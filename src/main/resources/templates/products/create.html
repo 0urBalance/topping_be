@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 등록 - Topping</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .nav { text-align: center; margin-bottom: 40px; }
+        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .form-container { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; 
+        }
+        .form-group textarea { height: 120px; resize: vertical; }
+        .btn { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #545b62; }
+        .form-actions { text-align: center; margin-top: 30px; }
+        .form-actions .btn { margin: 0 10px; }
+        .alert { padding: 12px; margin-bottom: 20px; border-radius: 4px; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍕 Topping - 프로젝트 등록</h1>
+        </div>
+        
+        <div class="nav">
+            <a href="/">홈</a>
+            <a href="/products">프로젝트 보기</a>
+            <a href="/products/create">프로젝트 등록</a>
+            <a href="/collaborations">협업 현황</a>
+        </div>
+
+        <div class="form-container">
+            <div th:if="${param.error}" class="alert alert-error">
+                <span th:if="${param.error[0] == 'user_not_found'}">사용자를 찾을 수 없습니다.</span>
+            </div>
+
+            <form action="/products/create" method="post">
+                <div class="form-group">
+                    <label for="title">프로젝트 제목</label>
+                    <input type="text" id="title" name="title" required placeholder="예: 웹 서비스 개발 협업 파트너 모집">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">프로젝트 설명</label>
+                    <textarea id="description" name="description" required placeholder="프로젝트에 대한 자세한 설명을 작성해주세요..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">카테고리</label>
+                    <select id="category" name="category" required>
+                        <option value="">카테고리를 선택하세요</option>
+                        <option value="웹 개발">웹 개발</option>
+                        <option value="모바일 앱">모바일 앱</option>
+                        <option value="게임 개발">게임 개발</option>
+                        <option value="디자인">디자인</option>
+                        <option value="마케팅">마케팅</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageUrl">이미지 URL (선택사항)</label>
+                    <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="creatorId">작성자 ID (UUID)</label>
+                    <input type="text" id="creatorId" name="creatorId" required placeholder="사용자 UUID를 입력하세요">
+                    <small style="color: #666;">실제 구현에서는 로그인한 사용자 정보를 자동으로 사용합니다.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">프로젝트 등록</button>
+                    <a href="/products" class="btn btn-secondary">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

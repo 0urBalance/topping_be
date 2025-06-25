@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>협업 신청 - Topping</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .nav { text-align: center; margin-bottom: 40px; }
+        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .form-container { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .product-info { background: #f8f9fa; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
+        .product-info h3 { margin-top: 0; color: #333; }
+        .product-category { background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #495057; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        .form-group input, .form-group textarea { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; 
+        }
+        .form-group textarea { height: 120px; resize: vertical; }
+        .btn { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .form-actions { text-align: center; margin-top: 30px; }
+        .form-actions .btn { margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍕 Topping - 협업 신청</h1>
+        </div>
+        
+        <div class="nav">
+            <a href="/">홈</a>
+            <a href="/products">프로젝트 보기</a>
+            <a href="/products/create">프로젝트 등록</a>
+            <a href="/collaborations">협업 현황</a>
+        </div>
+
+        <div class="form-container">
+            <div class="product-info">
+                <h3 th:text="${product.title}">프로젝트 제목</h3>
+                <p th:text="${product.description}">프로젝트 설명</p>
+                <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
+                <p><strong>카테고리:</strong> <span class="product-category" th:text="${product.category}">카테고리</span></p>
+            </div>
+
+            <h2>협업 신청서</h2>
+            <form action="/collaborations/apply" method="post">
+                <input type="hidden" name="productId" th:value="${product.uuid}">
+                
+                <div class="form-group">
+                    <label for="applicantId">신청자 ID (UUID)</label>
+                    <input type="text" id="applicantId" name="applicantId" required placeholder="신청자 UUID를 입력하세요">
+                    <small style="color: #666;">실제 구현에서는 로그인한 사용자 정보를 자동으로 사용합니다.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">협업 신청 메시지</label>
+                    <textarea id="message" name="message" required placeholder="협업을 원하는 이유, 본인의 경험, 기여할 수 있는 부분 등을 자유롭게 작성해주세요..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">협업 신청하기</button>
+                    <a th:href="@{/products/{id}(id=${product.uuid})}" class="btn btn-secondary">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>협업 현황 - Topping</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .nav { text-align: center; margin-bottom: 40px; }
+        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .collaborations-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .collaboration-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .collaboration-card h3 { margin-top: 0; color: #333; }
+        .collaboration-card p { color: #666; margin: 8px 0; }
+        .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .collaboration-message { background: #f8f9fa; padding: 12px; border-radius: 4px; margin: 15px 0; font-style: italic; }
+        .collaboration-meta { font-size: 14px; color: #666; margin-top: 10px; }
+        .actions { margin-top: 15px; }
+        .btn { display: inline-block; padding: 6px 12px; text-decoration: none; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 8px; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍕 Topping - 협업 현황</h1>
+        </div>
+        
+        <div class="nav">
+            <a href="/">홈</a>
+            <a href="/products">프로젝트 보기</a>
+            <a href="/products/create">프로젝트 등록</a>
+            <a href="/collaborations">협업 현황</a>
+        </div>
+
+        <div class="collaborations-grid">
+            <div th:each="collaboration : ${collaborations}" class="collaboration-card">
+                <h3 th:text="${collaboration.product.title}">프로젝트 제목</h3>
+                
+                <p><strong>프로젝트 작성자:</strong> <span th:text="${collaboration.product.creator.username}">작성자</span></p>
+                <p><strong>협업 신청자:</strong> <span th:text="${collaboration.applicant.username}">신청자</span></p>
+                
+                <div class="status-badge" 
+                     th:classappend="${collaboration.status.name() == 'PENDING'} ? 'status-pending' : (${collaboration.status.name() == 'ACCEPTED'} ? 'status-accepted' : 'status-rejected')">
+                    <span th:text="${collaboration.status.name() == 'PENDING'} ? '대기중' : (${collaboration.status.name() == 'ACCEPTED'} ? '승인됨' : '거절됨')">상태</span>
+                </div>
+
+                <div class="collaboration-message">
+                    <strong>협업 신청 메시지:</strong><br>
+                    <span th:text="${collaboration.message}">협업 신청 메시지</span>
+                </div>
+
+                <div class="collaboration-meta">
+                    <p><strong>신청일:</strong> <span th:text="${#temporals.format(collaboration.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</span></p>
+                    <p><strong>카테고리:</strong> <span th:text="${collaboration.product.category}">카테고리</span></p>
+                </div>
+
+                <div class="actions" th:if="${collaboration.status.name() == 'PENDING'}">
+                    <form th:action="@{/collaborations/{id}/accept(id=${collaboration.uuid})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-success">승인</button>
+                    </form>
+                    <form th:action="@{/collaborations/{id}/reject(id=${collaboration.uuid})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">거절</button>
+                    </form>
+                </div>
+
+                <div class="actions">
+                    <a th:href="@{/products/{id}(id=${collaboration.product.uuid})}" class="btn btn-primary">프로젝트 보기</a>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(collaborations)}" style="text-align: center; padding: 40px;">
+            <p>협업 신청 내역이 없습니다.</p>
+            <a href="/products" class="btn btn-primary">프로젝트 둘러보기</a>
+        </div>
+    </div>
+</body>
+</html>
