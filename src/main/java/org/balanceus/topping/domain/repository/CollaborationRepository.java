@@ -25,5 +25,7 @@ public interface CollaborationRepository {
 	
 	List<Collaboration> findByProductCreator(User creator);
 	
+	List<Collaboration> findByParticipant(User user);
+	
 	void deleteById(UUID id);
 }

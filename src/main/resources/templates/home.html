@@ -26,39 +26,32 @@
     <div class="container">
         <div class="header">
             <h1>🍕 Topping</h1>
-            <p>협업 프로젝트를 찾고 파트너를 매칭하는 플랫폼</p>
+            <p>Collabo를 찾고 파트너를 매칭하는 플랫폼</p>
         </div>
         
         <div class="nav">
-            <a href="/">홈</a>
-            <a href="/products">프로젝트 보기</a>
-            <a href="/products/create">프로젝트 등록</a>
-            <a href="/collaborations">협업 현황</a>
-            <a href="/proposals/suggest">협업 제안</a>
-            <a href="/proposals/browse">제안 둘러보기</a>
-            <a href="/proposals/mypage">내 제안</a>
-            <a href="/proposals/dashboard">사업자 대시보드</a>
-            <a href="/chat/rooms">채팅방</a>
-            <a href="/collaboration-products/live">🔥 Live 제품</a>
+            <a href="/explore">Explore (탐색)</a>
+            <a href="/collabo">Collabo (콜라보)</a>
+            <a href="/mypage">My Page (마이페이지)</a>
         </div>
 
-        <h2>최근 등록된 프로젝트</h2>
+        <h2>최근 등록된 Collabo</h2>
         <div class="products-grid">
             <div th:each="product : ${recentProducts}" class="product-card">
-                <h3 th:text="${product.title}">프로젝트 제목</h3>
-                <p th:text="${product.description}">프로젝트 설명</p>
+                <h3 th:text="${product.title}">Collabo 제목</h3>
+                <p th:text="${product.description}">Collabo 설명</p>
                 <span class="product-category" th:text="${product.category}">카테고리</span>
                 <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
                 <div style="margin-top: 15px;">
                     <a th:href="@{/products/{id}(id=${product.uuid})}" class="btn">자세히 보기</a>
-                    <a th:href="@{/collaborations/apply/{id}(id=${product.uuid})}" class="btn" style="background: #28a745;">협업 신청</a>
+                    <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn" style="background: #28a745;">Collabo 신청</a>
                 </div>
             </div>
         </div>
         
         <div th:if="${#lists.isEmpty(recentProducts)}" style="text-align: center; padding: 40px;">
-            <p>등록된 프로젝트가 없습니다.</p>
-            <a href="/products/create" class="btn">첫 프로젝트 등록하기</a>
+            <p>등록된 Collabo가 없습니다.</p>
+            <a href="/collabo/create" class="btn">첫 Collabo 등록하기</a>
         </div>
     </div>
 </body>

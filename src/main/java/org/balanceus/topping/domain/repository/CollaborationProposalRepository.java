@@ -24,6 +24,10 @@ public interface CollaborationProposalRepository {
 	List<CollaborationProposal> findByStatusOrderByTrendScoreDesc(CollaborationProposal.ProposalStatus status);
 	
 	List<CollaborationProposal> findByCategoryOrderByCreatedAtDesc(String category);
+	
+	List<CollaborationProposal> findByStatusOrderByCreatedAtDesc(CollaborationProposal.ProposalStatus status);
+	
+	List<CollaborationProposal> findByProposerAndStatus(User proposer, CollaborationProposal.ProposalStatus status);
 
 	void deleteById(UUID uuid);
 }

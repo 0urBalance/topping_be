@@ -18,4 +18,8 @@ public interface CollaborationProposalJpaRepository extends JpaRepository<Collab
 	List<CollaborationProposal> findByStatusOrderByTrendScoreDesc(CollaborationProposal.ProposalStatus status);
 	
 	List<CollaborationProposal> findByCategoryOrderByCreatedAtDesc(String category);
+	
+	List<CollaborationProposal> findByStatusOrderByCreatedAtDesc(CollaborationProposal.ProposalStatus status);
+	
+	List<CollaborationProposal> findByProposerAndStatus(User proposer, CollaborationProposal.ProposalStatus status);
 }

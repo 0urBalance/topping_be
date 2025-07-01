@@ -58,6 +58,16 @@ public class CollaborationProposalRepositoryImpl implements CollaborationProposa
 	}
 
 	@Override
+	public List<CollaborationProposal> findByStatusOrderByCreatedAtDesc(CollaborationProposal.ProposalStatus status) {
+		return jpaRepository.findByStatusOrderByCreatedAtDesc(status);
+	}
+
+	@Override
+	public List<CollaborationProposal> findByProposerAndStatus(User proposer, CollaborationProposal.ProposalStatus status) {
+		return jpaRepository.findByProposerAndStatus(proposer, status);
+	}
+
+	@Override
 	public void deleteById(UUID uuid) {
 		jpaRepository.deleteById(uuid);
 	}
