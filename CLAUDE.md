@@ -46,3 +46,6 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - Spring Security
 - Lombok for boilerplate reduction
 - Thymeleaf for server-side rendering
+
+## Memorized Items
+- to memorize
