@@ -89,7 +89,7 @@ public class CollaborationProductController {
 		product.setAvailableFrom(LocalDateTime.now());
 
 		CollaborationProduct saved = productRepository.save(product);
-		return ApiResponseData.success(Code.SUCCESS, saved);
+		return ApiResponseData.success(saved);
 	}
 
 	@GetMapping("/manage/{proposalId}")
@@ -135,7 +135,7 @@ public class CollaborationProductController {
 		proposal.setStatus(CollaborationProposal.ProposalStatus.LIVE);
 		proposalRepository.save(proposal);
 
-		return ApiResponseData.success(Code.SUCCESS, "제품이 성공적으로 출시되었습니다!");
+		return ApiResponseData.success("제품이 성공적으로 출시되었습니다!");
 	}
 
 	@GetMapping("/live")

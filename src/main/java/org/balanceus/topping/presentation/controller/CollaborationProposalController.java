@@ -64,7 +64,7 @@ public class CollaborationProposalController {
 		// 사업자들에게 새 제안 알림 전송
 		notificationService.notifyBusinessOwnersOfNewProposal(saved);
 		
-		return ApiResponseData.success(Code.SUCCESS, saved);
+		return ApiResponseData.success(saved);
 	}
 
 	@GetMapping("/mypage")
@@ -114,7 +114,7 @@ public class CollaborationProposalController {
 		// 제안자에게 수락 알림 전송
 		notificationService.notifyProposalAccepted(proposal);
 
-		return ApiResponseData.success(Code.SUCCESS, "협업 제안이 수락되었습니다.");
+		return ApiResponseData.success("협업 제안이 수락되었습니다.");
 	}
 
 	@PostMapping("/{proposalId}/reject")
@@ -137,7 +137,7 @@ public class CollaborationProposalController {
 		// 제안자에게 거절 알림 전송
 		notificationService.notifyProposalRejected(proposal);
 
-		return ApiResponseData.success(Code.SUCCESS, "협업 제안이 거절되었습니다.");
+		return ApiResponseData.success("협업 제안이 거절되었습니다.");
 	}
 
 	@GetMapping("/browse")

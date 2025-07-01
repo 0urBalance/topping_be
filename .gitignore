@@ -81,3 +81,4 @@ $RECYCLE.BIN/
 .env
 application-local.properties
 application-local.yml
+jdk-17.0.12+7/

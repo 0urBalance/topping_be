@@ -52,7 +52,7 @@ public class ChatController {
 
 		ChatRoom existingRoom = chatRoomRepository.findByCollaborationProposal(proposal).orElse(null);
 		if (existingRoom != null) {
-			return ApiResponseData.success(Code.SUCCESS, existingRoom);
+			return ApiResponseData.success(existingRoom);
 		}
 
 		ChatRoom chatRoom = new ChatRoom();
@@ -61,7 +61,7 @@ public class ChatController {
 		chatRoom.setIsActive(true);
 
 		ChatRoom saved = chatRoomRepository.save(chatRoom);
-		return ApiResponseData.success(Code.SUCCESS, saved);
+		return ApiResponseData.success(saved);
 	}
 
 	@GetMapping("/room/{roomId}")
@@ -99,7 +99,7 @@ public class ChatController {
 		chatMessage.setMessage(message);
 
 		ChatMessage saved = chatMessageRepository.save(chatMessage);
-		return ApiResponseData.success(Code.SUCCESS, saved);
+		return ApiResponseData.success(saved);
 	}
 
 	@MessageMapping("/chat/{roomId}")

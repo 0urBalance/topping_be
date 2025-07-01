@@ -48,4 +48,4 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - Thymeleaf for server-side rendering
 
 ## Memorized Items
-- to memorize
+- Remembered the original note to memorize
