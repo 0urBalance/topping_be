@@ -51,7 +51,9 @@
             <a href="/">홈</a>
             <a href="/explore">Explore (탐색)</a>
             <a href="/collabo" class="active">Collabo (콜라보)</a>
-            <a href="/mypage">My Page (마이페이지)</a>
+            <a href="/mypage" id="mypageLink">My Page (마이페이지)</a>
+            <a href="/auth/login" id="loginLink" style="display: none;">Login (로그인)</a>
+            <a href="#" id="logoutLink" onclick="logout()">Logout (로그아웃)</a>
         </div>
 
         <div class="action-cards">
@@ -155,6 +157,43 @@
     </div>
 
     <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('accessToken')) {
+                alert('로그인이 필요한 서비스입니다.');
+                window.location.href = '/auth/login';
+                return;
+            }
+        });
+
+        async function logout() {
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                
+                if (accessToken) {
+                    await fetch('/api/member/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + accessToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+                
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                
+                alert('로그아웃되었습니다.');
+                window.location.href = '/';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                window.location.href = '/';
+            }
+        }
+
         function showSection(sectionName) {
             // Hide all sections
             const sections = document.querySelectorAll('.content-section');

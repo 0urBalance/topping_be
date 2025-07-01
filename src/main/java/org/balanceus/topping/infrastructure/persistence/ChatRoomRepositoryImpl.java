@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.CollaborationProposal;
+import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +36,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
 	@Override
 	public List<ChatRoom> findByIsActiveTrue() {
 		return jpaRepository.findByIsActiveTrue();
+	}
+
+	@Override
+	public List<ChatRoom> findByParticipant(User user) {
+		return jpaRepository.findByParticipant(user);
 	}
 
 	@Override

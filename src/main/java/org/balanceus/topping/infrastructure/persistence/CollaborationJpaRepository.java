@@ -23,4 +23,7 @@ public interface CollaborationJpaRepository extends JpaRepository<Collaboration,
 	
 	@Query("SELECT c FROM Collaboration c WHERE c.product.creator = :creator")
 	List<Collaboration> findByProductCreator(@Param("creator") User creator);
+	
+	@Query("SELECT c FROM Collaboration c WHERE c.applicant = :user OR c.product.creator = :user")
+	List<Collaboration> findByParticipant(@Param("user") User user);
 }

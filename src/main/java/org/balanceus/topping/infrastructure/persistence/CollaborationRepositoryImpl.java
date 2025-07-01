@@ -55,6 +55,11 @@ public class CollaborationRepositoryImpl implements CollaborationRepository {
 	}
 
 	@Override
+	public List<Collaboration> findByParticipant(User user) {
+		return collaborationJpaRepository.findByParticipant(user);
+	}
+
+	@Override
 	public void deleteById(UUID id) {
 		collaborationJpaRepository.deleteById(id);
 	}

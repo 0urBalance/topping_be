@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Topping</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-container { background: white; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); padding: 40px; width: 100%; max-width: 400px; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #333; font-size: 32px; margin-bottom: 5px; }
+        .logo p { color: #666; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 2px solid #e1e1e1; border-radius: 5px; font-size: 16px; transition: border-color 0.3s; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .btn:hover { background: #5a6fd8; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .error-message { color: #e74c3c; font-size: 14px; margin-top: 5px; display: none; }
+        .success-message { color: #27ae60; font-size: 14px; margin-top: 5px; display: none; }
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #667eea; text-decoration: none; font-size: 14px; }
+        .links a:hover { text-decoration: underline; }
+        .divider { margin: 15px 0; text-align: center; color: #999; }
+        .nav-home { position: absolute; top: 20px; left: 20px; }
+        .nav-home a { color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 5px; }
+        .nav-home a:hover { background: rgba(255,255,255,0.3); }
+        .loading { display: none; text-align: center; margin-top: 10px; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="nav-home">
+        <a href="/">🏠 홈으로</a>
+    </div>
+
+    <div class="login-container">
+        <div class="logo">
+            <h1>🍕 Topping</h1>
+            <p>Collabo 플랫폼에 로그인하세요</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="email" id="email" name="email" required placeholder="your@email.com">
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요">
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn">
+                로그인
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>로그인 중...</span>
+            </div>
+
+            <div class="error-message" id="generalError"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+
+        <div class="links">
+            <a href="/auth/signup">계정이 없으신가요? 회원가입</a>
+            <div class="divider">|</div>
+            <a href="/auth/forgot-password">비밀번호를 잊으셨나요?</a>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is already logged in
+        if (localStorage.getItem('accessToken')) {
+            window.location.href = '/mypage';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+            
+            // Clear previous errors
+            clearErrors();
+            
+            // Basic validation
+            if (!validateEmail(email)) {
+                showError('emailError', '올바른 이메일 형식을 입력해주세요.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('passwordError', '비밀번호는 6자 이상이어야 합니다.');
+                return;
+            }
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/member/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.code === 'SUCCESS') {
+                    // Store access token
+                    localStorage.setItem('accessToken', data.data.accessToken);
+                    localStorage.setItem('userEmail', email);
+                    
+                    // Show success message
+                    showSuccess('로그인 성공! 페이지를 이동합니다...');
+                    
+                    // Redirect to My Page after short delay
+                    setTimeout(() => {
+                        window.location.href = '/mypage';
+                    }, 1000);
+                    
+                } else {
+                    // Handle login failure
+                    const errorMessage = data.message || '로그인 정보 불일치';
+                    showError('generalError', errorMessage);
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('generalError', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            } finally {
+                // Hide loading state
+                loginBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+        }
+        
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error-message, .success-message');
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+                element.textContent = '';
+            });
+        }
+        
+        // Auto-fill email if coming from signup
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
+        if (emailParam) {
+            document.getElementById('email').value = emailParam;
+        }
+    </script>
+</body>
+</html>

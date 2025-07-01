@@ -46,8 +46,11 @@
         <div class="nav">
             <a href="/">홈</a>
             <a href="/explore" class="active">Explore (탐색)</a>
-            <a href="/collabo">Collabo (콜라보)</a>
-            <a href="/mypage">My Page (마이페이지)</a>
+            <a href="/collabo" id="collaboLink">Collabo (콜라보)</a>
+            <a href="/mypage" id="mypageLink" style="display: none;">My Page (마이페이지)</a>
+            <a href="/auth/login" id="loginLink">Login (로그인)</a>
+            <a href="/auth/signup" id="signupLink">Sign Up (회원가입)</a>
+            <a href="#" id="logoutLink" style="display: none;" onclick="logout()">Logout (로그아웃)</a>
         </div>
 
         <div class="section-tabs">
@@ -128,6 +131,73 @@
     </div>
 
     <script>
+        // Check authentication state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+        });
+
+        function updateNavigation() {
+            const accessToken = localStorage.getItem('accessToken');
+            const isAuthenticated = accessToken !== null;
+            
+            const collaboLink = document.getElementById('collaboLink');
+            const mypageLink = document.getElementById('mypageLink');
+            const loginLink = document.getElementById('loginLink');
+            const signupLink = document.getElementById('signupLink');
+            const logoutLink = document.getElementById('logoutLink');
+            
+            if (isAuthenticated) {
+                if (mypageLink) mypageLink.style.display = 'inline';
+                if (logoutLink) logoutLink.style.display = 'inline';
+                if (loginLink) loginLink.style.display = 'none';
+                if (signupLink) signupLink.style.display = 'none';
+            } else {
+                if (mypageLink) mypageLink.style.display = 'none';
+                if (logoutLink) logoutLink.style.display = 'none';
+                if (loginLink) loginLink.style.display = 'inline';
+                if (signupLink) signupLink.style.display = 'inline';
+                
+                // Add click handler for protected routes
+                if (collaboLink) {
+                    collaboLink.onclick = function(e) {
+                        e.preventDefault();
+                        alert('로그인이 필요한 서비스입니다.');
+                        window.location.href = '/auth/login';
+                    };
+                }
+            }
+        }
+
+        async function logout() {
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                
+                if (accessToken) {
+                    await fetch('/api/member/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + accessToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+                
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                
+                updateNavigation();
+                alert('로그아웃되었습니다.');
+                window.location.href = '/';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                updateNavigation();
+                window.location.href = '/';
+            }
+        }
+
         function showSection(sectionName) {
             // Hide all sections
             const sections = document.querySelectorAll('.content-section');

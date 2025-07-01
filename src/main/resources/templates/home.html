@@ -31,8 +31,11 @@
         
         <div class="nav">
             <a href="/explore">Explore (탐색)</a>
-            <a href="/collabo">Collabo (콜라보)</a>
-            <a href="/mypage">My Page (마이페이지)</a>
+            <a href="/collabo" id="collaboLink">Collabo (콜라보)</a>
+            <a href="/mypage" id="mypageLink" style="display: none;">My Page (마이페이지)</a>
+            <a href="/auth/login" id="loginLink">Login (로그인)</a>
+            <a href="/auth/signup" id="signupLink">Sign Up (회원가입)</a>
+            <a href="#" id="logoutLink" style="display: none;" onclick="logout()">Logout (로그아웃)</a>
         </div>
 
         <h2>최근 등록된 Collabo</h2>
@@ -54,5 +57,107 @@
             <a href="/collabo/create" class="btn">첫 Collabo 등록하기</a>
         </div>
     </div>
+
+    <script>
+        // Check authentication state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+        });
+
+        function updateNavigation() {
+            const accessToken = localStorage.getItem('accessToken');
+            const isAuthenticated = accessToken !== null;
+            
+            // Get navigation elements
+            const collaboLink = document.getElementById('collaboLink');
+            const mypageLink = document.getElementById('mypageLink');
+            const loginLink = document.getElementById('loginLink');
+            const signupLink = document.getElementById('signupLink');
+            const logoutLink = document.getElementById('logoutLink');
+            
+            if (isAuthenticated) {
+                // Show authenticated user navigation
+                if (mypageLink) mypageLink.style.display = 'inline';
+                if (logoutLink) logoutLink.style.display = 'inline';
+                if (loginLink) loginLink.style.display = 'none';
+                if (signupLink) signupLink.style.display = 'none';
+                
+                // Add click handler for protected routes
+                if (collaboLink) {
+                    collaboLink.onclick = function(e) {
+                        if (!localStorage.getItem('accessToken')) {
+                            e.preventDefault();
+                            alert('로그인이 필요한 서비스입니다.');
+                            window.location.href = '/auth/login';
+                        }
+                    };
+                }
+            } else {
+                // Show guest navigation
+                if (mypageLink) mypageLink.style.display = 'none';
+                if (logoutLink) logoutLink.style.display = 'none';
+                if (loginLink) loginLink.style.display = 'inline';
+                if (signupLink) signupLink.style.display = 'inline';
+                
+                // Add click handler for protected routes
+                if (collaboLink) {
+                    collaboLink.onclick = function(e) {
+                        e.preventDefault();
+                        alert('로그인이 필요한 서비스입니다.');
+                        window.location.href = '/auth/login';
+                    };
+                }
+            }
+        }
+
+        async function logout() {
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                
+                if (accessToken) {
+                    // Call logout API
+                    await fetch('/api/member/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + accessToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+                
+                // Clear local storage
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                
+                // Update navigation
+                updateNavigation();
+                
+                // Show success message
+                alert('로그아웃되었습니다.');
+                
+                // Redirect to home
+                window.location.href = '/';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Clear storage anyway
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                updateNavigation();
+                window.location.href = '/';
+            }
+        }
+
+        // Protect Collabo application links
+        document.addEventListener('click', function(e) {
+            if (e.target.href && e.target.href.includes('/collabo/apply/')) {
+                if (!localStorage.getItem('accessToken')) {
+                    e.preventDefault();
+                    alert('로그인이 필요한 서비스입니다.');
+                    window.location.href = '/auth/login';
+                }
+            }
+        });
+    </script>
 </body>
 </html>
