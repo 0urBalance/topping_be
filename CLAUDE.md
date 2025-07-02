@@ -20,6 +20,7 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - **Production**: PostgreSQL (env vars: `DB_URL`, `DB_USER`, `DB_PASSWORD`)
 - **Testing**: H2 in-memory database
 - **Configuration**: Uses spring-dotenv, create `.env` file in project root
+- **Connection Pool**: Minimized HikariCP settings for reduced resource usage (6-10 connections for dev, 2-5 for testing)
 
 ## Architecture
 
