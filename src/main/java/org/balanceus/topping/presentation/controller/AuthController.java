@@ -5,9 +5,7 @@ import java.util.Optional;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
-import org.balanceus.topping.infrastructure.security.JwtService;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
-import org.balanceus.topping.presentation.dto.AuthResponse;
 import org.balanceus.topping.presentation.dto.LoginRequest;
 import org.balanceus.topping.presentation.dto.SignupRequest;
 import org.springframework.http.HttpStatus;
@@ -33,7 +31,6 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     // Template endpoints
@@ -47,40 +44,19 @@ public class AuthController {
         return "auth/signup";
     }
 
-    // API endpoints
-    @PostMapping("/api/member/login")
+    // API endpoints for session-based auth (handled by Spring Security)
+    // Login is now handled by Spring Security's /login endpoint
+    // This method can be used for additional login response if needed
+    @PostMapping("/api/member/login-status")
     @ResponseBody
-    public ResponseEntity<ApiResponseData<AuthResponse>> login(@RequestBody LoginRequest request) {
-        try {
-            // Authenticate user
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
-
+    public ResponseEntity<ApiResponseData<String>> loginStatus(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             User user = userDetails.getUser();
-
-            // Generate JWT token
-            String accessToken = jwtService.generateToken(userDetails);
-
-            // Create response
-            AuthResponse authResponse = AuthResponse.builder()
-                    .accessToken(accessToken)
-                    .tokenType("Bearer")
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .role(user.getRole().name())
-                    .expiresIn(jwtService.getExpirationTime())
-                    .build();
-
-            return ResponseEntity.ok(ApiResponseData.success(authResponse));
-
-        } catch (AuthenticationException e) {
+            return ResponseEntity.ok(ApiResponseData.success("로그인 성공: " + user.getUsername()));
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponseData.failure(401, "로그인 정보 불일치"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponseData.failure(500, "서버 오류가 발생했습니다."));
+                    .body(ApiResponseData.failure(401, "인증되지 않은 사용자"));
         }
     }
 
@@ -113,11 +89,12 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/api/member/logout")
+    // Logout is now handled by Spring Security's /logout endpoint
+    // This method can be used for additional logout response if needed
+    @PostMapping("/api/member/logout-status")
     @ResponseBody
-    public ResponseEntity<ApiResponseData<String>> logout() {
-        // Since we're using stateless JWT, logout is handled on the client side
-        // by removing the token from localStorage
+    public ResponseEntity<ApiResponseData<String>> logoutStatus() {
+        // Session logout is handled by Spring Security
         return ResponseEntity.ok(ApiResponseData.success("로그아웃되었습니다."));
     }
 }

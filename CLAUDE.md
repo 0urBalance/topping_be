@@ -7,12 +7,16 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 
 ## Build & Development Commands
 
+### Environment Setup
+- **JAVA_HOME**: Set to `/mnt/d/projects/topping/jdk-17.0.12+7` (JDK 17 included in project)
+- **Build Command**: `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew build`
+
 ### Build & Run
-- `./gradlew build` - Build the project
-- `./gradlew bootRun` - Run the Spring Boot application
-- `./gradlew test` - Run all tests
-- `./gradlew test --tests ClassName` - Run specific test class
-- `./gradlew test --tests ClassName.methodName` - Run specific test method
+- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew build` - Build the project
+- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew bootRun` - Run the Spring Boot application
+- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew test` - Run all tests
+- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew test --tests ClassName` - Run specific test class
+- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew test --tests ClassName.methodName` - Run specific test method
 
 ### Database
 - PostgreSQL database configured via environment variables
@@ -38,7 +42,7 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - **ApiResponseData**: Standardized response wrapper with code/message/data structure
 - **GlobalExceptionHandler**: Centralized exception handling with custom BaseException support
 - **User Entity**: Uses UUID as primary key with Role-based authentication
-- **Spring Security**: Configured for role-based access control
+- **Spring Security**: Session-based authentication with form login/logout and cookie management
 
 ### Dependencies
 - Spring Boot 3.5.3 with Java 17
@@ -66,14 +70,34 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
   - `failure(Integer code, String message)` - Failure response
 - **Usage**: Always call `ApiResponseData.success(data)` not `ApiResponseData.success(Code.SUCCESS, data)`
 
+## Authentication System
+
+### Session-Based Authentication
+- **Authentication Method**: Spring Security session-based authentication (migrated from JWT)
+- **Login Endpoints**: 
+  - `/login` - Standard form login (handled by Spring Security)
+  - `/api/session/login` - API login with JSON request/response
+- **Logout Endpoints**:
+  - `/logout` - Standard form logout (handled by Spring Security)
+  - `/api/session/logout` - API logout with JSON response
+- **Session Management**: Server-side session storage with JSESSIONID cookie
+- **Security Features**: Session invalidation on logout, cookie deletion, role-based access control
+
+### Authentication Endpoints
+- **Form Login**: `POST /login` - Standard HTML form authentication
+- **API Login**: `POST /api/session/login` - JSON-based login for frontend applications
+- **Form Logout**: `POST /logout` - Standard logout with redirect
+- **API Logout**: `POST /api/session/logout` - JSON-based logout
+- **Status Check**: `POST /api/member/login-status` - Check current authentication status
+
 ## Recent Development History
 
 ### 🛠 Task Summary (Latest Session)
-- **Git Commit Organization**: Reorganized commit history into feature-based atomic commits
-- **Build System Fixes**: Resolved all compilation errors and test failures
-- **Repository Pattern Standardization**: Implemented consistent repository architecture
-- **Test Infrastructure**: Set up proper testing environment with H2 database
-- **API Response Fixes**: Corrected controller method signatures across the application
+- **Authentication Migration**: Successfully migrated from JWT-based to session-based authentication
+- **JWT Removal**: Removed all JWT dependencies, services, filters, and DTOs
+- **Session Configuration**: Configured Spring Security for form login/logout with session management
+- **API Updates**: Updated authentication controllers for session-based endpoints
+- **Build Verification**: Confirmed successful compilation and test execution
 
 ### 🐞 Bug Fixes (Build Issues Resolved)
 1. **ApiResponseData Method Signature Errors**
@@ -127,16 +151,17 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 12. `fix: Resolve build failures and test configuration issues`
 
 ### ✅ Result
-- **✅ Clean Build**: `./gradlew build` completes successfully without errors
+- **✅ Clean Build**: `./gradlew build` completes successfully without errors (with JAVA_HOME set)
 - **✅ Test Suite**: All tests pass using H2 in-memory database
+- **✅ Authentication Migration**: Successfully migrated from JWT to session-based authentication
 - **✅ Consistent Architecture**: All repositories follow the same implementation pattern
 - **✅ API Standards**: Controllers use proper ApiResponseData method signatures
-- **✅ Modern Spring Security**: No deprecated method usage
-- **✅ Organized Git History**: Feature-based atomic commits for easy maintenance
+- **✅ Modern Spring Security**: Session-based authentication with proper form login/logout configuration
 
 ### 🚀 Development Readiness
-- Build system stable and reliable
+- Build system stable and reliable (requires JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7)
 - Test infrastructure properly configured
+- Authentication system migrated to session-based (removed JWT dependencies)
 - Repository patterns consistent across codebase
 - API response handling standardized
 - Documentation comprehensive and up-to-date
@@ -145,6 +170,9 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 ## Memorized Items
 - Project follows clean architecture with domain-driven design
 - All build issues resolved and tests passing
+- Authentication system uses session-based authentication (no JWT)
+- JAVA_HOME must be set to `/mnt/d/projects/topping/jdk-17.0.12+7` for builds
 - Consistent repository pattern implementation required
 - Use H2 database for testing, PostgreSQL for production
 - ApiResponseData.success() takes data as first parameter, not Code enum
+- Session authentication endpoints: `/login`, `/logout`, `/api/session/login`, `/api/session/logout`
