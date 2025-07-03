@@ -6,14 +6,18 @@ import org.balanceus.topping.infrastructure.security.Role;
 import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +33,7 @@ public class User {
 
 	private String password;
 
+	@Enumerated(EnumType.STRING)
 	private Role role;
 
 	private String username;

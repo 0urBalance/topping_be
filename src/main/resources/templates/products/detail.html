@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.title}">프로젝트 상세 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .nav { text-align: center; margin-bottom: 40px; }
+        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .product-detail { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .product-title { color: #333; margin-bottom: 20px; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .product-meta { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .product-meta p { margin: 5px 0; color: #666; }
+        .product-category { background: #e9ecef; padding: 6px 12px; border-radius: 4px; font-size: 14px; color: #495057; display: inline-block; }
+        .product-description { line-height: 1.6; color: #333; margin: 20px 0; }
+        .product-image { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; }
+        .actions { text-align: center; margin-top: 30px; }
+        .btn { display: inline-block; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 16px; margin: 0 10px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+    </style>
+</head>
+<body style="padding: 0;">
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <div class="container" style="padding-top: 2rem;">
+
+        <div class="product-detail">
+            <h1 class="product-title" th:text="${product.title}">프로젝트 제목</h1>
+            
+            <div class="product-meta">
+                <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
+                <p><strong>이메일:</strong> <span th:text="${product.creator.email}">user@example.com</span></p>
+                <p><strong>등록일:</strong> <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</span></p>
+                <p><strong>카테고리:</strong> <span class="product-category" th:text="${product.category}">카테고리</span></p>
+            </div>
+
+            <div th:if="${product.imageUrl}" class="product-image-container">
+                <img th:src="${product.imageUrl}" th:alt="${product.title}" class="product-image">
+            </div>
+
+            <div class="product-description">
+                <h3>프로젝트 설명</h3>
+                <p th:text="${product.description}">프로젝트 설명</p>
+            </div>
+
+            <div class="actions">
+                <a th:href="@{/collaborations/apply/{id}(id=${product.uuid})}" class="btn btn-success">협업 신청하기</a>
+                <a href="/products" class="btn btn-secondary">목록으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -25,12 +25,6 @@ public enum Code {
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "예기치 못한 서버 오류가 발생했습니다."),
 	INTERNAL_SERVER_MINIO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Minio 서버 오류가 발생했습니다."),
 
-	AUTH001(HttpStatus.UNAUTHORIZED,1001, "유효하지 않은 JWT 서명"),
-	AUTH002(HttpStatus.UNAUTHORIZED,1002, "만료된 JWT 토큰"),
-	AUTH003(HttpStatus.UNAUTHORIZED,1003, "지원하지 않는 JWT 토큰"),
-	AUTH004(HttpStatus.UNAUTHORIZED,1004, "Claim 누락"),
-	AUTH005(HttpStatus.UNAUTHORIZED,1005, "JWT 토큰 없음"),
-	AUTH006(HttpStatus.UNAUTHORIZED,1006, "Claim 누락"),
 
 	SIGN001(HttpStatus.BAD_REQUEST,2001,"일치하는 이메일 없음"),
 	SIGN002(HttpStatus.BAD_REQUEST,2002,"비밀번호 불일치"),

@@ -5,11 +5,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.infrastructure.security.Role;
 
 public interface UserRepository {
 	User findByUsername(String username);
 
 	Optional<User> findByEmail(String email);
+
+	List<User> findByRole(Role role);
 
 	<S extends User> S save(S entity);
 

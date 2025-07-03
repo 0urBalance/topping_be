@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+        }
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 70px);
+            padding: 20px;
+        }
+        .login-container { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            padding: 40px; 
+            width: 100%; 
+            max-width: 400px; 
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #333; font-size: 32px; margin-bottom: 5px; }
+        .logo p { color: #666; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid #e1e1e1; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            transition: border-color 0.3s; 
+        }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background 0.3s; 
+        }
+        .btn:hover { background: #5a6fd8; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .error-message { 
+            color: #e74c3c; 
+            font-size: 14px; 
+            margin-top: 10px; 
+            padding: 10px;
+            background-color: #fdf2f2;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+        }
+        .success-message { 
+            color: #27ae60; 
+            font-size: 14px; 
+            margin-top: 10px; 
+            padding: 10px;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 4px;
+        }
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #667eea; text-decoration: none; font-size: 14px; }
+        .links a:hover { text-decoration: underline; }
+        .divider { margin: 15px 0; text-align: center; color: #999; }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="main-content">
+        <div class="login-container">
+            <div class="logo">
+                <h1>🍕 Topping</h1>
+                <p>콜라보 플랫폼에 로그인하세요</p>
+            </div>
+
+            <!-- Show error message if login failed -->
+            <div th:if="${param.error}" class="error-message">
+                로그인 정보가 올바르지 않습니다. 이메일과 비밀번호를 확인해주세요.
+            </div>
+
+            <!-- Show logout message -->
+            <div th:if="${param.logout}" class="success-message">
+                성공적으로 로그아웃되었습니다.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">이메일</label>
+                    <input type="email" id="username" name="username" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요">
+                </div>
+
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <button type="submit" class="btn">
+                    로그인
+                </button>
+            </form>
+
+            <div class="links">
+                <a href="/auth/signup">계정이 없으신가요? 회원가입</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

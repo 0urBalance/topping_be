@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #333; margin-bottom: 10px; }
+        .header p { color: #666; font-size: 18px; }
+        .nav { text-align: center; margin-bottom: 40px; }
+        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .nav .active { color: #0056b3; text-decoration: underline; }
+        .section-tabs { text-align: center; margin-bottom: 30px; }
+        .section-tabs .tab { margin: 0 10px; padding: 10px 20px; background: #e9ecef; color: #495057; text-decoration: none; border-radius: 4px; display: inline-block; }
+        .section-tabs .tab.active { background: #007bff; color: white; }
+        .section-tabs .tab:hover { background: #007bff; color: white; }
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .content-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .content-card h3 { margin-top: 0; color: #333; }
+        .content-card p { color: #666; margin: 10px 0; }
+        .category-tag { background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #495057; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d1edff; color: #004085; }
+        .status-live { background: #d4edda; color: #155724; }
+        .content-meta { font-size: 14px; color: #666; margin-top: 10px; }
+        .btn { display: inline-block; padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-size: 14px; }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .actions { margin-top: 15px; }
+        .actions .btn { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Explore</h1>
+            <p>모든 콜라보 기회를 탐색하고 발견하세요</p>
+        </div>
+
+        <div class="section-tabs">
+            <a href="#collabos" class="tab active" onclick="showSection('collabos')">Collabo 찾기</a>
+            <a href="#proposals" class="tab" onclick="showSection('proposals')">제안 둘러보기</a>
+            <a href="#live-products" class="tab" onclick="showSection('live-products')">🔥 Live 제품</a>
+        </div>
+
+        <!-- Collabo Section -->
+        <div id="collabos-section" class="content-section">
+            <h2>최신 Collabo 기회</h2>
+            <div class="content-grid">
+                <div th:each="product : ${products}" class="content-card">
+                    <h3 th:text="${product.title}">Collabo 제목</h3>
+                    <p th:text="${product.description}">Collabo 설명</p>
+                    <span class="category-tag" th:text="${product.category}">카테고리</span>
+                    <div class="content-meta">
+                        <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
+                        <p><strong>등록일:</strong> <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</span></p>
+                    </div>
+                    <div class="actions">
+                        <a th:href="@{/products/{id}(id=${product.uuid})}" class="btn">자세히 보기</a>
+                        <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn btn-success">Collabo 신청</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 40px;">
+                <p>등록된 Collabo가 없습니다.</p>
+                <a href="/collabo/create" class="btn">첫 Collabo 등록하기</a>
+            </div>
+        </div>
+
+        <!-- Proposals Section -->
+        <div id="proposals-section" class="content-section" style="display: none;">
+            <h2>Collabo 제안 둘러보기</h2>
+            <div class="content-grid">
+                <div th:each="proposal : ${proposals}" class="content-card">
+                    <h3 th:text="${proposal.title}">제안 제목</h3>
+                    <p th:text="${proposal.description}">제안 설명</p>
+                    <span class="category-tag" th:text="${proposal.category}">카테고리</span>
+                    <span class="status-badge" 
+                          th:classappend="${proposal.status.name() == 'PENDING'} ? 'status-pending' : 
+                                         (${proposal.status.name() == 'ACCEPTED'} ? 'status-accepted' : 'status-live')"
+                          th:text="${proposal.status.name() == 'PENDING'} ? '제안중' : 
+                                   (${proposal.status.name() == 'ACCEPTED'} ? '매칭됨' : '진행중')">
+                        상태
+                    </span>
+                    <div class="content-meta">
+                        <p><strong>제안자:</strong> <span th:text="${proposal.proposer.username}">제안자명</span></p>
+                        <p><strong>작성일:</strong> <span th:text="${#temporals.format(proposal.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
+                    </div>
+                    <div class="actions">
+                        <a href="#" class="btn">자세히 보기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Products Section -->
+        <div id="live-products-section" class="content-section" style="display: none;">
+            <h2>🔥 Live Collabo 제품</h2>
+            <div class="content-grid">
+                <div th:each="liveProduct : ${liveProducts}" class="content-card">
+                    <h3 th:text="${liveProduct.name}">제품 이름</h3>
+                    <p th:text="${liveProduct.description}">제품 설명</p>
+                    <div class="content-meta">
+                        <p><strong>가격:</strong> <span th:text="${liveProduct.price}">가격</span>원</p>
+                        <p><strong>재고:</strong> <span th:text="${liveProduct.stockQuantity}">재고</span>개</p>
+                        <p><strong>특별 혜택:</strong> <span th:text="${liveProduct.specialOfferDescription}">혜택</span></p>
+                    </div>
+                    <div class="actions">
+                        <a th:href="@{/collaboration-products/{id}(id=${liveProduct.uuid})}" class="btn btn-success">구매하기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+        });
+
+        function updateNavigation() {
+            const accessToken = localStorage.getItem('accessToken');
+            const isAuthenticated = accessToken !== null;
+            
+            const collaboLink = document.getElementById('collaboLink');
+            const mypageLink = document.getElementById('mypageLink');
+            const loginLink = document.getElementById('loginLink');
+            const signupLink = document.getElementById('signupLink');
+            const logoutLink = document.getElementById('logoutLink');
+            
+            if (isAuthenticated) {
+                if (mypageLink) mypageLink.style.display = 'inline';
+                if (logoutLink) logoutLink.style.display = 'inline';
+                if (loginLink) loginLink.style.display = 'none';
+                if (signupLink) signupLink.style.display = 'none';
+            } else {
+                if (mypageLink) mypageLink.style.display = 'none';
+                if (logoutLink) logoutLink.style.display = 'none';
+                if (loginLink) loginLink.style.display = 'inline';
+                if (signupLink) signupLink.style.display = 'inline';
+                
+                // Add click handler for protected routes
+                if (collaboLink) {
+                    collaboLink.onclick = function(e) {
+                        e.preventDefault();
+                        alert('로그인이 필요한 서비스입니다.');
+                        window.location.href = '/auth/login';
+                    };
+                }
+            }
+        }
+
+        async function logout() {
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                
+                if (accessToken) {
+                    await fetch('/api/member/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + accessToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+                
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                
+                updateNavigation();
+                alert('로그아웃되었습니다.');
+                window.location.href = '/';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userEmail');
+                updateNavigation();
+                window.location.href = '/';
+            }
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.style.display = 'none');
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

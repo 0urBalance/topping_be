@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Navigation Bar Fragment -->
+    <nav th:fragment="navbar" class="navbar">
+        <div class="container">
+            <a href="/" class="logo">토핑</a>
+            
+            <div class="nav-items">
+                <a href="/explore">탐색</a>
+                <a href="/collabo">콜라보</a>
+            </div>
+            
+            <div class="auth-items">
+                <!-- Show login/signup for unauthenticated users -->
+                <th:block sec:authorize="!isAuthenticated()">
+                    <a href="/auth/login">로그인</a>
+                    <a href="/auth/signup">회원가입</a>
+                </th:block>
+                
+                <!-- Show user menu for authenticated users -->
+                <th:block sec:authorize="isAuthenticated()">
+                    <a href="/mypage">마이페이지</a>
+                    <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">로그아웃</a>
+                    
+                    <!-- Hidden logout form -->
+                    <form id="logout-form" action="/logout" method="post" style="display: none;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    </form>
+                </th:block>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

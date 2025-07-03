@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>협업 제안하기 - Topping</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+</head>
+<body style="padding: 0;">
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <div class="container" style="padding-top: 2rem;">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>협업 제안하기</h3>
+                        <p class="text-muted">창의적인 제품/서비스 조합을 제안해보세요!</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="proposalForm">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">제목 *</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                                <div class="form-text">예: 카페 + 베이커리 협업</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">설명 *</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                                <div class="form-text">협업 아이디어에 대한 자세한 설명을 작성해주세요.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category" class="form-label">카테고리 *</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">카테고리를 선택하세요</option>
+                                    <option value="음식">음식</option>
+                                    <option value="패션">패션</option>
+                                    <option value="뷰티">뷰티</option>
+                                    <option value="생활용품">생활용품</option>
+                                    <option value="문화">문화</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="revenueSharePreference" class="form-label">수익 분배 선호도</label>
+                                <input type="text" class="form-control" id="revenueSharePreference" name="revenueSharePreference">
+                                <div class="form-text">원하는 수익 분배 방식을 간단히 작성해주세요 (선택사항)</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">제안하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('proposalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('/proposals/suggest', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 'SUCCESS') {
+                    alert('협업 제안이 성공적으로 등록되었습니다!');
+                    window.location.href = '/proposals/mypage';
+                } else {
+                    alert('오류가 발생했습니다: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            });
+        });
+    </script>
+</body>
+</html>
