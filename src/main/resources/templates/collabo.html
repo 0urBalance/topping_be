@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Collabo - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .header { text-align: center; margin-bottom: 40px; }
         .header h1 { color: #333; margin-bottom: 10px; }
         .header p { color: #666; font-size: 18px; }
@@ -41,19 +42,13 @@
     </style>
 </head>
 <body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
     <div class="container">
         <div class="header">
             <h1>🤝 Collabo</h1>
             <p>Collabo를 시작하고 관리하세요</p>
-        </div>
-        
-        <div class="nav">
-            <a href="/">홈</a>
-            <a href="/explore">Explore (탐색)</a>
-            <a href="/collabo" class="active">Collabo (콜라보)</a>
-            <a href="/mypage" id="mypageLink">My Page (마이페이지)</a>
-            <a href="/auth/login" id="loginLink" style="display: none;">Login (로그인)</a>
-            <a href="#" id="logoutLink" onclick="logout()">Logout (로그아웃)</a>
         </div>
 
         <div class="action-cards">

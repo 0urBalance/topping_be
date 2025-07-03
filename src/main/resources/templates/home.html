@@ -1,163 +1,140 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Topping - 협업 매칭 플랫폼</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { color: #333; margin-bottom: 10px; }
-        .header p { color: #666; font-size: 18px; }
-        .nav { text-align: center; margin-bottom: 40px; }
-        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .nav a:hover { text-decoration: underline; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .product-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .product-card h3 { margin-top: 0; color: #333; }
-        .product-card p { color: #666; margin: 10px 0; }
-        .product-category { background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #495057; }
-        .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-        .btn:hover { background: #0056b3; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f5f5f5; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 { 
+            color: #333; 
+            margin-bottom: 10px; 
+            font-size: 3rem;
+        }
+        .header p { 
+            color: #666; 
+            font-size: 18px; 
+        }
+        .products-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+        .product-card { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .product-card h3 { 
+            margin-top: 0; 
+            color: #333; 
+        }
+        .product-card p { 
+            color: #666; 
+            margin: 10px 0; 
+        }
+        .product-category { 
+            background: #e9ecef; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            color: #495057; 
+        }
+        .btn { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            background: #2563eb; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            transition: background 0.3s ease;
+            margin-right: 10px;
+        }
+        .btn:hover { 
+            background: #1d4ed8; 
+        }
+        .btn.btn-success {
+            background: #059669;
+        }
+        .btn.btn-success:hover {
+            background: #047857;
+        }
+        .section-title {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section-title h2 {
+            margin: 0;
+            color: #333;
+        }
+        .empty-state {
+            text-align: center; 
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
     <div class="container">
         <div class="header">
             <h1>🍕 Topping</h1>
-            <p>Collabo를 찾고 파트너를 매칭하는 플랫폼</p>
-        </div>
-        
-        <div class="nav">
-            <a href="/explore">Explore (탐색)</a>
-            <a href="/collabo" id="collaboLink">Collabo (콜라보)</a>
-            <a href="/mypage" id="mypageLink" style="display: none;">My Page (마이페이지)</a>
-            <a href="/auth/login" id="loginLink">Login (로그인)</a>
-            <a href="/auth/signup" id="signupLink">Sign Up (회원가입)</a>
-            <a href="#" id="logoutLink" style="display: none;" onclick="logout()">Logout (로그아웃)</a>
+            <p>콜라보를 찾고 파트너를 매칭하는 플랫폼</p>
         </div>
 
-        <h2>최근 등록된 Collabo</h2>
-        <div class="products-grid">
+        <div class="section-title">
+            <h2>최근 등록된 콜라보</h2>
+        </div>
+        
+        <div class="products-grid" th:if="${recentProducts != null and !recentProducts.isEmpty()}">
             <div th:each="product : ${recentProducts}" class="product-card">
-                <h3 th:text="${product.title}">Collabo 제목</h3>
-                <p th:text="${product.description}">Collabo 설명</p>
+                <h3 th:text="${product.title}">콜라보 제목</h3>
+                <p th:text="${product.description}">콜라보 설명</p>
                 <span class="product-category" th:text="${product.category}">카테고리</span>
                 <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
                 <div style="margin-top: 15px;">
                     <a th:href="@{/products/{id}(id=${product.uuid})}" class="btn">자세히 보기</a>
-                    <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn" style="background: #28a745;">Collabo 신청</a>
+                    <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn btn-success">콜라보 신청</a>
                 </div>
             </div>
         </div>
         
-        <div th:if="${#lists.isEmpty(recentProducts)}" style="text-align: center; padding: 40px;">
-            <p>등록된 Collabo가 없습니다.</p>
-            <a href="/collabo/create" class="btn">첫 Collabo 등록하기</a>
+        <div th:if="${recentProducts == null or recentProducts.isEmpty()}" class="empty-state">
+            <p>등록된 콜라보가 없습니다.</p>
+            <a href="/collabo/create" class="btn">첫 콜라보 등록하기</a>
         </div>
     </div>
-
-    <script>
-        // Check authentication state on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateNavigation();
-        });
-
-        function updateNavigation() {
-            const accessToken = localStorage.getItem('accessToken');
-            const isAuthenticated = accessToken !== null;
-            
-            // Get navigation elements
-            const collaboLink = document.getElementById('collaboLink');
-            const mypageLink = document.getElementById('mypageLink');
-            const loginLink = document.getElementById('loginLink');
-            const signupLink = document.getElementById('signupLink');
-            const logoutLink = document.getElementById('logoutLink');
-            
-            if (isAuthenticated) {
-                // Show authenticated user navigation
-                if (mypageLink) mypageLink.style.display = 'inline';
-                if (logoutLink) logoutLink.style.display = 'inline';
-                if (loginLink) loginLink.style.display = 'none';
-                if (signupLink) signupLink.style.display = 'none';
-                
-                // Add click handler for protected routes
-                if (collaboLink) {
-                    collaboLink.onclick = function(e) {
-                        if (!localStorage.getItem('accessToken')) {
-                            e.preventDefault();
-                            alert('로그인이 필요한 서비스입니다.');
-                            window.location.href = '/auth/login';
-                        }
-                    };
-                }
-            } else {
-                // Show guest navigation
-                if (mypageLink) mypageLink.style.display = 'none';
-                if (logoutLink) logoutLink.style.display = 'none';
-                if (loginLink) loginLink.style.display = 'inline';
-                if (signupLink) signupLink.style.display = 'inline';
-                
-                // Add click handler for protected routes
-                if (collaboLink) {
-                    collaboLink.onclick = function(e) {
-                        e.preventDefault();
-                        alert('로그인이 필요한 서비스입니다.');
-                        window.location.href = '/auth/login';
-                    };
-                }
-            }
-        }
-
-        async function logout() {
-            try {
-                const accessToken = localStorage.getItem('accessToken');
-                
-                if (accessToken) {
-                    // Call logout API
-                    await fetch('/api/member/logout', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + accessToken,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                }
-                
-                // Clear local storage
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('userEmail');
-                
-                // Update navigation
-                updateNavigation();
-                
-                // Show success message
-                alert('로그아웃되었습니다.');
-                
-                // Redirect to home
-                window.location.href = '/';
-                
-            } catch (error) {
-                console.error('Logout error:', error);
-                // Clear storage anyway
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('userEmail');
-                updateNavigation();
-                window.location.href = '/';
-            }
-        }
-
-        // Protect Collabo application links
-        document.addEventListener('click', function(e) {
-            if (e.target.href && e.target.href.includes('/collabo/apply/')) {
-                if (!localStorage.getItem('accessToken')) {
-                    e.preventDefault();
-                    alert('로그인이 필요한 서비스입니다.');
-                    window.location.href = '/auth/login';
-                }
-            }
-        });
-    </script>
 </body>
 </html>

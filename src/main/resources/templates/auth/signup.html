@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .main-content { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 70px); padding: 20px; }
         .signup-container { background: white; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); padding: 40px; width: 100%; max-width: 450px; }
         .logo { text-align: center; margin-bottom: 30px; }
         .logo h1 { color: #333; font-size: 32px; margin-bottom: 5px; }
@@ -26,9 +28,6 @@
         .links { text-align: center; margin-top: 20px; }
         .links a { color: #667eea; text-decoration: none; font-size: 14px; }
         .links a:hover { text-decoration: underline; }
-        .nav-home { position: absolute; top: 20px; left: 20px; }
-        .nav-home a { color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 5px; }
-        .nav-home a:hover { background: rgba(255,255,255,0.3); }
         .loading { display: none; text-align: center; margin-top: 10px; }
         .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -42,11 +41,11 @@
     </style>
 </head>
 <body>
-    <div class="nav-home">
-        <a href="/">🏠 홈으로</a>
-    </div>
-
-    <div class="signup-container">
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="main-content">
+        <div class="signup-container">
         <div class="logo">
             <h1>🍕 Topping</h1>
             <p>Collabo 플랫폼에 가입하세요</p>
@@ -416,5 +415,6 @@
             });
         }
     </script>
+    </div>
 </body>
 </html>

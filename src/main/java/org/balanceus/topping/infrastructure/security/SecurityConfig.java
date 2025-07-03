@@ -27,7 +27,9 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf(csrf -> csrf.disable())
+			.csrf(csrf -> csrf
+				.ignoringRequestMatchers("/h2-console/**") // Disable CSRF for H2 console
+			)
 			.authorizeHttpRequests(authz -> authz
 				// Public endpoints
 				.requestMatchers("/", "/auth/**", "/login", "/api/member/signup").permitAll()
@@ -39,9 +41,10 @@ public class SecurityConfig {
 				.anyRequest().permitAll()
 			)
 			.formLogin(form -> form
+				.loginPage("/auth/login")
 				.loginProcessingUrl("/login")
 				.defaultSuccessUrl("/mypage", true)
-				.failureUrl("/login?error=true")
+				.failureUrl("/auth/login?error=true")
 				.permitAll()
 			)
 			.logout(logout -> logout
