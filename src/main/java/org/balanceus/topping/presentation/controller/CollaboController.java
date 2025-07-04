@@ -32,20 +32,17 @@ public class CollaboController {
 
 	@GetMapping
 	public String collabo(Model model, Principal principal) {
-		if (principal != null) {
-			User user = userRepository.findByEmail(principal.getName())
-					.orElse(null);
-			
-			if (user != null) {
-				List<Collaboration> currentCollaborations = collaborationRepository.findByApplicant(user);
-				List<ChatRoom> chatRooms = chatRoomRepository.findByIsActiveTrue();
-				List<CollaborationProduct> collaborationProducts = collaborationProductRepository.findAll();
+		// Spring Security guarantees principal is not null due to .authenticated() configuration
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		List<Collaboration> currentCollaborations = collaborationRepository.findByApplicant(user);
+		List<ChatRoom> chatRooms = chatRoomRepository.findByIsActiveTrue();
+		List<CollaborationProduct> collaborationProducts = collaborationProductRepository.findAll();
 
-				model.addAttribute("currentCollaborations", currentCollaborations);
-				model.addAttribute("chatRooms", chatRooms);
-				model.addAttribute("collaborationProducts", collaborationProducts);
-			}
-		}
+		model.addAttribute("currentCollaborations", currentCollaborations);
+		model.addAttribute("chatRooms", chatRooms);
+		model.addAttribute("collaborationProducts", collaborationProducts);
 
 		return "collabo";
 	}

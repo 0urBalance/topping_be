@@ -53,7 +53,29 @@ The authentication system manages user login, logout, and session management usi
 - **Removed Components**: JWT service, filters, DTOs, and dependencies
 - **Frontend Impact**: Frontend applications need to remove JWT token handling and use session cookies
 
+## Session Persistence Fixes (Latest)
+
+### Issues Resolved
+- **Mixed Authentication Models**: Removed conflicting JWT localStorage checks from templates
+- **Route Protection**: Fixed overly permissive `anyRequest().permitAll()` configuration
+- **Controller Logic**: Updated controllers to rely on Spring Security authentication guarantees
+- **Template Integration**: Ensured consistent `sec:authorize="isAuthenticated()"` usage
+
+### Technical Changes
+- **SecurityConfig.java**: Changed to `anyRequest().authenticated()` with explicit public exceptions
+- **Route Protection**: Added authentication requirements for `/collabo/**`, `/products/**`, `/chat/**`, etc.
+- **Template Updates**: Removed localStorage-based authentication checks from collabo.html and mypage.html
+- **Controller Updates**: Enhanced CollaboController and ProductController with proper Principal handling
+
+### Verification Results
+- ✅ **Session Creation**: JSESSIONID cookie created successfully on login
+- ✅ **Cross-Request Persistence**: Authentication maintained across all protected routes
+- ✅ **Automatic Redirects**: Unauthenticated users properly redirected to login
+- ✅ **Template Security**: Navbar correctly shows authentication state
+- ✅ **API Endpoints**: Session status can be verified via `/api/session/status`
+
 ## Testing
 - Use `@ActiveProfiles("test")` for test configurations
 - H2 in-memory database for testing authentication flows
 - Session authentication can be tested with cookie-based requests
+- **Debug Logging**: Enhanced logging available for authentication troubleshooting

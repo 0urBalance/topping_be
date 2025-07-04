@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/products")
@@ -35,7 +36,8 @@ public class ProductController {
 	}
 
 	@GetMapping("/create")
-	public String createProductForm(Model model) {
+	public String createProductForm(Model model, Principal principal) {
+		// Spring Security ensures principal is not null
 		model.addAttribute("product", new Product());
 		return "products/create";
 	}
@@ -46,9 +48,11 @@ public class ProductController {
 			@RequestParam String description,
 			@RequestParam String category,
 			@RequestParam String imageUrl,
-			@RequestParam UUID creatorId) {
+			Principal principal) {
 		
-		User creator = userRepository.findById(creatorId).orElse(null);
+		// Get creator from authenticated user instead of form parameter
+		User creator = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
 		if (creator == null) {
 			return "redirect:/products/create?error=user_not_found";
 		}

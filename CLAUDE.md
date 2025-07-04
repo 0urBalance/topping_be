@@ -104,15 +104,30 @@ All repositories follow a consistent three-layer pattern:
 
 ### Recent Status
 - ✅ Authentication migrated from JWT to session-based
+- ✅ Session persistence fixed across all protected routes
+- ✅ CSRF protection disabled for API endpoints
 - ✅ Build system stable and reliable
 - ✅ Test infrastructure properly configured
 - ✅ All repositories follow consistent patterns
 - ✅ Ready for feature development
 
-## Domain Navigation
+### Session Authentication Details
+- **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
+- **Session Persistence**: JSESSIONID cookie maintains authentication across requests
+- **Route Protection**: All feature routes (`/collabo/**`, `/mypage/**`, `/products/**`, etc.) require authentication
+- **Template Integration**: Thymeleaf security integration with `sec:authorize="isAuthenticated()"`
+- **API Security**: Session-based endpoints (`/api/session/*`) for login/logout/status
+- **Debugging**: Enhanced logging for authentication issues in controllers and security
 
-For detailed information about specific business areas, refer to the domain-specific documentation:
+## Documentation Navigation
 
+### 📚 Main Documentation Hub
+- **[Documentation Index](./docs/README.md)** - Complete documentation navigation and standards
+
+### 🔧 Troubleshooting Guides
+- **[Session Persistence Troubleshooting](./docs/SESSION_PERSISTENCE_TROUBLESHOOTING.md)** - Authentication issues and resolutions
+
+### 🏗️ Domain-Specific Documentation
 - [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management
 - [User Management](./docs/domains/user/README.md) - User accounts and roles
 - [Collaboration Platform](./docs/domains/collaboration/README.md) - Business matching and proposals

@@ -198,26 +198,11 @@
     </div>
 
     <script>
-        // Check authentication on page load
+        // No need for localStorage checks - Spring Security handles session authentication
         document.addEventListener('DOMContentLoaded', function() {
-            if (!localStorage.getItem('accessToken')) {
-                alert('로그인이 필요한 서비스입니다.');
-                window.location.href = '/auth/login';
-                return;
-            }
-            updateNavigation();
+            // Spring Security ensures only authenticated users can access this page
+            console.log('MyPage loaded - user is authenticated via session');
         });
-
-        function updateNavigation() {
-            const accessToken = localStorage.getItem('accessToken');
-            const isAuthenticated = accessToken !== null;
-            
-            // This page should only be accessible when authenticated
-            if (!isAuthenticated) {
-                window.location.href = '/auth/login';
-                return;
-            }
-        }
 
         function showSection(sectionName) {
             // Hide all sections

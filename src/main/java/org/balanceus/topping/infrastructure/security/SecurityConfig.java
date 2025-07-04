@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,17 +29,28 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.csrf(csrf -> csrf
-				.ignoringRequestMatchers("/h2-console/**") // Disable CSRF for H2 console
+				.ignoringRequestMatchers("/h2-console/**", "/api/**") // Disable CSRF for H2 console and API endpoints
 			)
 			.authorizeHttpRequests(authz -> authz
 				// Public endpoints
-				.requestMatchers("/", "/auth/**", "/login", "/api/member/signup").permitAll()
+				.requestMatchers("/", "/auth/**", "/login").permitAll()
 				.requestMatchers("/explore", "/css/**", "/js/**", "/images/**").permitAll()
 				.requestMatchers("/h2-console/**").permitAll() // For testing
-				// Protected endpoints
+				// Public API endpoints
+				.requestMatchers("/api/member/signup").permitAll()
+				.requestMatchers("/api/session/login", "/api/session/logout", "/api/session/status").permitAll()
+				// Protected endpoints - must be authenticated
 				.requestMatchers("/mypage/**", "/logout").authenticated()
 				.requestMatchers("/collabo/**").authenticated()
-				.anyRequest().permitAll()
+				.requestMatchers("/chat/**").authenticated()
+				.requestMatchers("/products/**").authenticated()
+				.requestMatchers("/proposals/**").authenticated()
+				.requestMatchers("/collaborations/**").authenticated()
+				.requestMatchers("/collaboration-products/**").authenticated()
+				// Protected API endpoints
+				.requestMatchers("/api/**").authenticated()
+				// Default to authenticated for any other request
+				.anyRequest().authenticated()
 			)
 			.formLogin(form -> form
 				.loginPage("/auth/login")
@@ -53,6 +65,11 @@ public class SecurityConfig {
 				.invalidateHttpSession(true)
 				.deleteCookies("JSESSIONID")
 				.permitAll()
+			)
+			.sessionManagement(session -> session
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+				.maximumSessions(1)
+				.maxSessionsPreventsLogin(false)
 			)
 			.authenticationProvider(authenticationProvider())
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));

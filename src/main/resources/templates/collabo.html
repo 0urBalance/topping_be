@@ -152,42 +152,10 @@
     </div>
 
     <script>
-        // Check authentication on page load
+        // No authentication checks needed - Spring Security handles session authentication
         document.addEventListener('DOMContentLoaded', function() {
-            if (!localStorage.getItem('accessToken')) {
-                alert('로그인이 필요한 서비스입니다.');
-                window.location.href = '/auth/login';
-                return;
-            }
+            console.log('Collabo page loaded - user is authenticated via session');
         });
-
-        async function logout() {
-            try {
-                const accessToken = localStorage.getItem('accessToken');
-                
-                if (accessToken) {
-                    await fetch('/api/member/logout', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + accessToken,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                }
-                
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('userEmail');
-                
-                alert('로그아웃되었습니다.');
-                window.location.href = '/';
-                
-            } catch (error) {
-                console.error('Logout error:', error);
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('userEmail');
-                window.location.href = '/';
-            }
-        }
 
         function showSection(sectionName) {
             // Hide all sections

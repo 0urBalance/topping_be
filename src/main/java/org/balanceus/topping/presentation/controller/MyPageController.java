@@ -21,10 +21,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/mypage")
 @RequiredArgsConstructor
+@Slf4j
 public class MyPageController {
 
 	private final UserRepository userRepository;
@@ -36,12 +38,18 @@ public class MyPageController {
 
 	@GetMapping
 	public String myPage(Model model, Principal principal) {
+		log.debug("MyPage accessed - Principal: {}", principal);
+		
 		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
 			return "redirect:/login";
 		}
 
+		log.debug("User authenticated - Principal name: {}", principal.getName());
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		log.debug("User found: {}", user.getEmail());
 
 		// Get user's proposals
 		List<CollaborationProposal> proposals = proposalRepository.findByProposer(user);
