@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${product.title}">프로젝트 상세 - Topping</title>
+    <title th:text="${product.title}">상품 상세 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
@@ -34,7 +34,7 @@
     <div class="container" style="padding-top: 2rem;">
 
         <div class="product-detail">
-            <h1 class="product-title" th:text="${product.title}">프로젝트 제목</h1>
+            <h1 class="product-title" th:text="${product.title}">상품 제목</h1>
             
             <div class="product-meta">
                 <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
@@ -48,8 +48,8 @@
             </div>
 
             <div class="product-description">
-                <h3>프로젝트 설명</h3>
-                <p th:text="${product.description}">프로젝트 설명</p>
+                <h3>상품 설명</h3>
+                <p th:text="${product.description}">상품 설명</p>
             </div>
 
             <div class="actions">

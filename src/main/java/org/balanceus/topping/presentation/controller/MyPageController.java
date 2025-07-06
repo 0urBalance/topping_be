@@ -14,7 +14,7 @@ import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.CollaborationProductRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
-import org.balanceus.topping.domain.repository.ProductRepository;
+import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.springframework.stereotype.Controller;
@@ -34,7 +34,7 @@ public class MyPageController {
 	private final UserRepository userRepository;
 	private final CollaborationProposalRepository proposalRepository;
 	private final CollaborationRepository collaborationRepository;
-	private final ProductRepository productRepository;
+	private final ProductService productService;
 	private final CollaborationProductRepository collaborationProductRepository;
 	private final ChatRoomRepository chatRoomRepository;
 	private final StoreRepository storeRepository;
@@ -62,7 +62,7 @@ public class MyPageController {
 				.findByStatus(CollaborationProposal.ProposalStatus.ACCEPTED);
 		
 		// Get user's registered products
-		List<Product> myProducts = productRepository.findByCreator(user);
+		List<Product> myProducts = productService.getProductsByCreator(principal.getName());
 		
 		// Get user's collaboration products
 		List<CollaborationProduct> myCollaborationProducts = collaborationProductRepository.findAll();
@@ -90,5 +90,80 @@ public class MyPageController {
 		model.addAttribute("chatRoomCount", chatRoomCount);
 
 		return "mypage";
+	}
+
+	@GetMapping("/store")
+	public String myPageStore(Model model, Principal principal) {
+		log.debug("MyPage Store accessed - Principal: {}", principal);
+		
+		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
+			return "redirect:/login";
+		}
+
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		
+		if (userStore == null) {
+			// Redirect to store registration if no store exists
+			return "redirect:/stores/register";
+		}
+		
+		model.addAttribute("userStore", userStore);
+		return "store/my-store";
+	}
+
+	@GetMapping("/product")
+	public String myPageProduct(Model model, Principal principal) {
+		log.debug("MyPage Product accessed - Principal: {}", principal);
+		
+		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
+			return "redirect:/login";
+		}
+
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Get user's registered products
+		List<Product> myProducts = productService.getProductsByCreator(principal.getName());
+		
+		model.addAttribute("myProducts", myProducts);
+		return "mypage/product";
+	}
+
+	@GetMapping("/collabos")
+	public String myPageCollabos(Model model, Principal principal) {
+		log.debug("MyPage Collaborations accessed - Principal: {}", principal);
+		
+		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
+			return "redirect:/login";
+		}
+
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Get user's proposals
+		List<CollaborationProposal> proposals = proposalRepository.findByProposer(user);
+		
+		// Get collaborations where user is involved
+		List<CollaborationProposal> acceptedCollaborations = proposalRepository
+				.findByStatus(CollaborationProposal.ProposalStatus.ACCEPTED);
+		
+		// Get user's collaboration products
+		List<CollaborationProduct> myCollaborationProducts = collaborationProductRepository.findAll();
+		
+		// Get active chat rooms
+		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
+
+		model.addAttribute("proposals", proposals);
+		model.addAttribute("acceptedCollaborations", acceptedCollaborations);
+		model.addAttribute("myCollaborationProducts", myCollaborationProducts);
+		model.addAttribute("activeChatRooms", activeChatRooms);
+		return "mypage/collabos";
 	}
 }

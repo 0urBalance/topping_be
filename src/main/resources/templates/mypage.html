@@ -65,7 +65,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-number" th:text="${productCount ?: 0}">0</div>
-                <div class="stat-label">등록한 Collabo</div>
+                <div class="stat-label">등록한 상품</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" th:text="${chatRoomCount ?: 0}">0</div>
@@ -89,9 +89,17 @@
         <div class="section-tabs">
             <a href="#proposals" class="tab active" onclick="showSection('proposals')">내 제안</a>
             <a href="#collaborations" class="tab" onclick="showSection('collaborations')">참여중 Collabo</a>
-            <a href="#registered" class="tab" onclick="showSection('registered')">등록한 Collabo</a>
+            <a href="#registered" class="tab" onclick="showSection('registered')">등록한 상품</a>
             <a href="#products" class="tab" onclick="showSection('products')">내 제품</a>
             <a href="#store" class="tab" onclick="showSection('store')">스토어 관리</a>
+        </div>
+
+        <!-- Quick Access Links -->
+        <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="color: #333; margin-bottom: 15px;">빠른 메뉴</h3>
+            <a href="/stores/my-store" class="btn btn-primary" style="margin: 5px;">스토어 관리</a>
+            <a href="/mypage/product" class="btn btn-success" style="margin: 5px;">내 상품</a>
+            <a href="/mypage/collabos" class="btn" style="margin: 5px; background: #6f42c1; color: white;">내 콜라보</a>
         </div>
 
         <!-- My Proposals Section -->
@@ -165,11 +173,11 @@
 
         <!-- Registered Products Section -->
         <div id="registered-section" class="content-section" style="display: none;">
-            <h2>등록한 Collabo</h2>
+            <h2>등록한 상품</h2>
             <div class="content-grid">
                 <div th:each="product : ${myProducts}" class="content-card">
-                    <h4 th:text="${product.title}">Collabo 제목</h4>
-                    <p th:text="${product.description}">Collabo 설명</p>
+                    <h4 th:text="${product.title}">상품 제목</h4>
+                    <p th:text="${product.description}">상품 설명</p>
                     <span class="status-badge" th:classappend="${product.isActive} ? 'status-live' : 'status-pending'"
                           th:text="${product.isActive} ? '활성' : '비활성'">상태</span>
                     <div class="actions">
@@ -179,7 +187,7 @@
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
-                <a href="/collabo/create" class="btn btn-success">새 Collabo 등록</a>
+                <a href="/products/create" class="btn btn-success">새 상품 등록</a>
             </div>
         </div>
 
@@ -256,7 +264,7 @@
                     <div class="actions" style="text-align: center;">
                         <a href="/stores/my-store" class="btn btn-primary">상세보기</a>
                         <a href="/stores/edit" class="btn">정보수정</a>
-                        <a href="/products/create" class="btn btn-success">상품 등록</a>
+                        <a href="/mypage/product" class="btn btn-success">상품 관리</a>
                     </div>
                 </div>
             </div>

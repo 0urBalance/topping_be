@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 콜라보 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #333; margin-bottom: 10px; }
+        .header p { color: #666; font-size: 18px; }
+        .breadcrumb { margin-bottom: 20px; }
+        .breadcrumb a { color: #007bff; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span { color: #666; }
+        .section-tabs { text-align: center; margin-bottom: 30px; }
+        .section-tabs .tab { margin: 0 10px; padding: 10px 20px; background: #e9ecef; color: #495057; text-decoration: none; border-radius: 4px; display: inline-block; cursor: pointer; }
+        .section-tabs .tab.active { background: #007bff; color: white; }
+        .section-tabs .tab:hover { background: #007bff; color: white; }
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .content-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .content-card h4 { margin-top: 0; color: #333; }
+        .content-card p { color: #666; margin: 10px 0; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d1edff; color: #004085; }
+        .status-live { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .btn { display: inline-block; padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-size: 14px; }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-primary { background: #007bff; }
+        .actions { margin-top: 15px; }
+        .actions .btn { margin-right: 10px; }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state h3 { color: #333; margin-bottom: 15px; }
+        .empty-state p { color: #666; margin-bottom: 30px; font-size: 16px; }
+        .content-section { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/mypage">마이페이지</a> <span>></span> <span>내 콜라보</span>
+        </div>
+        
+        <div class="header">
+            <h1>🤝 내 콜라보</h1>
+            <p>콜라보 제안, 진행 상황 및 채팅방을 관리하세요</p>
+        </div>
+
+        <div class="section-tabs">
+            <a href="#proposals" class="tab active" onclick="showSection('proposals')">내 제안</a>
+            <a href="#accepted" class="tab" onclick="showSection('accepted')">진행중 콜라보</a>
+            <a href="#products" class="tab" onclick="showSection('products')">콜라보 상품</a>
+            <a href="#chats" class="tab" onclick="showSection('chats')">채팅방</a>
+        </div>
+
+        <!-- My Proposals Section -->
+        <div id="proposals-section" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>내 콜라보 제안</h2>
+                <a href="/collabo/suggest" class="btn btn-primary">새 제안하기</a>
+            </div>
+            
+            <div class="content-grid">
+                <div th:each="proposal : ${proposals}" class="content-card">
+                    <h4 th:text="${proposal.title}">제안 제목</h4>
+                    <p th:text="${proposal.description}">제안 설명</p>
+                    <span class="status-badge" 
+                          th:classappend="${proposal.status.name() == 'PENDING'} ? 'status-pending' : 
+                                         (${proposal.status.name() == 'ACCEPTED'} ? 'status-accepted' : 
+                                         (${proposal.status.name() == 'REJECTED'} ? 'status-rejected' : 'status-live'))"
+                          th:text="${proposal.status.name() == 'PENDING'} ? '대기중' : 
+                                   (${proposal.status.name() == 'ACCEPTED'} ? '수락됨' : 
+                                   (${proposal.status.name() == 'REJECTED'} ? '거절됨' : '진행중'))">
+                        상태
+                    </span>
+                    
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                        <p>카테고리: <span th:text="${proposal.category}">카테고리</span></p>
+                        <p>작성일: <span th:text="${#temporals.format(proposal.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
+                    </div>
+                    
+                    <div th:if="${proposal.targetBusinessOwner != null}" style="margin-top: 10px;">
+                        <small style="color: #17a2b8;">
+                            콜라보 파트너: <span th:text="${proposal.targetBusinessOwner.username}">파트너명</span>
+                        </small>
+                    </div>
+                    
+                    <div th:if="${proposal.status.name() == 'ACCEPTED'}" class="actions">
+                        <a th:href="@{'/chat/room/create/' + ${proposal.uuid}}" 
+                           class="btn btn-success" 
+                           onclick="createChatRoom(this, event)">
+                            채팅방 입장
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(proposals)}" class="empty-state">
+                <div style="font-size: 48px; margin-bottom: 20px;">💡</div>
+                <h3>아직 제안한 콜라보가 없습니다</h3>
+                <p>첫 번째 콜라보를 제안해보세요!</p>
+                <a href="/collabo/suggest" class="btn btn-primary" style="font-size: 18px; padding: 15px 30px;">
+                    💡 콜라보 제안하기
+                </a>
+            </div>
+        </div>
+
+        <!-- Accepted Collaborations Section -->
+        <div id="accepted-section" class="content-section" style="display: none;">
+            <h2>진행중인 콜라보</h2>
+            <div class="content-grid">
+                <div th:each="collaboration : ${acceptedCollaborations}" class="content-card">
+                    <h4 th:text="${collaboration.title}">콜라보 제목</h4>
+                    <p th:text="${collaboration.description}">콜라보 설명</p>
+                    <span class="status-badge status-live">진행중</span>
+                    <div class="actions">
+                        <a th:href="@{/collabo/{id}(id=${collaboration.uuid})}" class="btn">상세보기</a>
+                        <a href="/chat/rooms" class="btn btn-success">채팅방</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(acceptedCollaborations)}" class="empty-state">
+                <div style="font-size: 48px; margin-bottom: 20px;">🤝</div>
+                <h3>진행중인 콜라보가 없습니다</h3>
+                <p>콜라보 제안을 해보거나 다른 사람의 제안을 수락해보세요!</p>
+                <a href="/explore" class="btn btn-primary">콜라보 찾아보기</a>
+            </div>
+        </div>
+
+        <!-- Collaboration Products Section -->
+        <div id="products-section" class="content-section" style="display: none;">
+            <h2>콜라보 상품</h2>
+            <div class="content-grid">
+                <div th:each="product : ${myCollaborationProducts}" class="content-card">
+                    <h4 th:text="${product.name}">상품 이름</h4>
+                    <p th:text="${product.description}">상품 설명</p>
+                    <span class="status-badge" 
+                          th:classappend="${product.status.name() == 'ACTIVE'} ? 'status-live' : 
+                                         (${product.status.name() == 'DRAFT'} ? 'status-pending' : 'status-accepted')"
+                          th:text="${product.status.name() == 'ACTIVE'} ? '판매중' : 
+                                   (${product.status.name() == 'DRAFT'} ? '준비중' : '종료')">
+                        상태
+                    </span>
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                        <p>가격: <span th:text="${product.price}">가격</span>원</p>
+                        <p>재고: <span th:text="${product.stockQuantity}">재고</span>개</p>
+                    </div>
+                    <div class="actions">
+                        <a th:href="@{/collaboration-products/{id}(id=${product.uuid})}" class="btn">관리하기</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/collaboration-products/create" class="btn btn-success">새 콜라보 상품 등록</a>
+            </div>
+        </div>
+
+        <!-- Chat Rooms Section -->
+        <div id="chats-section" class="content-section" style="display: none;">
+            <h2>콜라보 채팅방</h2>
+            <div class="content-grid">
+                <div th:each="chatRoom : ${activeChatRooms}" class="content-card">
+                    <h4 th:text="${chatRoom.roomName}">채팅방 이름</h4>
+                    <p>콜라보 파트너와 실시간으로 소통하세요</p>
+                    <span class="status-badge" th:classappend="${chatRoom.isActive} ? 'status-live' : 'status-pending'"
+                          th:text="${chatRoom.isActive} ? '활성' : '비활성'">상태</span>
+                    <div class="actions">
+                        <a th:href="@{/chat/room/{id}(id=${chatRoom.uuid})}" class="btn btn-success">채팅방 입장</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(activeChatRooms)}" class="empty-state">
+                <div style="font-size: 48px; margin-bottom: 20px;">💬</div>
+                <h3>활성화된 채팅방이 없습니다</h3>
+                <p>콜라보가 성사되면 자동으로 채팅방이 생성됩니다</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.style.display = 'none');
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function createChatRoom(element, event) {
+            event.preventDefault();
+            
+            const proposalId = element.href.split('/').pop();
+            
+            fetch(`/chat/room/create/${proposalId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 'SUCCESS') {
+                    window.location.href = `/chat/room/${data.data.uuid}`;
+                } else {
+                    alert('채팅방 생성에 실패했습니다: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            });
+        }
+    </script>
+</body>
+</html>

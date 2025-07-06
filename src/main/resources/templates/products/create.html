@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프로젝트 등록 - Topping</title>
+    <title>상품 등록 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
@@ -34,24 +34,45 @@
     <div class="container" style="padding-top: 2rem;">
 
         <div class="form-container">
+            <!-- Success Messages -->
+            <div th:if="${param.success}" class="alert alert-success" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+                <span th:if="${param.success[0] == 'created'}">상품이 성공적으로 등록되었습니다!</span>
+            </div>
+            
+            <!-- Error Messages -->
             <div th:if="${param.error}" class="alert alert-error">
                 <span th:if="${param.error[0] == 'user_not_found'}">사용자를 찾을 수 없습니다.</span>
+                <span th:if="${param.error[0] == 'invalid_data'}">입력된 데이터가 유효하지 않습니다.</span>
+                <span th:if="${param.error[0] == 'save_failed'}">상품 등록 중 오류가 발생했습니다.</span>
+            </div>
+            
+            <!-- Validation Errors -->
+            <div th:if="${#fields.hasErrors('productRequest')}" class="alert alert-error">
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li th:each="error : ${#fields.errors('productRequest')}" th:text="${error}">에러 메시지</li>
+                </ul>
             </div>
 
-            <form action="/products/create" method="post">
+            <form th:action="@{/products/create}" method="post" th:object="${productRequest}">
                 <div class="form-group">
-                    <label for="title">프로젝트 제목</label>
-                    <input type="text" id="title" name="title" required placeholder="예: 웹 서비스 개발 협업 파트너 모집">
+                    <label for="title">상품 제목</label>
+                    <input type="text" id="title" th:field="*{title}" required placeholder="예: 웹 서비스 개발 협업 파트너 모집">
+                    <div th:if="${#fields.hasErrors('title')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('title')}" th:text="${error}">에러</span>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="description">프로젝트 설명</label>
-                    <textarea id="description" name="description" required placeholder="프로젝트에 대한 자세한 설명을 작성해주세요..."></textarea>
+                    <label for="description">상품 설명</label>
+                    <textarea id="description" th:field="*{description}" required placeholder="상품에 대한 자세한 설명을 작성해주세요..."></textarea>
+                    <div th:if="${#fields.hasErrors('description')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('description')}" th:text="${error}">에러</span>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="category">카테고리</label>
-                    <select id="category" name="category" required>
+                    <select id="category" th:field="*{category}" required>
                         <option value="">카테고리를 선택하세요</option>
                         <option value="웹 개발">웹 개발</option>
                         <option value="모바일 앱">모바일 앱</option>
@@ -60,21 +81,31 @@
                         <option value="마케팅">마케팅</option>
                         <option value="기타">기타</option>
                     </select>
+                    <div th:if="${#fields.hasErrors('category')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('category')}" th:text="${error}">에러</span>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="imageUrl">이미지 URL (선택사항)</label>
-                    <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg">
+                    <input type="url" id="imageUrl" th:field="*{imageUrl}" placeholder="https://example.com/image.jpg">
+                    <div th:if="${#fields.hasErrors('imageUrl')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('imageUrl')}" th:text="${error}">에러</span>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="creatorId">작성자 ID (UUID)</label>
-                    <input type="text" id="creatorId" name="creatorId" required placeholder="사용자 UUID를 입력하세요">
-                    <small style="color: #666;">실제 구현에서는 로그인한 사용자 정보를 자동으로 사용합니다.</small>
+                <!-- Creator information (read-only display) -->
+                <div th:if="${user}" class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 4px; border-left: 4px solid #007bff;">
+                    <label style="margin-bottom: 5px; color: #495057;">등록자 정보</label>
+                    <div style="font-size: 14px; color: #666;">
+                        <p style="margin: 2px 0;"><strong>이름:</strong> <span th:text="${user.username}">사용자명</span></p>
+                        <p style="margin: 2px 0;"><strong>이메일:</strong> <span th:text="${user.email}">사용자 이메일</span></p>
+                        <small style="color: #28a745;">✓ 로그인된 사용자 정보가 자동으로 사용됩니다.</small>
+                    </div>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn">프로젝트 등록</button>
+                    <button type="submit" class="btn">상품 등록</button>
                     <a href="/products" class="btn btn-secondary">취소</a>
                 </div>
             </form>
