@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스토어 등록 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+        }
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 70px);
+            padding: 20px;
+        }
+        .register-container { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            padding: 40px; 
+            width: 100%; 
+            max-width: 600px; 
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #333; font-size: 32px; margin-bottom: 5px; }
+        .logo p { color: #666; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid #e1e1e1; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            transition: border-color 0.3s; 
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; 
+            border-color: #667eea; 
+        }
+        .form-group textarea { 
+            resize: vertical; 
+            min-height: 100px; 
+        }
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background 0.3s; 
+        }
+        .btn:hover { background: #5a6fd8; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .error-message { 
+            color: #e74c3c; 
+            font-size: 14px; 
+            margin-top: 10px; 
+            padding: 10px;
+            background-color: #fdf2f2;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+        }
+        .success-message { 
+            color: #27ae60; 
+            font-size: 14px; 
+            margin-top: 10px; 
+            padding: 10px;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 4px;
+        }
+        .field-error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .required { color: #e74c3c; }
+        .optional { color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="main-content">
+        <div class="register-container">
+            <div class="logo">
+                <h1>🏪 스토어 등록</h1>
+                <p>당신의 스토어를 등록하고 콜라보를 시작하세요</p>
+            </div>
+
+            <!-- Show error message if registration failed -->
+            <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
+                등록에 실패했습니다.
+            </div>
+
+            <!-- Show success message -->
+            <div th:if="${successMessage}" class="success-message" th:text="${successMessage}">
+                성공적으로 등록되었습니다.
+            </div>
+
+            <form th:action="@{/stores/register}" method="post" th:object="${storeRegistrationRequest}">
+                <div class="form-group">
+                    <label for="name">스토어 이름 <span class="required">*</span></label>
+                    <input type="text" id="name" th:field="*{name}" required placeholder="스토어 이름을 입력하세요">
+                    <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">주소 <span class="required">*</span></label>
+                    <input type="text" id="address" th:field="*{address}" required placeholder="주소를 입력하세요">
+                    <div class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contactNumber">연락처 <span class="required">*</span></label>
+                        <input type="tel" id="contactNumber" th:field="*{contactNumber}" required 
+                               placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}">
+                        <div class="field-error" th:if="${#fields.hasErrors('contactNumber')}" th:errors="*{contactNumber}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">카테고리 <span class="required">*</span></label>
+                        <select id="category" th:field="*{category}" required>
+                            <option value="">카테고리를 선택하세요</option>
+                            <option value="Cafe">카페</option>
+                            <option value="Dessert">디저트</option>
+                            <option value="Restaurant">레스토랑</option>
+                            <option value="Bakery">베이커리</option>
+                            <option value="Korean">한식</option>
+                            <option value="Western">양식</option>
+                            <option value="Asian">아시안</option>
+                            <option value="Fast Food">패스트푸드</option>
+                            <option value="Bar">바</option>
+                            <option value="Other">기타</option>
+                        </select>
+                        <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="businessHours">영업시간 <span class="required">*</span></label>
+                    <textarea id="businessHours" th:field="*{businessHours}" required 
+                              placeholder="예: 평일 09:00-22:00, 주말 10:00-23:00"></textarea>
+                    <div class="field-error" th:if="${#fields.hasErrors('businessHours')}" th:errors="*{businessHours}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mainImageUrl">메인 이미지 URL <span class="optional">(선택사항)</span></label>
+                    <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" 
+                           placeholder="https://example.com/image.jpg">
+                    <div class="field-error" th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="snsOrWebsiteLink">SNS 또는 웹사이트 링크 <span class="optional">(선택사항)</span></label>
+                    <input type="url" id="snsOrWebsiteLink" th:field="*{snsOrWebsiteLink}" 
+                           placeholder="https://instagram.com/yourstore">
+                    <div class="field-error" th:if="${#fields.hasErrors('snsOrWebsiteLink')}" th:errors="*{snsOrWebsiteLink}"></div>
+                </div>
+
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <button type="submit" class="btn">
+                    스토어 등록
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

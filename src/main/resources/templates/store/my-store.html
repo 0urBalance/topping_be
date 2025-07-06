@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 스토어 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+        }
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 70px);
+            padding: 20px;
+        }
+        .store-container { 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            padding: 40px; 
+            width: 100%; 
+            max-width: 800px; 
+        }
+        .store-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        .store-header h1 { 
+            color: #333; 
+            font-size: 32px; 
+            margin-bottom: 10px; 
+        }
+        .store-header p { 
+            color: #666; 
+            font-size: 16px; 
+        }
+        .store-image {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .store-image img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .store-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .info-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .info-item h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .info-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .info-item.full-width {
+            grid-column: 1 / -1;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .success-message { 
+            color: #27ae60; 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            padding: 15px;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .error-message { 
+            color: #e74c3c; 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            padding: 15px;
+            background-color: #fdf2f2;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .store-info {
+                grid-template-columns: 1fr;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="main-content">
+        <div class="store-container">
+            <!-- Show success message -->
+            <div th:if="${successMessage}" class="success-message" th:text="${successMessage}">
+                성공적으로 처리되었습니다.
+            </div>
+
+            <!-- Show error message -->
+            <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
+                오류가 발생했습니다.
+            </div>
+
+            <div class="store-header">
+                <h1 th:text="${store.name}">스토어 이름</h1>
+                <p><span class="badge" th:text="${store.category}">카테고리</span></p>
+            </div>
+
+            <div class="store-image" th:if="${store.mainImageUrl}">
+                <img th:src="${store.mainImageUrl}" th:alt="${store.name} + ' 메인 이미지'" />
+            </div>
+
+            <div class="store-info">
+                <div class="info-item">
+                    <h3>📍 주소</h3>
+                    <p th:text="${store.address}">스토어 주소</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>📞 연락처</h3>
+                    <p th:text="${store.contactNumber}">연락처</p>
+                </div>
+
+                <div class="info-item full-width">
+                    <h3>🕐 영업시간</h3>
+                    <p th:text="${store.businessHours}">영업시간</p>
+                </div>
+
+                <div class="info-item full-width" th:if="${store.snsOrWebsiteLink}">
+                    <h3>🔗 SNS / 웹사이트</h3>
+                    <p>
+                        <a th:href="${store.snsOrWebsiteLink}" target="_blank" th:text="${store.snsOrWebsiteLink}">
+                            링크
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a th:href="@{/stores/edit}" class="btn btn-primary">
+                    ✏️ 스토어 정보 수정
+                </a>
+                <a th:href="@{/products/create}" class="btn btn-secondary">
+                    📦 상품 등록
+                </a>
+                <a th:href="@{/collaborations/list}" class="btn btn-secondary">
+                    🤝 콜라보 제안 보기
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

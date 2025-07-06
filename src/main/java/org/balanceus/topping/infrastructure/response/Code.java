@@ -33,6 +33,11 @@ public enum Code {
 	SIGN005(HttpStatus.BAD_REQUEST,2005,"유효하지 않은 회원가입 정보"),
 	SIGN006(HttpStatus.BAD_REQUEST,2006,"유효하지 않은 관리자 코드"),
 
+	/**
+	 * 400번대
+	 */
+	NOT_FOUND(HttpStatus.NOT_FOUND, 404, "요청한 리소스를 찾을 수 없습니다."),
+	FORBIDDEN(HttpStatus.FORBIDDEN, 403, "접근 권한이 없습니다."),
 
 	;
 

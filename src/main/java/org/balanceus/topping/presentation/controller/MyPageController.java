@@ -8,12 +8,14 @@ import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProduct;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.CollaborationProductRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
+import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +37,7 @@ public class MyPageController {
 	private final ProductRepository productRepository;
 	private final CollaborationProductRepository collaborationProductRepository;
 	private final ChatRoomRepository chatRoomRepository;
+	private final StoreRepository storeRepository;
 
 	@GetMapping
 	public String myPage(Model model, Principal principal) {
@@ -67,6 +70,9 @@ public class MyPageController {
 		// Get active chat rooms
 		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
 
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+
 		// Calculate statistics
 		int proposalCount = proposals.size();
 		int collaborationCount = acceptedCollaborations.size();
@@ -77,6 +83,7 @@ public class MyPageController {
 		model.addAttribute("acceptedCollaborations", acceptedCollaborations);
 		model.addAttribute("myProducts", myProducts);
 		model.addAttribute("myCollaborationProducts", myCollaborationProducts);
+		model.addAttribute("userStore", userStore);
 		model.addAttribute("proposalCount", proposalCount);
 		model.addAttribute("collaborationCount", collaborationCount);
 		model.addAttribute("productCount", productCount);

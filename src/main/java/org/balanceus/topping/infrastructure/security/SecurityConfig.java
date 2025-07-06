@@ -47,6 +47,7 @@ public class SecurityConfig {
 				.requestMatchers("/proposals/**").authenticated()
 				.requestMatchers("/collaborations/**").authenticated()
 				.requestMatchers("/collaboration-products/**").authenticated()
+				.requestMatchers("/stores/**").authenticated()
 				// Protected API endpoints
 				.requestMatchers("/api/**").authenticated()
 				// Default to authenticated for any other request
