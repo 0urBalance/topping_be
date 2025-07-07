@@ -8,6 +8,7 @@ import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProduct;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.infrastructure.security.Role;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.CollaborationProductRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
@@ -64,7 +65,23 @@ public class CollaboController {
 	}
 
 	@GetMapping("/apply/{id}")
-	public String applyCollabo(@PathVariable UUID id) {
-		return "redirect:/collaborations/apply/" + id;
+	public String applyCollabo(@PathVariable UUID id, Principal principal) {
+		// Check authentication
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
+		}
+		
+		// Get authenticated user to check role
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+		
+		// Route based on user role
+		if (user.getRole() == Role.ROLE_BUSINESS_OWNER) {
+			// Business owners are redirected to proposals/suggest for creating business proposals
+			return "redirect:/collaborations/apply/" + id;
+		} else {
+			// General users (ROLE_USER) are redirected to collaborations/apply for direct collaboration
+			return "redirect:/proposals/suggest";
+		}
 	}
 }
