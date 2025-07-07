@@ -173,7 +173,7 @@
                 
                 const data = await response.json();
                 
-                if (response.ok && data.code === 'SUCCESS') {
+                if (response.ok && data.code === 200) {
                     // Show success message
                     showSuccess('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다...');
                     
