@@ -111,6 +111,96 @@ public class ProductController {
 		return "products/detail";
 	}
 
+	@GetMapping("/{id}/edit")
+	public String editProductForm(@PathVariable UUID id, Model model, Principal principal) {
+		log.debug("Product edit form accessed for product: {} by user: {}", id, principal != null ? principal.getName() : "anonymous");
+		
+		if (principal == null) {
+			log.warn("Unauthenticated user attempted to access product edit form");
+			return "redirect:/login";
+		}
+		
+		try {
+			// Validate ownership first
+			productService.validateProductOwnership(id, principal.getName());
+			
+			// Get the product to edit
+			Product product = productService.getProductById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+			
+			// Create ProductRequestDto with current values
+			ProductRequestDto productRequest = new ProductRequestDto();
+			productRequest.setTitle(product.getTitle());
+			productRequest.setDescription(product.getDescription());
+			productRequest.setCategory(product.getCategory());
+			productRequest.setImageUrl(product.getImageUrl());
+			
+			// Get user for form display
+			User user = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+			
+			model.addAttribute("product", product);
+			model.addAttribute("productRequest", productRequest);
+			model.addAttribute("user", user);
+			
+			return "products/edit";
+			
+		} catch (IllegalArgumentException e) {
+			log.warn("Access denied or product not found: {}", e.getMessage());
+			return "redirect:/products?error=access_denied";
+		} catch (Exception e) {
+			log.error("Error accessing product edit form: {}", e.getMessage());
+			return "redirect:/products?error=server_error";
+		}
+	}
+
+	@PostMapping("/{id}/edit")
+	public String updateProduct(
+			@PathVariable UUID id,
+			@Valid @ModelAttribute("productRequest") ProductRequestDto productRequest,
+			BindingResult bindingResult,
+			Model model,
+			Principal principal) {
+		
+		log.debug("Product update attempt for product: {} by user: {}", id, principal != null ? principal.getName() : "anonymous");
+		
+		// Validate authentication
+		if (principal == null) {
+			log.warn("Unauthenticated user attempted product update");
+			return "redirect:/login";
+		}
+		
+		try {
+			// Get the product for form re-display if needed
+			Product product = productService.getProductById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+			
+			// Handle validation errors
+			if (bindingResult.hasErrors()) {
+				log.warn("Product update validation failed for product: {} by user: {}", id, principal.getName());
+				// Re-populate user and product for form display
+				User user = userRepository.findByEmail(principal.getName())
+						.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+				model.addAttribute("product", product);
+				model.addAttribute("user", user);
+				return "products/edit";
+			}
+			
+			// Update product using service
+			Product updatedProduct = productService.updateProduct(id, productRequest, principal.getName());
+			log.info("Product updated successfully: {} by user: {}", updatedProduct.getUuid(), principal.getName());
+			return "redirect:/products/" + id + "?success=updated";
+			
+		} catch (IllegalArgumentException e) {
+			log.error("Product update failed due to invalid data or access denied: {}", e.getMessage());
+			return "redirect:/products?error=access_denied";
+			
+		} catch (Exception e) {
+			log.error("Product update failed for product: {} by user: {} - {}", id, principal.getName(), e.getMessage());
+			return "redirect:/products/" + id + "/edit?error=update_failed";
+		}
+	}
+
 	@GetMapping("/api")
 	@ResponseBody
 	public ApiResponseData<List<Product>> getProductsApi() {

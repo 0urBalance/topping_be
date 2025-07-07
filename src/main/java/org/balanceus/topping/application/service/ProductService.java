@@ -88,6 +88,53 @@ public class ProductService {
     }
 
     /**
+     * Update an existing product
+     */
+    public Product updateProduct(UUID id, ProductRequestDto requestDto, String userEmail) {
+        log.debug("Updating product: {} for user: {}", id, userEmail);
+        
+        // Get the product to update
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        
+        // Validate ownership
+        validateProductOwnership(product, userEmail);
+        
+        // Validate input
+        validateProductRequest(requestDto);
+        
+        // Update product fields
+        product.setTitle(requestDto.getTitle().trim());
+        product.setDescription(requestDto.getDescription().trim());
+        product.setCategory(requestDto.getCategory());
+        product.setImageUrl(requestDto.getImageUrl() != null && !requestDto.getImageUrl().trim().isEmpty() 
+                ? requestDto.getImageUrl().trim() : null);
+        
+        Product updatedProduct = productRepository.save(product);
+        log.info("Product updated successfully: {} by user: {}", updatedProduct.getUuid(), userEmail);
+        
+        return updatedProduct;
+    }
+
+    /**
+     * Validate that the user has permission to edit the product
+     */
+    private void validateProductOwnership(Product product, String userEmail) {
+        if (!product.getCreator().getEmail().equals(userEmail)) {
+            throw new IllegalArgumentException("Access denied: You can only edit your own products");
+        }
+    }
+
+    /**
+     * Validate that the user has permission to edit the product by ID
+     */
+    public void validateProductOwnership(UUID id, String userEmail) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        validateProductOwnership(product, userEmail);
+    }
+
+    /**
      * Validate product request data
      */
     private void validateProductRequest(ProductRequestDto requestDto) {
