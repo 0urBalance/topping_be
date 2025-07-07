@@ -33,6 +33,11 @@
     <div th:replace="fragments/navbar :: navbar"></div>
     <div class="container" style="padding-top: 2rem;">
 
+        <!-- Error Messages -->
+        <div th:if="${param.error}" class="alert alert-error" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+            <span th:if="${param.error[0] == 'cannot_apply_own_product'}">본인의 상품에는 콜라보 신청할 수 없습니다.</span>
+        </div>
+
         <div class="product-detail">
             <h1 class="product-title" th:text="${product.title}">상품 제목</h1>
             
@@ -53,7 +58,7 @@
             </div>
 
             <div class="actions">
-                <a th:href="@{/collaborations/apply/{id}(id=${product.uuid})}" class="btn btn-success">협업 신청하기</a>
+                <a th:href="@{/collaborations/apply/{id}(id=${product.uuid})}" class="btn btn-success">콜라보 신청하기</a>
                 <a href="/products" class="btn btn-secondary">목록으로 돌아가기</a>
             </div>
         </div>

@@ -2,6 +2,7 @@ package org.balanceus.topping.presentation.controller;
 
 import java.util.List;
 import java.util.UUID;
+import java.security.Principal;
 
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Product;
@@ -10,6 +11,7 @@ import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
+import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +32,7 @@ public class CollaborationController {
 	private final CollaborationRepository collaborationRepository;
 	private final ProductRepository productRepository;
 	private final UserRepository userRepository;
+	private final ProductService productService;
 
 	@GetMapping
 	public String listCollaborations(Model model) {
@@ -39,12 +42,35 @@ public class CollaborationController {
 	}
 
 	@GetMapping("/apply/{productId}")
-	public String applyForm(@PathVariable UUID productId, Model model) {
+	public String applyForm(@PathVariable UUID productId, Model model, Principal principal) {
+		// Check authentication
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
+		}
+		
+		// Get the target product
 		Product product = productRepository.findById(productId).orElse(null);
 		if (product == null) {
-			return "redirect:/products";
+			return "redirect:/products?error=product_not_found";
 		}
+		
+		// Get the authenticated user
+		User user = userRepository.findByEmail(principal.getName()).orElse(null);
+		if (user == null) {
+			return "redirect:/login?error=user_not_found";
+		}
+		
+		// Prevent self-application
+		if (product.getCreator().getUuid().equals(user.getUuid())) {
+			return "redirect:/products/" + productId + "?error=cannot_apply_own_product";
+		}
+		
+		// Get user's products for selection
+		List<Product> userProducts = productService.getProductsByCreator(principal.getName());
+		
 		model.addAttribute("product", product);
+		model.addAttribute("user", user);
+		model.addAttribute("userProducts", userProducts);
 		model.addAttribute("collaboration", new Collaboration());
 		return "collaborations/apply";
 	}
@@ -52,24 +78,57 @@ public class CollaborationController {
 	@PostMapping("/apply")
 	public String applyCollaboration(
 			@RequestParam UUID productId,
-			@RequestParam UUID applicantId,
-			@RequestParam String message) {
+			@RequestParam(required = false) UUID applicantProductId,
+			@RequestParam String message,
+			Principal principal) {
 		
+		// Check authentication
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
+		}
+		
+		// Get authenticated user
+		User applicant = userRepository.findByEmail(principal.getName()).orElse(null);
+		if (applicant == null) {
+			return "redirect:/login?error=user_not_found";
+		}
+		
+		// Get target product
 		Product product = productRepository.findById(productId).orElse(null);
-		User applicant = userRepository.findById(applicantId).orElse(null);
+		if (product == null) {
+			return "redirect:/products?error=product_not_found";
+		}
 		
-		if (product == null || applicant == null) {
-			return "redirect:/products";
+		// Prevent self-application
+		if (product.getCreator().getUuid().equals(applicant.getUuid())) {
+			return "redirect:/products/" + productId + "?error=cannot_apply_own_product";
+		}
+		
+		// Get applicant's product if provided
+		Product applicantProduct = null;
+		if (applicantProductId != null) {
+			applicantProduct = productRepository.findById(applicantProductId).orElse(null);
+			// Validate that the product belongs to the applicant
+			if (applicantProduct == null || !applicantProduct.getCreator().getUuid().equals(applicant.getUuid())) {
+				return "redirect:/collaborations/apply/" + productId + "?error=invalid_applicant_product";
+			}
+		}
+		
+		// Validate message
+		if (message == null || message.trim().isEmpty()) {
+			return "redirect:/collaborations/apply/" + productId + "?error=message_required";
 		}
 
+		// Create collaboration
 		Collaboration collaboration = new Collaboration();
 		collaboration.setProduct(product);
 		collaboration.setApplicant(applicant);
-		collaboration.setMessage(message);
+		collaboration.setApplicantProduct(applicantProduct);
+		collaboration.setMessage(message.trim());
 		collaboration.setStatus(CollaborationStatus.PENDING);
 
 		collaborationRepository.save(collaboration);
-		return "redirect:/collaborations";
+		return "redirect:/collaborations?success=application_submitted";
 	}
 
 	@PostMapping("/{id}/accept")

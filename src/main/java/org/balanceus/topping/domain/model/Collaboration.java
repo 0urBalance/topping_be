@@ -40,6 +40,10 @@ public class Collaboration {
 	@JoinColumn(name = "applicant_uuid")
 	private User applicant;
 
+	@ManyToOne
+	@JoinColumn(name = "applicant_product_uuid")
+	private Product applicantProduct;
+
 	@Enumerated(EnumType.STRING)
 	private CollaborationStatus status;
 
