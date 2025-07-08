@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-Topping (토핑) is a collaboration matching platform backend built with Spring Boot. The project uses a clean architecture approach with domain-driven design principles.
+Topping (토핑) is a collaboration matching platform backend built with Spring Boot. The project uses a clean architecture approach with domain-driven design principles, enabling businesses to find collaboration partners and manage collaborative projects.
 
 ## Quick Start
 
@@ -36,39 +36,20 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - Spring Security (session-based authentication)
 - Lombok + Thymeleaf
 
-## Domain Areas
+## 📁 Domain Reference
 
-The platform is organized into distinct business domains, each with detailed documentation:
+The platform is organized into distinct business domains. Each domain has comprehensive documentation covering models, APIs, business rules, and integration points:
 
-### 🔐 Authentication
-Session-based authentication with Spring Security
-- **Details**: [docs/domains/auth/README.md](./docs/domains/auth/README.md)
-- **Endpoints**: `/login`, `/logout`, `/api/session/login`, `/api/session/logout`
+### Core Domains
+- **[👤 User Domain](./docs/domains/user/README.md)** - User accounts, profiles, and role-based access control
+- **[🏪 Store Domain](./docs/domains/store/README.md)** - Business store registration and management
+- **[📦 Product Domain](./docs/domains/product/README.md)** - Product listings and collaboration features
+- **[🤝 Collaboration Domain](./docs/domains/collaboration/README.md)** - Business matching and partnership management
 
-### 👤 User Management
-User accounts, profiles, and role-based access control
-- **Details**: [docs/domains/user/README.md](./docs/domains/user/README.md)
-- **Roles**: `ROLE_USER`, `ROLE_BUSINESS_OWNER`
-
-### 🤝 Collaboration
-Business matching and partnership management system
-- **Details**: [docs/domains/collaboration/README.md](./docs/domains/collaboration/README.md)
-- **Features**: Proposals, matching, AI-based profit-sharing
-
-### 💬 Chat
-Real-time communication for active collaborations
-- **Details**: [docs/domains/chat/README.md](./docs/domains/chat/README.md)
-- **Technology**: WebSocket-based messaging
-
-### 📦 Products
-Product listings and collaboration-based product features
-- **Details**: [docs/domains/product/README.md](./docs/domains/product/README.md)
-- **Integration**: Product-specific collaborations
-
-### 🔔 Notifications
-Event-driven notifications for platform activities
-- **Details**: [docs/domains/notification/README.md](./docs/domains/notification/README.md)
-- **Events**: Collaboration updates, chat alerts, system notifications
+### Supporting Domains
+- **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security
+- **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication for collaborations
+- **[🔔 Notification Domain](./docs/domains/notification/README.md)** - Event-driven notifications
 
 ## Development Standards
 
@@ -105,19 +86,34 @@ All repositories follow a consistent three-layer pattern:
 ### Recent Status
 - ✅ Authentication migrated from JWT to session-based
 - ✅ Session persistence fixed across all protected routes
-- ✅ CSRF protection disabled for API endpoints
+- ✅ Store management integration with role-based access control
+- ✅ MyPage functionality enhanced with comprehensive features
+- ✅ Template errors resolved (Product field name fixes)
+- ✅ Routing issues resolved (Product creation endpoints)
 - ✅ Build system stable and reliable
-- ✅ Test infrastructure properly configured
-- ✅ All repositories follow consistent patterns
 - ✅ Ready for feature development
 
 ### Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
 - **Session Persistence**: JSESSIONID cookie maintains authentication across requests
-- **Route Protection**: All feature routes (`/collabo/**`, `/mypage/**`, `/products/**`, etc.) require authentication
+- **Route Protection**: All feature routes (`/collabo/**`, `/mypage/**`, `/products/**`, `/stores/**`) require authentication
 - **Template Integration**: Thymeleaf security integration with `sec:authorize="isAuthenticated()"`
 - **API Security**: Session-based endpoints (`/api/session/*`) for login/logout/status
-- **Debugging**: Enhanced logging for authentication issues in controllers and security
+- **Role-based Access**: Store management requires `ROLE_BUSINESS_OWNER` or `ROLE_ADMIN`
+
+## Critical Implementation Notes
+
+### ⚠️ Common Pitfalls
+- **Product Field**: Use `product.title`, NOT `product.name` in templates
+- **Product Routes**: Use `/products/create`, NOT `/products/register`
+- **Store Access**: Verify user role before store operations
+- **Session Auth**: Use Principal or UserDetailsImpl, not JWT tokens
+
+### Template Best Practices
+- Always use `th:href="@{/path}"` for internal links
+- Check user roles with `sec:authorize="hasRole('ROLE_NAME')"`
+- Handle null checks with `th:if="${object != null}"`
+- Use consistent variable naming (avoid 'application' - reserved word)
 
 ## Documentation Navigation
 
@@ -127,12 +123,11 @@ All repositories follow a consistent three-layer pattern:
 ### 🔧 Troubleshooting Guides
 - **[Session Persistence Troubleshooting](./docs/SESSION_PERSISTENCE_TROUBLESHOOTING.md)** - Authentication issues and resolutions
 
-### 🏗️ Domain-Specific Documentation
-- [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management
+### 🏗️ Quick Domain Access
 - [User Management](./docs/domains/user/README.md) - User accounts and roles
-- [Collaboration Platform](./docs/domains/collaboration/README.md) - Business matching and proposals
-- [Chat System](./docs/domains/chat/README.md) - Real-time messaging
+- [Store Management](./docs/domains/store/README.md) - Business store operations
 - [Product Management](./docs/domains/product/README.md) - Product listings and features
+- [Collaboration Platform](./docs/domains/collaboration/README.md) - Business matching and proposals
+- [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management
+- [Chat System](./docs/domains/chat/README.md) - Real-time messaging
 - [Notification System](./docs/domains/notification/README.md) - Event-driven alerts
-
-Each domain README contains detailed information about models, repositories, controllers, workflows, and integration points specific to that business area.
