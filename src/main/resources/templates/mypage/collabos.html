@@ -56,6 +56,7 @@
 
         <div class="section-tabs">
             <a href="#proposals" class="tab active" onclick="showSection('proposals')">내 제안</a>
+            <a href="#applications" class="tab" onclick="showSection('applications')">내 신청</a>
             <a href="#accepted" class="tab" onclick="showSection('accepted')">진행중 콜라보</a>
             <a href="#products" class="tab" onclick="showSection('products')">콜라보 상품</a>
             <a href="#chats" class="tab" onclick="showSection('chats')">채팅방</a>
@@ -113,6 +114,55 @@
             </div>
         </div>
 
+        <!-- My Applications Section -->
+        <div id="applications-section" class="content-section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>내 콜라보 신청</h2>
+                <a href="/explore" class="btn btn-primary">콜라보 찾아보기</a>
+            </div>
+            
+            <div class="content-grid">
+                <div th:each="application : ${myApplications}" class="content-card">
+                    <h4>
+                        <span th:text="${application.product.title}">상품명</span>에 대한 콜라보 신청
+                    </h4>
+                    <p th:text="${application.message}">신청 메시지</p>
+                    <span class="status-badge" 
+                          th:classappend="${application.status.name() == 'PENDING'} ? 'status-pending' : 
+                                         (${application.status.name() == 'ACCEPTED'} ? 'status-accepted' : 'status-rejected')"
+                          th:text="${application.status.name() == 'PENDING'} ? '대기중' : 
+                                   (${application.status.name() == 'ACCEPTED'} ? '수락됨' : '거절됨')">
+                        상태
+                    </span>
+                    
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                        <p>대상 상품: <span th:text="${application.product.title}">상품명</span></p>
+                        <p>상품 소유자: <span th:text="${application.product.creator.username}">사용자명</span></p>
+                        <p th:if="${application.applicantProduct != null}">
+                            내 제안 상품: <span th:text="${application.applicantProduct.title}">내 상품명</span>
+                        </p>
+                        <p>신청일: <span th:text="${#temporals.format(application.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
+                    </div>
+                    
+                    <div th:if="${application.status.name() == 'ACCEPTED'}" class="actions">
+                        <a th:href="@{'/products/' + ${application.product.uuid}}" 
+                           class="btn btn-success">
+                            상품 보기
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(myApplications)}" class="empty-state">
+                <div style="font-size: 48px; margin-bottom: 20px;">📝</div>
+                <h3>아직 신청한 콜라보가 없습니다</h3>
+                <p>다른 사용자의 상품에 콜라보를 신청해보세요!</p>
+                <a href="/explore" class="btn btn-primary" style="font-size: 18px; padding: 15px 30px;">
+                    🔍 콜라보 찾아보기
+                </a>
+            </div>
+        </div>
+
         <!-- Accepted Collaborations Section -->
         <div id="accepted-section" class="content-section" style="display: none;">
             <h2>진행중인 콜라보</h2>
@@ -141,7 +191,7 @@
             <h2>콜라보 상품</h2>
             <div class="content-grid">
                 <div th:each="product : ${myCollaborationProducts}" class="content-card">
-                    <h4 th:text="${product.name}">상품 이름</h4>
+                    <h4 th:text="${product.title}">상품 이름</h4>
                     <p th:text="${product.description}">상품 설명</p>
                     <span class="status-badge" 
                           th:classappend="${product.status.name() == 'ACTIVE'} ? 'status-live' : 

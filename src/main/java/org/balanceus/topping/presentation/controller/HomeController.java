@@ -25,4 +25,11 @@ public class HomeController {
 		model.addAttribute("recentProducts", recentProducts);
 		return "home";
 	}
+
+	@GetMapping("/upgrade")
+	public String showUpgradePage() {
+		// TODO: Implement actual user role upgrade functionality
+		// For now, redirect to mypage with info message
+		return "redirect:/mypage?info=upgrade_required";
+	}
 }

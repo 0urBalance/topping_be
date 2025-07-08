@@ -36,6 +36,13 @@ public class StoreController {
             return "redirect:/login";
         }
 
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+            return "redirect:/mypage?error=access_denied";
+        }
+
         Optional<Store> existingStore = storeService.getStoreByUser(userDetails.getUser().getUuid());
         if (existingStore.isPresent()) {
             return "redirect:/stores/my-store";
@@ -54,6 +61,13 @@ public class StoreController {
 
         if (userDetails == null) {
             return "redirect:/login";
+        }
+
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+            return "redirect:/mypage?error=access_denied";
         }
 
         if (bindingResult.hasErrors()) {
@@ -101,6 +115,13 @@ public class StoreController {
             return "redirect:/login";
         }
 
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+            return "redirect:/mypage?error=access_denied";
+        }
+
         Optional<Store> store = storeService.getStoreByUser(userDetails.getUser().getUuid());
         if (store.isEmpty()) {
             return "redirect:/stores/register";
@@ -114,6 +135,13 @@ public class StoreController {
     public String showEditForm(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails == null) {
             return "redirect:/login";
+        }
+
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+            return "redirect:/mypage?error=access_denied";
         }
 
         Optional<Store> store = storeService.getStoreByUser(userDetails.getUser().getUuid());
@@ -147,6 +175,13 @@ public class StoreController {
             return "redirect:/login";
         }
 
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+            return "redirect:/mypage?error=access_denied";
+        }
+
         Optional<Store> storeOptional = storeService.getStoreByUser(userDetails.getUser().getUuid());
         if (storeOptional.isEmpty()) {
             return "redirect:/stores/register";
@@ -167,4 +202,5 @@ public class StoreController {
             return "redirect:/stores/edit";
         }
     }
+
 }

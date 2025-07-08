@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>받은 신청 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #333; margin-bottom: 10px; font-size: 2.5rem; }
+        .header p { color: #666; font-size: 1.1rem; }
+        .breadcrumb { margin-bottom: 20px; }
+        .breadcrumb a { color: #007bff; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span { color: #666; }
+        
+        .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-item { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2rem; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        .stat-item.pending .stat-number { color: #ffc107; }
+        .stat-item.accepted .stat-number { color: #28a745; }
+        .stat-item.rejected .stat-number { color: #dc3545; }
+        .stat-item.total .stat-number { color: #6c757d; }
+
+        .urgent-banner { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; }
+        .urgent-banner.hidden { display: none; }
+        .urgent-content { display: flex; align-items: center; }
+        .urgent-icon { font-size: 2rem; margin-right: 20px; }
+        .urgent-text h3 { margin: 0; font-size: 1.3rem; }
+        .urgent-text p { margin: 5px 0 0 0; opacity: 0.9; }
+        .urgent-action { background: rgba(255,255,255,0.2); padding: 12px 24px; border-radius: 25px; text-decoration: none; color: white; font-weight: 600; transition: all 0.3s; }
+        .urgent-action:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+
+        .section-tabs { text-align: center; margin-bottom: 30px; }
+        .section-tabs .tab { margin: 0 10px; padding: 12px 24px; background: #e9ecef; color: #495057; text-decoration: none; border-radius: 25px; display: inline-block; cursor: pointer; transition: all 0.3s; }
+        .section-tabs .tab.active { background: #17a2b8; color: white; }
+        .section-tabs .tab:hover { background: #17a2b8; color: white; }
+        .section-tabs .tab.pending { position: relative; }
+        .section-tabs .tab.pending::after { content: attr(data-count); position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+        
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }
+        .application-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 6px 25px rgba(0,0,0,0.1); transition: all 0.3s; position: relative; }
+        .application-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+        .application-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: 20px 20px 0 0; }
+        .application-card.pending::before { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+        .application-card.accepted::before { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .application-card.rejected::before { background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .urgency-indicator { padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; }
+        .urgency-high { background: #ffebee; color: #c62828; }
+        .urgency-medium { background: #fff3e0; color: #ef6c00; }
+        .urgency-low { background: #e8f5e8; color: #2e7d32; }
+        
+        .applicant-info { display: flex; align-items: center; margin-bottom: 20px; }
+        .applicant-avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem; margin-right: 20px; }
+        .applicant-details h3 { margin: 0 0 5px 0; color: #333; font-size: 1.3rem; }
+        .applicant-details p { margin: 0; color: #666; }
+        
+        .product-section { margin: 20px 0; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product-item { padding: 15px; border: 2px solid #f0f0f0; border-radius: 12px; text-align: center; }
+        .product-item.target { border-color: #007bff; background: #f8f9ff; }
+        .product-item.offered { border-color: #28a745; background: #f8fff9; }
+        .product-icon { font-size: 2rem; margin-bottom: 10px; }
+        .product-name { font-weight: 600; color: #333; margin-bottom: 5px; }
+        .product-type { font-size: 0.8rem; color: #666; }
+        
+        .message-section { background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0; }
+        .message-title { font-weight: 600; color: #333; margin-bottom: 10px; display: flex; align-items: center; }
+        .message-title .icon { margin-right: 8px; }
+        .message-content { color: #666; line-height: 1.6; }
+        
+        .application-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; font-size: 0.9rem; color: #666; }
+        .meta-item { display: flex; align-items: center; }
+        .meta-icon { margin-right: 8px; font-size: 1.1rem; }
+        
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
+        .action-buttons.single { grid-template-columns: 1fr; }
+        .action-buttons.triple { grid-template-columns: 1fr 1fr 1fr; }
+        .action-btn { display: flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; border: none; cursor: pointer; }
+        .action-btn:hover { transform: translateY(-2px); }
+        .btn-accept { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; }
+        .btn-reject { background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; }
+        .btn-view { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; }
+        .btn-chat { background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: white; }
+        .btn-outline { background: transparent; border: 2px solid #6c757d; color: #6c757d; }
+        .btn-outline:hover { background: #6c757d; color: white; }
+        
+        .status-badge { padding: 6px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted { background: #d1edff; color: #004085; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        
+        .empty-state { text-align: center; padding: 80px 20px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .empty-state .icon { font-size: 5rem; margin-bottom: 25px; }
+        .empty-state h3 { color: #333; margin-bottom: 15px; font-size: 1.5rem; }
+        .empty-state p { color: #666; margin-bottom: 30px; font-size: 1.1rem; line-height: 1.6; }
+        
+        .content-section { margin-top: 20px; }
+        .content-section.hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/mypage">마이페이지</a> <span>></span> <span>받은 신청</span>
+        </div>
+        
+        <div class="header">
+            <h1>📩 받은 콜라보 신청</h1>
+            <p>내 상품에 온 콜라보 신청을 검토하고 관리하세요</p>
+        </div>
+
+        <!-- Urgent Banner -->
+        <div class="urgent-banner" th:classappend="${#lists.size(pendingReceived) == 0} ? 'hidden' : ''">
+            <div class="urgent-content">
+                <div class="urgent-icon">⚡</div>
+                <div class="urgent-text">
+                    <h3>새로운 콜라보 신청이 있습니다!</h3>
+                    <p th:text="${#lists.size(pendingReceived)} + '개의 신청이 응답을 기다리고 있습니다'">신청 대기중</p>
+                </div>
+            </div>
+            <a href="#pending" class="urgent-action" onclick="showSection('pending')">지금 확인</a>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div class="stats-summary">
+            <div class="stat-item total">
+                <div class="stat-number" th:text="${#lists.size(receivedApplications)}">0</div>
+                <div class="stat-label">전체 받은 신청</div>
+            </div>
+            <div class="stat-item pending">
+                <div class="stat-number" th:text="${#lists.size(pendingReceived)}">0</div>
+                <div class="stat-label">대기중 신청</div>
+            </div>
+            <div class="stat-item accepted">
+                <div class="stat-number" th:text="${#lists.size(acceptedReceived)}">0</div>
+                <div class="stat-label">수락한 신청</div>
+            </div>
+            <div class="stat-item rejected">
+                <div class="stat-number" th:text="${#lists.size(rejectedReceived)}">0</div>
+                <div class="stat-label">거절한 신청</div>
+            </div>
+        </div>
+
+        <!-- Section Tabs -->
+        <div class="section-tabs">
+            <a href="#pending" class="tab pending active" th:attr="data-count=${#lists.size(pendingReceived)}" onclick="showSection('pending')">대기중 신청</a>
+            <a href="#all" class="tab" onclick="showSection('all')">전체</a>
+            <a href="#accepted" class="tab" onclick="showSection('accepted')">수락한 신청</a>
+            <a href="#rejected" class="tab" onclick="showSection('rejected')">거절한 신청</a>
+        </div>
+
+        <!-- Pending Applications Section -->
+        <div id="pending-section" class="content-section">
+            <div class="content-grid">
+                <div th:each="receivedApp : ${pendingReceived}" class="application-card pending">
+                    <div class="card-header">
+                        <span class="urgency-indicator urgency-high">긴급</span>
+                        <span class="status-badge status-pending">대기중</span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(receivedApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${receivedApp.applicant.username}">신청자명</h3>
+                            <p>콜라보 신청자</p>
+                        </div>
+                    </div>
+                    
+                    <div class="product-section">
+                        <div class="product-grid">
+                            <div class="product-item target">
+                                <div class="product-icon">🎯</div>
+                                <div class="product-name" th:text="${receivedApp.product.title}">내 상품</div>
+                                <div class="product-type">콜라보 대상</div>
+                            </div>
+                            <div class="product-item offered" th:if="${receivedApp.applicantProduct != null}">
+                                <div class="product-icon">🎁</div>
+                                <div class="product-name" th:text="${receivedApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-type">신청자 상품</div>
+                            </div>
+                            <div class="product-item offered" th:if="${receivedApp.applicantProduct == null}">
+                                <div class="product-icon">🛠️</div>
+                                <div class="product-name">서비스 제안</div>
+                                <div class="product-type">신청자 서비스</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="message-section">
+                        <div class="message-title">
+                            <span class="icon">💬</span>
+                            신청 메시지
+                        </div>
+                        <div class="message-content" th:text="${receivedApp.message}">신청 메시지 내용</div>
+                    </div>
+                    
+                    <div class="application-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span th:text="'신청일: ' + ${#temporals.format(receivedApp.createdAt, 'MM-dd')}">신청일</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">⏰</span>
+                            <span th:text="'경과: ' + ${#temporals.format(receivedApp.createdAt, 'MM-dd')} + ' 이후'">경과시간</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <form th:action="@{/collaborations/{id}/accept(id=${receivedApp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-accept">✅ 수락하기</button>
+                        </form>
+                        <form th:action="@{/collaborations/{id}/reject(id=${receivedApp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-reject">❌ 거절하기</button>
+                        </form>
+                    </div>
+                    
+                    <div class="action-buttons triple" style="margin-top: 10px;">
+                        <a th:href="@{'/products/' + ${receivedApp.product.uuid}}" class="action-btn btn-view">상품 보기</a>
+                        <a th:if="${receivedApp.applicantProduct != null}" 
+                           th:href="@{'/products/' + ${receivedApp.applicantProduct.uuid}}" 
+                           class="action-btn btn-outline">제안상품 보기</a>
+                        <a th:href="@{'/users/' + ${receivedApp.applicant.uuid}}" class="action-btn btn-outline">프로필 보기</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(pendingReceived)}" class="empty-state">
+                <div class="icon">✨</div>
+                <h3>모든 신청을 처리했습니다!</h3>
+                <p>새로운 콜라보 신청이 오면<br>여기에 표시됩니다</p>
+                <a href="/mypage/ongoing" class="action-btn btn-view" style="display: inline-flex;">진행중 콜라보 보기</a>
+            </div>
+        </div>
+
+        <!-- All Applications Section -->
+        <div id="all-section" class="content-section hidden">
+            <div class="content-grid">
+                <div th:each="allApp : ${receivedApplications}" class="application-card" th:classappend="${allApp.status.name().toLowerCase()}">
+                    <div class="card-header">
+                        <span class="urgency-indicator" 
+                              th:classappend="${allApp.status.name() == 'PENDING'} ? 'urgency-high' : 'urgency-low'"
+                              th:text="${allApp.status.name() == 'PENDING'} ? '긴급' : '처리완료'">상태</span>
+                        <span class="status-badge" 
+                              th:classappend="'status-' + ${allApp.status.name().toLowerCase()}"
+                              th:text="${allApp.status.name() == 'PENDING'} ? '대기중' : 
+                                       (${allApp.status.name() == 'ACCEPTED'} ? '수락됨' : '거절됨')">
+                            상태
+                        </span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(allApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${allApp.applicant.username}">신청자명</h3>
+                            <p>콜라보 신청자</p>
+                        </div>
+                    </div>
+                    
+                    <div class="product-section">
+                        <div class="product-grid">
+                            <div class="product-item target">
+                                <div class="product-icon">🎯</div>
+                                <div class="product-name" th:text="${allApp.product.title}">내 상품</div>
+                                <div class="product-type">콜라보 대상</div>
+                            </div>
+                            <div class="product-item offered" th:if="${allApp.applicantProduct != null}">
+                                <div class="product-icon">🎁</div>
+                                <div class="product-name" th:text="${allApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-type">신청자 상품</div>
+                            </div>
+                            <div class="product-item offered" th:if="${allApp.applicantProduct == null}">
+                                <div class="product-icon">🛠️</div>
+                                <div class="product-name">서비스 제안</div>
+                                <div class="product-type">신청자 서비스</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="message-section">
+                        <div class="message-title">
+                            <span class="icon">💬</span>
+                            신청 메시지
+                        </div>
+                        <div class="message-content" th:text="${allApp.message}">신청 메시지 내용</div>
+                    </div>
+                    
+                    <div class="application-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span th:text="'신청일: ' + ${#temporals.format(allApp.createdAt, 'MM-dd')}">신청일</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👤</span>
+                            <span th:text="'신청자: ' + ${allApp.applicant.username}">신청자</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action buttons for pending applications -->
+                    <div th:if="${allApp.status.name() == 'PENDING'}" class="action-buttons">
+                        <form th:action="@{/collaborations/{id}/accept(id=${allApp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-accept">✅ 수락하기</button>
+                        </form>
+                        <form th:action="@{/collaborations/{id}/reject(id=${allApp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-reject">❌ 거절하기</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Action buttons for accepted applications -->
+                    <div th:if="${allApp.status.name() == 'ACCEPTED'}" class="action-buttons">
+                        <a href="/chat/rooms" class="action-btn btn-chat">💬 채팅하기</a>
+                        <a href="/mypage/ongoing" class="action-btn btn-view">콜라보 관리</a>
+                    </div>
+                    
+                    <!-- Action buttons for rejected applications -->
+                    <div th:if="${allApp.status.name() == 'REJECTED'}" class="action-buttons single">
+                        <a th:href="@{'/products/' + ${allApp.product.uuid}}" class="action-btn btn-outline">상품 보기</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(receivedApplications)}" class="empty-state">
+                <div class="icon">📭</div>
+                <h3>아직 받은 신청이 없습니다</h3>
+                <p>상품을 등록하고 홍보하여<br>콜라보 신청을 받아보세요!</p>
+                <a href="/products/register" class="action-btn btn-view" style="display: inline-flex;">상품 등록하기</a>
+            </div>
+        </div>
+
+        <!-- Accepted Applications Section -->
+        <div id="accepted-section" class="content-section hidden">
+            <div class="content-grid">
+                <div th:each="acceptedApp : ${acceptedReceived}" class="application-card accepted">
+                    <div class="card-header">
+                        <span class="urgency-indicator urgency-low">완료</span>
+                        <span class="status-badge status-accepted">수락됨</span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(acceptedApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${acceptedApp.applicant.username}">파트너명</h3>
+                            <p>콜라보 파트너</p>
+                        </div>
+                    </div>
+                    
+                    <div class="product-section">
+                        <div class="product-grid">
+                            <div class="product-item target">
+                                <div class="product-icon">🎯</div>
+                                <div class="product-name" th:text="${acceptedApp.product.title}">내 상품</div>
+                                <div class="product-type">콜라보 대상</div>
+                            </div>
+                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct != null}">
+                                <div class="product-icon">🎁</div>
+                                <div class="product-name" th:text="${acceptedApp.applicantProduct.title}">파트너 상품</div>
+                                <div class="product-type">파트너 제공</div>
+                            </div>
+                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct == null}">
+                                <div class="product-icon">🛠️</div>
+                                <div class="product-name">서비스 제공</div>
+                                <div class="product-type">파트너 서비스</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <a href="/chat/rooms" class="action-btn btn-chat">💬 채팅하기</a>
+                        <a href="/mypage/ongoing" class="action-btn btn-view">콜라보 관리</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(acceptedReceived)}" class="empty-state">
+                <div class="icon">🤝</div>
+                <h3>수락한 신청이 없습니다</h3>
+                <p>콜라보 신청을 수락하면<br>여기에 표시됩니다</p>
+                <a href="#pending" class="action-btn btn-view" style="display: inline-flex;" onclick="showSection('pending')">대기중 신청 확인</a>
+            </div>
+        </div>
+
+        <!-- Rejected Applications Section -->
+        <div id="rejected-section" class="content-section hidden">
+            <div class="content-grid">
+                <div th:each="rejectedApp : ${rejectedReceived}" class="application-card rejected">
+                    <div class="card-header">
+                        <span class="urgency-indicator urgency-medium">처리완료</span>
+                        <span class="status-badge status-rejected">거절됨</span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(rejectedApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${rejectedApp.applicant.username}">신청자명</h3>
+                            <p>거절된 신청</p>
+                        </div>
+                    </div>
+                    
+                    <div class="product-section">
+                        <div class="product-grid">
+                            <div class="product-item target">
+                                <div class="product-icon">🎯</div>
+                                <div class="product-name" th:text="${acceptedApp.product.title}">내 상품</div>
+                                <div class="product-type">콜라보 대상</div>
+                            </div>
+                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct != null}">
+                                <div class="product-icon">🎁</div>
+                                <div class="product-name" th:text="${acceptedApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-type">신청자 상품</div>
+                            </div>
+                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct == null}">
+                                <div class="product-icon">🛠️</div>
+                                <div class="product-name">서비스 제안</div>
+                                <div class="product-type">신청자 서비스</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons single">
+                        <a th:href="@{'/products/' + ${acceptedApp.product.uuid}}" class="action-btn btn-outline">상품 보기</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(rejectedReceived)}" class="empty-state">
+                <div class="icon">🚫</div>
+                <h3>거절한 신청이 없습니다</h3>
+                <p>신중하게 선택하신 결과입니다!</p>
+                <a href="/mypage" class="action-btn btn-outline" style="display: inline-flex;">마이페이지로</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Auto-refresh for real-time updates (every 30 seconds)
+        setTimeout(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
