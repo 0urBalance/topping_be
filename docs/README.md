@@ -10,13 +10,18 @@ This directory contains comprehensive documentation for the Topping collaboratio
 
 ### 🏗️ Architecture Documentation
 
-#### Domain-Specific Documentation
+#### Core Domain Documentation
 - **[🔐 Authentication](./domains/auth/README.md)** - Login/logout, session management
 - **[👤 User Management](./domains/user/README.md)** - User accounts and roles  
 - **[🤝 Collaboration](./domains/collaboration/README.md)** - Business matching and proposals
 - **[💬 Chat System](./domains/chat/README.md)** - Real-time messaging
 - **[📦 Product Management](./domains/product/README.md)** - Product listings and features
+- **[🏪 Store Management](./domains/store/README.md)** - Business store operations
 - **[🔔 Notification System](./domains/notification/README.md)** - Event-driven alerts
+
+#### Support & Policy Documentation
+- **[🎧 Customer Support](./domains/support/README.md)** - FAQ and inquiry management system
+- **[📋 Policy Management](./domains/policy/README.md)** - Privacy policy and terms of service with modal integration
 
 ### 📋 Migration Documentation
 - **[Documentation Migration](./DOCUMENTATION_MIGRATION.md)** - Migration status and process
@@ -32,10 +37,13 @@ docs/
 └── domains/                                    # Domain-specific documentation
     ├── auth/README.md                          # Authentication domain
     ├── user/README.md                          # User management domain
+    ├── store/README.md                         # Store management domain
+    ├── product/README.md                       # Product domain
     ├── collaboration/README.md                 # Collaboration domain
     ├── chat/README.md                          # Chat domain
-    ├── product/README.md                       # Product domain
-    └── notification/README.md                  # Notification domain
+    ├── notification/README.md                  # Notification domain
+    ├── support/README.md                       # Customer support domain
+    └── policy/README.md                        # Policy management domain
 ```
 
 ### Documentation Types
@@ -58,6 +66,9 @@ docs/
 - ✅ **Session Persistence Fix**: Resolved authentication persistence issues across protected routes
 - ✅ **CSRF Protection**: Configured for form-based auth, disabled for API endpoints
 - ✅ **Route Security**: Implemented secure-by-default authorization rules
+- ✅ **Customer Support System**: Comprehensive FAQ and inquiry management system
+- ✅ **Policy Modal Integration**: Privacy policy and terms of service with modal functionality
+- ✅ **Enhanced Signup Process**: Required agreement checkbox with modal policy access
 
 ### Development Environment
 - **Java**: JDK 17 (included in project at `/mnt/d/projects/topping/jdk-17.0.12+7`)

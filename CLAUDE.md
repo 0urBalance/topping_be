@@ -50,6 +50,8 @@ The platform is organized into distinct business domains. Each domain has compre
 - **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security
 - **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication for collaborations
 - **[🔔 Notification Domain](./docs/domains/notification/README.md)** - Event-driven notifications
+- **[🎧 Support Domain](./docs/domains/support/README.md)** - Customer support system with FAQ and inquiry management
+- **[📋 Policy Domain](./docs/domains/policy/README.md)** - Privacy policy and terms of service with modal integration
 
 ## Development Standards
 
@@ -91,12 +93,16 @@ All repositories follow a consistent three-layer pattern:
 - ✅ Template errors resolved (Product field name fixes)
 - ✅ Routing issues resolved (Product creation endpoints)
 - ✅ Build system stable and reliable
+- ✅ **Customer Support System implemented** - FAQ management, inquiry submission, admin responses
+- ✅ **Policy Modal System implemented** - Privacy policy and terms of service with modal integration
+- ✅ **Enhanced Signup Process** - Required agreement checkbox with modal policy access
+- ✅ **Footer Modal Integration** - Consistent modal experience across all pages
 - ✅ Ready for feature development
 
 ### Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
 - **Session Persistence**: JSESSIONID cookie maintains authentication across requests
-- **Route Protection**: All feature routes (`/collabo/**`, `/mypage/**`, `/products/**`, `/stores/**`) require authentication
+- **Route Protection**: All feature routes (`/collabo/**`, `/mypage/**`, `/products/**`, `/stores/**`, `/support/inquiry*`, `/support/my-inquiries`) require authentication
 - **Template Integration**: Thymeleaf security integration with `sec:authorize="isAuthenticated()"`
 - **API Security**: Session-based endpoints (`/api/session/*`) for login/logout/status
 - **Role-based Access**: Store management requires `ROLE_BUSINESS_OWNER` or `ROLE_ADMIN`
@@ -115,6 +121,20 @@ All repositories follow a consistent three-layer pattern:
 - Handle null checks with `th:if="${object != null}"`
 - Use consistent variable naming (avoid 'application' - reserved word)
 
+### Modal System Guidelines
+- **Policy Modals**: Use dynamic content loading with caching (`/policy/privacy-modal`, `/policy/terms-modal`)
+- **Modal Structure**: Header with title and close button, body with scrollable content
+- **JavaScript Integration**: Handle modal open/close, dynamic content loading, outside-click closing
+- **Signup Integration**: Required agreement checkbox validation before form submission
+- **Footer Integration**: Consistent modal experience across all pages with footer links
+
+### Customer Support System
+- **Public Access**: FAQ viewing (`/support/cs`) accessible to all users
+- **Authenticated Access**: Inquiry submission and management require login
+- **Repository Pattern**: Follows three-layer pattern (`SupportInquiryRepository`, `FAQRepository`)
+- **Entity Design**: Uses enums for categories and status tracking
+- **Template Structure**: Modern responsive design with search and pagination
+
 ## Documentation Navigation
 
 ### 📚 Main Documentation Hub
@@ -131,3 +151,5 @@ All repositories follow a consistent three-layer pattern:
 - [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management
 - [Chat System](./docs/domains/chat/README.md) - Real-time messaging
 - [Notification System](./docs/domains/notification/README.md) - Event-driven alerts
+- [Customer Support](./docs/domains/support/README.md) - FAQ and inquiry management
+- [Policy Management](./docs/domains/policy/README.md) - Privacy policy and terms of service
