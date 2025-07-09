@@ -36,6 +36,9 @@ public class SecurityConfig {
 				.requestMatchers("/", "/auth/**", "/login").permitAll()
 				.requestMatchers("/explore", "/css/**", "/js/**", "/images/**").permitAll()
 				.requestMatchers("/h2-console/**").permitAll() // For testing
+				// Public support endpoints
+				.requestMatchers("/support/cs", "/support/faq/**").permitAll()
+				.requestMatchers("/support/api/faqs").permitAll()
 				// Public API endpoints
 				.requestMatchers("/api/member/signup").permitAll()
 				.requestMatchers("/api/session/login", "/api/session/logout", "/api/session/status").permitAll()
@@ -50,6 +53,8 @@ public class SecurityConfig {
 				.requestMatchers("/collaborations/**").authenticated()
 				.requestMatchers("/collaboration-products/**").authenticated()
 				.requestMatchers("/stores/**").authenticated()
+				// Support endpoints requiring authentication
+				.requestMatchers("/support/inquiry-form", "/support/inquiry", "/support/my-inquiries", "/support/inquiry/**").authenticated()
 				// Protected API endpoints
 				.requestMatchers("/api/**").authenticated()
 				// Default to authenticated for any other request

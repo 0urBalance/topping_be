@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 작성하기 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: #718096;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-label.required::after {
+            content: " *";
+            color: #e53e3e;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .form-select:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+        }
+        
+        .form-textarea:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .form-file {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f7fafc;
+        }
+        
+        .form-file:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+        
+        .form-file:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .form-help {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 6px;
+        }
+        
+        .form-error {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 6px;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #feb2b2;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .user-info {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .user-info h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .user-info p {
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .file-info {
+            background: #f7fafc;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        
+        .guidelines {
+            background: #ebf8ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #bee3f8;
+        }
+        
+        .guidelines h3 {
+            color: #2b6cb0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .guidelines ul {
+            color: #2d3748;
+            padding-left: 20px;
+        }
+        
+        .guidelines li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .form-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>💬 문의 작성하기</h1>
+            <p>궁금하신 점이나 문제가 있으시면 언제든지 문의해주세요. 최대한 빠르게 답변드리겠습니다.</p>
+        </div>
+        
+        <div th:if="${errorMessage}" class="error-message">
+            <span th:text="${errorMessage}">오류 메시지</span>
+        </div>
+        
+        <div th:if="${successMessage}" class="success-message">
+            <span th:text="${successMessage}">성공 메시지</span>
+        </div>
+        
+        <div class="form-container">
+            <!-- User Information Display -->
+            <div class="user-info" th:if="${user != null}">
+                <h3>📋 문의자 정보</h3>
+                <p><strong>이름:</strong> <span th:text="${user.name}">사용자 이름</span></p>
+                <p><strong>이메일:</strong> <span th:text="${user.email}">user@example.com</span></p>
+                <p><strong>역할:</strong> <span th:text="${user.role.displayName}">사용자 역할</span></p>
+            </div>
+            
+            <!-- Guidelines -->
+            <div class="guidelines">
+                <h3>📝 문의 작성 가이드</h3>
+                <ul>
+                    <li>구체적이고 명확한 제목을 작성해주세요.</li>
+                    <li>문제 상황을 자세히 설명해주세요.</li>
+                    <li>스크린샷이나 관련 파일이 있다면 첨부해주세요.</li>
+                    <li>답변은 보통 1-2 영업일 내에 드립니다.</li>
+                    <li>긴급한 문제의 경우 카테고리를 '긴급 문의'로 선택해주세요.</li>
+                </ul>
+            </div>
+            
+            <!-- Inquiry Form -->
+            <form th:action="@{/support/inquiry}" th:object="${inquiryRequest}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                
+                <div class="form-group">
+                    <label for="title" class="form-label required">제목</label>
+                    <input type="text" 
+                           id="title" 
+                           name="title" 
+                           class="form-input" 
+                           th:field="*{title}"
+                           placeholder="문의 제목을 입력해주세요"
+                           maxlength="200"
+                           required>
+                    <div class="form-help">최대 200자까지 입력 가능합니다.</div>
+                    <div class="form-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                        제목 오류 메시지
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category" class="form-label required">카테고리</label>
+                    <select id="category" 
+                            name="category" 
+                            class="form-select" 
+                            th:field="*{category}"
+                            required>
+                        <option value="">카테고리를 선택해주세요</option>
+                        <option th:each="category : ${inquiryCategories}" 
+                                th:value="${category.name()}"
+                                th:text="${category.displayName}">
+                            카테고리
+                        </option>
+                    </select>
+                    <div class="form-help">문의 내용과 가장 관련된 카테고리를 선택해주세요.</div>
+                    <div class="form-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">
+                        카테고리 오류 메시지
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content" class="form-label required">내용</label>
+                    <textarea id="content" 
+                              name="content" 
+                              class="form-textarea" 
+                              th:field="*{content}"
+                              placeholder="문의 내용을 자세히 작성해주세요.&#10;&#10;예시:&#10;- 언제 문제가 발생했나요?&#10;- 어떤 상황에서 문제가 발생했나요?&#10;- 기대했던 결과는 무엇인가요?&#10;- 실제로 어떤 일이 일어났나요?"
+                              maxlength="5000"
+                              required></textarea>
+                    <div class="form-help">최대 5000자까지 입력 가능합니다. 문제 상황을 구체적으로 설명해주세요.</div>
+                    <div class="form-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">
+                        내용 오류 메시지
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attachment" class="form-label">첨부 파일</label>
+                    <input type="file" 
+                           id="attachment" 
+                           name="attachment" 
+                           class="form-file"
+                           accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.zip"
+                           onchange="showFileInfo(this)">
+                    <div class="form-help">
+                        지원 형식: JPG, PNG, GIF, PDF, DOC, DOCX, TXT, ZIP (최대 10MB)
+                    </div>
+                    <div id="file-info" class="file-info" style="display: none;">
+                        <span id="file-name"></span>
+                        <span id="file-size"></span>
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <a href="/support/cs" class="btn btn-secondary">
+                        ← 취소
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        📤 문의 등록
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function showFileInfo(input) {
+            const fileInfo = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const size = (file.size / 1024 / 1024).toFixed(2); // MB
+                
+                fileName.textContent = `파일명: ${file.name}`;
+                fileSize.textContent = ` (${size} MB)`;
+                fileInfo.style.display = 'block';
+                
+                // Check file size limit (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('파일 크기는 10MB를 초과할 수 없습니다.');
+                    input.value = '';
+                    fileInfo.style.display = 'none';
+                    return;
+                }
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        }
+        
+        // Character count for textarea
+        const contentTextarea = document.getElementById('content');
+        const titleInput = document.getElementById('title');
+        
+        function updateCharCount(element, maxLength) {
+            const helpText = element.nextElementSibling;
+            const currentLength = element.value.length;
+            helpText.textContent = `${currentLength}/${maxLength}자 입력됨`;
+            
+            if (currentLength > maxLength * 0.9) {
+                helpText.style.color = '#e53e3e';
+            } else {
+                helpText.style.color = '#718096';
+            }
+        }
+        
+        contentTextarea.addEventListener('input', function() {
+            updateCharCount(this, 5000);
+        });
+        
+        titleInput.addEventListener('input', function() {
+            updateCharCount(this, 200);
+        });
+        
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const category = document.getElementById('category').value;
+            const content = document.getElementById('content').value.trim();
+            
+            if (!title) {
+                alert('제목을 입력해주세요.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!category) {
+                alert('카테고리를 선택해주세요.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!content) {
+                alert('내용을 입력해주세요.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (content.length < 10) {
+                alert('내용을 10자 이상 입력해주세요.');
+                e.preventDefault();
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

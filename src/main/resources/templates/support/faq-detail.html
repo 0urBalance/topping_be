@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ 상세 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .faq-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .faq-header {
+            border-bottom: 2px solid #f7fafc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .faq-question {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .faq-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #ebf8ff;
+            color: #2b6cb0;
+        }
+        
+        .faq-answer {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #4a5568;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .related-faqs {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .related-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .related-list {
+            list-style: none;
+        }
+        
+        .related-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .related-item:last-child {
+            border-bottom: none;
+        }
+        
+        .related-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .related-link:hover {
+            color: #3182ce;
+            text-decoration: underline;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+        }
+        
+        .helpful-section {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .helpful-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .helpful-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .helpful-btn {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .helpful-btn:hover {
+            background: #4299e1;
+            border-color: #4299e1;
+            color: white;
+        }
+        
+        .helpful-btn.selected {
+            background: #4299e1;
+            border-color: #4299e1;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .faq-card {
+                padding: 25px;
+            }
+            
+            .faq-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .helpful-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="breadcrumb">
+                <a href="/support/cs">고객지원</a> → 
+                <span>FAQ 상세</span>
+            </div>
+            <h1>❓ FAQ 상세</h1>
+        </div>
+        
+        <div class="faq-card">
+            <div class="faq-header">
+                <h2 class="faq-question" th:text="${faq.question}">자주 묻는 질문</h2>
+                <div class="faq-meta">
+                    <div class="meta-item">
+                        <span>📅</span>
+                        <span th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd')}">2024-01-15</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>👀</span>
+                        <span th:text="|조회수 ${faq.viewCount}|">조회수 123</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="category-badge" th:text="${faq.category.displayName}">카테고리</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-answer" th:text="${faq.answer}">
+                FAQ 답변 내용이 여기에 표시됩니다.
+            </div>
+            
+            <div class="helpful-section">
+                <div class="helpful-question">이 답변이 도움이 되었나요?</div>
+                <div class="helpful-buttons">
+                    <button class="helpful-btn" onclick="markHelpful(true)">
+                        👍 도움됨
+                    </button>
+                    <button class="helpful-btn" onclick="markHelpful(false)">
+                        👎 도움안됨
+                    </button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/support/cs" class="btn btn-secondary">
+                    ← FAQ 목록
+                </a>
+                <div>
+                    <a href="/support/inquiry-form" class="btn btn-success">
+                        💬 추가 문의하기
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related FAQs would go here if implemented -->
+        <!-- 
+        <div class="related-faqs">
+            <h3 class="related-title">🔗 관련 FAQ</h3>
+            <ul class="related-list">
+                <li class="related-item">
+                    <a href="#" class="related-link">다른 관련 질문이 여기에 표시됩니다</a>
+                </li>
+            </ul>
+        </div>
+        -->
+    </div>
+    
+    <script>
+        function markHelpful(isHelpful) {
+            // Remove previous selection
+            document.querySelectorAll('.helpful-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Mark current selection
+            event.target.classList.add('selected');
+            
+            // Here you would typically send an AJAX request to record the feedback
+            console.log('FAQ marked as helpful:', isHelpful);
+            
+            // Show feedback message
+            setTimeout(() => {
+                alert('피드백이 등록되었습니다. 감사합니다!');
+            }, 100);
+        }
+    </script>
+</body>
+</html>

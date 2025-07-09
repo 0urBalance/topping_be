@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 상세 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .inquiry-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .inquiry-header {
+            border-bottom: 2px solid #f7fafc;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .inquiry-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .inquiry-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .status-in-progress {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-closed {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .category-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #ebf8ff;
+            color: #2b6cb0;
+        }
+        
+        .inquiry-content {
+            margin-bottom: 25px;
+        }
+        
+        .content-section {
+            margin-bottom: 25px;
+        }
+        
+        .content-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .content-text {
+            color: #4a5568;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .attachment-section {
+            margin-bottom: 25px;
+        }
+        
+        .attachment-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            color: #0369a1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .attachment-link:hover {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+        }
+        
+        .response-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f7fafc;
+        }
+        
+        .response-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .response-author {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .response-date {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .response-content {
+            color: #4a5568;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .no-response {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-style: italic;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c53030;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .inquiry-card {
+                padding: 20px;
+            }
+            
+            .inquiry-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Navigation Bar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="breadcrumb">
+                <a href="/support/cs">고객지원</a> → 
+                <a href="/support/my-inquiries">내 문의</a> → 
+                <span>문의 상세</span>
+            </div>
+            <h1>📋 문의 상세</h1>
+        </div>
+        
+        <div class="inquiry-card">
+            <div class="inquiry-header">
+                <h2 class="inquiry-title" th:text="${inquiry.title}">문의 제목</h2>
+                <div class="inquiry-meta">
+                    <div class="meta-item">
+                        <span>📅</span>
+                        <span th:text="${#temporals.format(inquiry.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-15 14:30</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>👤</span>
+                        <span th:text="${inquiry.user.name}">사용자명</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="category-badge" th:text="${inquiry.category.displayName}">카테고리</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="status-badge" 
+                              th:classappend="${inquiry.status.name().toLowerCase().replace('_', '-')}"
+                              th:text="${inquiry.status.displayName}">상태</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="inquiry-content">
+                <div class="content-section">
+                    <label class="content-label">📝 문의 내용</label>
+                    <div class="content-text" th:text="${inquiry.content}">
+                        문의 내용이 여기에 표시됩니다.
+                    </div>
+                </div>
+                
+                <div class="attachment-section" th:if="${inquiry.attachmentFileName != null}">
+                    <label class="content-label">📎 첨부 파일</label>
+                    <a href="#" class="attachment-link">
+                        <span>📄</span>
+                        <span th:text="${inquiry.attachmentFileName}">파일명.pdf</span>
+                        <span>(다운로드)</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="response-section">
+                <label class="content-label">💬 답변</label>
+                
+                <div th:if="${inquiry.response != null and !inquiry.response.isEmpty()}">
+                    <div class="response-card">
+                        <div class="response-header">
+                            <span class="response-author">🎧 고객지원팀</span>
+                            <span class="response-date" th:text="${#temporals.format(inquiry.responseDate, 'yyyy-MM-dd HH:mm')}">2024-01-16 09:15</span>
+                        </div>
+                        <div class="response-content" th:text="${inquiry.response}">
+                            답변 내용이 여기에 표시됩니다.
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:unless="${inquiry.response != null and !inquiry.response.isEmpty()}" class="no-response">
+                    <p>아직 답변이 등록되지 않았습니다.</p>
+                    <p>빠른 시일 내에 답변드리겠습니다.</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/support/my-inquiries" class="btn btn-secondary">
+                    ← 목록으로
+                </a>
+                <a th:if="${inquiry.status.name() == 'PENDING'}" 
+                   href="#" 
+                   class="btn btn-danger"
+                   onclick="if(confirm('정말 이 문의를 취소하시겠습니까?')) { document.getElementById('cancelForm').submit(); }">
+                    🗑️ 문의 취소
+                </a>
+            </div>
+            
+            <!-- Hidden form for canceling inquiry -->
+            <form id="cancelForm" th:action="@{/support/inquiry/{id}/cancel(id=${inquiry.id})}" method="post" style="display: none;">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
