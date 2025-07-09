@@ -11,6 +11,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -41,6 +43,10 @@ public class User {
 	private String username;
 
 	private Boolean termsAgreement;
+
+	@ManyToOne
+	@JoinColumn(name = "sgg_cd_5")
+	private SggCode sggCode;
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Store store;

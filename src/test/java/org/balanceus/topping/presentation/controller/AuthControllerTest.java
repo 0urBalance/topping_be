@@ -1,10 +1,13 @@
 package org.balanceus.topping.presentation.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.repository.SggCodeRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.security.Role;
 import org.balanceus.topping.presentation.dto.SignupRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +39,21 @@ class AuthControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private SggCodeRepository sggCodeRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        // Create test SggCode data
+        SggCode testSggCode = new SggCode();
+        testSggCode.setSggCd5(11010);
+        testSggCode.setSggCdNm("서울특별시 종로구");
+        testSggCode.setSggCdNmRegion("서울특별시");
+        testSggCode.setSggCdNmCity("종로구");
+        sggCodeRepository.save(testSggCode);
+    }
 
     @Test
     void signup_WithValidDataAndTermsAgreement_ShouldSucceed() throws Exception {
@@ -45,6 +62,7 @@ class AuthControllerTest {
                 "test@example.com",
                 "password123",
                 Role.ROLE_USER,
+                11010,
                 true
         );
 
@@ -69,6 +87,7 @@ class AuthControllerTest {
                 "test@example.com",
                 "password123",
                 Role.ROLE_USER,
+                11010,
                 false
         );
 
@@ -91,6 +110,7 @@ class AuthControllerTest {
                 "test@example.com",
                 "password123",
                 Role.ROLE_USER,
+                11010,
                 null
         );
 
@@ -122,6 +142,7 @@ class AuthControllerTest {
                 "test@example.com",
                 "password123",
                 Role.ROLE_USER,
+                11010,
                 true
         );
 
@@ -140,6 +161,7 @@ class AuthControllerTest {
                 "business@example.com",
                 "password123",
                 Role.ROLE_BUSINESS_OWNER,
+                11010,
                 true
         );
 

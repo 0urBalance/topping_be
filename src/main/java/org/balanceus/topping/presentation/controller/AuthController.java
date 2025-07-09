@@ -2,7 +2,9 @@ package org.balanceus.topping.presentation.controller;
 
 import java.util.Optional;
 
+import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.repository.SggCodeRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final SggCodeRepository sggCodeRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
@@ -70,6 +73,19 @@ public class AuthController {
                         .body(ApiResponseData.failure(400, "이용약관 및 개인정보처리방침에 동의해주세요."));
             }
 
+            // Validate sggCode
+            if (request.getSggCode() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponseData.failure(400, "지역을 선택해주세요."));
+            }
+
+            // Check if sggCode exists
+            Optional<SggCode> sggCodeOpt = sggCodeRepository.findById(request.getSggCode());
+            if (sggCodeOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponseData.failure(400, "유효하지 않은 지역입니다."));
+            }
+
             // Check if email already exists
             Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
             if (existingUser.isPresent()) {
@@ -78,11 +94,14 @@ public class AuthController {
             }
 
             // Create new user
+            SggCode sggCode = sggCodeOpt.get();
+            
             User newUser = new User();
             newUser.setUsername(request.getUsername());
             newUser.setEmail(request.getEmail());
             newUser.setPassword(passwordEncoder.encode(request.getPassword()));
             newUser.setRole(request.getRole());
+            newUser.setSggCode(sggCode);
             newUser.setTermsAgreement(request.getTermsAgreement());
 
             // Save user

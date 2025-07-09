@@ -94,6 +94,26 @@
             </div>
 
             <div class="form-group">
+                <label for="region">지역</label>
+                <select id="region" name="region" required onchange="loadCities()">
+                    <option value="">지역을 선택하세요</option>
+                </select>
+                <div class="error-message" id="regionError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="sggCode">시/군/구</label>
+                <select id="sggCode" name="sggCode" required disabled>
+                    <option value="">먼저 지역을 선택하세요</option>
+                </select>
+                <div class="error-message" id="sggCodeError"></div>
+                <div class="loading" id="regionLoading" style="margin-top: 5px;">
+                    <div class="spinner"></div>
+                    <span style="font-size: 12px;">지역 정보를 불러오는 중...</span>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label for="password">비밀번호</label>
                 <input type="password" id="password" name="password" required 
                        placeholder="6자 이상의 비밀번호" oninput="validatePassword()">
@@ -243,6 +263,8 @@
         let validation = {
             name: false,
             email: false,
+            region: false,
+            sggCode: false,
             password: false,
             confirmPassword: false,
             terms: false
@@ -255,6 +277,7 @@
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 role: document.getElementById('role').value,
+                sggCode: document.getElementById('sggCode').value,
                 password: document.getElementById('password').value,
                 confirmPassword: document.getElementById('confirmPassword').value,
                 termsAgreement: document.getElementById('termsAgreement').checked
@@ -286,6 +309,7 @@
                         email: formData.email,
                         password: formData.password,
                         role: formData.role,
+                        sggCode: formData.sggCode,
                         termsAgreement: formData.termsAgreement
                     })
                 });
@@ -332,6 +356,11 @@
             
             if (!formData.role) {
                 showError('roleError', '역할을 선택해주세요.');
+                isValid = false;
+            }
+            
+            if (!formData.sggCode) {
+                showError('sggCodeError', '지역을 선택해주세요.');
                 isValid = false;
             }
             
@@ -588,6 +617,119 @@
         
         // Add event listener for terms checkbox
         document.getElementById('termsAgreement').addEventListener('change', validateTermsAgreement);
+        
+        // Region and city management
+        async function loadRegions() {
+            const regionLoading = document.getElementById('regionLoading');
+            const regionSelect = document.getElementById('region');
+            
+            try {
+                regionLoading.style.display = 'block';
+                
+                const response = await fetch('/api/sggcode/regions');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear existing options except the first one
+                    regionSelect.innerHTML = '<option value="">지역을 선택하세요</option>';
+                    
+                    // Add regions to dropdown
+                    data.regions.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region;
+                        regionSelect.appendChild(option);
+                    });
+                } else {
+                    showError('regionError', data.message || '지역 정보를 불러올 수 없습니다.');
+                }
+            } catch (error) {
+                console.error('Region loading error:', error);
+                showError('regionError', '지역 정보를 불러오는 중 오류가 발생했습니다.');
+            } finally {
+                regionLoading.style.display = 'none';
+            }
+        }
+        
+        async function loadCities() {
+            const regionSelect = document.getElementById('region');
+            const citySelect = document.getElementById('sggCode');
+            const regionLoading = document.getElementById('regionLoading');
+            
+            const selectedRegion = regionSelect.value;
+            
+            if (!selectedRegion) {
+                citySelect.innerHTML = '<option value="">먼저 지역을 선택하세요</option>';
+                citySelect.disabled = true;
+                validation.region = false;
+                validation.sggCode = false;
+                hideError('regionError');
+                hideError('sggCodeError');
+                return;
+            }
+            
+            try {
+                regionLoading.style.display = 'block';
+                citySelect.disabled = true;
+                citySelect.innerHTML = '<option value="">불러오는 중...</option>';
+                
+                const response = await fetch(`/api/sggcode/cities?region=${encodeURIComponent(selectedRegion)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear existing options
+                    citySelect.innerHTML = '<option value="">시/군/구를 선택하세요</option>';
+                    
+                    // Add cities to dropdown
+                    data.cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.code;
+                        option.textContent = city.name;
+                        citySelect.appendChild(option);
+                    });
+                    
+                    citySelect.disabled = false;
+                    validation.region = true;
+                    hideError('regionError');
+                } else {
+                    showError('sggCodeError', data.message || '시/군/구 정보를 불러올 수 없습니다.');
+                    citySelect.innerHTML = '<option value="">다시 시도해주세요</option>';
+                }
+            } catch (error) {
+                console.error('Cities loading error:', error);
+                showError('sggCodeError', '시/군/구 정보를 불러오는 중 오류가 발생했습니다.');
+                citySelect.innerHTML = '<option value="">오류 발생</option>';
+            } finally {
+                regionLoading.style.display = 'none';
+            }
+        }
+        
+        function validateSggCode() {
+            const sggCodeSelect = document.getElementById('sggCode');
+            const selectedCode = sggCodeSelect.value;
+            
+            if (selectedCode) {
+                validation.sggCode = true;
+                hideError('sggCodeError');
+            } else {
+                validation.sggCode = false;
+            }
+        }
+        
+        // Add event listeners for region validation
+        document.getElementById('region').addEventListener('change', function() {
+            loadCities();
+        });
+        
+        document.getElementById('sggCode').addEventListener('change', validateSggCode);
+        
+        // Load regions when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRegions();
+        });
+        
+        // Hide region loading initially
+        document.getElementById('regionLoading').style.display = 'none';
     </script>
     </div>
 </body>

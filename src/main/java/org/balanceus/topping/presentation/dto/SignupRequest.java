@@ -16,5 +16,6 @@ public class SignupRequest {
     private String email;
     private String password;
     private Role role;
+    private Integer sggCode;
     private Boolean termsAgreement;
 }
