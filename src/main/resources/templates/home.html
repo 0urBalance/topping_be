@@ -6,101 +6,445 @@
     <title>Topping - 협업 매칭 플랫폼</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #f5f5f5; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 20px;
-        }
-        .header { 
-            text-align: center; 
-            margin-bottom: 40px; 
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header h1 { 
-            color: #333; 
-            margin-bottom: 10px; 
-            font-size: 3rem;
-        }
-        .header p { 
-            color: #666; 
-            font-size: 18px; 
-        }
-        .products-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 20px; 
-        }
-        .product-card { 
-            background: white; 
-            border-radius: 8px; 
-            padding: 20px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .product-card h3 { 
-            margin-top: 0; 
-            color: #333; 
-        }
-        .product-card p { 
-            color: #666; 
-            margin: 10px 0; 
-        }
-        .product-category { 
-            background: #e9ecef; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-size: 12px; 
-            color: #495057; 
-        }
-        .btn { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            background: #2563eb; 
-            color: white; 
-            text-decoration: none; 
-            border-radius: 4px; 
-            transition: background 0.3s ease;
-            margin-right: 10px;
-        }
-        .btn:hover { 
-            background: #1d4ed8; 
-        }
-        .btn.btn-success {
-            background: #059669;
-        }
-        .btn.btn-success:hover {
-            background: #047857;
-        }
-        .section-title {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .section-title h2 {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            line-height: 1.6;
             color: #333;
         }
-        .empty-state {
-            text-align: center; 
-            padding: 40px;
-            background: white;
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .hero-content {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: #718096;
+            margin-bottom: 30px;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 50px 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #4299e1;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #2d3748;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .search-tags {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 10px;
+        }
+        
+        .hero-image {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .hero-circle {
+            width: 300px;
+            height: 300px;
+            background: #cbd5e0;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #718096;
+        }
+        
+        /* Find Collaboration Section */
+        .find-section {
+            background: #4a5568;
+            padding: 80px 0;
+            color: white;
+        }
+        
+        .find-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .find-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 50px;
+            color: white;
+        }
+        
+        .find-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .category-section {
+            color: white;
+        }
+        
+        .category-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .category-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .category-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #718096;
+            color: #cbd5e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .category-btn:hover,
+        .category-btn.active {
+            background: #2d3748;
+            border-color: #2d3748;
+            color: white;
+        }
+        
+        .subcategory-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .subcategory-item {
+            background: #718096;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .subcategory-item:hover {
+            background: #2d3748;
+        }
+        
+        .subcategory-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .products-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 150px;
+            background: #f97316;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23dc2626"/></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .product-info {
+            padding: 20px;
+            color: #333;
+        }
+        
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .product-desc {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-outline {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: transparent;
+            color: #718096;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #2d3748;
+            color: white;
+            border-color: #2d3748;
+        }
+        
+        .btn-outline:hover {
+            border-color: #2d3748;
+            color: #2d3748;
+        }
+        
+        .btn-primary:hover {
+            background: #1a202c;
+        }
+        
+        /* Registry Section */
+        .registry-section {
+            background: #f8f9fa;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .registry-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .registry-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+        
+        .registry-subtitle {
+            font-size: 1.1rem;
+            color: #718096;
+            margin-bottom: 50px;
+        }
+        
+        .registry-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .registry-icon {
+            width: 80px;
+            height: 80px;
+            background: #cbd5e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #718096;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .registry-icon:hover {
+            background: #2d3748;
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .registry-btn {
+            background: #cbd5e0;
+            color: #718096;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .registry-btn:hover {
+            background: #2d3748;
+            color: white;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: #4a5568;
+            padding: 80px 0;
+            color: white;
+        }
+        
+        .cta-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .cta-content {
+            flex: 1;
+        }
+        
+        .cta-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        
+        .cta-subtitle {
+            font-size: 1rem;
+            color: #cbd5e0;
+            margin-bottom: 30px;
+        }
+        
+        .cta-btn {
+            background: white;
+            color: #2d3748;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-btn:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+        
+        .cta-illustration {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .illustration-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #718096;
+            border-radius: 20px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #cbd5e0;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero-content {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            
+            .find-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .products-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .registry-icons {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .cta-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .cta-content {
+                margin-bottom: 40px;
+            }
         }
     </style>
 </head>
@@ -108,33 +452,125 @@
     <!-- Include Navigation Bar -->
     <div th:replace="fragments/navbar :: navbar"></div>
     
-    <div class="container">
-        <div class="header">
-            <h1>🍕 Topping</h1>
-            <p>콜라보를 찾고 파트너를 매칭하는 플랫폼</p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">지금 우리 브랜드에 어울리는 콜라보,<br>지금 바로 찾아보세요!</h1>
+                <p class="hero-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|">
+                
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="검색어를 입력하세요">
+                    <button class="search-btn">검색하기</button>
+                </div>
+                <div class="search-tags">
+                    최근 검색어: 에스프레소와 화감을 / 매력 / 기능 등록에서
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-circle">🍕</div>
+            </div>
         </div>
+    </section>
 
-        <div class="section-title">
-            <h2>상품 둘러보기</h2>
-        </div>
-        
-        <div class="products-grid" th:if="${recentProducts != null and !recentProducts.isEmpty()}">
-            <div th:each="product : ${recentProducts}" class="product-card">
-                <h3 th:text="${product.title}">콜라보 제목</h3>
-                <p th:text="${product.description}">콜라보 설명</p>
-                <span class="product-category" th:text="${product.category}">카테고리</span>
-                <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
-                <div style="margin-top: 15px;">
-                    <a th:href="@{/products/{id}(id=${product.uuid})}" class="btn">자세히 보기</a>
-                    <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn btn-success">콜라보 신청</a>
+    <!-- Find Your Collaboration Section -->
+    <section class="find-section">
+        <div class="find-container">
+            <h2 class="find-title">FIND YOUR COLLABORATION</h2>
+            
+            <div class="find-content">
+                <div class="category-section">
+                    <h3 class="category-title">인기 키워드</h3>
+                    
+                    <div class="category-filters">
+                        <button class="category-btn active">커피</button>
+                        <button class="category-btn">음료</button>
+                        <button class="category-btn">간식</button>
+                        <button class="category-btn">정보</button>
+                    </div>
+                    
+                    <div class="subcategory-grid">
+                        <div class="subcategory-item">
+                            <div class="subcategory-icon">△</div>
+                            <div>커피 / 아메리카노</div>
+                        </div>
+                        <div class="subcategory-item">
+                            <div class="subcategory-icon">△</div>
+                            <div>차류 / 차류</div>
+                        </div>
+                        <div class="subcategory-item">
+                            <div class="subcategory-icon">△</div>
+                            <div>차산 / 음료</div>
+                        </div>
+                        <div class="subcategory-item">
+                            <div class="subcategory-icon">△</div>
+                            <div>매우스 / 플레치</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="products-section">
+                    <div class="product-card" th:each="product : ${recentProducts}">
+                        <div class="product-image"></div>
+                        <div class="product-info">
+                            <h3 class="product-title" th:text="${product.title}">오션 브랜드헬프</h3>
+                            <p class="product-desc" th:text="${product.description}">오션 브랜드 스스로 매친 프로젝트 보편 우바님과의 콜라보를 통해 맞춤형 제품을 만들어보세요</p>
+                            <div class="product-actions">
+                                <button class="btn-outline">관심</button>
+                                <button class="btn-outline btn-primary">신청하기</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" th:unless="${recentProducts != null and !recentProducts.isEmpty()}">
+                        <div class="product-image"></div>
+                        <div class="product-info">
+                            <h3 class="product-title">수제순물레링</h3>
+                            <p class="product-desc">수제순물레링 같은 대선거운 법선의 세입으로 다양한 온스타일을 만들어보세요</p>
+                            <div class="product-actions">
+                                <button class="btn-outline">관심</button>
+                                <button class="btn-outline btn-primary">신청하기</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div th:if="${recentProducts == null or recentProducts.isEmpty()}" class="empty-state">
-            <p>등록된 콜라보가 없습니다.</p>
-            <a href="/collabo/create" class="btn">첫 콜라보 등록하기</a>
+    </section>
+
+    <!-- Registry Section -->
+    <section class="registry-section">
+        <div class="registry-container">
+            <h2 class="registry-title">Registry My ITEM</h2>
+            <p class="registry-subtitle">우리 매장과 어울리는 상품을 직접 찾아보세요!</p>
+            
+            <div class="registry-icons">
+                <div class="registry-icon">🔧</div>
+                <div class="registry-icon">🥛</div>
+                <div class="registry-icon">🍰</div>
+                <div class="registry-icon">☕</div>
+                <div class="registry-icon">🎨</div>
+            </div>
+            
+            <button class="registry-btn" onclick="location.href='/products/create'">상품 등록</button>
         </div>
-    </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <div class="cta-content">
+                <h2 class="cta-title">나의 매장을 등록하고<br>콜라보 제안 받기!</h2>
+                <p class="cta-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|">2346개의 등록된 매장과 함께 친구들과 함께하세요</p>
+                <button class="cta-btn" onclick="location.href='/store/register'">매장 등록하기</button>
+            </div>
+            <div class="cta-illustration">
+                <div class="illustration-placeholder">👥</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>
