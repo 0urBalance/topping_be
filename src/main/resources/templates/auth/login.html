@@ -73,10 +73,147 @@
             border: 1px solid #bbf7d0;
             border-radius: 4px;
         }
-        .links { text-align: center; margin-top: 20px; }
-        .links a { color: #667eea; text-decoration: none; font-size: 14px; }
+        .links { 
+            text-align: center; 
+            margin-top: 20px; 
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+        .links a { 
+            color: #667eea; 
+            text-decoration: none; 
+            font-size: 14px;
+            padding: 5px 0;
+        }
         .links a:hover { text-decoration: underline; }
-        .divider { margin: 15px 0; text-align: center; color: #999; }
+        .links button {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            padding: 5px 0;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .links button:hover {
+            text-decoration: underline;
+            color: #5a6fd8;
+        }
+        .divider { 
+            margin: 8px 0; 
+            text-align: center; 
+            color: #999; 
+            font-size: 14px;
+        }
+        .email-check-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .email-check-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        .email-check-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .email-check-close:hover {
+            color: #333;
+        }
+        .email-check-form {
+            margin-top: 20px;
+        }
+        .email-check-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .email-check-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .email-check-submit {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .email-check-submit:hover {
+            background: #5a6fd8;
+        }
+        .email-check-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .email-check-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            display: none;
+        }
+        .email-check-result.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .email-check-result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .email-check-result.not-found {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -118,13 +255,151 @@
                     로그인
                 </button>
             </form>
-
+            
             <div class="links">
                 <a href="/auth/signup">계정이 없으신가요? 회원가입</a>
                 <div class="divider">또는</div>
+                <button onclick="openEmailCheckModal()">
+                    이메일 확인하기
+                </button>
                 <a href="/auth/password-recovery/find">비밀번호를 잊으셨나요?</a>
             </div>
         </div>
     </div>
+
+    <!-- Email Check Modal -->
+    <div id="emailCheckModal" class="email-check-modal">
+        <div class="email-check-modal-content">
+            <span class="email-check-close" onclick="closeEmailCheckModal()">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 20px; color: #333;">이메일 확인</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                가입 여부를 확인하실 이메일 주소를 입력해주세요.
+            </p>
+            
+            <form class="email-check-form" onsubmit="checkEmail(event)">
+                <input type="email" 
+                       id="emailCheckInput" 
+                       class="email-check-input" 
+                       placeholder="이메일 주소를 입력하세요" 
+                       required>
+                <button type="submit" class="email-check-submit" id="emailCheckSubmit">
+                    이메일 확인
+                </button>
+            </form>
+            
+            <div class="loading" id="emailCheckLoading">
+                확인 중입니다...
+            </div>
+            
+            <div id="emailCheckResult" class="email-check-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Get CSRF token from meta tag or hidden input
+        function getCsrfToken() {
+            const tokenElement = document.querySelector('input[name="_csrf"]');
+            return tokenElement ? tokenElement.value : '';
+        }
+        
+        function getCsrfHeader() {
+            const tokenElement = document.querySelector('input[name="_csrf"]');
+            return tokenElement ? tokenElement.getAttribute('name') : '_csrf';
+        }
+
+        function openEmailCheckModal() {
+            document.getElementById('emailCheckModal').style.display = 'block';
+            document.getElementById('emailCheckInput').focus();
+        }
+
+        function closeEmailCheckModal() {
+            document.getElementById('emailCheckModal').style.display = 'none';
+            document.getElementById('emailCheckInput').value = '';
+            document.getElementById('emailCheckResult').style.display = 'none';
+            document.getElementById('emailCheckLoading').style.display = 'none';
+            document.getElementById('emailCheckSubmit').disabled = false;
+        }
+
+        function checkEmail(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('emailCheckInput').value.trim();
+            const submitBtn = document.getElementById('emailCheckSubmit');
+            const resultDiv = document.getElementById('emailCheckResult');
+            const loadingDiv = document.getElementById('emailCheckLoading');
+            
+            if (!email) {
+                showResult('이메일 주소를 입력해주세요.', 'error');
+                return;
+            }
+            
+            // Show loading
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            // Send request to backend
+            const csrfToken = getCsrfToken();
+            const csrfHeader = getCsrfHeader();
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Add CSRF token to headers
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            
+            fetch('/api/auth/check-email', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                submitBtn.disabled = false;
+                
+                if (data.success) {
+                    if (data.exists) {
+                        showResult(data.message, 'success');
+                    } else {
+                        showResult(data.message, 'not-found');
+                    }
+                } else {
+                    showResult(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                loadingDiv.style.display = 'none';
+                submitBtn.disabled = false;
+                console.error('Network Error Details:', error);
+                showResult('네트워크 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+            });
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('emailCheckResult');
+            resultDiv.textContent = message;
+            resultDiv.className = `email-check-result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('emailCheckModal');
+            if (event.target === modal) {
+                closeEmailCheckModal();
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeEmailCheckModal();
+            }
+        });
+    </script>
 </body>
 </html>

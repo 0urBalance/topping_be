@@ -30,7 +30,9 @@ public class PasswordRecoveryService {
         // Check if user exists
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("해당 이메일로 가입된 계정이 존재하지 않습니다.");
+            // Don't expose whether email exists to prevent user enumeration
+            // Just log the attempt and return silently
+            return;
         }
         
         // Generate verification code

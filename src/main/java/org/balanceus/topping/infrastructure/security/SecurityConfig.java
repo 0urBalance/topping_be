@@ -39,6 +39,7 @@ public class SecurityConfig {
 				// Public API endpoints
 				.requestMatchers("/api/member/signup").permitAll()
 				.requestMatchers("/api/session/login", "/api/session/logout", "/api/session/status").permitAll()
+				.requestMatchers("/api/auth/check-email").permitAll()
 				// Protected endpoints - must be authenticated
 				.requestMatchers("/mypage/**", "/logout").authenticated()
 				.requestMatchers("/collabo/**").authenticated()
