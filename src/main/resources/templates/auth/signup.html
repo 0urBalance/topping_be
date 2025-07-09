@@ -53,6 +53,9 @@
         .modal-body h3 { margin-top: 20px; margin-bottom: 10px; color: #667eea; }
         .modal-body p { margin-bottom: 10px; }
         .modal-body ul { margin-bottom: 10px; padding-left: 20px; }
+        .loading-spinner { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px; }
+        .loading-spinner .spinner { width: 20px; height: 20px; }
+        .loading-spinner span { font-size: 14px; color: #667eea; }
     </style>
 </head>
 <body>
@@ -171,41 +174,11 @@
                 <h2 class="modal-title">이용약관</h2>
                 <span class="close" onclick="closeTermsModal()">&times;</span>
             </div>
-            <div class="modal-body">
-                <h3>제1조 (목적)</h3>
-                <p>이 약관은 토핑(Topping) 플랫폼(이하 "서비스"라 함)의 이용조건 및 절차, 회사와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
-                
-                <h3>제2조 (정의)</h3>
-                <p>이 약관에서 사용하는 용어의 정의는 다음과 같습니다:</p>
-                <ul>
-                    <li>"서비스"라 함은 토핑 플랫폼에서 제공하는 모든 서비스를 의미합니다.</li>
-                    <li>"회원"이라 함은 서비스에 개인정보를 제공하여 회원등록을 한 자를 의미합니다.</li>
-                    <li>"콘텐츠"라 함은 서비스에서 제공되는 모든 정보, 데이터, 문서, 이미지 등을 의미합니다.</li>
-                </ul>
-                
-                <h3>제3조 (약관의 효력 및 변경)</h3>
-                <p>이 약관은 서비스 화면에 게시하여 공시함으로써 효력이 발생합니다. 회사는 합리적인 사유가 발생할 경우 이 약관을 변경할 수 있으며, 변경된 약관은 서비스 화면에 공지함으로써 효력이 발생합니다.</p>
-                
-                <h3>제4조 (서비스의 제공)</h3>
-                <p>회사는 다음과 같은 서비스를 제공합니다:</p>
-                <ul>
-                    <li>비즈니스 협업 매칭 서비스</li>
-                    <li>상품 및 서비스 등록 및 관리</li>
-                    <li>협업 제안 및 소통 기능</li>
-                    <li>기타 회사가 정하는 서비스</li>
-                </ul>
-                
-                <h3>제5조 (회원의 의무)</h3>
-                <p>회원은 다음 행위를 하여서는 안 됩니다:</p>
-                <ul>
-                    <li>허위 정보 입력</li>
-                    <li>타인의 정보 도용</li>
-                    <li>서비스 운영에 방해되는 행위</li>
-                    <li>법령에 위반되는 행위</li>
-                </ul>
-                
-                <h3>제6조 (개인정보보호)</h3>
-                <p>회사는 관련 법령이 정하는 바에 따라 회원의 개인정보를 보호하기 위해 노력합니다. 개인정보의 보호 및 사용에 대해서는 관련 법령 및 개인정보처리방침을 따릅니다.</p>
+            <div class="modal-body" id="termsModalBody">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>약관을 불러오는 중...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -217,39 +190,11 @@
                 <h2 class="modal-title">개인정보처리방침</h2>
                 <span class="close" onclick="closePrivacyModal()">&times;</span>
             </div>
-            <div class="modal-body">
-                <h3>1. 개인정보의 수집 및 이용목적</h3>
-                <p>토핑 플랫폼은 다음의 목적을 위하여 개인정보를 처리합니다:</p>
-                <ul>
-                    <li>회원 가입 및 관리</li>
-                    <li>서비스 제공 및 업무처리</li>
-                    <li>마케팅 및 광고에의 활용</li>
-                    <li>서비스 개선 및 신규 서비스 개발</li>
-                </ul>
-                
-                <h3>2. 처리하는 개인정보 항목</h3>
-                <p>토핑 플랫폼은 다음의 개인정보 항목을 처리하고 있습니다:</p>
-                <ul>
-                    <li>필수항목: 이름, 이메일, 비밀번호, 역할</li>
-                    <li>선택항목: 프로필 사진, 전화번호, 주소</li>
-                    <li>자동수집항목: 접속 IP, 접속 로그, 쿠키</li>
-                </ul>
-                
-                <h3>3. 개인정보의 처리 및 보유기간</h3>
-                <p>개인정보는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 처리·보유합니다.</p>
-                
-                <h3>4. 개인정보의 제3자 제공</h3>
-                <p>토핑 플랫폼은 원칙적으로 정보주체의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우에는 예외로 합니다:</p>
-                <ul>
-                    <li>정보주체가 사전에 동의한 경우</li>
-                    <li>법령의 규정에 의하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
-                </ul>
-                
-                <h3>5. 개인정보 보호책임자</h3>
-                <p>토핑 플랫폼은 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 개인정보 보호책임자를 지정하고 있습니다.</p>
-                
-                <h3>6. 정보주체의 권리·의무 및 그 행사방법</h3>
-                <p>정보주체는 언제든지 개인정보 열람·정정·삭제·처리정지 요구 등의 권리를 행사할 수 있습니다.</p>
+            <div class="modal-body" id="privacyModalBody">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>개인정보처리방침을 불러오는 중...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -569,9 +514,25 @@
         }
         
         // Modal functions
-        function openTermsModal() {
-            document.getElementById('termsModal').style.display = 'block';
+        async function openTermsModal() {
+            const modal = document.getElementById('termsModal');
+            const modalBody = document.getElementById('termsModalBody');
+            
+            modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
+            
+            // Load terms content if not already loaded
+            if (!modalBody.dataset.loaded) {
+                try {
+                    const response = await fetch('/policy/terms-modal');
+                    const html = await response.text();
+                    modalBody.innerHTML = html;
+                    modalBody.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error('Failed to load terms:', error);
+                    modalBody.innerHTML = '<p style="color: #e74c3c;">약관을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+                }
+            }
         }
         
         function closeTermsModal() {
@@ -579,9 +540,25 @@
             document.body.style.overflow = 'auto';
         }
         
-        function openPrivacyModal() {
-            document.getElementById('privacyModal').style.display = 'block';
+        async function openPrivacyModal() {
+            const modal = document.getElementById('privacyModal');
+            const modalBody = document.getElementById('privacyModalBody');
+            
+            modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
+            
+            // Load privacy content if not already loaded
+            if (!modalBody.dataset.loaded) {
+                try {
+                    const response = await fetch('/policy/privacy-modal');
+                    const html = await response.text();
+                    modalBody.innerHTML = html;
+                    modalBody.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error('Failed to load privacy policy:', error);
+                    modalBody.innerHTML = '<p style="color: #e74c3c;">개인정보처리방침을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+                }
+            }
         }
         
         function closePrivacyModal() {
