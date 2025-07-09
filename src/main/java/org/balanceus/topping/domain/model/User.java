@@ -40,6 +40,8 @@ public class User {
 
 	private String username;
 
+	private Boolean termsAgreement;
+
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Store store;
 }

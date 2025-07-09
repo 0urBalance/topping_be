@@ -64,6 +64,12 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<ApiResponseData<String>> signup(@RequestBody SignupRequest request) {
         try {
+            // Validate terms agreement
+            if (request.getTermsAgreement() == null || !request.getTermsAgreement()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponseData.failure(400, "이용약관 및 개인정보처리방침에 동의해주세요."));
+            }
+
             // Check if email already exists
             Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
             if (existingUser.isPresent()) {
@@ -77,6 +83,7 @@ public class AuthController {
             newUser.setEmail(request.getEmail());
             newUser.setPassword(passwordEncoder.encode(request.getPassword()));
             newUser.setRole(request.getRole());
+            newUser.setTermsAgreement(request.getTermsAgreement());
 
             // Save user
             userRepository.save(newUser);
