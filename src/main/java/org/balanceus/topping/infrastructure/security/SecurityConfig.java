@@ -39,6 +39,8 @@ public class SecurityConfig {
 				// Public support endpoints
 				.requestMatchers("/support/cs", "/support/faq/**").permitAll()
 				.requestMatchers("/support/api/faqs").permitAll()
+				// Public policy endpoints
+				.requestMatchers("/policy/**").permitAll()
 				// Public API endpoints
 				.requestMatchers("/api/member/signup").permitAll()
 				.requestMatchers("/api/session/login", "/api/session/logout", "/api/session/status").permitAll()
