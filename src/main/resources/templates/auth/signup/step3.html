@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>회원가입 - 로그인 정보 - 토핑</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .signup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        .signup-card {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 3rem 2rem;
+        }
+        .logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 1rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .step-indicator {
+            background-color: #ff6b35;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .form-control:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+        }
+        .email-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .email-input {
+            flex: 1;
+        }
+        .verify-btn {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .password-hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .checkbox-group {
+            margin: 1.5rem 0;
+        }
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .custom-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: #ff6b35;
+        }
+        .custom-checkbox label {
+            font-size: 0.9rem;
+            color: #333;
+            margin: 0;
+        }
+        .next-btn {
+            width: 100%;
+            height: 50px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #999;
+            margin-top: 1rem;
+            cursor: not-allowed;
+        }
+        .next-btn.active {
+            background-color: #ff6b35;
+            color: white;
+            cursor: pointer;
+        }
+        .footer-links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.9rem;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .success-message {
+            color: #28a745;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover, .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        .modal-body {
+            line-height: 1.6;
+            color: #333;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <img th:src="@{/image/topping_L_text.png}" alt="토핑 로고" class="logo">
+            <div class="step-indicator">2</div>
+            
+            <h2 class="step-title">로그인에 사용할 정보를 입력해주세요.</h2>
+            
+            <form id="step3Form">
+                <div class="mb-3">
+                    <label class="form-label">이메일</label>
+                    <div class="email-row">
+                        <input type="email" class="form-control email-input" id="email" placeholder="이메일을 입력하세요" required>
+                        <button type="button" class="verify-btn" id="checkEmailBtn">중복확인</button>
+                    </div>
+                    <div class="error-message" id="emailError"></div>
+                    <div class="success-message" id="emailSuccess"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-control" id="password" placeholder="6자리 이상 입력하세요" required>
+                    <div class="password-hint">6자리 이상 입력하세요</div>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">비밀번호 확인</label>
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호를 다시 입력하세요" required>
+                    <div class="error-message" id="confirmPasswordError"></div>
+                    <div class="success-message" id="confirmPasswordSuccess"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">전화번호</label>
+                    <input type="tel" class="form-control" id="phoneNumber" placeholder="010-0000-0000" required>
+                    <div class="error-message" id="phoneError"></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <div class="custom-checkbox">
+                        <input type="checkbox" id="termsAgreement" required>
+                        <label for="termsAgreement">
+                            <a href="#" onclick="openTermsModal()">이용약관</a>
+                            및
+                            <a href="#" onclick="openPrivacyModal()">개인정보</a>
+                            수집에 동의합니다.</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="next-btn" id="nextBtn">
+                    완료
+                </button>
+            </form>
+
+            <div class="footer-links">
+                <a href="#" onclick="openTermsModal()">이용약관</a>
+                <a href="#" onclick="openPrivacyModal()">개인정보처리방침</a>
+                <a href="/support/cs">고객센터</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">이용약관</h2>
+                <span class="close" onclick="closeTermsModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="termsModalBody">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>약관을 불러오는 중...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">개인정보처리방침</h2>
+                <span class="close" onclick="closePrivacyModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="privacyModalBody">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>개인정보처리방침을 불러오는 중...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let emailVerified = false;
+        let emailCheckTimeout;
+        let isEmailChecking = false;
+
+        // 공통 이메일 중복 확인 함수
+        function checkEmailDuplicate(email, showLoading = false) {
+            const emailError = document.getElementById('emailError');
+            const emailSuccess = document.getElementById('emailSuccess');
+            
+            if (!email) {
+                emailError.textContent = '이메일을 입력해주세요.';
+                emailError.style.display = 'block';
+                emailSuccess.style.display = 'none';
+                emailVerified = false;
+                validateForm();
+                return;
+            }
+            
+            // 이메일 형식 검증
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                emailError.textContent = '올바른 이메일 형식이 아닙니다.';
+                emailError.style.display = 'block';
+                emailSuccess.style.display = 'none';
+                emailVerified = false;
+                validateForm();
+                return;
+            }
+            
+            if (showLoading) {
+                emailError.style.display = 'none';
+                emailSuccess.textContent = '이메일 확인 중...';
+                emailSuccess.style.display = 'block';
+            }
+            
+            isEmailChecking = true;
+            
+            // 서버에 중복 확인 요청
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            
+            fetch('/api/auth/check-email', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                isEmailChecking = false;
+                if (data.success) {
+                    if (data.data.exists) {
+                        emailError.textContent = '이미 사용중인 이메일입니다.';
+                        emailError.style.display = 'block';
+                        emailSuccess.style.display = 'none';
+                        emailVerified = false;
+                    } else {
+                        emailSuccess.textContent = '사용 가능한 이메일입니다.';
+                        emailSuccess.style.display = 'block';
+                        emailError.style.display = 'none';
+                        emailVerified = true;
+                    }
+                } else {
+                    emailError.textContent = data.message || '이메일 확인에 실패했습니다.';
+                    emailError.style.display = 'block';
+                    emailSuccess.style.display = 'none';
+                    emailVerified = false;
+                }
+                validateForm();
+            })
+            .catch(error => {
+                isEmailChecking = false;
+                console.error('Error:', error);
+                emailError.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+                emailError.style.display = 'block';
+                emailSuccess.style.display = 'none';
+                emailVerified = false;
+                validateForm();
+            });
+        }
+
+        // 이메일 중복 확인 버튼 클릭
+        document.getElementById('checkEmailBtn').addEventListener('click', function() {
+            const email = document.getElementById('email').value.trim();
+            checkEmailDuplicate(email, true);
+        });
+
+        // 이메일 변경 시 디바운스된 중복 확인
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value.trim();
+            
+            // 이메일 검증 상태 초기화
+            emailVerified = false;
+            document.getElementById('emailError').style.display = 'none';
+            document.getElementById('emailSuccess').style.display = 'none';
+            
+            // 이전 타이머 취소
+            if (emailCheckTimeout) {
+                clearTimeout(emailCheckTimeout);
+            }
+            
+            // 빈 이메일인 경우 즉시 폼 검증만 실행
+            if (!email) {
+                validateForm();
+                return;
+            }
+            
+            // 500ms 후 자동 중복 확인
+            emailCheckTimeout = setTimeout(() => {
+                if (!isEmailChecking) {
+                    checkEmailDuplicate(email);
+                }
+            }, 500);
+            
+            validateForm();
+        });
+
+        // 비밀번호 검증
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const passwordError = document.getElementById('passwordError');
+            
+            if (password.length > 0 && password.length < 6) {
+                passwordError.textContent = '비밀번호는 6자리 이상이어야 합니다.';
+                passwordError.style.display = 'block';
+            } else {
+                passwordError.style.display = 'none';
+            }
+            
+            validatePasswordConfirm();
+            validateForm();
+        });
+
+        // 비밀번호 확인 검증
+        document.getElementById('confirmPassword').addEventListener('input', validatePasswordConfirm);
+
+        function validatePasswordConfirm() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            const confirmPasswordSuccess = document.getElementById('confirmPasswordSuccess');
+            
+            if (confirmPassword.length > 0) {
+                if (password !== confirmPassword) {
+                    confirmPasswordError.textContent = '비밀번호가 일치하지 않습니다.';
+                    confirmPasswordError.style.display = 'block';
+                    confirmPasswordSuccess.style.display = 'none';
+                } else {
+                    confirmPasswordError.style.display = 'none';
+                    confirmPasswordSuccess.textContent = '비밀번호가 일치합니다.';
+                    confirmPasswordSuccess.style.display = 'block';
+                }
+            } else {
+                confirmPasswordError.style.display = 'none';
+                confirmPasswordSuccess.style.display = 'none';
+            }
+            
+            validateForm();
+        }
+
+        // 전화번호 형식 자동 변경
+        document.getElementById('phoneNumber').addEventListener('input', function() {
+            let value = this.value.replace(/[^0-9]/g, '');
+            
+            if (value.length >= 3 && value.length <= 7) {
+                value = value.replace(/(\d{3})(\d+)/, '$1-$2');
+            } else if (value.length >= 8) {
+                value = value.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
+            }
+            
+            this.value = value;
+            validateForm();
+        });
+
+        // 약관 동의 체크
+        document.getElementById('termsAgreement').addEventListener('change', validateForm);
+
+        // 폼 검증
+        function validateForm() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const termsAgreement = document.getElementById('termsAgreement').checked;
+            
+            const isValid = emailVerified && 
+                           password.length >= 6 && 
+                           password === confirmPassword && 
+                           phoneNumber.length >= 12 && 
+                           termsAgreement;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (isValid) {
+                nextBtn.classList.add('active');
+                nextBtn.style.cursor = 'pointer';
+            } else {
+                nextBtn.classList.remove('active');
+                nextBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // 폼 제출
+        document.getElementById('step3Form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!emailVerified) {
+                alert('이메일 중복 확인을 해주세요.');
+                return;
+            }
+            
+            const formData = {
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value,
+                phoneNumber: document.getElementById('phoneNumber').value.trim(),
+                termsAgreement: document.getElementById('termsAgreement').checked,
+                privacyAgreement: document.getElementById('termsAgreement').checked
+            };
+            
+            if (formData.password !== formData.confirmPassword) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+            
+            if (!formData.termsAgreement) {
+                alert('이용약관에 동의해주세요.');
+                return;
+            }
+            
+            // CSRF 토큰 추가
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            
+            fetch('/signup/step/3', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'success') {
+                    window.location.href = '/signup/step/4';
+                } else if (data === 'email_exists') {
+                    alert('이미 사용중인 이메일입니다.');
+                } else {
+                    alert('오류가 발생했습니다. 다시 시도해주세요.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다. 다시 시도해주세요.');
+            });
+        });
+
+        // Modal functions
+        async function openTermsModal() {
+            const modal = document.getElementById('termsModal');
+            const modalBody = document.getElementById('termsModalBody');
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Load terms content if not already loaded
+            if (!modalBody.dataset.loaded) {
+                try {
+                    const response = await fetch('/policy/terms-modal');
+                    const html = await response.text();
+                    modalBody.innerHTML = html;
+                    modalBody.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error('Failed to load terms:', error);
+                    modalBody.innerHTML = '<p style="color: #e74c3c;">약관을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+                }
+            }
+        }
+        
+        function closeTermsModal() {
+            document.getElementById('termsModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        async function openPrivacyModal() {
+            const modal = document.getElementById('privacyModal');
+            const modalBody = document.getElementById('privacyModalBody');
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Load privacy content if not already loaded
+            if (!modalBody.dataset.loaded) {
+                try {
+                    const response = await fetch('/policy/privacy-modal');
+                    const html = await response.text();
+                    modalBody.innerHTML = html;
+                    modalBody.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error('Failed to load privacy policy:', error);
+                    modalBody.innerHTML = '<p style="color: #e74c3c;">개인정보처리방침을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+                }
+            }
+        }
+        
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const termsModal = document.getElementById('termsModal');
+            const privacyModal = document.getElementById('privacyModal');
+            
+            if (event.target === termsModal) {
+                closeTermsModal();
+            }
+            if (event.target === privacyModal) {
+                closePrivacyModal();
+            }
+        }
+    </script>
+</body>
+</html>

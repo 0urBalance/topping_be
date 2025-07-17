@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,12 +30,14 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.csrf(csrf -> csrf
+				.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				.ignoringRequestMatchers("/h2-console/**", "/api/**") // Disable CSRF for H2 console and API endpoints
 			)
 			.authorizeHttpRequests(authz -> authz
 				// Public endpoints
 				.requestMatchers("/", "/auth/**", "/login").permitAll()
-				.requestMatchers("/explore", "/css/**", "/js/**", "/images/**").permitAll()
+				.requestMatchers("/signup/**").permitAll()
+				.requestMatchers("/explore", "/css/**", "/js/**", "/images/**", "/image/**").permitAll()
 				.requestMatchers("/h2-console/**").permitAll() // For testing
 				// Public support endpoints
 				.requestMatchers("/support/cs", "/support/faq/**").permitAll()

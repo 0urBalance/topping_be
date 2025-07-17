@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 완료 - 토핑</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .signup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .signup-card {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        .logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 2rem;
+        }
+        .completion-message {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        .sub-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 3rem;
+            line-height: 1.5;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .primary-btn {
+            width: 100%;
+            height: 50px;
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        .primary-btn:hover {
+            background-color: #e55a2e;
+            color: white;
+            text-decoration: none;
+        }
+        .secondary-btn {
+            width: 100%;
+            height: 50px;
+            background-color: transparent;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .secondary-btn:hover {
+            background-color: #ff6b35;
+            color: white;
+            text-decoration: none;
+        }
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 2rem;
+        }
+        .feature-highlight {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #ff6b35;
+        }
+        .feature-highlight h5 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .feature-highlight p {
+            color: #666;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <img th:src="@{/image/topping_L_text.png}" alt="토핑 로고" class="logo">
+            
+            <div class="success-icon">✅</div>
+            
+            <h1 class="completion-message">
+                회원가입이 완료되었습니다.<br>
+                다양한 콜라보를 시작해 보세요!
+            </h1>
+            
+            <p class="sub-message">
+                토핑에서 새로운 비즈니스 파트너를 찾고<br>
+                성공적인 협업 프로젝트를 시작하세요.
+            </p>
+
+<!--            <div class="feature-highlight">-->
+<!--                <h5>🚀 지금 바로 시작하세요!</h5>-->
+<!--                <p>프로필을 완성하고 첫 번째 콜라보 파트너를 찾아보세요. 수많은 기회가 여러분을 기다리고 있습니다.</p>-->
+<!--            </div>-->
+<!--            -->
+<!--            <div class="action-buttons">-->
+<!--                <a href="/auth/login" class="primary-btn">-->
+<!--                    로그인-->
+<!--                </a>-->
+<!--                <a href="/" class="secondary-btn">-->
+<!--                    홈으로 가기-->
+<!--                </a>-->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 페이지 로드 후 자동으로 세션 정리
+        setTimeout(() => {
+            fetch('/signup/complete', {
+                method: 'GET'
+            }).catch(error => {
+                console.error('세션 정리 중 오류:', error);
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

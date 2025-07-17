@@ -1,5 +1,6 @@
 package org.balanceus.topping.domain.model;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.balanceus.topping.infrastructure.security.Role;
@@ -42,6 +43,13 @@ public class User {
 
 	private String username;
 
+	private LocalDate birthDate;
+
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
+
+	private String phoneNumber;
+
 	private Boolean termsAgreement;
 
 	@ManyToOne
@@ -50,4 +58,19 @@ public class User {
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Store store;
+
+	public enum Gender {
+		MALE("남성"),
+		FEMALE("여성");
+
+		private final String displayName;
+
+		Gender(String displayName) {
+			this.displayName = displayName;
+		}
+
+		public String getDisplayName() {
+			return displayName;
+		}
+	}
 }

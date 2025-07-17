@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>회원가입 - 기본정보 - 토핑</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .signup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        .signup-card {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 3rem 2rem;
+        }
+        .logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 1rem;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .step-indicator {
+            background-color: #ff6b35;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-control:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+        }
+        .birth-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .birth-input {
+            flex: 1;
+        }
+        .birth-label {
+            font-size: 1rem;
+            color: #666;
+            margin: 0 5px;
+        }
+        .gender-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1rem;
+        }
+        .gender-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .gender-btn.selected {
+            border-color: #ff6b35;
+            background-color: #ff6b35;
+            color: white;
+        }
+        .search-wrapper {
+            position: relative;
+        }
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .next-btn {
+            width: 100%;
+            height: 50px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #999;
+            margin-top: 1rem;
+            cursor: not-allowed;
+        }
+        .next-btn.active {
+            background-color: #ff6b35;
+            color: white;
+            cursor: pointer;
+        }
+        .footer-links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.9rem;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover, .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        .modal-body {
+            line-height: 1.6;
+            color: #333;
+        }
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <img th:src="@{/image/topping_L_text.png}" alt="토핑 로고" class="logo">
+            <div class="step-indicator">1</div>
+            
+            <h2 class="step-title">기본 정보를 입력해주세요.</h2>
+            
+            <form id="step2Form">
+                <div class="mb-3">
+                    <label class="form-label">이름</label>
+                    <input type="text" class="form-control" id="username" placeholder="이름을 입력하세요" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">생년월일</label>
+                    <div class="birth-row">
+                        <input type="number" class="form-control birth-input" id="birthYear" placeholder="1999" min="1900" max="2024" required>
+                        <span class="birth-label">년</span>
+                        <input type="number" class="form-control birth-input" id="birthMonth" placeholder="01" min="1" max="12" required>
+                        <span class="birth-label">월</span>
+                        <input type="number" class="form-control birth-input" id="birthDay" placeholder="01" min="1" max="31" required>
+                        <span class="birth-label">일</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">성별</label>
+                    <div class="gender-group">
+                        <button type="button" class="gender-btn selected" data-gender="MALE">남성</button>
+                        <button type="button" class="gender-btn" data-gender="FEMALE">여성</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">지역 (시/도)</label>
+                    <select class="form-control" id="regionSelect" required>
+                        <option value="">지역을 선택하세요</option>
+                    </select>
+                    <div id="regionError" class="text-danger" style="display: none; margin-top: 5px;"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">시/군/구</label>
+                    <select class="form-control" id="citySelect" required disabled>
+                        <option value="">먼저 지역을 선택하세요</option>
+                    </select>
+                    <div id="cityError" class="text-danger" style="display: none; margin-top: 5px;"></div>
+                    <input type="hidden" id="selectedCityCode" name="selectedCityCode">
+                </div>
+                
+                <button type="submit" class="next-btn" id="nextBtn">
+                    확인
+                </button>
+            </form>
+
+            <div class="footer-links">
+                <a href="#" onclick="openTermsModal()">이용약관</a>
+                <a href="#" onclick="openPrivacyModal()">개인정보처리방침</a>
+                <a href="/support/cs">고객센터</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">이용약관</h2>
+                <span class="close" onclick="closeTermsModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="termsModalBody">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>약관을 불러오는 중...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">개인정보처리방침</h2>
+                <span class="close" onclick="closePrivacyModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="privacyModalBody">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>개인정보처리방침을 불러오는 중...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedGender = 'MALE';
+        let selectedRegion = '';
+        let selectedCity = '';
+        let selectedCityCode = '';
+
+        // 성별 선택 핸들러
+        document.querySelectorAll('.gender-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedGender = this.dataset.gender;
+                validateForm();
+            });
+        });
+
+        // 지역 데이터 로드
+        function loadRegions() {
+            fetch('/api/sggcode/regions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('regionSelect');
+                        data.regions.forEach(region => {
+                            const option = document.createElement('option');
+                            option.value = region;
+                            option.textContent = region;
+                            select.appendChild(option);
+                        });
+                        hideError('regionError');
+                    } else {
+                        showError('regionError', data.message || '지역 정보를 불러올 수 없습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading regions:', error);
+                    showError('regionError', '지역 정보를 불러올 수 없습니다.');
+                });
+        }
+
+        // 시/군/구 데이터 로드
+        function loadCities(regionName) {
+            const citySelect = document.getElementById('citySelect');
+            
+            // 기존 시/군/구 옵션 초기화
+            citySelect.innerHTML = '<option value="">시/군/구를 선택하세요</option>';
+            citySelect.disabled = true;
+            selectedCity = '';
+            selectedCityCode = '';
+            document.getElementById('selectedCityCode').value = '';
+            
+            if (!regionName) {
+                citySelect.innerHTML = '<option value="">먼저 지역을 선택하세요</option>';
+                validateForm();
+                return;
+            }
+
+            fetch(`/api/sggcode/cities?region=${encodeURIComponent(regionName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        data.cities.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city.name;
+                            option.textContent = city.name;
+                            option.dataset.code = city.code;
+                            citySelect.appendChild(option);
+                        });
+                        citySelect.disabled = false;
+                        hideError('cityError');
+                    } else {
+                        showError('cityError', data.message || '시/군/구 정보를 불러올 수 없습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading cities:', error);
+                    showError('cityError', '시/군/구 정보를 불러올 수 없습니다.');
+                });
+        }
+
+        // 지역 선택 핸들러
+        document.getElementById('regionSelect').addEventListener('change', function() {
+            selectedRegion = this.value;
+            loadCities(selectedRegion);
+            validateForm();
+        });
+
+        // 시/군/구 선택 핸들러
+        document.getElementById('citySelect').addEventListener('change', function() {
+            selectedCity = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            selectedCityCode = selectedOption.dataset.code || '';
+            document.getElementById('selectedCityCode').value = selectedCityCode;
+            validateForm();
+        });
+
+        // 에러 메시지 표시
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // 에러 메시지 숨기기
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
+        }
+
+        // 폼 입력 검증
+        function validateForm() {
+            const username = document.getElementById('username').value.trim();
+            const birthYear = document.getElementById('birthYear').value;
+            const birthMonth = document.getElementById('birthMonth').value;
+            const birthDay = document.getElementById('birthDay').value;
+            
+            const isValid = username && birthYear && birthMonth && birthDay && selectedGender && selectedRegion && selectedCity && selectedCityCode;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (isValid) {
+                nextBtn.classList.add('active');
+                nextBtn.style.cursor = 'pointer';
+            } else {
+                nextBtn.classList.remove('active');
+                nextBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // 입력 필드 이벤트 리스너
+        ['username', 'birthYear', 'birthMonth', 'birthDay'].forEach(id => {
+            document.getElementById(id).addEventListener('input', validateForm);
+        });
+
+        // 폼 제출 핸들러
+        document.getElementById('step2Form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                birthYear: document.getElementById('birthYear').value,
+                birthMonth: document.getElementById('birthMonth').value,
+                birthDay: document.getElementById('birthDay').value,
+                gender: selectedGender,
+                region: selectedCityCode // Send city code instead of region
+            };
+            
+            // 유효성 검사
+            if (!formData.username || !formData.birthYear || !formData.birthMonth || !formData.birthDay || !formData.gender || !formData.region) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            
+            fetch('/signup/step/2', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'success') {
+                    window.location.href = '/signup/step/3';
+                } else {
+                    alert('오류가 발생했습니다. 다시 시도해주세요.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다. 다시 시도해주세요.');
+            });
+        });
+
+        // 페이지 로드 시 지역 데이터 로드
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRegions();
+        });
+
+        // Modal functions
+        async function openTermsModal() {
+            const modal = document.getElementById('termsModal');
+            const modalBody = document.getElementById('termsModalBody');
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Load terms content if not already loaded
+            if (!modalBody.dataset.loaded) {
+                try {
+                    const response = await fetch('/policy/terms-modal');
+                    const html = await response.text();
+                    modalBody.innerHTML = html;
+                    modalBody.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error('Failed to load terms:', error);
+                    modalBody.innerHTML = '<p style="color: #e74c3c;">약관을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+                }
+            }
+        }
+        
+        function closeTermsModal() {
+            document.getElementById('termsModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        async function openPrivacyModal() {
+            const modal = document.getElementById('privacyModal');
+            const modalBody = document.getElementById('privacyModalBody');
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Load privacy content if not already loaded
+            if (!modalBody.dataset.loaded) {
+                try {
+                    const response = await fetch('/policy/privacy-modal');
+                    const html = await response.text();
+                    modalBody.innerHTML = html;
+                    modalBody.dataset.loaded = 'true';
+                } catch (error) {
+                    console.error('Failed to load privacy policy:', error);
+                    modalBody.innerHTML = '<p style="color: #e74c3c;">개인정보처리방침을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+                }
+            }
+        }
+        
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const termsModal = document.getElementById('termsModal');
+            const privacyModal = document.getElementById('privacyModal');
+            
+            if (event.target === termsModal) {
+                closeTermsModal();
+            }
+            if (event.target === privacyModal) {
+                closePrivacyModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -10,6 +10,7 @@ import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
 import org.balanceus.topping.presentation.dto.LoginRequest;
 import org.balanceus.topping.presentation.dto.SignupRequest;
+import org.balanceus.topping.presentation.dto.EmailCheckRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,7 +45,7 @@ public class AuthController {
 
     @GetMapping("/auth/signup")
     public String signupPage() {
-        return "auth/signup";
+        return "redirect:/signup/start";
     }
 
     // API endpoints for session-based auth (handled by Spring Security)
@@ -112,6 +113,23 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponseData.failure(500, "회원가입 중 오류가 발생했습니다."));
+        }
+    }
+
+    @PostMapping("/api/member/check-email")
+    @ResponseBody
+    public ResponseEntity<ApiResponseData<Object>> checkEmail(@RequestBody EmailCheckRequest request) {
+        try {
+            Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+            boolean exists = existingUser.isPresent();
+            
+            return ResponseEntity.ok(ApiResponseData.success(new Object() {
+                public final boolean exists = existingUser.isPresent();
+            }));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponseData.failure(500, "이메일 확인 중 오류가 발생했습니다."));
         }
     }
 
