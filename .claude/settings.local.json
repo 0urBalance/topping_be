@@ -5,7 +5,9 @@
       "Bash(git commit:*)",
       "Bash(export:*)",
       "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(mkdir:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }
