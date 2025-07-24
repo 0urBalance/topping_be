@@ -11,6 +11,7 @@ import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
 import org.balanceus.topping.presentation.dto.LoginRequest;
 import org.balanceus.topping.presentation.dto.SignupRequest;
 import org.balanceus.topping.presentation.dto.EmailCheckRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,9 +39,15 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
+    @Value("${KAKAO.REST-API-KEY}")
+    private String kakaoRestApiKey;
+
     // Template endpoints
     @GetMapping("/auth/login")
-    public String loginPage() {
+    public String loginPage(Model model) {
+        String redirectUri = "http://topping.cloud/api/user/kakao/callback";
+        model.addAttribute("kakaoRestApiKey", kakaoRestApiKey);
+        model.addAttribute("kakaoRedirectUri", redirectUri);
         return "auth/login";
     }
 

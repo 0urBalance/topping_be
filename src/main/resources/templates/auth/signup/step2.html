@@ -211,10 +211,16 @@
 <body>
     <div class="signup-container">
         <div class="signup-card">
-            <img th:src="@{/image/topping_L_text.png}" alt="토핑 로고" class="logo">
-            <div class="step-indicator">1</div>
+            <img th:src="@{/image/topping_M_text.png.png}" alt="토핑 로고" class="logo">
+            <div class="step-indicator">2</div>
             
             <h2 class="step-title">기본 정보를 입력해주세요.</h2>
+            
+            <div th:if="${signupData != null and signupData.userType != null}" 
+                 style="background-color: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <small style="color: #666;">선택한 유형:</small>
+                <strong style="color: #ff6b35;" th:text="${signupData.userType}">사용자</strong>
+            </div>
             
             <form id="step2Form">
                 <div class="mb-3">
@@ -237,7 +243,7 @@
                 <div class="mb-3">
                     <label class="form-label">성별</label>
                     <div class="gender-group">
-                        <button type="button" class="gender-btn selected" data-gender="MALE">남성</button>
+                        <button type="button" class="gender-btn" data-gender="MALE">남성</button>
                         <button type="button" class="gender-btn" data-gender="FEMALE">여성</button>
                     </div>
                 </div>

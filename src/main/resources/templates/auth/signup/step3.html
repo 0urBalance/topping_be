@@ -211,10 +211,26 @@
 <body>
     <div class="signup-container">
         <div class="signup-card">
-            <img th:src="@{/image/topping_L_text.png}" alt="토핑 로고" class="logo">
-            <div class="step-indicator">2</div>
+            <img th:src="@{/image/topping_M_text.png.png}" alt="토핑 로고" class="logo">
+            <div class="step-indicator">3</div>
             
             <h2 class="step-title">로그인에 사용할 정보를 입력해주세요.</h2>
+            
+            <div th:if="${signupData != null}" 
+                 style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="color: #666;">유형:</span>
+                    <strong style="color: #ff6b35;" th:text="${signupData.userType ?: '-'}">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="color: #666;">이름:</span>
+                    <strong th:text="${signupData.username ?: '-'}">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #666;">지역:</span>
+                    <strong th:text="${signupData.region ?: '-'}">-</strong>
+                </div>
+            </div>
             
             <form id="step3Form">
                 <div class="mb-3">

@@ -387,7 +387,9 @@
 
         <!-- Show error message if login failed -->
         <div th:if="${param.error}" class="error-message">
-            로그인 정보가 올바르지 않습니다. 이메일과 비밀번호를 확인해주세요.
+            <span th:if="${param.error[0] == 'kakao_login_failed'}">카카오 로그인에 실패했습니다. 다시 시도해주세요.</span>
+            <span th:if="${param.error[0] == 'kakao_login_error'}">카카오 로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</span>
+            <span th:if="${param.error[0] != 'kakao_login_failed' and param.error[0] != 'kakao_login_error'}">로그인 정보가 올바르지 않습니다. 이메일과 비밀번호를 확인해주세요.</span>
         </div>
 
         <!-- Show logout message -->
@@ -538,7 +540,7 @@
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
 
         function openEmailCheckModal() {
             document.getElementById('emailCheckModal').style.display = 'block';
@@ -630,7 +632,15 @@
 
         // Social login functions (placeholders)
         function loginWithKakao() {
-            alert('카카오 로그인 기능은 준비 중입니다.');
+            const REST_API_KEY =  /*[[${kakaoRestApiKey}]]*/ "";
+            const REDIRECT_URI = /*[[${kakaoRedirectUri}]]*/ "";
+            const kakaoAuthUrl =
+                `https://kauth.kakao.com/oauth/authorize` +
+                `?client_id=${REST_API_KEY}` +
+                `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+                `&response_type=code`;
+
+            location.href = kakaoAuthUrl;
         }
 
         function loginWithNaver() {
