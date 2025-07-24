@@ -4,394 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 - Topping</title>
-    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <meta name="kakao-rest-api-key" th:content="${kakaoRestApiKey}">
+    <meta name="kakao-redirect-uri" th:content="${kakaoRedirectUri}">
+    
+    <!-- Auth-specific CSS -->
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin-left: 240px; /* Account for sidebar */
-            transition: margin-left 0.3s ease;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                margin-left: 0; /* No sidebar offset on mobile */
-            }
-        }
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-            padding: 48px;
-            width: 100%;
-            max-width: 700px;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .logo-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g stroke="%23ff6b35" stroke-width="2" fill="none"><path d="M20 40 C20 20, 40 15, 50 25 C60 15, 80 20, 80 40 L80 45 C80 55, 70 60, 60 55 L50 50 L40 55 C30 60, 20 55, 20 45 Z M35 35 L45 45 M55 35 L65 45 M30 25 L35 15 M50 20 L50 10 M70 25 L75 15"/></g></svg>') no-repeat center;
-            background-size: contain;
-        }
-
-        .logo-text {
-            font-size: 28px;
-            font-weight: 600;
-            color: #ff6b35;
-            letter-spacing: 1px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background: #fff;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #ff6b35;
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
-
-        .form-group input::placeholder {
-            color: #9ca3af;
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            font-size: 14px;
-        }
-
-        .auto-login {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .auto-login input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #ff6b35;
-        }
-
-        .forgot-password {
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .forgot-password:hover {
-            color: #ff6b35;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            background: #ff6b35;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 12px;
-        }
-
-        .btn-primary:hover {
-            background: #e55a2b;
-        }
-
-        .btn-primary:disabled {
-            background: #d1d5db;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 16px;
-            background: white;
-            color: #ff6b35;
-            border: 1px solid #ff6b35;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 24px;
-        }
-
-        .btn-secondary:hover {
-            background: #ff6b35;
-            color: white;
-        }
-
-        .social-login {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .social-btn {
-            width: 100%;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .social-btn:hover {
-            opacity: 0.9;
-        }
-
-        .social-btn.kakao {
-            background: #fee500;
-            color: #000;
-        }
-
-        .social-btn.naver {
-            background: #03c75a;
-            color: white;
-        }
-
-        .social-btn.google {
-            background: #fff;
-            color: #333;
-            border: 1px solid #dadce0;
-        }
-
-        .social-btn-icon {
-            width: 18px;
-            height: 18px;
-        }
-
-        img.logo {
-            width: 250px; /* 기존 80px의 절반 */
-            height: auto; /* 비율 유지 */
-            margin: 0 auto 16px;
-            display: block;
-        }
-
-        .divider {
-            text-align: center;
-            margin: 24px 0;
-            position: relative;
-            color: #9ca3af;
-            font-size: 12px;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e1e5e9;
-        }
-
-        .divider span {
-            background: white;
-            padding: 0 12px;
-            position: relative;
-        }
-
-        .bottom-link {
-            text-align: center;
-            margin-top: 16px;
-        }
-
-        .bottom-link a {
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .bottom-link a:hover {
-            color: #ff6b35;
-        }
-
-        .bottom-link .bottom-text,
-        .bottom-link .bottom-text a {
-            font-size: 13px;
-            color: #6b7280;
-            text-decoration: none;
-        }
-
-        .error-message {
-            color: #dc2626;
-            font-size: 14px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-        }
-
-        .success-message {
-            color: #059669;
-            font-size: 14px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 8px;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: none;
-            border-radius: 12px;
-            width: 80%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover, .close:focus {
-            color: #000;
-            text-decoration: none;
-        }
-
-        .modal-body {
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .loading-spinner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #ff6b35;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 32px 24px;
-                margin: 16px;
-            }
-
-            .logo-text {
-                font-size: 24px;
-            }
+        /* Login-specific overrides */
+        .auth-container {
+            max-width: 500px;
         }
     </style>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 </head>
-<body>
-<!-- Include Navigation Bar -->
-<div th:replace="~{fragments/navbar :: navbar}"></div>
-
-<div class="main-content">
-    <div class="login-container">
+<body class="auth-body">
+    <!-- Auth Header (minimal) -->
+    <header class="auth-header">
+        <a href="/" class="auth-logo">
+            <img th:src="@{/image/topping_S.png}" alt="토핑" class="logo-image">
+        </a>
+    </header>
+    
+    <!-- Main Auth Content -->
+    <main class="auth-main">
+        <div class="auth-container">
         <div class="logo">
             <img th:src="@{/image/topping_L_text.png}" alt="토핑 로고" class="logo">
-            <!--                <div class="logo-icon"></div>-->
-            <!--                <div class="logo-text">TOPPING</div>-->
         </div>
 
         <!-- Show error message if login failed -->
@@ -406,7 +47,7 @@
             성공적으로 로그아웃되었습니다.
         </div>
 
-        <form th:action="@{/login}" method="post">
+        <form th:action="@{/login}" method="post" class="auth-form">
             <div class="form-group">
                 <label for="username">이메일</label>
                 <input type="email" id="username" name="username" required placeholder="이메일을 입력해주세요">
@@ -438,7 +79,7 @@
             </button>
         </form>
 
-        <button type="button" class="btn-secondary" onclick="location.href='/signup/start'">
+        <button type="button" class="btn btn-secondary" onclick="location.href='/auth/signup/step1'">
             회원가입
         </button>
 
@@ -480,75 +121,25 @@
                     찾기
                 </span>
         </div>
-    </div>
-
-    <!-- Email Check Modal (existing functionality) -->
-    <div id="emailCheckModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">이메일 확인</h2>
-                <span class="close" onclick="closeEmailCheckModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 20px; color: #666;">
-                    가입 여부를 확인하실 이메일 주소를 입력해주세요.
-                </p>
-
-                <form onsubmit="checkEmail(event)">
-                    <div class="form-group">
-                        <input type="email"
-                               id="emailCheckInput"
-                               placeholder="이메일 주소를 입력하세요"
-                               required>
-                    </div>
-                    <button type="submit" class="btn-primary" id="emailCheckSubmit">
-                        이메일 확인
-                    </button>
-                </form>
-
-                <div id="emailCheckLoading" class="loading-spinner" style="display: none;">
-                    <div class="spinner"></div>
-                    <span>확인 중입니다...</span>
-                </div>
-
-                <div id="emailCheckResult"
-                     style="display: none; margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 14px;"></div>
-            </div>
         </div>
-    </div>
-
-    <!-- Terms of Service Modal -->
-    <div id="termsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">이용약관</h2>
-                <span class="close" onclick="closeTermsModal()">&times;</span>
-            </div>
-            <div class="modal-body" id="termsModalBody">
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <span>약관을 불러오는 중...</span>
-                </div>
-            </div>
+    </main>
+    
+    <!-- Auth Footer -->
+    <footer class="auth-footer">
+        <div class="auth-footer-links">
+            <a href="#" onclick="openTermsModal()">이용약관</a>
+            <a href="#" onclick="openPrivacyModal()">개인정보처리방침</a>
+            <a href="/support/cs">고객센터</a>
         </div>
-    </div>
-
-    <!-- Privacy Policy Modal -->
-    <div id="privacyModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">개인정보처리방침</h2>
-                <span class="close" onclick="closePrivacyModal()">&times;</span>
-            </div>
-            <div class="modal-body" id="privacyModalBody">
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <span>개인정보처리방침을 불러오는 중...</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
+        <p>&copy; topping. All Rights Reserved.</p>
+    </footer>
+    
+    <!-- Policy Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+    
+    <!-- Email Check Modal Fragment -->
+    <div th:replace="~{fragments/modals :: email-check-modal}"></div>
+    
     <script th:inline="javascript">
 
         function openEmailCheckModal() {
@@ -639,107 +230,14 @@
             }
         }
 
-        // Social login functions (placeholders)
-        function loginWithKakao() {
-            const REST_API_KEY =  /*[[${kakaoRestApiKey}]]*/ "";
-            const REDIRECT_URI = /*[[${kakaoRedirectUri}]]*/ "";
-            const kakaoAuthUrl =
-                `https://kauth.kakao.com/oauth/authorize` +
-                `?client_id=${REST_API_KEY}` +
-                `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-                `&response_type=code`;
+        // Set Kakao API keys for auth-common.js
+        window.kakaoRestApiKey = /*[[${kakaoRestApiKey}]]*/ "";
+        window.kakaoRedirectUri = /*[[${kakaoRedirectUri}]]*/ "";
 
-            location.href = kakaoAuthUrl;
-        }
-
-        function loginWithNaver() {
-            alert('네이버 로그인 기능은 준비 중입니다.');
-        }
-
-        function loginWithGoogle() {
-            alert('구글 로그인 기능은 준비 중입니다.');
-        }
-
-        // Modal functions
-        async function openTermsModal() {
-            const modal = document.getElementById('termsModal');
-            const modalBody = document.getElementById('termsModalBody');
-
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-
-            // Load terms content if not already loaded
-            if (!modalBody.dataset.loaded) {
-                try {
-                    const response = await fetch('/policy/terms-modal');
-                    const html = await response.text();
-                    modalBody.innerHTML = html;
-                    modalBody.dataset.loaded = 'true';
-                } catch (error) {
-                    console.error('Failed to load terms:', error);
-                    modalBody.innerHTML = '<p style="color: #dc2626;">약관을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
-                }
-            }
-        }
-
-        function closeTermsModal() {
-            document.getElementById('termsModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        async function openPrivacyModal() {
-            const modal = document.getElementById('privacyModal');
-            const modalBody = document.getElementById('privacyModalBody');
-
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-
-            // Load privacy content if not already loaded
-            if (!modalBody.dataset.loaded) {
-                try {
-                    const response = await fetch('/policy/privacy-modal');
-                    const html = await response.text();
-                    modalBody.innerHTML = html;
-                    modalBody.dataset.loaded = 'true';
-                } catch (error) {
-                    console.error('Failed to load privacy policy:', error);
-                    modalBody.innerHTML = '<p style="color: #dc2626;">개인정보처리방침을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
-                }
-            }
-        }
-
-        function closePrivacyModal() {
-            document.getElementById('privacyModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function (event) {
-            const termsModal = document.getElementById('termsModal');
-            const privacyModal = document.getElementById('privacyModal');
-            const emailCheckModal = document.getElementById('emailCheckModal');
-
-            if (event.target === termsModal) {
-                closeTermsModal();
-            }
-            if (event.target === privacyModal) {
-                closePrivacyModal();
-            }
-            if (event.target === emailCheckModal) {
-                closeEmailCheckModal();
-            }
-        }
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeEmailCheckModal();
-                closeTermsModal();
-                closePrivacyModal();
-            }
-        });
+        // All modal functions are now handled by auth-common.js
     </script>
     
-    <script th:src="@{/js/sidebar.js}"></script>
+    <!-- Common Scripts -->
+    <script th:src="@{/js/auth-common.js}"></script>
 </body>
 </html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Topping">Topping</title>
+    
+    <!-- Auth-specific CSS -->
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    
+    <!-- Page-specific CSS -->
+    <th:block layout:fragment="styles"></th:block>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+<body class="auth-body">
+    <!-- Auth Header (minimal) -->
+    <header class="auth-header">
+        <a href="/" class="auth-logo">
+            <img th:src="@{/image/topping_S.png}" alt="토핑" class="logo-image">
+        </a>
+    </header>
+    
+    <!-- Main Auth Content -->
+    <main class="auth-main" layout:fragment="content">
+        <!-- Auth page content will be inserted here -->
+    </main>
+    
+    <!-- Auth Footer -->
+    <footer class="auth-footer">
+        <div class="auth-footer-links">
+            <a href="#" onclick="openTermsModal()">이용약관</a>
+            <a href="#" onclick="openPrivacyModal()">개인정보처리방침</a>
+            <a href="/support/cs">고객센터</a>
+        </div>
+        <p>&copy; topping. All Rights Reserved.</p>
+    </footer>
+    
+    <!-- Policy Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+    
+    <!-- Common Scripts -->
+    <script th:src="@{/js/auth-common.js}"></script>
+    
+    <!-- Page-specific Scripts -->
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

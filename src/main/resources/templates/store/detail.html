@@ -4,17 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${store.name} + ' - 토핑'">가게 상세 - 토핑</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- CSS Framework -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/store-detail.css}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 </head>
-<body>
-    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+<body class="main-body">
 
-    <div class="container-fluid store-detail-container">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
+    
+    <!-- Navigation Sidebar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <!-- Main Content Area with Sidebar Offset -->
+    <div class="content-wrapper">
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            <div class="store-detail-container">
         <!-- Header Section -->
         <div class="store-header">
             <div class="store-info">
@@ -179,17 +189,33 @@
                 </div>
             </div>
         </div>
+            </div>
+        </main>
+        
+        <!-- Page-specific Action Bar -->
+        <div class="action-bar">
+            <div class="action-bar-content">
+                <div class="action-bar-left">
+                    <span class="text-muted">가게 상세 정보</span>
+                </div>
+                <div class="action-bar-right">
+                    <button class="btn btn-outline wishlist-toggle-btn" onclick="toggleWishlist()" th:classappend="${isWishlisted} ? 'wishlisted' : ''">
+                        <i class="fas fa-heart"></i> 천창
+                    </button>
+                    <button class="btn btn-primary collaboration-request-btn" onclick="openCollaborationModal()">
+                        콜라보 요청하기
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Fixed Bottom Button Bar -->
-    <div class="bottom-button-bar">
-        <button class="collaboration-request-btn" onclick="openCollaborationModal()">
-            콜라보 요청하기
-        </button>
-        <button class="wishlist-toggle-btn" onclick="toggleWishlist()" th:classappend="${isWishlisted} ? 'wishlisted' : ''">
-            <i class="fas fa-heart"></i>
-        </button>
-    </div>
+    
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- Common Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+    <div th:replace="~{fragments/modals :: confirmation-modal}"></div>
 
     <!-- Modals -->
     <!-- Map Modal -->
@@ -274,11 +300,8 @@
         </div>
     </div>
 
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
-    <script th:src="@{/js/sidebar.js}"></script>
+    <!-- Common Scripts -->
+    <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/store-detail.js}"></script>
 </body>
 </html>

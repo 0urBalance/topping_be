@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Policy Modals Fragment -->
+    <div th:fragment="policy-modals">
+        <!-- Terms of Service Modal -->
+        <div id="termsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">이용약관</h2>
+                    <span class="modal-close" onclick="closeTermsModal()">&times;</span>
+                </div>
+                <div class="modal-body" id="termsModalBody">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <span>약관을 불러오는 중...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Policy Modal -->
+        <div id="privacyModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">개인정보처리방침</h2>
+                    <span class="modal-close" onclick="closePrivacyModal()">&times;</span>
+                </div>
+                <div class="modal-body" id="privacyModalBody">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <span>개인정보처리방침을 불러오는 중...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal Fragment -->
+    <div th:fragment="confirmation-modal">
+        <div id="confirmationModal" class="modal">
+            <div class="modal-content confirmation-modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="confirmationTitle">확인</h2>
+                    <span class="modal-close" onclick="closeConfirmationModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmationMessage">정말로 진행하시겠습니까?</p>
+                    <div class="confirmation-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="closeConfirmationModal()">취소</button>
+                        <button type="button" class="btn btn-primary" id="confirmationConfirmBtn">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Check Modal Fragment -->
+    <div th:fragment="email-check-modal">
+        <div id="emailCheckModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">이메일 확인</h2>
+                    <span class="modal-close" onclick="closeEmailCheckModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-description">가입 여부를 확인하실 이메일 주소를 입력해주세요.</p>
+                    <form onsubmit="checkEmail(event)">
+                        <div class="form-group">
+                            <input type="email" id="emailCheckInput" class="form-control" 
+                                   placeholder="이메일 주소를 입력하세요" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="emailCheckSubmit">
+                            이메일 확인
+                        </button>
+                    </form>
+                    <div id="emailCheckLoading" class="loading-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>확인 중입니다...</span>
+                    </div>
+                    <div id="emailCheckResult" class="result-message" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message Modal Fragment -->
+    <div th:fragment="success-modal">
+        <div id="successModal" class="modal">
+            <div class="modal-content success-modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">성공</h2>
+                    <span class="modal-close" onclick="closeSuccessModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="success-icon">✅</div>
+                    <p id="successMessage">작업이 성공적으로 완료되었습니다.</p>
+                    <button type="button" class="btn btn-primary" onclick="closeSuccessModal()">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message Modal Fragment -->
+    <div th:fragment="error-modal">
+        <div id="errorModal" class="modal">
+            <div class="modal-content error-modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">오류</h2>
+                    <span class="modal-close" onclick="closeErrorModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="error-icon">❌</div>
+                    <p id="errorMessage">오류가 발생했습니다. 다시 시도해주세요.</p>
+                    <button type="button" class="btn btn-primary" onclick="closeErrorModal()">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal Fragment -->
+    <div th:fragment="loading-modal">
+        <div id="loadingModal" class="modal">
+            <div class="modal-content loading-modal-content">
+                <div class="modal-body text-center">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <span id="loadingMessage">처리 중입니다...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

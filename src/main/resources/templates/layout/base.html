@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Topping">Topping - 협업 매칭 플랫폼</title>
+    
+    <!-- Common CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    
+    <!-- Page-specific CSS -->
+    <th:block layout:fragment="styles"></th:block>
+    
+    <!-- Common meta tags -->
+    <meta name="description" content="토핑과 함께 비즈니스 협업 파트너를 찾아보세요">
+    <meta name="keywords" content="콜라보, 협업, 비즈니스, 매칭, 토핑">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
+    
+    <!-- Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="main-content" layout:fragment="content">
+        <!-- Page content will be inserted here -->
+    </main>
+    
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- Common Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+    
+    <!-- Common Scripts -->
+    <script th:src="@{/js/sidebar.js}"></script>
+    <script th:src="@{/js/common.js}"></script>
+    
+    <!-- Page-specific Scripts -->
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+</html>
