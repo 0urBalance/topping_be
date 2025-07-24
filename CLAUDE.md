@@ -20,7 +20,7 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - **Production**: PostgreSQL (env vars: `DB_URL`, `DB_USER`, `DB_PASSWORD`)
 - **Testing**: H2 in-memory database
 - **Configuration**: Uses spring-dotenv, create `.env` file in project root
-- **Connection Pool**: Minimized HikariCP settings for reduced resource usage (6-10 connections for dev, 2-5 for testing)
+- **Connection Pool**: HikariCP settings optimized for development (10-20 connections)
 
 ## Architecture
 
@@ -49,7 +49,7 @@ The platform is organized into distinct business domains. Each domain has compre
 - **[🤝 Collaboration Domain](./docs/domains/collaboration/README.md)** - Business matching and partnership management
 
 ### Supporting Domains
-- **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security
+- **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security and Kakao social login
 - **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication for collaborations
 - **[🔔 Notification Domain](./docs/domains/notification/README.md)** - Event-driven notifications
 - **[🎧 Support Domain](./docs/domains/support/README.md)** - Customer support system with FAQ and inquiry management
@@ -148,7 +148,18 @@ All repositories follow a consistent three-layer pattern:
 - **Template Integration**: Thymeleaf security integration with `sec:authorize="isAuthenticated()"`
 - **API Security**: Session-based endpoints (`/api/session/*`) for login/logout/status
 - **Role-based Access**: Store management requires `ROLE_BUSINESS_OWNER` or `ROLE_ADMIN`
-- **CSRF Protection**: Cookie-based token repository prevents session creation issues
+- **CSRF Protection**: CSRF protection disabled for simplified form handling
+
+### Kakao Social Login Integration
+- **Service Layer**: `KakaoService` handles OAuth flow and user management in application layer
+- **Domain Model**: `KakaoUserInfoDto` in domain layer with validation logic
+- **Session Integration**: Uses `SecurityContextHolder` for session-based authentication (NOT JWT)
+- **User Management**: Automatically creates new users with default settings (Seoul/Gangnam region, ROLE_USER)
+- **Error Handling**: Specific error messages for Kakao login failures in login template
+- **API Flow**: `/api/user/kakao/callback` → KakaoService → Spring Security session
+- **Configuration**: Uses `KAKAO_REST_API_KEY` environment variable
+- **Clean Architecture**: External API integration in application layer, business logic in domain layer
+- **RestTemplate**: Centralized configuration for external API calls
 
 ## Critical Implementation Notes
 
@@ -165,7 +176,7 @@ All repositories follow a consistent three-layer pattern:
 - Check user roles with `sec:authorize="hasRole('ROLE_NAME')"`
 - Handle null checks with `th:if="${object != null}"`
 - Use consistent variable naming (avoid 'application' - reserved word)
-- Include CSRF token in all forms: `<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />`
+- CSRF protection is disabled - no CSRF tokens needed in forms
 
 ### Modal System Guidelines
 - **Policy Modals**: Use dynamic content loading with caching (`/policy/privacy-modal`, `/policy/terms-modal`)
@@ -184,11 +195,12 @@ All repositories follow a consistent three-layer pattern:
 
 ## 🔧 Troubleshooting & Common Issues
 
-### Login Page Issues
-- **Session Creation**: Fixed with cookie-based CSRF tokens
+### Login & Authentication Issues
+- **Session Creation**: Session-based authentication working properly
 - **Fragment Rendering**: Updated to Thymeleaf 3 syntax
 - **Template Errors**: All deprecated syntax updated
-- **CSRF Issues**: Properly configured with `CookieCsrfTokenRepository.withHttpOnlyFalse()`
+- **CSRF Protection**: Disabled for simplified form handling
+- **Kakao Login**: Integrated with session-based authentication, error handling in place
 
 ### Entity Management
 - **Optimistic Locking**: Fixed by removing manual UUID setting in SignupController
@@ -247,12 +259,13 @@ All repositories follow a consistent three-layer pattern:
 
 The Topping platform is now in a stable, production-ready state with:
 
-- **Complete Authentication System**: Session-based with proper security
+- **Complete Authentication System**: Session-based with Kakao social login integration
 - **Full Domain Implementation**: All core business domains functional
 - **Modern UI/UX**: Responsive, accessible, brand-consistent design
 - **Comprehensive Testing**: Unit and integration tests with proper test profiles
 - **Documentation**: Complete domain documentation and troubleshooting guides
-- **Security**: CSRF protection, role-based access control, secure session management
+- **Security**: Role-based access control, secure session management, CSRF disabled for simplified forms
+- **Social Login**: Kakao OAuth integration with automatic user registration
 - **Performance**: Optimized database connections, efficient queries, minimal resource usage
 
 The platform is ready for deployment and further feature development.

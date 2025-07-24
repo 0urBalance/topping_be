@@ -18,6 +18,15 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            margin-left: 240px; /* Account for sidebar */
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0; /* No sidebar offset on mobile */
+            }
+        }
         }
 
         .main-content {
@@ -730,5 +739,7 @@
             }
         });
     </script>
+    
+    <script th:src="@{/js/sidebar.js}"></script>
 </body>
 </html>

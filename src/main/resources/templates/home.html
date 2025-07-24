@@ -16,6 +16,14 @@
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
+            margin-left: 240px; /* Account for sidebar */
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0; /* No sidebar offset on mobile */
+            }
         }
         
         /* Hero Section */
@@ -450,7 +458,7 @@
 </head>
 <body>
     <!-- Include Navigation Bar -->
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     
     <!-- Hero Section -->
     <section class="hero-section">
@@ -572,5 +580,7 @@
 
     <!-- Footer -->
     <div th:replace="fragments/footer :: footer"></div>
+    
+    <script th:src="@{/js/sidebar.js}"></script>
 </body>
 </html>

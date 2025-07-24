@@ -6,7 +6,21 @@
     <title>My Page - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            margin-left: 240px; /* Account for sidebar */
+            padding: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0; /* No sidebar offset on mobile */
+            }
+        }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .header { text-align: center; margin-bottom: 40px; color: white; }
         .header h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
@@ -275,5 +289,7 @@
             location.reload();
         }, 30000);
     </script>
+    
+    <script th:src="@{/js/sidebar.js}"></script>
 </body>
 </html>

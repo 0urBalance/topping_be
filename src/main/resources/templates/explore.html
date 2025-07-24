@@ -6,7 +6,20 @@
     <title>Explore - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            margin-left: 240px; /* Account for sidebar */
+            padding: 0; 
+            background-color: #f5f5f5; 
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0; /* No sidebar offset on mobile */
+            }
+        }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .header { text-align: center; margin-bottom: 40px; }
         .header h1 { color: #333; margin-bottom: 10px; }
@@ -208,5 +221,7 @@
             event.target.classList.add('active');
         }
     </script>
+    
+    <script th:src="@{/js/sidebar.js}"></script>
 </body>
 </html>

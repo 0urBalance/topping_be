@@ -4,34 +4,73 @@
     <meta charset="UTF-8">
 </head>
 <body>
-    <!-- Navigation Bar Fragment -->
-    <nav th:fragment="navbar" class="navbar">
-        <div class="container">
-            <a href="/" class="logo">토핑</a>
-            
-            <div class="nav-items">
-                <a href="/explore">탐색</a>
-                <a href="/collabo">콜라보</a>
-            </div>
-            
-            <div class="auth-items">
-                <!-- Show login/signup for unauthenticated users -->
-                <th:block sec:authorize="!isAuthenticated()">
-                    <a href="/auth/login">로그인</a>
-                    <a href="/auth/signup">회원가입</a>
-                </th:block>
-                
-                <!-- Show user menu for authenticated users -->
-                <th:block sec:authorize="isAuthenticated()">
-                    <a href="/mypage">마이페이지</a>
-                    <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">로그아웃</a>
-                    
-                    <!-- Hidden logout form -->
-                    <form id="logout-form" action="/logout" method="post" style="display: none;">
-                    </form>
-                </th:block>
-            </div>
+    <!-- Sidebar Navigation Fragment -->
+    <div th:fragment="navbar">
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleSidebar()">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        
+        <!-- Sidebar Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+        
+        <!-- Main Sidebar -->
+        <nav class="sidebar" id="sidebar">
+        <!-- Logo Section -->
+        <div class="sidebar-logo">
+            <a href="/" class="logo-link">
+                <img th:src="@{/image/topping_S.png}" alt="토핑" class="logo-image">
+                <span class="logo-text">토핑</span>
+            </a>
         </div>
-    </nav>
+        
+        <!-- Navigation Menu -->
+        <div class="sidebar-menu">
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a href="/explore" class="menu-link" th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/explore') ? 'active' : ''}">
+                        <i class="menu-icon">🔍</i>
+                        <span class="menu-text">콜라보 - 탐색</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/mypage" class="menu-link" th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/mypage') ? 'active' : ''}">
+                        <i class="menu-icon">👤</i>
+                        <span class="menu-text">마이페이지</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Authentication Section -->
+        <div class="sidebar-auth">
+            <!-- Show login/signup for unauthenticated users -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a href="/auth/login" class="auth-link login-link" th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/auth/login') ? 'active' : ''}">
+                    <i class="auth-icon">🔑</i>
+                    <span class="auth-text">로그인</span>
+                </a>
+                <a href="/auth/signup" class="auth-link signup-link" th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/auth/signup') ? 'active' : ''}">
+                    <i class="auth-icon">📝</i>
+                    <span class="auth-text">회원가입</span>
+                </a>
+            </th:block>
+            
+            <!-- Show logout for authenticated users -->
+            <th:block sec:authorize="isAuthenticated()">
+                <a href="/logout" class="auth-link logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="auth-icon">🚪</i>
+                    <span class="auth-text">로그아웃</span>
+                </a>
+                
+                <!-- Hidden logout form -->
+                <form id="logout-form" action="/logout" method="post" style="display: none;">
+                </form>
+            </th:block>
+        </div>
+        </nav>
+    </div>
 </body>
 </html>
