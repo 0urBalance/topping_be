@@ -1,6 +1,6 @@
 /* Sidebar Navigation Styles */
 :root {
-    --sidebar-width: 240px;
+    --sidebar-width: 160px;
     --sidebar-bg: #ffffff;
     --sidebar-border: #e0e0e0;
     --primary-color: #ff6b35;
@@ -18,7 +18,7 @@
     position: fixed;
     left: 0;
     top: 0;
-    width: var(--sidebar-width);
+    /*width: var(--sidebar-width);*/
     height: 100vh;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--sidebar-border);
