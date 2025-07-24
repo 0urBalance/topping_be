@@ -55,9 +55,19 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<ApiResponseData<String>> loginStatus(Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            User user = userDetails.getUser();
-            return ResponseEntity.ok(ApiResponseData.success("로그인 성공: " + user.getUsername()));
+            // Handle both UserDetailsImpl and standard User for tests
+            String username;
+            if (authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                username = userDetails.getUser().getUsername();
+            } else if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
+                org.springframework.security.core.userdetails.User springUser = 
+                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+                username = springUser.getUsername();
+            } else {
+                username = authentication.getName();
+            }
+            return ResponseEntity.ok(ApiResponseData.success("로그인 성공: " + username));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponseData.failure(401, "인증되지 않은 사용자"));
@@ -108,7 +118,7 @@ public class AuthController {
             // Save user
             userRepository.save(newUser);
 
-            return ResponseEntity.ok(ApiResponseData.success("회원가입이 완료되었습니다."));
+            return ResponseEntity.ok(ApiResponseData.success("회원가입이 완료되었습니다.", "회원가입이 완료되었습니다."));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

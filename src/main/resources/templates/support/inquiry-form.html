@@ -330,7 +330,6 @@
             
             <!-- Inquiry Form -->
             <form th:action="@{/support/inquiry}" th:object="${inquiryRequest}" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 
                 <div class="form-group">
                     <label for="title" class="form-label required">제목</label>

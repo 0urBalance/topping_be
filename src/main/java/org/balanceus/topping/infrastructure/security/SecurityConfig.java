@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,10 +28,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf(csrf -> csrf
-				.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-				.ignoringRequestMatchers("/h2-console/**", "/api/**") // Disable CSRF for H2 console and API endpoints
-			)
+			.csrf(csrf -> csrf.disable()) // Disable CSRF protection completely
 			.authorizeHttpRequests(authz -> authz
 				// Public endpoints
 				.requestMatchers("/", "/auth/**", "/login").permitAll()

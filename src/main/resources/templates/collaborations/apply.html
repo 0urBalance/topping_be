@@ -68,7 +68,6 @@
             
             <form action="/collaborations/apply" method="post">
                 <input type="hidden" name="productId" th:value="${product.uuid}">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 
                 <div class="form-group">
                     <label for="applicantProductId">신청할 상품 (선택사항)</label>

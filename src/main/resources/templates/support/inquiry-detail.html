@@ -389,7 +389,6 @@
             
             <!-- Hidden form for canceling inquiry -->
             <form id="cancelForm" th:action="@{/support/inquiry/{id}/cancel(id=${inquiry.id})}" method="post" style="display: none;">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             </form>
         </div>
     </div>

@@ -66,11 +66,9 @@
 
                 <div class="actions" th:if="${collaboration.status.name() == 'PENDING'}">
                     <form th:action="@{/collaborations/{id}/accept(id=${collaboration.uuid})}" method="post" style="display: inline;">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit" class="btn btn-success">승인</button>
                     </form>
                     <form th:action="@{/collaborations/{id}/reject(id=${collaboration.uuid})}" method="post" style="display: inline;">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit" class="btn btn-danger">거절</button>
                     </form>
                 </div>

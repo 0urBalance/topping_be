@@ -178,8 +178,6 @@
                     <div class="field-error" th:if="${#fields.hasErrors('snsOrWebsiteLink')}" th:errors="*{snsOrWebsiteLink}"></div>
                 </div>
 
-                <!-- CSRF Token -->
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <button type="submit" class="btn">
                     스토어 등록

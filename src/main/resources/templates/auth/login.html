@@ -421,8 +421,6 @@
                 </div>
             </div>
 
-            <!-- CSRF Token -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
             <button type="submit" class="btn-primary">
                 로그인
@@ -541,16 +539,6 @@
     </div>
 
     <script>
-        // Get CSRF token from meta tag or hidden input
-        function getCsrfToken() {
-            const tokenElement = document.querySelector('input[name="_csrf"]');
-            return tokenElement ? tokenElement.value : '';
-        }
-
-        function getCsrfHeader() {
-            const tokenElement = document.querySelector('input[name="_csrf"]');
-            return tokenElement ? tokenElement.getAttribute('name') : '_csrf';
-        }
 
         function openEmailCheckModal() {
             document.getElementById('emailCheckModal').style.display = 'block';
@@ -584,17 +572,9 @@
             submitBtn.disabled = true;
 
             // Send request to backend
-            const csrfToken = getCsrfToken();
-            const csrfHeader = getCsrfHeader();
-
             const headers = {
                 'Content-Type': 'application/json'
             };
-
-            // Add CSRF token to headers
-            if (csrfToken && csrfHeader) {
-                headers[csrfHeader] = csrfToken;
-            }
 
             fetch('/api/auth/check-email', {
                 method: 'POST',
