@@ -53,7 +53,7 @@ public class AuthController {
 
     @GetMapping("/auth/signup")
     public String signupPage() {
-        return "redirect:/signup/start";
+        return "redirect:/auth/signup/step1";
     }
 
     // API endpoints for session-based auth (handled by Spring Security)
