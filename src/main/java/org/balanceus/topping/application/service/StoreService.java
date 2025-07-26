@@ -1,11 +1,15 @@
 package org.balanceus.topping.application.service;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
+import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.exception.BaseException;
@@ -22,6 +26,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
     public Store registerStore(StoreRegistrationRequest request, UUID userUuid) {
         Optional<User> userOptional = userRepository.findById(userUuid);
@@ -49,7 +54,10 @@ public class StoreService {
         store.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
         store.setUser(user);
 
-        return storeRepository.save(store);
+        Store savedStore = storeRepository.save(store);
+        
+        
+        return savedStore;
     }
 
     @Transactional(readOnly = true)
@@ -63,8 +71,14 @@ public class StoreService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Store> getStoreByIdWithMenusAndTags(UUID storeId) {
-        return storeRepository.findByIdWithMenusAndTags(storeId);
+    public Optional<Store> getStoreByIdWithProductsAndTags(UUID storeId) {
+        return storeRepository.findByIdWithProductsAndTags(storeId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Store> getStoresByUser(UUID userUuid) {
+        Optional<Store> store = storeRepository.findByUserUuid(userUuid);
+        return store.map(List::of).orElse(List.of());
     }
 
     public Store updateStore(UUID storeUuid, StoreRegistrationRequest request, UUID userUuid) {
@@ -93,4 +107,5 @@ public class StoreService {
 
         return storeRepository.save(store);
     }
+    
 }

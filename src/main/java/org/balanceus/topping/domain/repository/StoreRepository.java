@@ -25,7 +25,7 @@ public interface StoreRepository {
     
     Optional<Store> findById(UUID id);
     
-    Optional<Store> findByIdWithMenusAndTags(UUID id);
+    Optional<Store> findByIdWithProductsAndTags(UUID id);
     
     boolean existsById(UUID id);
     

@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Collabo 목록 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -32,12 +37,12 @@
 
         <div class="products-grid">
             <div th:each="product : ${products}" class="product-card">
-                <h3 th:text="${product.title}">Collabo 제목</h3>
+                <h3 th:text="${product.name}">Collabo 제목</h3>
                 <p th:text="${product.description}">Collabo 설명</p>
                 <span class="product-category" th:text="${product.category}">카테고리</span>
                 <div class="product-meta">
-                    <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
-                    <p><strong>등록일:</strong> <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</span></p>
+                    <p><strong>작성자:</strong> <span th:text="${product.creator != null ? product.creator.username : '알 수 없음'}">사용자명</span></p>
+                    <p><strong>등록일:</strong> <span th:text="${product.createdAt != null ? #temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm') : '알 수 없음'}">2024-01-01 12:00</span></p>
                 </div>
                 <div class="actions">
                     <a th:href="@{/products/{id}(id=${product.uuid})}" class="btn">자세히 보기</a>

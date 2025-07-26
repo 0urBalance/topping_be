@@ -10,12 +10,13 @@ let galleryImages = [];
 
 // Initialize gallery images from DOM
 function initializeGalleryImages() {
-    const imageElements = document.querySelectorAll('.gallery-item img');
+    const imageElements = document.querySelectorAll('.gallery-trigger img');
     galleryImages = Array.from(imageElements).map(img => img.src);
     
     // Fallback images if no uploaded images exist
     if (galleryImages.length === 0) {
         galleryImages = [
+            '/image/topping_L.png',
             '/image/topping_L.png',
             '/image/topping_M.png',
             '/image/topping_S.png'
@@ -62,6 +63,55 @@ function setupEventListeners() {
             }
         }
     });
+
+    // 1. 가게 사진 갤러리 열기
+    document.querySelectorAll('.gallery-trigger').forEach(el => {
+        el.addEventListener('click', () => {
+            const idx = parseInt(el.dataset.index, 10);
+            openImageGallery(idx);
+        });
+    });
+
+    // 2. 메뉴 상세 모달 열기 (legacy support)
+    document.querySelectorAll('.menu-item[data-menu-name]:not(.clickable-product)').forEach(el => {
+        el.addEventListener('click', () => {
+            openMenuDetail(el.dataset.menuName);
+        });
+    });
+
+    // 3. Product detail navigation for new clickable products
+    document.querySelectorAll('.clickable-product[data-product-uuid]').forEach(el => {
+        el.addEventListener('click', () => {
+            const productUuid = el.dataset.productUuid;
+            if (productUuid) {
+                openProductDetail(productUuid);
+            }
+        });
+    });
+
+    // 4. 좋아요 토글
+    const likeBtn = document.querySelector('.like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', toggleLike);
+    }
+
+    // 5. 찜하기 토글
+    const wishlistBtn = document.querySelector('.wishlist-btn, .wishlist-toggle-btn');
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', toggleWishlist);
+    }
+
+    // 6. 콜라보 리스트 토글
+    const collabToggle = document.querySelector('.toggle-btn');
+    if (collabToggle) {
+        collabToggle.addEventListener('click', toggleCollaborationList);
+    }
+
+    // 7. 콜라보 요청 모달 열기
+    const collabReqBtn = document.querySelector('.collaboration-request-btn');
+    if (collabReqBtn) {
+        collabReqBtn.addEventListener('click', openCollaborationModal);
+    }
 }
 
 // Toggle collaboration list
@@ -115,7 +165,14 @@ function nextImage() {
     updateGalleryImage();
 }
 
-// Open menu detail modal
+// Open product detail page
+function openProductDetail(productUuid) {
+    if (productUuid) {
+        window.location.href = `/products/${productUuid}`;
+    }
+}
+
+// Open menu detail modal (legacy support)
 function openMenuDetail(menuName) {
     const modal = new bootstrap.Modal(document.getElementById('menuDetailModal'));
     const modalTitle = document.getElementById('menuModalTitle');

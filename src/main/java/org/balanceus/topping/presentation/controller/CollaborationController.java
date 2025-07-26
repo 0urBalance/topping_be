@@ -66,7 +66,7 @@ public class CollaborationController {
 		}
 		
 		// Get user's products for selection
-		List<Product> userProducts = productService.getProductsByCreator(principal.getName());
+		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
 		
 		model.addAttribute("product", product);
 		model.addAttribute("user", user);

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${store.name} + ' - 토핑'">가게 상세 - 토핑</title>
-    
+
     <!-- CSS Framework -->
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
@@ -13,304 +13,203 @@
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 </head>
 <body class="main-body">
+<a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Skip to main content for accessibility -->
-    <a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
-    
-    <!-- Navigation Sidebar -->
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
-    
-    <!-- Main Content Area with Sidebar Offset -->
-    <div class="content-wrapper">
-        <!-- Main Content -->
-        <main id="main-content" class="main-content">
-            <div class="store-detail-container">
-            <!-- Hero Section: 3열 그리드 -->
+<div class="content-wrapper">
+    <main id="main-content" class="main-content">
+        <div class="store-detail-container">
+
+            <!-- Hero Section -->
             <section class="hero-section">
-              <div class="hero-grid">
-                
-                <!-- 1. 가게 정보 -->
-                <div class="store-info">
-                  <div class="category-badge" th:text="${store.category}">카페</div>
-                  <h1 class="store-name" th:text="${store.name}">에펠루아 본점</h1>
-                  <div class="rating-section">
-                    <span class="rating">⭐ <span th:text="${rating}">4.9</span></span>
-                    <span class="review-count">(<span th:text="${reviewCount}">1,114</span>)</span>
-                  </div>
-                  <div class="address">
-                    <span class="material-symbols-outlined">location_on</span>
-                    <span th:text="${store.address}">강원특별자치도 강릉시 창해로 361-77</span>
-                  </div>
-                  <div class="hashtags" th:if="${!store.hashtags.empty}">
-                    <span class="hashtag" th:each="hashtag : ${store.hashtags}" th:text="${hashtag}">Hashtag</span>
-                  </div>
-                  <div class="hashtags" th:if="${store.hashtags.empty}">
-                    <span class="hashtag">#새로운가게</span>
-                  </div>
-                  <div class="social-stats">
-                    <button class="stat-btn like-btn" onclick="toggleLike()">
-                      <span class="material-symbols-outlined">thumb_up</span>
-                      <span th:text="${likeCount}">23</span>
-                    </button>
-                    <button class="stat-btn wishlist-btn" onclick="toggleWishlist()">
-                      <span class="material-symbols-outlined">favorite</span>
-                      <span th:text="${wishlistCount}">1,115</span>
-                    </button>
-                  </div>
-                </div>
-                
-                <!-- 2. 대표 이미지 -->
-                <div class="hero-image">
-                  <img th:if="${store.mainImage != null}" 
-                       th:src="${store.mainImage.imagePath}" 
-                       th:alt="${store.name}" onclick="openImageGallery(0)">
-                  <img th:if="${store.mainImage == null}" 
-                       th:src="${store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png'}" 
-                       th:alt="${store.name}" onclick="openImageGallery(0)">
-                </div>
-                
-                <!-- 3. 콜라보 박스 -->
-                <div class="collaboration-box">
-                  <div class="collab-header">
-                    <span class="material-symbols-outlined">handshake</span>
-                    <h3>함께 콜라보 중인 가게</h3>
-                    <button class="toggle-btn" onclick="toggleCollaborationList()" aria-expanded="false">
-                      <span class="material-symbols-outlined" id="collab-chevron">expand_more</span>
-                    </button>
-                  </div>
-                  <ul class="collab-list" id="collaboration-list" style="display:none;">
-                    <li>
-                      <img src="/image/topping_M.png" alt="" class="collab-thumb">
-                      <div class="collab-info">
-                        <strong>강릉 홍게감비</strong>
-                        <span>음식점</span>
-                      </div>
-                    </li>
-                    <li>
-                      <img src="/image/topping_S.png" alt="" class="collab-thumb">
-                      <div class="collab-info">
-                        <strong>핑크파라 초당점</strong>
-                        <span>카페</span>
-                      </div>
-                    </li>
-                  </ul>
-                  <div class="instagram-link">
-                    <span class="material-symbols-outlined">instagram</span>
-                    <a href="https://www.instagram.com/yefeelua_official/" target="_blank" rel="noopener">
-                      instagram.com/yefeelua_official
-                    </a>
-                  </div>
-                  <button class="btn btn-primary collaboration-request-btn"
-                          onclick="openCollaborationModal()">콜라보 요청하기</button>
-                </div>
-                
-              </div><!-- /.hero-grid -->
+                <div class="hero-grid">
+
+                    <!-- 1. 가게 정보 -->
+                    <div class="store-info">
+                        <div class="category-badge" th:text="${store.category}">카페</div>
+                        <h1 class="store-name" th:text="${store.name}">에펠루아 본점</h1>
+                        <div class="rating-section">
+                            <span class="rating">⭐ <span th:text="${rating}">4.9</span></span>
+                            <span class="review-count">(<span th:text="${reviewCount}">1,114</span>)</span>
+                        </div>
+                        <div class="address">
+                            <span class="material-symbols-outlined">location_on</span>
+                            <span th:text="${store.address}">강릉시 창해로 361-77</span>
+                        </div>
+                        <div class="hashtags" th:if="${!store.hashtags.empty}">
+                  <span class="hashtag" th:each="hashtag : ${store.hashtags}"
+                        th:text="${hashtag}">#태그</span>
+                        </div>
+                        <div class="hashtags" th:if="${store.hashtags.empty}">
+                            <span class="hashtag">#새로운가게</span>
+                        </div>
+                        <div class="social-stats">
+                            <button class="stat-btn like-btn" onclick="toggleLike()">
+                                <span class="material-symbols-outlined">thumb_up</span>
+                                <span th:text="${likeCount}">23</span>
+                            </button>
+                            <button class="stat-btn wishlist-btn" onclick="toggleWishlist()">
+                                <span class="material-symbols-outlined">favorite</span>
+                                <span th:text="${wishlistCount}">1,115</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. 대표 이미지 -->
+                    <div class="hero-image">
+                        <img th:if="${store.mainImage != null}"
+                             th:src="${store.mainImage.imagePath}"
+                             th:alt="${store.name}"
+                             class="gallery-trigger"
+                             data-index="0" />
+                        <img th:if="${store.mainImage == null}"
+                             th:src="${store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png'}"
+                             th:alt="${store.name}"
+                             class="gallery-trigger"
+                             data-index="0" />
+                    </div>
+
+                    <!-- 3. 콜라보 박스 (static onclick 유지) -->
+                    <div class="collaboration-box">
+                        <div class="collab-header">
+                            <span class="material-symbols-outlined">handshake</span>
+                            <h3>함께 콜라보 중인 가게</h3>
+                            <button class="toggle-btn" onclick="toggleCollaborationList()" aria-expanded="false">
+                                <span class="material-symbols-outlined" id="collab-chevron">expand_more</span>
+                            </button>
+                        </div>
+                        <ul class="collab-list" id="collaboration-list" style="display:none;">
+                            <li>…</li>
+                            <li>…</li>
+                        </ul>
+                        <div class="instagram-link">
+                            <span class="material-symbols-outlined">instagram</span>
+                            <a th:href="${store.snsOrWebsiteLink}" target="_blank" rel="noopener">
+                                <span th:text="${store.snsOrWebsiteLink}">instagram.com/…</span>
+                            </a>
+                        </div>
+                        <button class="btn btn-primary collaboration-request-btn"
+                                onclick="openCollaborationModal()">콜라보 요청하기</button>
+                    </div>
+
+                </div><!-- /.hero-grid -->
             </section>
 
-        <!-- Image Gallery Section -->
-        <div class="image-gallery">
-            <div class="gallery-title">가게 사진</div>
-            <div class="gallery-description">가게의 분위기를 보여주는 사진들입니다.</div>
-            <div class="image-grid" th:if="${!store.images.empty}">
-                <div class="gallery-item" 
-                     th:each="image, iterStat : ${store.images}" 
-                     th:onclick="'openImageGallery(' + ${iterStat.index} + ')'">
-                    <img th:src="${image.imagePath}" 
-                         th:alt="${image.imageType.displayName}"
-                         th:title="${image.imageType.displayName}">
-                    <div class="image-type-badge" th:text="${image.imageType.displayName}">이미지 타입</div>
-                </div>
-            </div>
-            <div th:if="${store.images.empty}" class="no-images-message">
-                <p>아직 등록된 이미지가 없습니다.</p>
-                <small>가게 사장님께서 곧 멋진 사진들을 업로드할 예정입니다.</small>
-            </div>
-        </div>
+            <!-- Image Gallery Section -->
+            <div class="image-gallery">
+                <div class="gallery-title">가게 사진</div>
+                <div class="gallery-description">분위기를 보여주는 사진들입니다.</div>
 
-
-        <!-- Popular Menu Section -->
-        <div class="menu-section" th:if="${!popularMenus.empty}">
-            <h3 class="menu-title">콜라보 인기 메뉴</h3>
-            <div class="menu-grid">
-                <div class="menu-item" th:each="menu : ${popularMenus}" 
-                     th:onclick="'openMenuDetail(\'' + ${menu.name} + '\')'"
-                     onclick="openMenuDetail('메뉴')">
-                    <img th:if="${menu.mainImage != null}" 
-                         th:src="${menu.mainImage.imagePath}" 
-                         th:alt="${menu.name}">
-                    <img th:if="${menu.mainImage == null}" 
-                         th:src="${menu.imageUrl != null ? menu.imageUrl : '/image/topping_M.png'}" 
-                         th:alt="${menu.name}">
-                    <div class="menu-info">
-                        <h4 th:text="${menu.name}">메뉴명</h4>
-                        <p th:text="${menu.description != null ? menu.description : '맛있는 메뉴입니다'}">메뉴 설명</p>
-                        <div class="price" th:text="${#numbers.formatDecimal(menu.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
-                        <div class="reviews" th:text="'리뷰 ' + ${menu.reviewCount}">리뷰 수</div>
+                <div class="image-grid" th:if="${!store.images.empty}">
+                    <div class="gallery-item gallery-trigger"
+                         th:each="image, iterStat : ${store.images}"
+                         th:attr="data-index=${iterStat.index}">
+                        <img th:src="${image.imagePath}"
+                             th:alt="${image.imageType.displayName}"
+                             th:title="${image.imageType.displayName}" />
+                        <div class="image-type-badge"
+                             th:text="${image.imageType.displayName}">이미지 타입</div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- No Popular Menus Message -->
-        <div class="menu-section" th:if="${popularMenus.empty}">
-            <h3 class="menu-title">콜라보 인기 메뉴</h3>
-            <div class="no-menu-message">
-                <p>아직 등록된 인기 메뉴가 없습니다.</p>
-                <small>가게 사장님께서 곧 멋진 메뉴들을 추가할 예정입니다.</small>
-            </div>
-        </div>
 
-        <!-- Signature Menu Section -->
-        <div class="menu-section" th:if="${!signatureMenus.empty}">
-            <h3 class="menu-title">시그니처 메뉴</h3>
-            <div class="menu-description">이 가게만의 특별한 메뉴들입니다.</div>
-            <div class="menu-grid">
-                <div class="menu-item" th:each="menu : ${signatureMenus}" 
-                     th:onclick="'openMenuDetail(\'' + ${menu.name} + '\')'"
-                     onclick="openMenuDetail('메뉴')">
-                    <img th:if="${menu.mainImage != null}" 
-                         th:src="${menu.mainImage.imagePath}" 
-                         th:alt="${menu.name}">
-                    <img th:if="${menu.mainImage == null}" 
-                         th:src="${menu.imageUrl != null ? menu.imageUrl : '/image/topping_L.png'}" 
-                         th:alt="${menu.name}">
-                    <div class="menu-info">
-                        <h4 th:text="${menu.name}">메뉴명</h4>
-                        <p th:text="${menu.description != null ? menu.description : '특별한 시그니처 메뉴입니다'}">메뉴 설명</p>
-                        <div class="price" th:text="${#numbers.formatDecimal(menu.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
-                        <div class="reviews" th:text="'리뷰 ' + ${menu.reviewCount}">리뷰 수</div>
-                    </div>
+                <div th:if="${store.images.empty}" class="no-images-message">
+                    <p>아직 등록된 이미지가 없습니다.</p>
                 </div>
             </div>
-        </div>
-        
-        <!-- No Signature Menus Message -->
-        <div class="menu-section" th:if="${signatureMenus.empty}">
-            <h3 class="menu-title">시그니처 메뉴</h3>
-            <div class="menu-description">이 가게만의 특별한 메뉴들입니다.</div>
-            <div class="no-menu-message">
-                <p>아직 등록된 시그니처 메뉴가 없습니다.</p>
-                <small>가게 사장님께서 곧 특별한 메뉴들을 추가할 예정입니다.</small>
-            </div>
-        </div>
-            </div>
-        </main>
-        
-        <!-- Page-specific Action Bar -->
-        <div class="action-bar">
-            <div class="action-bar-content">
-                <div class="action-bar-left">
-                    <span class="text-muted">가게 상세 정보</span>
-                </div>
-                <div class="action-bar-right">
-                    <button class="btn btn-outline wishlist-toggle-btn" onclick="toggleWishlist()" th:classappend="${isWishlisted} ? 'wishlisted' : ''">
-                        <i class="fas fa-heart"></i> 천창
-                    </button>
-                    <button class="btn btn-primary collaboration-request-btn" onclick="openCollaborationModal()">
-                        콜라보 요청하기
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <div th:replace="~{fragments/footer :: footer}"></div>
-    
-    <!-- Common Modals -->
-    <div th:replace="~{fragments/modals :: policy-modals}"></div>
-    <div th:replace="~{fragments/modals :: confirmation-modal}"></div>
 
-    <!-- Modals -->
-    <!-- Map Modal -->
-    <div class="modal fade" id="mapModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">가게 위치</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="map-placeholder">
-                        <p>지도 API 연동 예정</p>
-                        <p th:text="${store.address}">주소 정보</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Gallery Modal -->
-    <div class="modal fade" id="imageGalleryModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">가게 사진</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="gallery-carousel">
-                        <img id="galleryImage" src="" alt="가게 사진">
-                        <div class="gallery-nav">
-                            <button class="prev-btn" onclick="prevImage()">‹</button>
-                            <button class="next-btn" onclick="nextImage()">›</button>
+            <!-- Popular Product Section -->
+            <div class="menu-section">
+                <h3 class="menu-title">인기 상품</h3>
+                <div class="menu-description">가장 많이 판매된 상품입니다.</div>
+                
+                <!-- Dynamic product grid - renders only actual products -->
+                <div th:if="${!#lists.isEmpty(popularMenus)}" class="menu-grid">
+                    <div class="menu-item clickable-product"
+                         th:each="product : ${popularMenus}"
+                         th:attr="data-menu-name=${product.name},data-product-uuid=${product.uuid}">
+                        <img th:if="${product.mainImage != null}"
+                             th:src="${product.mainImage.imagePath}"
+                             th:alt="${product.name}" />
+                        <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+                             th:src="${product.thumbnailPath}"
+                             th:alt="${product.name}" />
+                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+                             th:src="${product.imageUrl}"
+                             th:alt="${product.name}" />
+                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+                             th:src="@{/image/topping_M.png}"
+                             th:alt="${product.name}" />
+                        <div class="menu-info">
+                            <h4 th:text="${product.name}">상품명</h4>
+                            <p th:text="${product.description != null ? product.description : '맛있는 상품입니다'}">설명</p>
+                            <div class="price"
+                                 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                            <div class="reviews"
+                                 th:text="'리뷰 ' + ${product.reviewCount}">리뷰 0</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Menu Detail Modal -->
-    <div class="modal fade" id="menuDetailModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="menuModalTitle">메뉴 상세</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="menuModalBody">
-                    <!-- Menu details will be loaded here -->
+                
+                <!-- Empty state message -->
+                <div th:if="${#lists.isEmpty(popularMenus)}" class="no-images-message">
+                    <p>아직 등록된 인기 상품이 없습니다.</p>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Collaboration Request Modal -->
-    <div class="modal fade" id="collaborationModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">콜라보 요청하기</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div sec:authorize="!isAuthenticated()">
-                        <p>콜라보 요청을 하려면 로그인이 필요합니다.</p>
-                        <a href="/auth/login" class="btn btn-primary">로그인하기</a>
-                    </div>
-                    <div sec:authorize="isAuthenticated()">
-                        <form id="collaborationForm">
-                            <div class="mb-3">
-                                <label for="message" class="form-label">요청 메시지</label>
-                                <textarea class="form-control" id="message" rows="4" 
-                                    placeholder="콜라보 제안 내용을 작성해주세요."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">요청 보내기</button>
-                        </form>
+            <!-- Signature Product Section -->
+            <div class="menu-section">
+                <h3 class="menu-title">시그니처 상품</h3>
+                <div class="menu-description">대표 상품을 소개합니다.</div>
+                
+                <!-- Dynamic product grid - renders only actual products -->
+                <div th:if="${!#lists.isEmpty(signatureMenus)}" class="menu-grid">
+                    <div class="menu-item clickable-product"
+                         th:each="product : ${signatureMenus}"
+                         th:attr="data-menu-name=${product.name},data-product-uuid=${product.uuid}">
+                        <img th:if="${product.mainImage != null}"
+                             th:src="${product.mainImage.imagePath}"
+                             th:alt="${product.name}" />
+                        <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+                             th:src="${product.thumbnailPath}"
+                             th:alt="${product.name}" />
+                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+                             th:src="${product.imageUrl}"
+                             th:alt="${product.name}" />
+                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+                             th:src="@{/image/topping_L.png}"
+                             th:alt="${product.name}" />
+                        <div class="menu-info">
+                            <h4 th:text="${product.name}">상품명</h4>
+                            <p th:text="${product.description != null ? product.description : '특별한 상품입니다'}">설명</p>
+                            <div class="price"
+                                 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                            <div class="reviews"
+                                 th:text="'리뷰 ' + ${product.reviewCount}">리뷰 0</div>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Empty state message -->
+                <div th:if="${#lists.isEmpty(signatureMenus)}" class="no-images-message">
+                    <p>아직 등록된 시그니처 상품이 없습니다.</p>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Common Scripts -->
-    <script th:src="@{/js/common.js}"></script>
-    <script th:src="@{/js/store-detail.js}"></script>
+        </div>
+    </main>
+
+    <div class="action-bar">…</div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/modals :: policy-modals}"></div>
+<div th:replace="~{fragments/modals :: confirmation-modal}"></div>
+
+<!-- Common Scripts -->
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/store-detail.js}"></script>
 </body>
 </html>

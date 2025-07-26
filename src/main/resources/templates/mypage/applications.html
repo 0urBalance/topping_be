@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 신청 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
@@ -122,7 +127,7 @@
                         <div class="product-image">📦</div>
                         <div class="product-details">
                             <h4 th:text="${myApp.product.title}">상품명</h4>
-                            <p th:text="${myApp.product.creator.username} + '님의 상품'">상품 소유자</p>
+                            <p th:text="${myApp.product.creator != null ? (myApp.product.creator.username + '님의 상품') : '알 수 없는 사용자의 상품'}">상품 소유자</p>
                         </div>
                         <span class="status-badge" 
                               th:classappend="'status-' + ${myApp.status.name().toLowerCase()}"
@@ -176,7 +181,7 @@
                         <div class="product-image">📦</div>
                         <div class="product-details">
                             <h4 th:text="${pendingApp.product.title}">상품명</h4>
-                            <p th:text="${pendingApp.product.creator.username} + '님의 상품'">상품 소유자</p>
+                            <p th:text="${pendingApp.product.creator != null ? (pendingApp.product.creator.username + '님의 상품') : '알 수 없는 사용자의 상품'}">상품 소유자</p>
                         </div>
                         <span class="status-badge status-pending">대기중</span>
                     </div>
@@ -222,7 +227,7 @@
                         <div class="product-image">📦</div>
                         <div class="product-details">
                             <h4 th:text="${acceptedApp.product.title}">상품명</h4>
-                            <p th:text="${acceptedApp.product.creator.username} + '님의 상품'">상품 소유자</p>
+                            <p th:text="${acceptedApp.product.creator != null ? (acceptedApp.product.creator.username + '님의 상품') : '알 수 없는 사용자의 상품'}">상품 소유자</p>
                         </div>
                         <span class="status-badge status-accepted">수락됨</span>
                     </div>
@@ -267,7 +272,7 @@
                         <div class="product-image">📦</div>
                         <div class="product-details">
                             <h4 th:text="${rejectedApp.product.title}">상품명</h4>
-                            <p th:text="${rejectedApp.product.creator.username} + '님의 상품'">상품 소유자</p>
+                            <p th:text="${rejectedApp.product.creator != null ? (rejectedApp.product.creator.username + '님의 상품') : '알 수 없는 사용자의 상품'}">상품 소유자</p>
                         </div>
                         <span class="status-badge status-rejected">거절됨</span>
                     </div>

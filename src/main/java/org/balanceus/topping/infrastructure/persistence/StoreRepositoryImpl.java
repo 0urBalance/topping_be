@@ -59,8 +59,8 @@ public class StoreRepositoryImpl implements StoreRepository {
     }
 
     @Override
-    public Optional<Store> findByIdWithMenusAndTags(UUID id) {
-        return storeJpaRepository.findByIdWithMenusAndTags(id);
+    public Optional<Store> findByIdWithProductsAndTags(UUID id) {
+        return storeJpaRepository.findByIdWithProductsAndTags(id);
     }
 
     @Override

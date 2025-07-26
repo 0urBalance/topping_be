@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>상품 수정 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
         .container { max-width: 800px; margin: 0 auto; }
@@ -58,10 +63,18 @@
 
             <form th:action="@{/products/{id}/edit(id=${product.uuid})}" method="post" th:object="${productRequest}">
                 <div class="form-group">
-                    <label for="title">상품 제목</label>
-                    <input type="text" id="title" th:field="*{title}" required placeholder="예: 웹 서비스 개발 협업 파트너 모집">
-                    <div th:if="${#fields.hasErrors('title')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
-                        <span th:each="error : ${#fields.errors('title')}" th:text="${error}">에러</span>
+                    <label for="name">상품명</label>
+                    <input type="text" id="name" th:field="*{name}" required placeholder="예: 시그니처 라떼">
+                    <div th:if="${#fields.hasErrors('name')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('name')}" th:text="${error}">에러</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">가격</label>
+                    <input type="number" id="price" th:field="*{price}" required placeholder="7000" step="100" min="0">
+                    <div th:if="${#fields.hasErrors('price')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('price')}" th:text="${error}">에러</span>
                     </div>
                 </div>
 
@@ -77,11 +90,10 @@
                     <label for="category">카테고리</label>
                     <select id="category" th:field="*{category}" required>
                         <option value="">카테고리를 선택하세요</option>
-                        <option value="웹 개발">웹 개발</option>
-                        <option value="모바일 앱">모바일 앱</option>
-                        <option value="게임 개발">게임 개발</option>
-                        <option value="디자인">디자인</option>
-                        <option value="마케팅">마케팅</option>
+                        <option value="signature">시그니처 상품</option>
+                        <option value="popular">인기 상품</option>
+                        <option value="collaboration">콜라보 상품</option>
+                        <option value="new">신상품</option>
                         <option value="기타">기타</option>
                     </select>
                     <div th:if="${#fields.hasErrors('category')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
@@ -101,7 +113,7 @@
                 <div th:if="${product}" class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 4px; border-left: 4px solid #28a745;">
                     <label style="margin-bottom: 5px; color: #495057;">상품 정보</label>
                     <div style="font-size: 14px; color: #666;">
-                        <p style="margin: 2px 0;"><strong>등록자:</strong> <span th:text="${product.creator.username}">등록자명</span></p>
+                        <p style="margin: 2px 0;"><strong>등록자:</strong> <span th:text="${product.creator != null ? product.creator.username : '알 수 없음'}">등록자명</span></p>
                         <p style="margin: 2px 0;"><strong>등록일:</strong> <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">등록일시</span></p>
                         <p style="margin: 2px 0;"><strong>상태:</strong> <span th:text="${product.isActive ? '활성' : '비활성'}" th:class="${product.isActive ? 'text-success' : 'text-danger'}">상태</span></p>
                         <small style="color: #28a745;">✓ 본인이 등록한 상품을 수정하고 있습니다.</small>

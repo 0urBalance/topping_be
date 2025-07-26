@@ -332,39 +332,43 @@
             </div>
         </section>
 
-        <!-- Section 2: Menu List -->
-        <section class="explore-section" id="menus-section">
+        <!-- Section 2: Product List -->
+        <section class="explore-section" id="products-section">
             <div class="section-header">
                 <span class="section-icon">🍽️</span>
-                <h2>인기 메뉴</h2>
+                <h2>인기 상품</h2>
             </div>
             
             <div th:if="${!#lists.isEmpty(popularMenus)}" class="card-grid">
-                <a th:each="menu : ${popularMenus}" 
-                   th:href="@{/stores/{id}(id=${menu.store.uuid})}" 
+                <a th:each="product : ${popularMenus}" 
+                   th:href="@{/stores/{id}(id=${product.store.uuid})}" 
                    class="explore-card menu-card">
                     <div class="card-image">
-                        <img th:if="${menu.mainImage != null}" 
-                             th:src="${menu.mainImage.imagePath}" 
-                             th:alt="${menu.name}"
+                        <img th:if="${product.mainImage != null}" 
+                             th:src="${product.mainImage.imagePath}" 
+                             th:alt="${product.name}"
                              loading="lazy">
-                        <img th:if="${menu.mainImage == null and menu.imageUrl != null}" 
-                             th:src="${menu.imageUrl}" 
-                             th:alt="${menu.name}"
+                        <img th:if="${product.mainImage == null and product.thumbnailPath != null}" 
+                             th:src="${product.thumbnailPath}" 
+                             th:alt="${product.name}"
                              loading="lazy">
-                        <div th:if="${menu.mainImage == null and menu.imageUrl == null}" 
+                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}" 
+                             th:src="${product.imageUrl}" 
+                             th:alt="${product.name}"
+                             loading="lazy">
+                        <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}" 
                              class="placeholder">🍽️</div>
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title" th:text="${menu.name}">메뉴 이름</h3>
-                        <p class="card-subtitle" th:text="${menu.description}">메뉴 설명</p>
+                        <h3 class="card-title" th:text="${product.name}">상품 이름</h3>
+                        <p class="card-subtitle" th:text="${product.description}">상품 설명</p>
                         <div class="card-tags">
-                            <span class="tag" th:text="${menu.menuType.displayName}">메뉴 타입</span>
-                            <span class="tag" th:text="${menu.category.displayName}">카테고리</span>
+                            <span class="tag" th:text="${product.productType.displayName}">상품 타입</span>
+                            <span class="tag" th:text="${product.category.displayName}">카테고리</span>
                         </div>
                         <div class="card-meta">
-                            <span class="card-price" th:text="${#numbers.formatInteger(menu.price, 0, 'COMMA')} + '원'">가격</span>
-                            <span class="card-store" th:text="${menu.store.name}">가게명</span>
+                            <span class="card-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
+                            <span class="card-store" th:text="${product.store.name}">가게명</span>
                         </div>
                     </div>
                 </a>
@@ -372,8 +376,8 @@
             
             <div th:if="${#lists.isEmpty(popularMenus)}" class="empty-state">
                 <div class="empty-icon">🍽️</div>
-                <h3>등록된 메뉴가 없습니다</h3>
-                <p>곧 맛있는 메뉴들이 등록될 예정입니다!</p>
+                <h3>등록된 상품이 없습니다</h3>
+                <p>곧 맛있는 상품들이 등록될 예정입니다!</p>
             </div>
         </section>
 
@@ -385,31 +389,35 @@
             </div>
             
             <div th:if="${!#lists.isEmpty(collaborationMenus)}" class="card-grid">
-                <a th:each="menu : ${collaborationMenus}" 
-                   th:href="@{/stores/{id}(id=${menu.store.uuid})}" 
+                <a th:each="product : ${collaborationMenus}" 
+                   th:href="@{/stores/{id}(id=${product.store.uuid})}" 
                    class="explore-card menu-card">
                     <div class="card-image">
-                        <img th:if="${menu.mainImage != null}" 
-                             th:src="${menu.mainImage.imagePath}" 
-                             th:alt="${menu.name}"
+                        <img th:if="${product.mainImage != null}" 
+                             th:src="${product.mainImage.imagePath}" 
+                             th:alt="${product.name}"
                              loading="lazy">
-                        <img th:if="${menu.mainImage == null and menu.imageUrl != null}" 
-                             th:src="${menu.imageUrl}" 
-                             th:alt="${menu.name}"
+                        <img th:if="${product.mainImage == null and product.thumbnailPath != null}" 
+                             th:src="${product.thumbnailPath}" 
+                             th:alt="${product.name}"
                              loading="lazy">
-                        <div th:if="${menu.mainImage == null and menu.imageUrl == null}" 
+                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}" 
+                             th:src="${product.imageUrl}" 
+                             th:alt="${product.name}"
+                             loading="lazy">
+                        <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}" 
                              class="placeholder">🤝</div>
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title" th:text="${menu.name}">콜라보 메뉴 이름</h3>
-                        <p class="card-subtitle" th:text="${menu.description}">메뉴 설명</p>
+                        <h3 class="card-title" th:text="${product.name}">콜라보 상품 이름</h3>
+                        <p class="card-subtitle" th:text="${product.description}">상품 설명</p>
                         <div class="card-tags">
                             <span class="tag">콜라보</span>
-                            <span class="tag" th:text="${menu.category.displayName}">카테고리</span>
+                            <span class="tag" th:text="${product.category.displayName}">카테고리</span>
                         </div>
                         <div class="card-meta">
-                            <span class="card-price" th:text="${#numbers.formatInteger(menu.price, 0, 'COMMA')} + '원'">가격</span>
-                            <span class="card-store" th:text="${menu.store.name}">가게명</span>
+                            <span class="card-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
+                            <span class="card-store" th:text="${product.store.name}">가게명</span>
                         </div>
                     </div>
                 </a>
@@ -436,8 +444,8 @@
             
             <div th:if="${#lists.isEmpty(collaborationMenus) and #lists.isEmpty(liveProducts)}" class="empty-state">
                 <div class="empty-icon">🤝</div>
-                <h3>콜라보 제품이 없습니다</h3>
-                <p>특별한 콜라보 제품들이 곧 출시될 예정입니다!</p>
+                <h3>콜라보 상품이 없습니다</h3>
+                <p>특별한 콜라보 상품들이 곧 출시될 예정입니다!</p>
             </div>
         </section>
     </div>

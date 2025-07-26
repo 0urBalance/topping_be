@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>콜라보 현황 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -43,11 +48,11 @@
 
         <div class="collaborations-grid">
             <div th:each="collaboration : ${collaborations}" class="collaboration-card">
-                <h3 th:text="${collaboration.product.title}">프로젝트 제목</h3>
+                <h3 th:text="${collaboration.product.name}">프로젝트 제목</h3>
                 
-                <p><strong>프로젝트 작성자:</strong> <span th:text="${collaboration.product.creator.username}">작성자</span></p>
+                <p><strong>프로젝트 작성자:</strong> <span th:text="${collaboration.product.creator != null ? collaboration.product.creator.username : '알 수 없음'}">작성자</span></p>
                 <p><strong>콜라보 신청자:</strong> <span th:text="${collaboration.applicant.username}">신청자</span></p>
-                <p th:if="${collaboration.applicantProduct != null}"><strong>신청자 상품:</strong> <span th:text="${collaboration.applicantProduct.title}">신청자 상품</span></p>
+                <p th:if="${collaboration.applicantProduct != null}"><strong>신청자 상품:</strong> <span th:text="${collaboration.applicantProduct.name}">신청자 상품</span></p>
                 
                 <div class="status-badge" 
                      th:classappend="${collaboration.status.name() == 'PENDING'} ? 'status-pending' : (${collaboration.status.name() == 'ACCEPTED'} ? 'status-accepted' : 'status-rejected')">

@@ -7,9 +7,9 @@ import java.util.UUID;
 
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
 import org.balanceus.topping.application.service.ImageUploadService;
-import org.balanceus.topping.application.service.MenuService;
+import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
-import org.balanceus.topping.domain.model.Menu;
+import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreImage;
 import org.balanceus.topping.domain.repository.StoreLikeRepository;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StoreController {
 
     private final StoreService storeService;
-    private final MenuService menuService;
+    private final ProductService productService;
     private final ImageUploadService imageUploadService;
     private final StoreLikeRepository storeLikeRepository;
     private final WishlistRepository wishlistRepository;
@@ -225,7 +225,7 @@ public class StoreController {
         
         Optional<Store> storeOptional;
         try {
-            storeOptional = storeService.getStoreByIdWithMenusAndTags(storeId);
+            storeOptional = storeService.getStoreByIdWithProductsAndTags(storeId);
         } catch (Exception e) {
             log.warn("Failed to fetch store with menus and tags, falling back to simple query", e);
             storeOptional = storeService.getStoreById(storeId);
@@ -245,13 +245,14 @@ public class StoreController {
         }
         model.addAttribute("isOwner", isOwner);
         
-        // Use Store entity helper methods for menus - with null safety
-        List<Menu> popularMenus = store.getPopularMenus();
-        List<Menu> signatureMenus = store.getSignatureMenus();
+        // Use Store entity helper methods for products - with null safety
+        List<Product> popularProducts = store.getPopularProducts();
+        List<Product> signatureProducts = store.getSignatureProducts();
+        
         
         // Ensure lists are never null for template
-        model.addAttribute("popularMenus", popularMenus != null ? popularMenus : new ArrayList<>());
-        model.addAttribute("signatureMenus", signatureMenus != null ? signatureMenus : new ArrayList<>());
+        model.addAttribute("popularMenus", popularProducts != null ? popularProducts : new ArrayList<>());
+        model.addAttribute("signatureMenus", signatureProducts != null ? signatureProducts : new ArrayList<>());
         
         // Get actual like and wishlist data
         long likeCount = storeLikeRepository.countByStore(store);

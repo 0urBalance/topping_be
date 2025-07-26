@@ -77,7 +77,7 @@ public class MyPageController {
 		List<Collaboration> receivedApplications = collaborationRepository.findByProductCreator(user);
 		
 		// Get user's registered products
-		List<Product> myProducts = productService.getProductsByCreator(principal.getName());
+		List<Product> myProducts = productService.getProductsByCreator(user.getUuid());
 		
 		// Get user's collaboration products
 		List<CollaborationProduct> myCollaborationProducts = collaborationProductRepository.findAll();
@@ -171,7 +171,7 @@ public class MyPageController {
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
 		// Get user's registered products
-		List<Product> myProducts = productService.getProductsByCreator(principal.getName());
+		List<Product> myProducts = productService.getProductsByCreator(user.getUuid());
 		
 		model.addAttribute("myProducts", myProducts);
 		return "mypage/product";

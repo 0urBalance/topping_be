@@ -3,65 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${product.title}">상품 상세 - Topping</title>
+    <title th:text="${product.name} + ' - 토핑'">상품 상세 - 토핑</title>
+    
+    <!-- CSS Framework -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .nav { text-align: center; margin-bottom: 40px; }
-        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .nav a:hover { text-decoration: underline; }
-        .product-detail { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .product-title { color: #333; margin-bottom: 20px; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-        .product-meta { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        .product-meta p { margin: 5px 0; color: #666; }
-        .product-category { background: #e9ecef; padding: 6px 12px; border-radius: 4px; font-size: 14px; color: #495057; display: inline-block; }
-        .product-description { line-height: 1.6; color: #333; margin: 20px 0; }
-        .product-image { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; }
-        .actions { text-align: center; margin-top: 30px; }
-        .btn { display: inline-block; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 16px; margin: 0 10px; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-primary:hover { background: #0056b3; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #1e7e34; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:hover { background: #545b62; }
+        /* Page-specific styles */
+        .detail-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: var(--spacing-xl);
+        }
+        
+        .product-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .product-header h1 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .product-image-container {
+            text-align: center;
+            margin: var(--spacing-xl) 0;
+        }
+        
+        .product-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .product-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            min-width: 80px;
+        }
+        
+        .meta-value {
+            color: var(--medium-gray);
+        }
+        
+        .price-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .category-badge {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .store-info {
+            background: var(--light-bg);
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            margin: var(--spacing-lg) 0;
+        }
+        
+        @media (max-width: 768px) {
+            .product-meta {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-<body style="padding: 0;">
-    <div th:replace="fragments/navbar :: navbar"></div>
-    <div class="container" style="padding-top: 2rem;">
+<body class="main-body">
+    <!-- Include Navigation Bar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Error Messages -->
-        <div th:if="${param.error}" class="alert alert-error" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
-            <span th:if="${param.error[0] == 'cannot_apply_own_product'}">본인의 상품에는 콜라보 신청할 수 없습니다.</span>
-        </div>
+    <main id="main-content" class="main-content">
+        <div class="detail-container">
 
-        <div class="product-detail">
-            <h1 class="product-title" th:text="${product.title}">상품 제목</h1>
+            <!-- Success/Error Messages -->
+            <div th:if="${param.success}" class="alert alert-success">
+                <span th:if="${param.success[0] == 'updated'}">상품이 성공적으로 수정되었습니다!</span>
+            </div>
             
-            <div class="product-meta">
-                <p><strong>작성자:</strong> <span th:text="${product.creator.username}">사용자명</span></p>
-                <p><strong>이메일:</strong> <span th:text="${product.creator.email}">user@example.com</span></p>
-                <p><strong>등록일:</strong> <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</span></p>
-                <p><strong>카테고리:</strong> <span class="product-category" th:text="${product.category}">카테고리</span></p>
+            <div th:if="${param.error}" class="alert alert-error">
+                <span th:if="${param.error[0] == 'cannot_apply_own_product'}">본인의 상품에는 콜라보 신청할 수 없습니다.</span>
             </div>
 
-            <div th:if="${product.imageUrl}" class="product-image-container">
-                <img th:src="${product.imageUrl}" th:alt="${product.title}" class="product-image">
+            <div class="product-header">
+                <h1 th:text="${product.name}">상품명</h1>
+                <p>상품 상세 정보</p>
             </div>
 
-            <div class="product-description">
-                <h3>상품 설명</h3>
-                <p th:text="${product.description}">상품 설명</p>
+            <!-- Product Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">상품 정보</h3>
+                </div>
+                <div class="card-body">
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">가격:</span>
+                            <span class="price-display" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">카테고리:</span>
+                            <span class="category-badge" th:text="${product.category.displayName}">카테고리</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">리뷰 수:</span>
+                            <span class="meta-value" th:text="${product.reviewCount} + '개'">리뷰 수</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">등록일:</span>
+                            <span class="meta-value" th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd')}">등록일</span>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${product.description != null and !product.description.empty}" style="margin-top: var(--spacing-lg);">
+                        <h4>상품 설명</h4>
+                        <p th:text="${product.description}" style="line-height: 1.6; color: var(--medium-gray);">상품 설명</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="actions">
-                <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn btn-success">콜라보 신청하기</a>
-                <a href="/products" class="btn btn-secondary">목록으로 돌아가기</a>
+            <!-- Product Image -->
+            <div th:if="${product.mainImage != null or product.thumbnailPath != null or product.imageUrl != null}" class="product-image-container">
+                <img th:if="${product.mainImage != null}" 
+                     th:src="${product.mainImage.imagePath}" 
+                     th:alt="${product.name}" 
+                     class="product-image">
+                <img th:if="${product.mainImage == null and product.thumbnailPath != null}" 
+                     th:src="${product.thumbnailPath}" 
+                     th:alt="${product.name}" 
+                     class="product-image">
+                <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}" 
+                     th:src="${product.imageUrl}" 
+                     th:alt="${product.name}" 
+                     class="product-image">
+            </div>
+
+            <!-- Store Information -->
+            <div class="store-info">
+                <h4>등록 스토어 정보</h4>
+                <div class="product-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">스토어:</span>
+                        <span class="meta-value">
+                            <a th:href="@{/stores/{id}(id=${product.store.uuid})}" 
+                               th:text="${product.store.name}" 
+                               style="color: var(--primary-color); text-decoration: none;">스토어명</a>
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">등록자:</span>
+                        <span class="meta-value" th:text="${product.creator != null ? product.creator.username : '알 수 없음'}">사용자명</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; margin-top: var(--spacing-xl);">
+                <a th:href="@{/collabo/apply/{id}(id=${product.uuid})}" class="btn btn-primary">
+                    🤝 콜라보 신청하기
+                </a>
+                <!-- Edit button for product owner -->
+                <a sec:authorize="isAuthenticated()" 
+                   th:if="${product.creator.uuid == #authentication.principal.user.uuid}"
+                   th:href="@{/products/{id}/edit(id=${product.uuid})}" 
+                   class="btn btn-secondary">
+                    ✏️ 수정하기
+                </a>
+                <a th:href="@{/products}" class="btn btn-outline">
+                    🔙 목록으로
+                </a>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- Common Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+
+    <!-- Framework JavaScript -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/main-common.js}"></script>
 </body>
 </html>

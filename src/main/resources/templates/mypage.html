@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Page - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -234,7 +239,7 @@
             <div th:each="pendingApp : ${#lists.size(pendingApplications) > 3 ? #lists.subList(pendingApplications, 0, 3) : pendingApplications}" class="activity-item">
                 <div class="activity-icon pending">⏳</div>
                 <div class="activity-content">
-                    <div class="activity-title" th:text="'콜라보 신청: ' + ${pendingApp.product.title}">콜라보 신청</div>
+                    <div class="activity-title" th:text="'콜라보 신청: ' + ${pendingApp.product.name}">콜라보 신청</div>
                     <div class="activity-description">대기 중인 신청</div>
                 </div>
                 <div class="activity-time" th:text="${#temporals.format(pendingApp.createdAt, 'MM-dd')}">날짜</div>
@@ -244,7 +249,7 @@
             <div th:each="collaboration : ${#lists.size(ongoingCollaborations) > 2 ? #lists.subList(ongoingCollaborations, 0, 2) : ongoingCollaborations}" class="activity-item">
                 <div class="activity-icon accepted">🤝</div>
                 <div class="activity-content">
-                    <div class="activity-title" th:text="'진행중: ' + ${collaboration.product.title}">진행중 콜라보</div>
+                    <div class="activity-title" th:text="'진행중: ' + ${collaboration.product.name}">진행중 콜라보</div>
                     <div class="activity-description">활성 콜라보레이션</div>
                 </div>
                 <div class="activity-time" th:text="${#temporals.format(collaboration.createdAt, 'MM-dd')}">날짜</div>
@@ -254,7 +259,7 @@
             <div th:each="received : ${#lists.size(receivedApplications) > 2 ? #lists.subList(receivedApplications, 0, 2) : receivedApplications}" class="activity-item">
                 <div class="activity-icon received">📩</div>
                 <div class="activity-content">
-                    <div class="activity-title" th:text="'신청 받음: ' + ${received.product.title}">받은 신청</div>
+                    <div class="activity-title" th:text="'신청 받음: ' + ${received.product.name}">받은 신청</div>
                     <div class="activity-description" th:text="${received.applicant.username} + '님의 신청'">신청자 정보</div>
                 </div>
                 <div class="activity-time" th:text="${#temporals.format(received.createdAt, 'MM-dd')}">날짜</div>

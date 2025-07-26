@@ -16,11 +16,11 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
-import org.balanceus.topping.domain.model.Menu;
-import org.balanceus.topping.domain.model.MenuImage;
+import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.ProductImage;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreImage;
-import org.balanceus.topping.domain.repository.MenuImageRepository;
+import org.balanceus.topping.domain.repository.ProductImageRepository;
 import org.balanceus.topping.domain.repository.StoreImageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageUploadService {
 
     private final StoreImageRepository storeImageRepository;
-    private final MenuImageRepository menuImageRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Value("${app.upload.dir:src/main/resources/static}")
     private String uploadDir;
@@ -79,36 +79,6 @@ public class ImageUploadService {
         return uploadedPaths;
     }
 
-    public List<String> uploadMenuImages(Menu menu, MultipartFile[] files, MenuImage.ImageType imageType) {
-        List<String> uploadedPaths = new ArrayList<>();
-        
-        for (MultipartFile file : files) {
-            try {
-                validateImageFile(file);
-                String imagePath = saveImageFile(file, "products", menu.getUuid().toString());
-                
-                MenuImage menuImage = new MenuImage();
-                menuImage.setMenu(menu);
-                menuImage.setImagePath(imagePath);
-                menuImage.setOriginalFilename(file.getOriginalFilename());
-                menuImage.setImageType(imageType);
-                menuImage.setFileSize(file.getSize());
-                menuImage.setContentType(file.getContentType());
-                menuImage.setDisplayOrder(getNextDisplayOrder(menu));
-                
-                menuImageRepository.save(menuImage);
-                uploadedPaths.add(imagePath);
-                
-                log.info("Successfully uploaded menu image: {} for menu: {}", imagePath, menu.getUuid());
-                
-            } catch (Exception e) {
-                log.error("Failed to upload image for menu: {}", menu.getUuid(), e);
-                throw new RuntimeException("이미지 업로드에 실패했습니다: " + e.getMessage());
-            }
-        }
-        
-        return uploadedPaths;
-    }
 
     private void validateImageFile(MultipartFile file) {
         if (file.isEmpty()) {
@@ -203,9 +173,6 @@ public class ImageUploadService {
         return (int) storeImageRepository.countByStore(store);
     }
 
-    private int getNextDisplayOrder(Menu menu) {
-        return (int) menuImageRepository.countByMenu(menu);
-    }
 
     public void deleteStoreImage(UUID imageId) {
         try {
@@ -226,24 +193,6 @@ public class ImageUploadService {
         }
     }
 
-    public void deleteMenuImage(UUID imageId) {
-        try {
-            // First, get the image details before deletion
-            MenuImage menuImage = menuImageRepository.findByUuid(imageId)
-                    .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
-            
-            // Delete the physical file
-            deletePhysicalFile(menuImage.getImagePath());
-            
-            // Delete the database record
-            menuImageRepository.deleteByUuid(imageId);
-            
-            log.info("Successfully deleted menu image: {} (path: {})", imageId, menuImage.getImagePath());
-        } catch (Exception e) {
-            log.error("Failed to delete menu image: {}", imageId, e);
-            throw new RuntimeException("이미지 삭제에 실패했습니다: " + e.getMessage());
-        }
-    }
 
     /**
      * Delete physical file from filesystem
@@ -285,6 +234,77 @@ public class ImageUploadService {
         } catch (Exception e) {
             log.error("Failed to delete physical file: {}", imagePath, e);
             // Don't throw exception for file deletion errors to avoid blocking database cleanup
+        }
+    }
+
+    /**
+     * Upload a single product image (thumbnail)
+     */
+    public String uploadProductImage(Product product, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Image file is required");
+        }
+
+        validateImageFile(file);
+
+        try {
+            // Create product directory
+            String productDir = "/image/products/" + product.getUuid() + "/";
+            Path productPath = Paths.get(uploadDir + productDir);
+            Files.createDirectories(productPath);
+
+            // Generate unique filename
+            String originalFilename = file.getOriginalFilename();
+            String extension = getFileExtension(originalFilename);
+            String filename = UUID.randomUUID().toString() + "." + extension;
+            String imagePath = productDir + filename;
+
+            // Process and save image
+            BufferedImage processedImage = processImage(file);
+            File outputFile = new File(uploadDir + imagePath);
+            ImageIO.write(processedImage, extension, outputFile);
+
+            // Save product image metadata
+            ProductImage productImage = new ProductImage();
+            productImage.setImagePath(imagePath);
+            productImage.setOriginalFilename(originalFilename);
+            productImage.setFileSize(file.getSize());
+            productImage.setContentType(file.getContentType());
+            productImage.setImageType(ProductImage.ImageType.MAIN);
+            productImage.setDisplayOrder(getNextDisplayOrder(product));
+            productImage.setProduct(product);
+
+            productImageRepository.save(productImage);
+
+            log.info("Successfully uploaded product image: {} for product: {}", imagePath, product.getUuid());
+            return imagePath;
+
+        } catch (IOException e) {
+            log.error("Failed to upload product image for product: {}", product.getUuid(), e);
+            throw new RuntimeException("Image upload failed: " + e.getMessage());
+        }
+    }
+
+    private int getNextDisplayOrder(Product product) {
+        return (int) productImageRepository.countByProduct(product);
+    }
+
+    public void deleteProductImage(UUID imageId) {
+        try {
+            // First, get the image details before deletion
+            ProductImage productImage = productImageRepository.findByUuid(imageId)
+                    .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
+            
+            // Delete the physical file
+            deletePhysicalFile(productImage.getImagePath());
+            
+            // Delete the database record
+            productImageRepository.deleteByUuid(imageId);
+            
+            log.info("Successfully deleted product image: {} (path: {})", imageId, productImage.getImagePath());
+        } catch (Exception e) {
+            log.error("Failed to delete product image: {}", imageId, e);
+            throw new RuntimeException("이미지 삭제에 실패했습니다: " + e.getMessage());
         }
     }
 }

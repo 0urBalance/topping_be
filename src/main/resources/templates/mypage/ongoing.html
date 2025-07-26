@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>진행중 콜라보 - Topping</title>
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
@@ -135,9 +140,9 @@
                     </div>
                     
                     <div class="partner-info">
-                        <div class="partner-avatar" th:text="${#strings.substring(collaboration.product.creator.username, 0, 1)}">P</div>
+                        <div class="partner-avatar" th:text="${collaboration.product.creator != null ? #strings.substring(collaboration.product.creator.username, 0, 1) : '?'}">P</div>
                         <div class="partner-details">
-                            <h4 th:text="${collaboration.product.creator.username}">파트너명</h4>
+                            <h4 th:text="${collaboration.product.creator != null ? collaboration.product.creator.username : '알 수 없음'}">파트너명</h4>
                             <p>콜라보 파트너</p>
                         </div>
                     </div>

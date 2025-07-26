@@ -1,7 +1,9 @@
 package org.balanceus.topping.domain.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
@@ -69,7 +71,7 @@ public class Store {
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC, createdAt ASC")
-    private List<StoreImage> images = new ArrayList<>();
+    private Set<StoreImage> images = new LinkedHashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "store_tags", joinColumns = @JoinColumn(name = "store_uuid"))
@@ -77,8 +79,8 @@ public class Store {
     private List<String> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("menuType ASC, reviewCount DESC, name ASC")
-    private List<Menu> menus = new ArrayList<>();
+    @OrderBy("productType ASC, reviewCount DESC, name ASC")
+    private List<Product> products = new ArrayList<>();
 
     // Helper methods for image management
     public void addImage(StoreImage image) {
@@ -110,27 +112,27 @@ public class Store {
                 .orElse(null);
     }
 
-    // Helper methods for menu management
-    public void addMenu(Menu menu) {
-        menus.add(menu);
-        menu.setStore(this);
+    // Helper methods for product management
+    public void addProduct(Product product) {
+        products.add(product);
+        product.setStore(this);
     }
 
-    public void removeMenu(Menu menu) {
-        menus.remove(menu);
-        menu.setStore(null);
+    public void removeProduct(Product product) {
+        products.remove(product);
+        product.setStore(null);
     }
 
-    public List<Menu> getPopularMenus() {
-        return menus.stream()
-                .filter(menu -> menu.getMenuType() == Menu.MenuType.COLLABORATION || menu.getReviewCount() > 10)
+    public List<Product> getPopularProducts() {
+        return products.stream()
+                .filter(product -> product.getProductType() == Product.ProductType.COLLABORATION || product.getReviewCount() > 10)
                 .limit(6)
                 .toList();
     }
 
-    public List<Menu> getSignatureMenus() {
-        return menus.stream()
-                .filter(menu -> menu.getMenuType() == Menu.MenuType.SIGNATURE)
+    public List<Product> getSignatureProducts() {
+        return products.stream()
+                .filter(product -> product.getProductType() == Product.ProductType.SIGNATURE)
                 .limit(6)
                 .toList();
     }

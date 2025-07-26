@@ -16,18 +16,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "menu_images")
+@Table(name = "product_images")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuImage {
+public class ProductImage {
 
     @Id
     @GeneratedValue
@@ -43,31 +44,31 @@ public class MenuImage {
     private String originalFilename;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ImageType imageType = ImageType.MAIN;
-
-    @Column(nullable = false)
+    @NotNull(message = "File size is required")
     private Long fileSize;
 
     @Column(nullable = false)
+    @NotBlank(message = "Content type is required")
     private String contentType;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ImageType imageType = ImageType.GALLERY;
+
     private Integer displayOrder = 0;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @ManyToOne
-    @JoinColumn(name = "menu_uuid", nullable = false)
-    private Menu menu;
+    @JoinColumn(name = "product_uuid", nullable = false)
+    private Product product;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
     public enum ImageType {
         MAIN("대표 이미지"),
         GALLERY("갤러리 이미지"),
-        INGREDIENT("재료 이미지"),
-        DETAIL("상세 이미지");
+        DETAIL("상세 이미지"),
+        THUMBNAIL("썸네일 이미지");
 
         private final String displayName;
 

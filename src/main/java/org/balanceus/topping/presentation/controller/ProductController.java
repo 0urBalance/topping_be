@@ -5,11 +5,16 @@ import java.util.UUID;
 import java.security.Principal;
 
 import org.balanceus.topping.application.dto.ProductRequestDto;
+import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.ProductService;
+import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
+import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +22,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.BindingResult;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +40,8 @@ import jakarta.validation.Valid;
 public class ProductController {
 
 	private final ProductService productService;
+	private final StoreService storeService;
+	private final ImageUploadService imageUploadService;
 	private final UserRepository userRepository;
 
 	@GetMapping
@@ -42,19 +52,26 @@ public class ProductController {
 	}
 
 	@GetMapping("/create")
-	public String createProductForm(Model model, Principal principal) {
-		log.debug("Product creation form accessed by: {}", principal != null ? principal.getName() : "anonymous");
-		
-		if (principal == null) {
-			log.warn("Unauthenticated user attempted to access product creation form");
+	public String createProductForm(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+		if (userDetails == null) {
 			return "redirect:/login";
 		}
 		
-		// Verify user exists in database
-		User user = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+		// Check if user has business owner role
+		String userRole = userDetails.getUser().getRole().name();
+		if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+			log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+			return "redirect:/mypage?error=access_denied";
+		}
 		
-		model.addAttribute("user", user);
+		// Get user's stores
+		List<Store> userStores = storeService.getStoresByUser(userDetails.getUser().getUuid());
+		if (userStores.isEmpty()) {
+			return "redirect:/stores/register?error=no_store";
+		}
+		
+		model.addAttribute("user", userDetails.getUser());
+		model.addAttribute("userStores", userStores);
 		model.addAttribute("productRequest", new ProductRequestDto());
 		return "products/create";
 	}
@@ -63,40 +80,57 @@ public class ProductController {
 	public String createProduct(
 			@Valid @ModelAttribute("productRequest") ProductRequestDto productRequest,
 			BindingResult bindingResult,
+			@RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
 			Model model,
-			Principal principal) {
-		
-		log.debug("Product creation attempt by: {}", principal != null ? principal.getName() : "anonymous");
+			@AuthenticationPrincipal UserDetailsImpl userDetails,
+			RedirectAttributes redirectAttributes) {
 		
 		// Validate authentication
-		if (principal == null) {
-			log.warn("Unauthenticated user attempted product creation");
+		if (userDetails == null) {
 			return "redirect:/login";
+		}
+		
+		// Check if user has business owner role
+		String userRole = userDetails.getUser().getRole().name();
+		if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+			log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+			return "redirect:/mypage?error=access_denied";
 		}
 		
 		// Handle validation errors
 		if (bindingResult.hasErrors()) {
-			log.warn("Product creation validation failed for user: {}", principal.getName());
-			// Re-populate user for form display
-			User user = userRepository.findByEmail(principal.getName())
-					.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
-			model.addAttribute("user", user);
+			log.warn("Product creation validation failed for user: {}", userDetails.getUser().getEmail());
+			// Re-populate data for form display
+			List<Store> userStores = storeService.getStoresByUser(userDetails.getUser().getUuid());
+			model.addAttribute("user", userDetails.getUser());
+			model.addAttribute("userStores", userStores);
 			return "products/create";
 		}
 
 		try {
-			// Create product using service with authenticated user
-			Product createdProduct = productService.createProduct(productRequest, principal.getName());
-			log.info("Product created successfully: {} by user: {}", createdProduct.getUuid(), principal.getName());
-			return "redirect:/products?success=created";
+			// Create product using service
+			Product createdProduct = productService.createProduct(productRequest, userDetails.getUser().getUuid());
+			
+			// Handle image upload if provided
+			if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+				String imagePath = imageUploadService.uploadProductImage(createdProduct, thumbnailFile);
+				createdProduct.setThumbnailPath(imagePath);
+				productService.updateProduct(createdProduct);
+			}
+			
+			log.info("Product created successfully: {} by user: {}", createdProduct.getUuid(), userDetails.getUser().getEmail());
+			redirectAttributes.addFlashAttribute("successMessage", "Product created successfully!");
+			return "redirect:/products/" + createdProduct.getUuid();
 			
 		} catch (IllegalArgumentException e) {
 			log.error("Product creation failed due to invalid data: {}", e.getMessage());
-			return "redirect:/products/create?error=invalid_data";
+			redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+			return "redirect:/products/create";
 			
 		} catch (Exception e) {
-			log.error("Product creation failed for user: {} - {}", principal.getName(), e.getMessage());
-			return "redirect:/products/create?error=save_failed";
+			log.error("Product creation failed for user: {} - {}", userDetails.getUser().getEmail(), e.getMessage());
+			redirectAttributes.addFlashAttribute("errorMessage", "Product creation failed");
+			return "redirect:/products/create";
 		}
 	}
 
@@ -121,8 +155,12 @@ public class ProductController {
 		}
 		
 		try {
+			// Get user for form display
+			User user = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+					
 			// Validate ownership first
-			productService.validateProductOwnership(id, principal.getName());
+			productService.validateProductOwnership(id, user.getUuid());
 			
 			// Get the product to edit
 			Product product = productService.getProductById(id)
@@ -130,14 +168,12 @@ public class ProductController {
 			
 			// Create ProductRequestDto with current values
 			ProductRequestDto productRequest = new ProductRequestDto();
-			productRequest.setTitle(product.getTitle());
+			productRequest.setName(product.getName());
 			productRequest.setDescription(product.getDescription());
-			productRequest.setCategory(product.getCategory());
-			productRequest.setImageUrl(product.getImageUrl());
-			
-			// Get user for form display
-			User user = userRepository.findByEmail(principal.getName())
-					.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+			productRequest.setPrice(product.getPrice());
+			productRequest.setCategory(product.getCategory().name().toLowerCase());
+			productRequest.setThumbnailPath(product.getThumbnailPath());
+			productRequest.setStoreId(product.getStore().getUuid());
 			
 			model.addAttribute("product", product);
 			model.addAttribute("productRequest", productRequest);
@@ -186,8 +222,12 @@ public class ProductController {
 				return "products/edit";
 			}
 			
+			// Get the user UUID
+			User user = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+					
 			// Update product using service
-			Product updatedProduct = productService.updateProduct(id, productRequest, principal.getName());
+			Product updatedProduct = productService.updateProduct(id, productRequest, user.getUuid());
 			log.info("Product updated successfully: {} by user: {}", updatedProduct.getUuid(), principal.getName());
 			return "redirect:/products/" + id + "?success=updated";
 			

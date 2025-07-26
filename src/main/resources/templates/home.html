@@ -229,10 +229,11 @@
         .product-image {
             width: 100%;
             height: 150px;
-            background: #f97316;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23dc2626"/></svg>');
+            background: #f8f9fa;
             background-size: cover;
             background-position: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .product-info {
@@ -527,27 +528,48 @@
                 </div>
 
                 <div class="products-section">
-                    <div class="product-card" th:each="product : ${recentProducts}">
-                        <div class="product-image"></div>
+                    <div class="product-card clickable-product-card" th:each="product : ${recentProducts}" th:attr="data-product-uuid=${product.uuid}">
+                        <div class="product-image">
+                            <img th:if="${product.mainImage != null}"
+                                 th:src="${product.mainImage.imagePath}"
+                                 th:alt="${product.name}"
+                                 style="width: 100%; height: 100%; object-fit: cover;" />
+                            <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+                                 th:src="${product.thumbnailPath}"
+                                 th:alt="${product.name}"
+                                 style="width: 100%; height: 100%; object-fit: cover;" />
+                            <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+                                 th:src="${product.imageUrl}"
+                                 th:alt="${product.name}"
+                                 style="width: 100%; height: 100%; object-fit: cover;" />
+                            <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+                                 style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;">
+                                📦
+                            </div>
+                        </div>
                         <div class="product-info">
-                            <h3 class="product-title" th:text="${product.title}">오션 브랜드헬프</h3>
-                            <p class="product-desc" th:text="${product.description}">오션 브랜드 스스로 매친 프로젝트 보편 우바님과의 콜라보를 통해
-                                맞춤형 제품을 만들어보세요</p>
+                            <h3 class="product-title" th:text="${product.name}">상품 타이들</h3>
+                            <p class="product-desc" th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 상세 설명</p>
                             <div class="product-actions">
-                                <button class="btn-outline">관심</button>
-                                <button class="btn-outline btn-primary">신청하기</button>
+                                <button class="btn-outline wishlist-btn" th:attr="data-product-uuid=${product.uuid}">관심</button>
+                                <button class="btn-outline btn-primary apply-btn" th:attr="data-product-uuid=${product.uuid}">신청하기</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="product-card" th:unless="${recentProducts != null and !recentProducts.isEmpty()}">
-                        <div class="product-image"></div>
+                    <!-- Empty state when no products exist -->
+                    <div th:if="${#lists.isEmpty(recentProducts)}" class="product-card" style="opacity: 0.6;">
+                        <div class="product-image">
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;">
+                                📦
+                            </div>
+                        </div>
                         <div class="product-info">
-                            <h3 class="product-title">수제순물레링</h3>
-                            <p class="product-desc">수제순물레링 같은 대선거운 법선의 세입으로 다양한 온스타일을 만들어보세요</p>
+                            <h3 class="product-title">등록된 상품이 없습니다</h3>
+                            <p class="product-desc">곧 멋진 상품들이 등록될 예정입니다!</p>
                             <div class="product-actions">
-                                <button class="btn-outline">관심</button>
-                                <button class="btn-outline btn-primary">신청하기</button>
+                                <button class="btn-outline" disabled>관심</button>
+                                <button class="btn-outline btn-primary" onclick="location.href='/products/create'">상품 등록</button>
                             </div>
                         </div>
                     </div>
@@ -599,5 +621,82 @@
 <!-- Common Scripts -->
 <script th:src="@{/js/sidebar.js}"></script>
 <script th:src="@{/js/common.js}"></script>
+
+<script>
+// Handle wishlist toggle
+function toggleWishlist(button, productUuid) {
+    // Check if user is authenticated
+    // This is a placeholder - implement actual authentication check
+    console.log('Toggle wishlist for product:', productUuid);
+    
+    // Toggle button state
+    if (button.textContent === '관심') {
+        button.textContent = '♥ 관심';
+        button.style.color = '#dc2626';
+    } else {
+        button.textContent = '관심';
+        button.style.color = '';
+    }
+    
+    // TODO: Implement actual API call to add/remove from wishlist
+    // await fetch(`/api/wishlist/${productUuid}`, { method: 'POST' });
+}
+
+// Add hover effects and click handlers to product cards
+document.addEventListener('DOMContentLoaded', function() {
+    const productCards = document.querySelectorAll('.product-card');
+    
+    productCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.cursor = 'pointer';
+        });
+        
+        // Add click handler for navigation
+        if (card.classList.contains('clickable-product-card')) {
+            card.addEventListener('click', function(e) {
+                // Don't trigger if clicking on a button
+                if (e.target.tagName !== 'BUTTON') {
+                    const productUuid = this.dataset.productUuid;
+                    if (productUuid) {
+                        location.href = '/products/' + productUuid;
+                    }
+                }
+            });
+        }
+    });
+    
+    // Handle wishlist button clicks
+    document.querySelectorAll('.wishlist-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card click
+            const productUuid = this.dataset.productUuid;
+            toggleWishlist(this, productUuid);
+        });
+    });
+    
+    // Handle apply button clicks
+    document.querySelectorAll('.apply-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card click
+            const productUuid = this.dataset.productUuid;
+            if (productUuid) {
+                location.href = '/collabo/apply/' + productUuid;
+            }
+        });
+    });
+    
+    // Handle image load errors
+    const productImages = document.querySelectorAll('.product-image img');
+    productImages.forEach(img => {
+        img.addEventListener('error', function() {
+            this.style.display = 'none';
+            const fallback = document.createElement('div');
+            fallback.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;';
+            fallback.textContent = '📦';
+            this.parentElement.appendChild(fallback);
+        });
+    });
+});
+</script>
 </body>
 </html>
