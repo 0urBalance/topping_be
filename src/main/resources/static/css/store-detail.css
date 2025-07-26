@@ -23,7 +23,7 @@ body {
     background-color: var(--light-bg);
     color: var(--dark-gray);
     line-height: 1.6;
-    margin-left: 240px; /* Account for sidebar width */
+    margin-left: 150px; /* Account for sidebar width */
     transition: margin-left 0.3s ease;
 }
 
@@ -39,12 +39,19 @@ body {
     padding: 20px;
 }
 
-/* Header Section */
-.store-header {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 40px;
+/* Hero Section */
+.hero-section {
     margin-bottom: 40px;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.store-info {
     background: white;
     padding: 30px;
     border-radius: var(--border-radius);
@@ -67,6 +74,7 @@ body {
     font-weight: 700;
     color: var(--dark-gray);
     margin-bottom: 10px;
+    line-height: 1.2;
 }
 
 .rating-section {
@@ -158,23 +166,161 @@ body {
     border-color: var(--primary-color);
 }
 
-.store-main-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.store-main-image img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
+.hero-image {
+    position: relative;
+    overflow: hidden;
+    background: rgba(135, 96, 79, 0.1);
     border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: transform 0.2s;
+    box-shadow: var(--shadow);
 }
 
-.store-main-image img:hover {
-    transform: scale(1.02);
+.hero-image img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.hero-image img:hover {
+    transform: scale(1.05);
+}
+
+/* Collaboration Box */
+.collaboration-box {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    height: fit-content;
+}
+
+.collab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.collab-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin: 0;
+    flex: 1;
+    margin-left: 8px;
+}
+
+.collab-header .material-symbols-outlined {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.toggle-btn:hover {
+    background-color: rgba(255, 107, 53, 0.1);
+}
+
+.toggle-btn .material-symbols-outlined {
+    transition: transform 0.2s;
+    color: var(--medium-gray);
+}
+
+.toggle-btn[aria-expanded="true"] .material-symbols-outlined {
+    transform: rotate(180deg);
+}
+
+.collab-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.collab-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.collab-list li:hover {
+    background-color: var(--light-bg);
+}
+
+.collab-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.collab-info strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 2px;
+}
+
+.collab-info span {
+    font-size: 0.8rem;
+    color: var(--medium-gray);
+}
+
+.instagram-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    margin-bottom: 15px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.instagram-link .material-symbols-outlined {
+    color: #e4405f;
+    font-size: 1.2rem;
+}
+
+.instagram-link a {
+    color: var(--info-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    word-break: break-all;
+}
+
+.instagram-link a:hover {
+    text-decoration: underline;
+}
+
+.collaboration-request-btn {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.collaboration-request-btn:hover {
+    background-color: var(--primary-hover);
 }
 
 /* Image Gallery Section */
@@ -216,148 +362,47 @@ body {
     transform: scale(1.02);
 }
 
+.gallery-item {
+    position: relative;
+}
+
 .gallery-item img {
     width: 100%;
     height: 150px;
     object-fit: cover;
 }
 
-/* Collaboration Section */
-.collaboration-section {
-    background: white;
-    padding: 30px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 30px;
-}
-
-.collaboration-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.section-title .icon {
-    font-size: 2rem;
-}
-
-.section-title h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--dark-gray);
-}
-
-.section-title p {
-    margin: 0;
-    color: var(--medium-gray);
-    font-size: 0.9rem;
-}
-
-.toggle-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--medium-gray);
-    cursor: pointer;
-    transition: transform 0.2s, color 0.2s;
-}
-
-.toggle-btn:hover {
-    color: var(--primary-color);
-}
-
-.toggle-btn.active {
-    transform: rotate(180deg);
-}
-
-.collaboration-list {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-color);
-}
-
-.collaboration-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(224, 224, 224, 0.5);
-}
-
-.collaboration-item:last-child {
-    border-bottom: none;
-}
-
-.collaboration-item img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.collab-info {
-    flex: 1;
-}
-
-.collab-info h4 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-    color: var(--dark-gray);
-}
-
-.collab-info p {
-    margin: 0;
-    color: var(--medium-gray);
-    font-size: 0.9rem;
-}
-
-.follow-btn {
-    background-color: var(--primary-color);
+.image-type-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.7);
     color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
-.follow-btn:hover {
-    background-color: #e55a2b;
+.no-images-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--medium-gray);
+    background: rgba(135, 96, 79, 0.05);
+    border-radius: var(--border-radius);
 }
 
-.instagram-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 15px 0;
-    margin-top: 10px;
-    border-top: 1px solid rgba(224, 224, 224, 0.5);
+.no-images-message p {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
 }
 
-.instagram-link i {
-    font-size: 1.5rem;
-    color: #e4405f;
-}
-
-.instagram-link a {
-    color: var(--info-color);
-    text-decoration: none;
+.no-images-message small {
     font-size: 0.9rem;
+    color: var(--light-gray);
 }
 
-.instagram-link a:hover {
-    text-decoration: underline;
-}
 
 /* Menu Sections */
 .menu-section {
@@ -549,15 +594,52 @@ body {
     background: rgba(0, 0, 0, 0.9);
 }
 
-/* Responsive Design */
+/* Tablet Design */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .hero-grid {
+        grid-template-columns: 2fr 2fr 1fr;
+        gap: 15px;
+    }
+    
+    .store-info {
+        padding: 25px;
+    }
+    
+    .hero-image img {
+        height: 250px;
+    }
+    
+    .collaboration-box {
+        padding: 15px;
+    }
+}
+
+/* Mobile Design */
 @media (max-width: 768px) {
     .store-detail-container {
         padding: 10px;
     }
     
-    .store-header {
+    .hero-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 15px;
+    }
+    
+    .store-info {
+        padding: 20px;
+        order: 1;
+    }
+    
+    .hero-image {
+        order: 2;
+    }
+    
+    .hero-image img {
+        height: 200px;
+    }
+    
+    .collaboration-box {
+        order: 3;
         padding: 20px;
     }
     
@@ -600,8 +682,20 @@ body {
 }
 
 @media (max-width: 480px) {
-    .store-header {
-        padding: 15px;
+    .hero-section {
+        margin-bottom: 20px;
+    }
+    
+    .store-info {
+        padding: 20px 15px;
+    }
+    
+    .hero-image {
+        min-height: 220px;
+    }
+    
+    .hero-image img {
+        min-height: 220px;
     }
     
     .image-gallery,

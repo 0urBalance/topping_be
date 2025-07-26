@@ -6,14 +6,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global variables for image gallery
 let currentImageIndex = 0;
-const galleryImages = [
-    '/image/topping_L.png',
-    '/image/topping_M.png',
-    '/image/topping_S.png'
-];
+let galleryImages = [];
+
+// Initialize gallery images from DOM
+function initializeGalleryImages() {
+    const imageElements = document.querySelectorAll('.gallery-item img');
+    galleryImages = Array.from(imageElements).map(img => img.src);
+    
+    // Fallback images if no uploaded images exist
+    if (galleryImages.length === 0) {
+        galleryImages = [
+            '/image/topping_L.png',
+            '/image/topping_M.png',
+            '/image/topping_S.png'
+        ];
+    }
+}
 
 // Initialize page functionality
 function initializePage() {
+    // Initialize gallery images
+    initializeGalleryImages();
+    
     // Add padding to body for fixed bottom bar
     document.body.style.paddingBottom = '90px';
     
@@ -53,16 +67,16 @@ function setupEventListeners() {
 // Toggle collaboration list
 function toggleCollaborationList() {
     const collaborationList = document.getElementById('collaboration-list');
-    const chevron = document.getElementById('collab-chevron');
+    const toggleBtn = document.querySelector('.toggle-btn');
     
     if (collaborationList.style.display === 'none' || collaborationList.style.display === '') {
         collaborationList.style.display = 'block';
         collaborationList.classList.add('show');
-        chevron.classList.add('active');
+        toggleBtn.setAttribute('aria-expanded', 'true');
     } else {
         collaborationList.style.display = 'none';
         collaborationList.classList.remove('show');
-        chevron.classList.remove('active');
+        toggleBtn.setAttribute('aria-expanded', 'false');
     }
 }
 

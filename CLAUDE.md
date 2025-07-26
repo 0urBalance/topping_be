@@ -37,6 +37,8 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - Lombok + Thymeleaf
 - WebSocket for real-time chat
 - Spring Data repositories with three-layer pattern
+- Multi-image upload system with image processing
+- Async task execution with custom thread pools
 
 ## 📁 Domain Reference
 
@@ -377,6 +379,11 @@ window.Topping.copyToClipboard(text);
 - ✅ **CSRF Protection**: Cookie-based token repository, session-safe implementation
 - ✅ **Modal System**: Consistent across all pages, proper event handling
 - ✅ **Footer Integration**: Modal experience integrated across all templates
+- ✅ **Multi-Image Upload System**: Complete file upload infrastructure with validation, processing, and storage
+- ✅ **Store Detail Page**: 3-column responsive layout with enhanced gallery and collaboration features
+- ✅ **Explore Page**: Three-section discovery layout (stores, menus, collaboration products)
+- ✅ **Thread Pool Configuration**: Custom async executor with DiscardOldestPolicy for optimal performance
+- ✅ **Image Management**: Entity relationships, repositories, and service layer for multiple images per store/menu
 
 ### Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -434,6 +441,74 @@ window.Topping.copyToClipboard(text);
 - **Repository Pattern**: Follows three-layer pattern (`SupportInquiryRepository`, `FAQRepository`)
 - **Entity Design**: Uses enums for categories and status tracking
 - **Template Structure**: Modern responsive design with search and pagination
+
+## 🖼️ Multi-Image Upload System
+
+### Image Upload Infrastructure
+- **Service Layer**: `ImageUploadService` handles multi-file uploads with validation and processing
+- **Storage Structure**: Files organized as `/static/image/stores/{storeId}/{UUID}.{ext}` and `/static/image/products/{productId}/{UUID}.{ext}`
+- **File Validation**: JPG, JPEG, PNG only; max 10MB per file; automatic image resizing (max 1920x1080)
+- **Metadata Storage**: `StoreImage` and `MenuImage` entities track original filename, file size, content type, display order
+- **Security**: UUID-based filenames prevent collisions and directory traversal attacks
+
+### Image Entity Management
+- **Store Images**: `StoreImage` entity with types: MAIN, GALLERY, INTERIOR, EXTERIOR
+- **Menu Images**: `MenuImage` entity with types: MAIN, GALLERY, INGREDIENT, DETAIL
+- **Repository Pattern**: Three-layer pattern with `StoreImageRepository`/`MenuImageRepository`
+- **Entity Relationships**: `@OneToMany` relationships with cascade and orphan removal
+- **Helper Methods**: `getImagePaths()`, `getMainImage()`, `getGalleryImages()` for easy access
+
+### Frontend Implementation
+- **Multi-file Selection**: `<input type="file" multiple>` with drag-and-drop support
+- **Real-time Previews**: Thumbnail generation before upload with remove functionality
+- **Auto-upload**: Images upload immediately after selection with progress indicators
+- **Error Handling**: Client-side validation and server-side error reporting
+- **Current Images**: Grid display of existing images with individual delete capability
+
+### API Endpoints
+- **Upload**: `POST /stores/upload-images` - Multi-file upload with image type selection
+- **Delete**: `POST /stores/delete-image/{imageId}` - Individual image deletion
+- **Access Control**: Role-based permissions (BUSINESS_OWNER/ADMIN only)
+- **Response Format**: Standard `ApiResponseData` wrapper with success/error handling
+
+## 🔍 Explore Page System
+
+### Three-Section Layout
+- **Section 1: Store List**: Displays registered stores with thumbnails, names, addresses, categories
+- **Section 2: Menu List**: Shows popular/signature menus with prices, descriptions, store associations
+- **Section 3: Collaboration Products**: Features collaboration menus and live products with special tags
+
+### Controller Enhancement
+- **Data Sources**: `StoreRepository`, `MenuRepository` with pagination (12 items per section)
+- **Query Methods**: `findByMenuTypeOrderByReviewCountDesc()` for popular menu sorting
+- **Performance**: Optimized queries with `PageRequest.of(0, 12)` limiting
+- **Backward Compatibility**: Maintains existing collaboration data structure
+
+### Responsive Card Design
+- **CSS Grid Layout**: `repeat(auto-fill, minmax(300px, 1fr))` for responsive design
+- **Card Components**: Consistent styling with hover effects, shadows, image scaling
+- **Image Handling**: Lazy loading, error fallbacks, placeholder support
+- **Empty States**: User-friendly messages when sections have no content
+
+### Navigation & Performance
+- **Clickable Cards**: Store cards link to `/stores/{id}`, menu cards to store detail pages
+- **Lazy Loading**: Images load only when in viewport using Intersection Observer
+- **Error Recovery**: Automatic fallback to placeholders on image load failure
+- **Mobile Optimization**: Single-column layout on mobile with optimized card sizing
+
+## ⚙️ Async Thread Pool Configuration
+
+### Custom Thread Pool Setup
+- **Configuration Class**: `AsyncConfig.java` with `@EnableAsync` annotation
+- **Thread Pool Settings**: 5 core, 10 max threads, 50 queue capacity
+- **Thread Naming**: `custom-executor-` prefix for easy identification
+- **Rejection Policy**: `ThreadPoolExecutor.DiscardOldestPolicy()` for handling overflow
+
+### Usage Pattern
+- **Annotation**: `@Async("customExecutor")` for method-level async execution
+- **Service Integration**: Available for use in any Spring-managed component
+- **Error Handling**: Proper initialization and resource management
+- **Performance**: Optimized for concurrent image processing and background tasks
 
 ## 🔧 Troubleshooting & Common Issues
 

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.StoreRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,7 @@ public class StoreRepositoryImpl implements StoreRepository {
     }
 
     @Override
-    public List<Store> findAll() {
+    public List<Store> findAll(Pageable pageable) {
         return storeJpaRepository.findAll();
     }
 

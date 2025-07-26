@@ -8,6 +8,10 @@
     <!-- CSS Framework -->
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/store-detail.css}">
+    <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
@@ -25,101 +29,109 @@
         <!-- Main Content -->
         <main id="main-content" class="main-content">
             <div class="store-detail-container">
-        <!-- Header Section -->
-        <div class="store-header">
-            <div class="store-info">
-                <div class="category-badge" th:text="${store.category}">카페</div>
-                <h1 class="store-name" th:text="${store.name}">예쁜루아 본점</h1>
-                <div class="rating-section">
+            <!-- Hero Section: 3열 그리드 -->
+            <section class="hero-section">
+              <div class="hero-grid">
+                
+                <!-- 1. 가게 정보 -->
+                <div class="store-info">
+                  <div class="category-badge" th:text="${store.category}">카페</div>
+                  <h1 class="store-name" th:text="${store.name}">에펠루아 본점</h1>
+                  <div class="rating-section">
                     <span class="rating">⭐ <span th:text="${rating}">4.9</span></span>
                     <span class="review-count">(<span th:text="${reviewCount}">1,114</span>)</span>
-                </div>
-                <div class="address">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span th:text="${store.address}">강원특별자치도 강릉시 창해로 351-7 7 쟈이(주) 본점</span>
-                    <button class="map-btn" onclick="openMapModal()">🗺️</button>
-                </div>
-                <div class="hashtags">
+                  </div>
+                  <div class="address">
+                    <span class="material-symbols-outlined">location_on</span>
+                    <span th:text="${store.address}">강원특별자치도 강릉시 창해로 361-77</span>
+                  </div>
+                  <div class="hashtags">
                     <span class="hashtag">#강릉</span>
                     <span class="hashtag">#디저트맛집</span>
                     <span class="hashtag">#인스타핫플</span>
                     <span class="hashtag">#아메리카노맛집</span>
                     <span class="hashtag">#차림상차림여행</span>
-                </div>
-                <div class="social-stats">
+                  </div>
+                  <div class="social-stats">
                     <button class="stat-btn like-btn" onclick="toggleLike()">
-                        <i class="fas fa-thumbs-up"></i>
-                        <span class="count" th:text="${likeCount}">23</span>
+                      <span class="material-symbols-outlined">thumb_up</span>
+                      <span th:text="${likeCount}">23</span>
                     </button>
                     <button class="stat-btn wishlist-btn" onclick="toggleWishlist()">
-                        <i class="fas fa-heart"></i>
-                        <span class="count" th:text="${wishlistCount}">115</span>
+                      <span class="material-symbols-outlined">favorite</span>
+                      <span th:text="${wishlistCount}">1,115</span>
                     </button>
+                  </div>
                 </div>
-            </div>
-            <div class="store-main-image">
-                <img th:src="${store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png'}" 
-                     th:alt="${store.name}" onclick="openImageGallery(0)">
-            </div>
-        </div>
+                
+                <!-- 2. 대표 이미지 -->
+                <div class="hero-image">
+                  <img th:if="${store.mainImage != null}" 
+                       th:src="${store.mainImage.imagePath}" 
+                       th:alt="${store.name}" onclick="openImageGallery(0)">
+                  <img th:if="${store.mainImage == null}" 
+                       th:src="${store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png'}" 
+                       th:alt="${store.name}" onclick="openImageGallery(0)">
+                </div>
+                
+                <!-- 3. 콜라보 박스 -->
+                <div class="collaboration-box">
+                  <div class="collab-header">
+                    <span class="material-symbols-outlined">handshake</span>
+                    <h3>함께 콜라보 중인 가게</h3>
+                    <button class="toggle-btn" onclick="toggleCollaborationList()" aria-expanded="false">
+                      <span class="material-symbols-outlined" id="collab-chevron">expand_more</span>
+                    </button>
+                  </div>
+                  <ul class="collab-list" id="collaboration-list" style="display:none;">
+                    <li>
+                      <img src="/image/topping_M.png" alt="" class="collab-thumb">
+                      <div class="collab-info">
+                        <strong>강릉 홍게감비</strong>
+                        <span>음식점</span>
+                      </div>
+                    </li>
+                    <li>
+                      <img src="/image/topping_S.png" alt="" class="collab-thumb">
+                      <div class="collab-info">
+                        <strong>핑크파라 초당점</strong>
+                        <span>카페</span>
+                      </div>
+                    </li>
+                  </ul>
+                  <div class="instagram-link">
+                    <span class="material-symbols-outlined">instagram</span>
+                    <a href="https://www.instagram.com/yefeelua_official/" target="_blank" rel="noopener">
+                      instagram.com/yefeelua_official
+                    </a>
+                  </div>
+                  <button class="btn btn-primary collaboration-request-btn"
+                          onclick="openCollaborationModal()">콜라보 요청하기</button>
+                </div>
+                
+              </div><!-- /.hero-grid -->
+            </section>
 
         <!-- Image Gallery Section -->
         <div class="image-gallery">
             <div class="gallery-title">가게 사진</div>
             <div class="gallery-description">가게의 분위기를 보여주는 사진들입니다.</div>
-            <div class="image-grid">
-                <div class="gallery-item" onclick="openImageGallery(0)">
-                    <img th:src="${store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png'}" alt="가게 외관">
+            <div class="image-grid" th:if="${!store.images.empty}">
+                <div class="gallery-item" 
+                     th:each="image, iterStat : ${store.images}" 
+                     th:onclick="'openImageGallery(' + ${iterStat.index} + ')'">
+                    <img th:src="${image.imagePath}" 
+                         th:alt="${image.imageType.displayName}"
+                         th:title="${image.imageType.displayName}">
+                    <div class="image-type-badge" th:text="${image.imageType.displayName}">이미지 타입</div>
                 </div>
-                <div class="gallery-item" onclick="openImageGallery(1)">
-                    <img src="/image/topping_M.png" alt="가게 내부">
-                </div>
-                <div class="gallery-item" onclick="openImageGallery(2)">
-                    <img src="/image/topping_S.png" alt="인테리어">
-                </div>
+            </div>
+            <div th:if="${store.images.empty}" class="no-images-message">
+                <p>아직 등록된 이미지가 없습니다.</p>
+                <small>가게 사장님께서 곧 멋진 사진들을 업로드할 예정입니다.</small>
             </div>
         </div>
 
-        <!-- Collaboration Section -->
-        <div class="collaboration-section">
-            <div class="collaboration-header">
-                <div class="section-title">
-                    <div class="icon">🤝</div>
-                    <div>
-                        <h3>예쁜루아 본점과 콜라보하고 있는 가게 목록</h3>
-                        <p>지금 본점과 콜라보하고 있는 가게들을 보실 수 있습니다.</p>
-                    </div>
-                </div>
-                <button class="toggle-btn" onclick="toggleCollaborationList()">
-                    <i class="fas fa-chevron-down" id="collab-chevron"></i>
-                </button>
-            </div>
-            
-            <div class="collaboration-list" id="collaboration-list" style="display: none;">
-                <div class="collaboration-item">
-                    <img src="/image/topping_M.png" alt="강릉 홍게감비">
-                    <div class="collab-info">
-                        <h4>강릉 홍게감비</h4>
-                        <p>해산물 전문점</p>
-                    </div>
-                    <button class="follow-btn">팔로우</button>
-                </div>
-                <div class="collaboration-item">
-                    <img src="/image/topping_S.png" alt="핑크파라 초당점">
-                    <div class="collab-info">
-                        <h4>핑크파라 초당점</h4>
-                        <p>카페, 디저트</p>
-                    </div>
-                    <button class="follow-btn">팔로우</button>
-                </div>
-                <div class="instagram-link">
-                    <i class="fab fa-instagram"></i>
-                    <a href="https://www.instagram.com/yefeelua_official/" target="_blank">
-                        https://www.instagram.com/yefeelua_official/
-                    </a>
-                </div>
-            </div>
-        </div>
 
         <!-- Popular Menu Section -->
         <div class="menu-section">

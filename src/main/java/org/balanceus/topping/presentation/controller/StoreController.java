@@ -5,10 +5,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
+import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.MenuService;
 import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.domain.model.Menu;
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreImage;
 import org.balanceus.topping.domain.repository.StoreLikeRepository;
 import org.balanceus.topping.domain.repository.WishlistRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
@@ -22,7 +24,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
@@ -37,6 +41,7 @@ public class StoreController {
 
     private final StoreService storeService;
     private final MenuService menuService;
+    private final ImageUploadService imageUploadService;
     private final StoreLikeRepository storeLikeRepository;
     private final WishlistRepository wishlistRepository;
 
@@ -259,6 +264,65 @@ public class StoreController {
         model.addAttribute("isWishlisted", isWishlisted);
         
         return "store/detail";
+    }
+
+    @PostMapping("/upload-images")
+    @ResponseBody
+    public ApiResponseData<List<String>> uploadStoreImages(
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam(value = "imageType", defaultValue = "GALLERY") String imageType,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null) {
+            return ApiResponseData.failure(401, "Authentication required");
+        }
+
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            return ApiResponseData.failure(403, "Access denied");
+        }
+
+        Optional<Store> storeOptional = storeService.getStoreByUser(userDetails.getUser().getUuid());
+        if (storeOptional.isEmpty()) {
+            return ApiResponseData.failure(404, "Store not found");
+        }
+
+        try {
+            StoreImage.ImageType type = StoreImage.ImageType.valueOf(imageType.toUpperCase());
+            List<String> uploadedPaths = imageUploadService.uploadStoreImages(
+                    storeOptional.get(), files, type);
+            
+            return ApiResponseData.success(uploadedPaths);
+        } catch (Exception e) {
+            log.error("Store image upload failed", e);
+            return ApiResponseData.failure(500, e.getMessage());
+        }
+    }
+
+    @PostMapping("/delete-image/{imageId}")
+    @ResponseBody
+    public ApiResponseData<String> deleteStoreImage(
+            @PathVariable("imageId") UUID imageId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null) {
+            return ApiResponseData.failure(401, "Authentication required");
+        }
+
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            return ApiResponseData.failure(403, "Access denied");
+        }
+
+        try {
+            imageUploadService.deleteStoreImage(imageId);
+            return ApiResponseData.success("Image deleted successfully");
+        } catch (Exception e) {
+            log.error("Store image deletion failed", e);
+            return ApiResponseData.failure(500, e.getMessage());
+        }
     }
 
 }
