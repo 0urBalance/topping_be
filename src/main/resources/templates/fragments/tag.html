@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- Category Badge -->
+<span th:fragment="category(text)" class="tag-base tag-category" th:text="${text}">카테고리</span>
+
+<!-- Hashtag for hero section -->
+<span th:fragment="hashtag(text)" class="tag-base tag-hashtag" th:text="${text}">#태그</span>
+
+<!-- Tag group for multiple tags -->
+<div th:fragment="hashtag-group(tags)" class="tag-group">
+    <span th:each="tag : ${tags}" th:replace="~{fragments/tag :: hashtag(${tag})}"></span>
+</div>
+
+<!-- Default hashtag when no tags exist -->
+<div th:fragment="default-hashtag" class="tag-group">
+    <span th:replace="~{fragments/tag :: hashtag('#새로운가게')}"></span>
+</div>
+
+</body>
+</html>

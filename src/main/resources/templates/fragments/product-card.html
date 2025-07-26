@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- Reusable Product Card Fragment -->
+<div th:fragment="card(product)" class="card-base card-product clickable-product" th:attr="data-product-uuid=${product.uuid}">
+    <div class="card-image-container">
+        <img th:if="${product.mainImage != null}"
+             th:src="${product.mainImage.imagePath}"
+             th:alt="${product.name}"
+             class="image-product lazy-load"
+             loading="lazy" />
+        <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+             th:src="${product.thumbnailPath}"
+             th:alt="${product.name}"
+             class="image-product lazy-load"
+             loading="lazy" />
+        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+             th:src="${product.imageUrl}"
+             th:alt="${product.name}"
+             class="image-product lazy-load"
+             loading="lazy" />
+        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+             th:src="@{/image/topping_M.png}"
+             th:alt="${product.name}"
+             class="image-product" />
+    </div>
+    <div class="card-content">
+        <h3 class="heading-md text-dark" th:text="${product.name}">상품명</h3>
+        <p class="text-sm text-medium" 
+           style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px;"
+           th:text="${product.description != null ? product.description : '상품 설명'}">설명</p>
+        <div class="text-primary" 
+             style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;"
+             th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+        <div class="text-xs text-light" th:text="'리뷰 ' + ${product.reviewCount} + '개'">리뷰 0개</div>
+    </div>
+</div>
+
+<!-- Compact Product Card for smaller spaces -->
+<div th:fragment="compact-card(product)" class="card-base card-product clickable-product" th:attr="data-product-uuid=${product.uuid}">
+    <div style="display: flex; gap: 15px; padding: 20px; border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);">
+        <img th:if="${product.mainImage != null}"
+             th:src="${product.mainImage.imagePath}"
+             th:alt="${product.name}"
+             style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
+             loading="lazy" />
+        <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+             th:src="${product.thumbnailPath}"
+             th:alt="${product.name}"
+             style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
+             loading="lazy" />
+        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+             th:src="${product.imageUrl}"
+             th:alt="${product.name}"
+             style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
+             loading="lazy" />
+        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+             th:src="@{/image/topping_M.png}"
+             th:alt="${product.name}"
+             style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;" />
+        <div style="flex: 1;">
+            <h4 class="heading-md text-dark" th:text="${product.name}">상품명</h4>
+            <p class="text-sm text-medium" th:text="${product.description != null ? product.description : '상품 설명'}" style="margin: 0 0 10px 0;">설명</p>
+            <div class="text-primary" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px;" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+            <div class="text-xs text-light" th:text="'리뷰 ' + ${product.reviewCount}">리뷰 0</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
