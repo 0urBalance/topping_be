@@ -97,4 +97,20 @@ public class SessionAuthController {
                 .body(ApiResponseData.failure(401, "인증되지 않음"));
         }
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/api/session/check")
+    @ResponseBody
+    public ResponseEntity<ApiResponseData<String>> sessionCheck(HttpServletRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String sessionId = request.getSession().getId();
+        
+        log.debug("Session check - Session ID: {}, Authentication: {}", sessionId, auth);
+        
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            return ResponseEntity.ok(ApiResponseData.success("세션 유효"));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponseData.failure(401, "세션 만료"));
+        }
+    }
 }

@@ -62,6 +62,11 @@ public class StoreService {
         return storeRepository.findById(storeId);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Store> getStoreByIdWithMenusAndTags(UUID storeId) {
+        return storeRepository.findByIdWithMenusAndTags(storeId);
+    }
+
     public Store updateStore(UUID storeUuid, StoreRegistrationRequest request, UUID userUuid) {
         Optional<Store> storeOptional = storeRepository.findById(storeUuid);
         if (storeOptional.isEmpty()) {

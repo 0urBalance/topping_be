@@ -1,6 +1,7 @@
 package org.balanceus.topping.domain.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Menu;
@@ -9,6 +10,8 @@ import org.balanceus.topping.domain.model.MenuImage;
 public interface MenuImageRepository {
     
     MenuImage save(MenuImage menuImage);
+    
+    Optional<MenuImage> findByUuid(UUID uuid);
     
     List<MenuImage> findByMenu(Menu menu);
     

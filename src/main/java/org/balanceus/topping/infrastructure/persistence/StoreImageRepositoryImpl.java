@@ -1,6 +1,7 @@
 package org.balanceus.topping.infrastructure.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Store;
@@ -19,6 +20,11 @@ public class StoreImageRepositoryImpl implements StoreImageRepository {
     @Override
     public StoreImage save(StoreImage storeImage) {
         return storeImageJpaRepository.save(storeImage);
+    }
+
+    @Override
+    public Optional<StoreImage> findByUuid(UUID uuid) {
+        return storeImageJpaRepository.findById(uuid);
     }
 
     @Override

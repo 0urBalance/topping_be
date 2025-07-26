@@ -1,6 +1,7 @@
 package org.balanceus.topping.infrastructure.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Menu;
@@ -19,6 +20,11 @@ public class MenuImageRepositoryImpl implements MenuImageRepository {
     @Override
     public MenuImage save(MenuImage menuImage) {
         return menuImageJpaRepository.save(menuImage);
+    }
+
+    @Override
+    public Optional<MenuImage> findByUuid(UUID uuid) {
+        return menuImageJpaRepository.findById(uuid);
     }
 
     @Override

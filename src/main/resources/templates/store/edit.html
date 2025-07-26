@@ -4,408 +4,360 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스토어 수정 - Topping</title>
+    
+    <!-- CSS Framework -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: Arial, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-        }
-        .main-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 70px);
-            padding: 20px;
-        }
+        /* Page-specific styles */
         .edit-container { 
-            background: white; 
-            border-radius: 10px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            padding: 40px; 
-            width: 100%; 
-            max-width: 600px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: var(--spacing-xl);
         }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { color: #333; font-size: 32px; margin-bottom: 5px; }
-        .logo p { color: #666; font-size: 14px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; }
-        .form-group input, .form-group select, .form-group textarea { 
-            width: 100%; 
-            padding: 12px 15px; 
-            border: 2px solid #e1e1e1; 
-            border-radius: 5px; 
-            font-size: 16px; 
-            transition: border-color 0.3s; 
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
-            outline: none; 
-            border-color: #667eea; 
-        }
-        .form-group textarea { 
-            resize: vertical; 
-            min-height: 100px; 
-        }
-        .btn { 
-            padding: 12px 24px; 
-            border: none; 
-            border-radius: 5px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: background 0.3s; 
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary { 
-            background: #667eea; 
-            color: white; 
-        }
-        .btn-primary:hover { 
-            background: #5a6fd8; 
-        }
-        .btn-secondary { 
-            background: #6c757d; 
-            color: white; 
-        }
-        .btn-secondary:hover { 
-            background: #5a6268; 
-        }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-        .error-message { 
-            color: #e74c3c; 
-            font-size: 14px; 
-            margin-bottom: 20px; 
-            padding: 15px;
-            background-color: #fdf2f2;
-            border: 1px solid #fecaca;
-            border-radius: 4px;
+        
+        .page-header {
             text-align: center;
+            margin-bottom: var(--spacing-2xl);
         }
-        .success-message { 
-            color: #27ae60; 
-            font-size: 14px; 
-            margin-bottom: 20px; 
-            padding: 15px;
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 4px;
-            text-align: center;
+        
+        .page-header h1 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
         }
-        .field-error {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-        }
+        
         .form-row {
-            display: flex;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
         }
-        .form-row .form-group {
-            flex: 1;
+        
+        /* Image Management Styles */
+        .image-section {
+            background: white;
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .required { color: #e74c3c; }
-        .optional { color: #666; font-size: 12px; }
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
+        
+        .image-section h3 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-md);
+            font-size: 1.25rem;
         }
-        .btn-full {
-            width: 100%;
-        }
-        /* Image Upload Styles */
-        .image-upload-section {
-            margin-bottom: 25px;
-        }
-        .image-upload-section h4 {
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 14px;
-            font-weight: 600;
-        }
+        
         .upload-area {
             border: 2px dashed #ddd;
             border-radius: 8px;
-            padding: 20px;
+            padding: var(--spacing-xl);
             text-align: center;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            margin-bottom: var(--spacing-lg);
         }
-        .upload-area:hover {
-            border-color: #667eea;
-        }
+        
+        .upload-area:hover,
         .upload-area.drag-over {
-            border-color: #667eea;
-            background-color: #f8f9ff;
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
         }
+        
         .upload-placeholder {
             cursor: pointer;
-            padding: 20px;
         }
-        .upload-placeholder span {
-            font-size: 2rem;
+        
+        .upload-placeholder .icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
             display: block;
-            margin-bottom: 10px;
         }
-        .upload-placeholder p {
-            margin: 0 0 5px 0;
-            color: #666;
-            font-weight: 500;
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--spacing-md);
         }
-        .upload-placeholder small {
-            color: #999;
-            font-size: 12px;
+        
+        .image-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
         }
+        
+        .image-thumbnail {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: var(--spacing-sm);
+            background: #f9f9f9;
+        }
+        
+        .image-type-badge {
+            font-size: 0.75rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .delete-btn {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+        
         .image-preview-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
         }
+        
         .image-preview {
             position: relative;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        
         .image-preview img {
             width: 100%;
             height: 120px;
             object-fit: cover;
         }
-        .image-preview .remove-btn {
+        
+        .remove-btn {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(231, 76, 60, 0.8);
+            top: var(--spacing-xs);
+            right: var(--spacing-xs);
+            background: rgba(231, 76, 60, 0.9);
             color: white;
             border: none;
             border-radius: 50%;
             width: 24px;
             height: 24px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .image-preview .remove-btn:hover {
-            background: rgba(231, 76, 60, 1);
+        
+        .remove-btn:hover {
+            background: var(--error-color);
         }
-        .current-images {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .current-images h4 {
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .current-image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        .current-image-item {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .current-image-thumbnail {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-        .image-info {
-            padding: 10px;
-            background: #f9f9f9;
-        }
-        .image-info span {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .delete-image-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .delete-image-btn:hover {
-            background: #c0392b;
-        }
+        
         .upload-progress {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f0f8ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #0066cc;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+            padding: var(--spacing-xs);
+            font-size: 0.75rem;
+            text-align: center;
         }
-
-        @media (max-width: 480px) {
+        
+        .success-indicator {
+            position: absolute;
+            bottom: var(--spacing-xs);
+            left: var(--spacing-xs);
+            background: rgba(0, 128, 0, 0.9);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+        
+        @media (max-width: 768px) {
             .form-row {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
-            .action-buttons {
-                flex-direction: column;
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             }
             .image-preview-container {
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
-            .current-image-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
         }
     </style>
 </head>
-<body>
+<body class="main-body">
     <!-- Include Navigation Bar -->
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="main-content">
+    <main id="main-content" class="main-content">
         <div class="edit-container">
-            <div class="logo">
+            <div class="page-header">
                 <h1>✏️ 스토어 수정</h1>
                 <p>스토어 정보를 수정하세요</p>
             </div>
 
-            <!-- Show error message if update failed -->
-            <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}">
+            <!-- Show messages -->
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">
                 수정에 실패했습니다.
             </div>
-
-            <!-- Show success message -->
-            <div th:if="${successMessage}" class="success-message" th:text="${successMessage}">
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">
                 성공적으로 수정되었습니다.
             </div>
 
             <form th:action="@{/stores/edit}" method="post" th:object="${storeRegistrationRequest}">
-                <div class="form-group">
-                    <label for="name">스토어 이름 <span class="required">*</span></label>
-                    <input type="text" id="name" th:field="*{name}" required placeholder="스토어 이름을 입력하세요">
-                    <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="address">주소 <span class="required">*</span></label>
-                    <input type="text" id="address" th:field="*{address}" required placeholder="주소를 입력하세요">
-                    <div class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="contactNumber">연락처 <span class="required">*</span></label>
-                        <input type="tel" id="contactNumber" th:field="*{contactNumber}" required 
-                               placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}">
-                        <div class="field-error" th:if="${#fields.hasErrors('contactNumber')}" th:errors="*{contactNumber}"></div>
+                <!-- Basic Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">기본 정보</h3>
                     </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label" for="name">스토어 이름 <span style="color: var(--error-color);">*</span></label>
+                            <input type="text" id="name" th:field="*{name}" class="form-control" required placeholder="스토어 이름을 입력하세요">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="category">카테고리 <span class="required">*</span></label>
-                        <select id="category" th:field="*{category}" required>
-                            <option value="">카테고리를 선택하세요</option>
-                            <option value="Cafe">카페</option>
-                            <option value="Dessert">디저트</option>
-                            <option value="Restaurant">레스토랑</option>
-                            <option value="Bakery">베이커리</option>
-                            <option value="Korean">한식</option>
-                            <option value="Western">양식</option>
-                            <option value="Asian">아시안</option>
-                            <option value="Fast Food">패스트푸드</option>
-                            <option value="Bar">바</option>
-                            <option value="Other">기타</option>
-                        </select>
-                        <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                        <div class="form-group">
+                            <label class="form-label" for="address">주소 <span style="color: var(--error-color);">*</span></label>
+                            <input type="text" id="address" th:field="*{address}" class="form-control" required placeholder="주소를 입력하세요">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="contactNumber">연락처 <span style="color: var(--error-color);">*</span></label>
+                                <input type="tel" id="contactNumber" th:field="*{contactNumber}" class="form-control" required 
+                                       placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('contactNumber')}" th:errors="*{contactNumber}"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="category">카테고리 <span style="color: var(--error-color);">*</span></label>
+                                <select id="category" th:field="*{category}" class="form-control" required>
+                                    <option value="">카테고리를 선택하세요</option>
+                                    <option value="Cafe">카페</option>
+                                    <option value="Dessert">디저트</option>
+                                    <option value="Restaurant">레스토랑</option>
+                                    <option value="Bakery">베이커리</option>
+                                    <option value="Korean">한식</option>
+                                    <option value="Western">양식</option>
+                                    <option value="Asian">아시안</option>
+                                    <option value="Fast Food">패스트푸드</option>
+                                    <option value="Bar">바</option>
+                                    <option value="Other">기타</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="businessHours">영업시간 <span style="color: var(--error-color);">*</span></label>
+                            <textarea id="businessHours" th:field="*{businessHours}" class="form-control" required 
+                                      placeholder="예: 평일 09:00-22:00, 주말 10:00-23:00"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('businessHours')}" th:errors="*{businessHours}"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="businessHours">영업시간 <span class="required">*</span></label>
-                    <textarea id="businessHours" th:field="*{businessHours}" required 
-                              placeholder="예: 평일 09:00-22:00, 주말 10:00-23:00"></textarea>
-                    <div class="field-error" th:if="${#fields.hasErrors('businessHours')}" th:errors="*{businessHours}"></div>
-                </div>
-
-                <!-- Image Upload Section -->
-                <div class="form-group">
-                    <label>이미지 업로드 <span class="optional">(선택사항)</span></label>
+                <!-- Image Management -->
+                <div class="image-section">
+                    <h3>📷 이미지 관리</h3>
                     
-                    <!-- Main Image Upload -->
-                    <div class="image-upload-section">
-                        <h4>대표 이미지</h4>
-                        <div class="upload-area" id="mainImageUpload">
-                            <input type="file" id="mainImageFiles" name="mainImageFiles" multiple 
-                                   accept="image/jpeg,image/jpg,image/png" style="display: none;">
-                            <div class="upload-placeholder" onclick="document.getElementById('mainImageFiles').click()">
-                                <span>📷</span>
-                                <p>클릭하거나 드래그하여 대표 이미지를 업로드하세요</p>
-                                <small>JPG, JPEG, PNG 파일만 업로드 가능 (최대 10MB)</small>
-                            </div>
-                            <div class="image-preview-container" id="mainImagePreviews"></div>
-                        </div>
-                    </div>
-
-                    <!-- Gallery Images Upload -->
-                    <div class="image-upload-section">
-                        <h4>갤러리 이미지</h4>
-                        <div class="upload-area" id="galleryImageUpload">
-                            <input type="file" id="galleryImageFiles" name="galleryImageFiles" multiple 
-                                   accept="image/jpeg,image/jpg,image/png" style="display: none;">
-                            <div class="upload-placeholder" onclick="document.getElementById('galleryImageFiles').click()">
-                                <span>🖼️</span>
-                                <p>클릭하거나 드래그하여 갤러리 이미지를 업로드하세요</p>
-                                <small>여러 장 선택 가능 (각각 최대 10MB)</small>
-                            </div>
-                            <div class="image-preview-container" id="galleryImagePreviews"></div>
-                        </div>
-                    </div>
-
                     <!-- Current Images Display -->
-                    <div class="current-images" th:if="${store != null and !store.images.empty}">
+                    <div th:if="${store != null and !store.images.empty}">
                         <h4>현재 등록된 이미지</h4>
-                        <div class="current-image-grid">
-                            <div class="current-image-item" th:each="image : ${store.images}">
-                                <img th:src="${image.imagePath}" alt="Store Image" class="current-image-thumbnail">
+                        <div class="image-grid">
+                            <div class="image-item" th:each="image : ${store.images}">
+                                <img th:src="${image.imagePath}" alt="Store Image" class="image-thumbnail">
                                 <div class="image-info">
-                                    <span th:text="${image.imageType.displayName}">이미지 타입</span>
-                                    <button type="button" class="delete-image-btn" 
-                                            th:onclick="'deleteImage(\'' + ${image.uuid} + '\')'">삭제</button>
+                                    <div class="image-type-badge" th:text="${image.imageType.displayName}">이미지 타입</div>
+                                    <button type="button" class="delete-btn" 
+                                            th:data-image-id="${image.uuid}"
+                                            onclick="deleteExistingImage(this.dataset.imageId)">🗑️ 삭제</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <div th:if="${store == null or store.images.empty}">
+                        <div class="alert alert-info">
+                            아직 등록된 이미지가 없습니다. 아래에서 이미지를 업로드해보세요.
+                        </div>
+                    </div>
+
+                    <!-- Upload Areas -->
+                    <div style="margin-top: var(--spacing-lg);">
+                        <!-- Main Image Upload -->
+                        <div style="margin-bottom: var(--spacing-lg);">
+                            <h4>대표 이미지 업로드</h4>
+                            <div class="upload-area" id="mainImageUpload">
+                                <input type="file" id="mainImageFiles" name="mainImageFiles" multiple 
+                                       accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('mainImageFiles').click()">
+                                    <span class="icon">📷</span>
+                                    <p><strong>클릭하거나 드래그하여 대표 이미지를 업로드하세요</strong></p>
+                                    <small>JPG, JPEG, PNG 파일만 업로드 가능 (최대 10MB)</small>
+                                </div>
+                                <div class="image-preview-container" id="mainImagePreviews"></div>
+                            </div>
+                        </div>
+
+                        <!-- Gallery Images Upload -->
+                        <div>
+                            <h4>갤러리 이미지 업로드</h4>
+                            <div class="upload-area" id="galleryImageUpload">
+                                <input type="file" id="galleryImageFiles" name="galleryImageFiles" multiple 
+                                       accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                                <div class="upload-placeholder" onclick="document.getElementById('galleryImageFiles').click()">
+                                    <span class="icon">🖼️</span>
+                                    <p><strong>클릭하거나 드래그하여 갤러리 이미지를 업로드하세요</strong></p>
+                                    <small>여러 장 선택 가능 (각각 최대 10MB)</small>
+                                </div>
+                                <div class="image-preview-container" id="galleryImagePreviews"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Legacy URL field for backward compatibility -->
-                <div class="form-group">
-                    <label for="mainImageUrl">메인 이미지 URL <span class="optional">(선택사항)</span></label>
-                    <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" 
-                           placeholder="https://example.com/image.jpg">
-                    <div class="field-error" th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}"></div>
+                <!-- Additional Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">추가 정보</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label" for="mainImageUrl">메인 이미지 URL <small>(선택사항)</small></label>
+                            <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" class="form-control"
+                                   placeholder="https://example.com/image.jpg">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="snsOrWebsiteLink">SNS 또는 웹사이트 링크 <small>(선택사항)</small></label>
+                            <input type="url" id="snsOrWebsiteLink" th:field="*{snsOrWebsiteLink}" class="form-control"
+                                   placeholder="https://instagram.com/yourstore">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('snsOrWebsiteLink')}" th:errors="*{snsOrWebsiteLink}"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="snsOrWebsiteLink">SNS 또는 웹사이트 링크 <span class="optional">(선택사항)</span></label>
-                    <input type="url" id="snsOrWebsiteLink" th:field="*{snsOrWebsiteLink}" 
-                           placeholder="https://instagram.com/yourstore">
-                    <div class="field-error" th:if="${#fields.hasErrors('snsOrWebsiteLink')}" th:errors="*{snsOrWebsiteLink}"></div>
-                </div>
-
-
-                <div class="action-buttons">
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: var(--spacing-md); justify-content: center; margin-top: var(--spacing-xl);">
                     <button type="submit" class="btn btn-primary">
                         💾 수정 저장
                     </button>
@@ -415,7 +367,18 @@
                 </div>
             </form>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- Common Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+    <div th:replace="~{fragments/modals :: confirmation-modal}"></div>
+
+    <!-- Framework JavaScript -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/main-common.js}"></script>
 
     <script>
         // Image upload functionality
@@ -455,8 +418,6 @@
         }
 
         function handleFiles(files, previewContainer, imageType) {
-            previewContainer.innerHTML = '';
-            
             Array.from(files).forEach((file, index) => {
                 if (validateFile(file)) {
                     const preview = createImagePreview(file, index, previewContainer, imageType);
@@ -470,12 +431,12 @@
             const maxSize = 10 * 1024 * 1024; // 10MB
 
             if (!allowedTypes.includes(file.type)) {
-                alert('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
+                window.Topping.notify.error('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
                 return false;
             }
 
             if (file.size > maxSize) {
-                alert('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+                window.Topping.notify.error('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
                 return false;
             }
 
@@ -526,45 +487,104 @@
             .then(response => response.json())
             .then(data => {
                 progressDiv.remove();
-                if (data.success) {
+                // Check if the response indicates success (code 200)
+                if (data.code === 200) {
                     console.log('Upload successful:', data.data);
                     // Add success indicator
                     const successDiv = document.createElement('div');
-                    successDiv.style.cssText = 'position: absolute; bottom: 5px; left: 5px; background: rgba(0,128,0,0.8); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px;';
+                    successDiv.className = 'success-indicator';
                     successDiv.innerHTML = '✓';
                     previewElement.appendChild(successDiv);
+                    
+                    if (window.Topping && window.Topping.notify) {
+                        window.Topping.notify.success('이미지가 성공적으로 업로드되었습니다.');
+                    }
                 } else {
-                    alert('업로드 실패: ' + data.message);
+                    const errorMsg = '업로드 실패: ' + (data.message || '알 수 없는 오류');
+                    if (window.Topping && window.Topping.notify) {
+                        window.Topping.notify.error(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
                     previewElement.remove();
                 }
             })
             .catch(error => {
                 progressDiv.remove();
                 console.error('Upload error:', error);
-                alert('업로드 중 오류가 발생했습니다.');
+                const errorMsg = '업로드 중 오류가 발생했습니다: ' + error.message;
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error(errorMsg);
+                } else {
+                    alert(errorMsg);
+                }
                 previewElement.remove();
             });
         }
 
-        function deleteImage(imageId) {
-            if (!confirm('이 이미지를 삭제하시겠습니까?')) {
+        function deleteExistingImage(imageId) {
+            console.log('Delete button clicked for image:', imageId);
+            
+            // Check if Topping framework is loaded
+            if (!window.Topping || !window.Topping.showConfirmation) {
+                console.error('Topping framework not loaded');
+                alert('프레임워크 로딩 오류가 발생했습니다. 페이지를 새로고침해주세요.');
                 return;
             }
+            
+            window.Topping.showConfirmation({
+                title: '이미지 삭제',
+                message: '이 이미지를 삭제하시겠습니까? 삭제된 이미지는 복구할 수 없습니다.',
+                onConfirm: function() {
+                    console.log('User confirmed deletion');
+                    performImageDeletion(imageId);
+                }
+            });
+        }
 
+        function performImageDeletion(imageId) {
+            console.log('Performing deletion for image:', imageId);
+            
             fetch(`/stores/delete-image/${imageId}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Delete response status:', response.status);
+                return response.json();
+            })
             .then(data => {
-                if (data.success) {
-                    location.reload(); // Refresh page to update image list
+                console.log('Delete response data:', data);
+                // Check if the response indicates success (code 200)
+                if (data.code === 200) {
+                    if (window.Topping && window.Topping.notify) {
+                        window.Topping.notify.success('이미지가 성공적으로 삭제되었습니다.');
+                    } else {
+                        alert('이미지가 성공적으로 삭제되었습니다.');
+                    }
+                    // Refresh page to update image list
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    alert('삭제 실패: ' + data.message);
+                    const errorMsg = '삭제 실패: ' + (data.message || '알 수 없는 오류');
+                    if (window.Topping && window.Topping.notify) {
+                        window.Topping.notify.error(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
                 }
             })
             .catch(error => {
                 console.error('Delete error:', error);
-                alert('삭제 중 오류가 발생했습니다.');
+                const errorMsg = '삭제 중 오류가 발생했습니다: ' + error.message;
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error(errorMsg);
+                } else {
+                    alert(errorMsg);
+                }
             });
         }
     </script>

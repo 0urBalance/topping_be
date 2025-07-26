@@ -25,6 +25,8 @@ public interface StoreRepository {
     
     Optional<Store> findById(UUID id);
     
+    Optional<Store> findByIdWithMenusAndTags(UUID id);
+    
     boolean existsById(UUID id);
     
     List<Store> findAll(Pageable pageable);

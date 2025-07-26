@@ -1,5 +1,6 @@
 package org.balanceus.topping.presentation.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -222,7 +223,14 @@ public class StoreController {
     public String storeDetail(@PathVariable("storeId") UUID storeId, Model model, 
                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
         
-        Optional<Store> storeOptional = storeService.getStoreById(storeId);
+        Optional<Store> storeOptional;
+        try {
+            storeOptional = storeService.getStoreByIdWithMenusAndTags(storeId);
+        } catch (Exception e) {
+            log.warn("Failed to fetch store with menus and tags, falling back to simple query", e);
+            storeOptional = storeService.getStoreById(storeId);
+        }
+        
         if (storeOptional.isEmpty()) {
             return "redirect:/explore?error=store_not_found";
         }
@@ -237,12 +245,13 @@ public class StoreController {
         }
         model.addAttribute("isOwner", isOwner);
         
-        // Get menus by type
-        List<Menu> collaborationMenus = menuService.getCollaborationMenus(store);
-        List<Menu> signatureMenus = menuService.getSignatureMenus(store);
+        // Use Store entity helper methods for menus - with null safety
+        List<Menu> popularMenus = store.getPopularMenus();
+        List<Menu> signatureMenus = store.getSignatureMenus();
         
-        model.addAttribute("collaborationMenus", collaborationMenus);
-        model.addAttribute("signatureMenus", signatureMenus);
+        // Ensure lists are never null for template
+        model.addAttribute("popularMenus", popularMenus != null ? popularMenus : new ArrayList<>());
+        model.addAttribute("signatureMenus", signatureMenus != null ? signatureMenus : new ArrayList<>());
         
         // Get actual like and wishlist data
         long likeCount = storeLikeRepository.countByStore(store);

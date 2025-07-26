@@ -20,7 +20,7 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 - **Production**: PostgreSQL (env vars: `DB_URL`, `DB_USER`, `DB_PASSWORD`)
 - **Testing**: H2 in-memory database
 - **Configuration**: Uses spring-dotenv, create `.env` file in project root
-- **Connection Pool**: HikariCP settings optimized for development (10-20 connections)
+- **Connection Pool**: HikariCP optimized (5-30 connections, leak detection enabled)
 
 ## Architecture
 
@@ -496,9 +496,16 @@ window.Topping.copyToClipboard(text);
 - **Error Recovery**: Automatic fallback to placeholders on image load failure
 - **Mobile Optimization**: Single-column layout on mobile with optimized card sizing
 
-## ⚙️ Async Thread Pool Configuration
+## ⚙️ Database & Performance Configuration
 
-### Custom Thread Pool Setup
+### HikariCP Connection Pool
+- **Pool Size**: 5 minimum idle, 30 maximum connections
+- **Timeouts**: 30s connection timeout, 10min idle timeout, 30min max lifetime
+- **Leak Detection**: 60s threshold to identify connection leaks
+- **Validation**: 5s validation timeout for connection health checks
+- **Performance**: Optimized for high concurrency and connection reuse
+
+### Async Thread Pool Configuration
 - **Configuration Class**: `AsyncConfig.java` with `@EnableAsync` annotation
 - **Thread Pool Settings**: 5 core, 10 max threads, 50 queue capacity
 - **Thread Naming**: `custom-executor-` prefix for easy identification
@@ -509,6 +516,12 @@ window.Topping.copyToClipboard(text);
 - **Service Integration**: Available for use in any Spring-managed component
 - **Error Handling**: Proper initialization and resource management
 - **Performance**: Optimized for concurrent image processing and background tasks
+
+### Transaction Management
+- **Service Layer**: All service classes properly annotated with `@Transactional`
+- **Repository Layer**: Uses three-layer pattern without transactions (correct design)
+- **Controller Layer**: Read-only transactions for controller methods accessing repositories
+- **Connection Safety**: All database queries execute within proper transaction boundaries
 
 ## 🔧 Troubleshooting & Common Issues
 
@@ -524,10 +537,17 @@ window.Topping.copyToClipboard(text);
 - **UUID Generation**: Let Hibernate handle @GeneratedValue @UuidGenerator entities
 - **Repository Layer**: Consistent three-layer pattern across all domains
 
+### Database & Connection Pool Issues
+- **Connection Pool Exhaustion**: Fixed transaction boundary issues in KakaoService and SggCodeController
+- **HikariCP Configuration**: Optimized pool size (5-30), leak detection enabled, proper timeouts
+- **Transaction Management**: All service methods properly wrapped in @Transactional boundaries
+- **Query Optimization**: Replaced unbounded findAll() calls with paginated queries where appropriate
+- **Connection Monitoring**: Enhanced logging for connection pool stats and leak detection
+
 ### Build & Runtime
 - **JAVA_HOME**: Must be set correctly for all Gradle operations
 - **Dependencies**: All conflicts resolved, no version mismatches
-- **Database**: Connection pool optimized for development and testing
+- **Database**: Connection pool optimized with leak detection and monitoring
 - **Session Config**: Persistent sessions with proper timeout configuration
 
 ## 📋 Development Workflow
@@ -535,10 +555,12 @@ window.Topping.copyToClipboard(text);
 ### Adding New Features
 1. **Domain Design**: Follow clean architecture principles
 2. **Repository Pattern**: Implement three-layer pattern
-3. **Controller Layer**: Use proper response wrappers
-4. **Template Integration**: Follow UI/UX guidelines
-5. **Security**: Implement proper authentication/authorization
-6. **Testing**: Write comprehensive tests with test profile
+3. **Transaction Boundaries**: Ensure all service methods have @Transactional annotations
+4. **Controller Layer**: Use proper response wrappers and @Transactional(readOnly = true) for read operations
+5. **Template Integration**: Follow UI/UX guidelines
+6. **Security**: Implement proper authentication/authorization
+7. **Testing**: Write comprehensive tests with test profile
+8. **Connection Safety**: Avoid unbounded queries like findAll() - use pagination when needed
 
 ### UI/UX Development
 1. **MANDATORY**: Use the Topping CSS Framework for ALL new templates
@@ -555,6 +577,8 @@ window.Topping.copyToClipboard(text);
 - **Clean Code**: Follow existing patterns and conventions
 - **Error Handling**: Proper exception handling with user-friendly messages
 - **Security**: Always validate inputs, protect against common vulnerabilities
+- **Transaction Safety**: All database operations must be within @Transactional boundaries
+- **Connection Management**: Monitor for connection leaks using HikariCP leak detection
 - **Documentation**: Update relevant documentation when adding features
 
 ## Documentation Navigation
@@ -587,6 +611,7 @@ The Topping platform is now in a stable, production-ready state with:
 - **Documentation**: Complete domain documentation and troubleshooting guides
 - **Security**: Role-based access control, secure session management, CSRF disabled for simplified forms
 - **Social Login**: Kakao OAuth integration with automatic user registration
-- **Performance**: Optimized database connections, efficient queries, minimal resource usage
+- **Performance**: Optimized HikariCP connection pool, efficient queries, connection leak detection
+- **Database Reliability**: Fixed connection pool exhaustion issues, proper transaction boundaries
 
 The platform is ready for deployment and further feature development.

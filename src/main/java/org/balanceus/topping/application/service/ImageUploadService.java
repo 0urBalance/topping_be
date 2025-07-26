@@ -209,21 +209,82 @@ public class ImageUploadService {
 
     public void deleteStoreImage(UUID imageId) {
         try {
+            // First, get the image details before deletion
+            StoreImage storeImage = storeImageRepository.findByUuid(imageId)
+                    .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
+            
+            // Delete the physical file
+            deletePhysicalFile(storeImage.getImagePath());
+            
+            // Delete the database record
             storeImageRepository.deleteByUuid(imageId);
-            log.info("Successfully deleted store image: {}", imageId);
+            
+            log.info("Successfully deleted store image: {} (path: {})", imageId, storeImage.getImagePath());
         } catch (Exception e) {
             log.error("Failed to delete store image: {}", imageId, e);
-            throw new RuntimeException("이미지 삭제에 실패했습니다.");
+            throw new RuntimeException("이미지 삭제에 실패했습니다: " + e.getMessage());
         }
     }
 
     public void deleteMenuImage(UUID imageId) {
         try {
+            // First, get the image details before deletion
+            MenuImage menuImage = menuImageRepository.findByUuid(imageId)
+                    .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
+            
+            // Delete the physical file
+            deletePhysicalFile(menuImage.getImagePath());
+            
+            // Delete the database record
             menuImageRepository.deleteByUuid(imageId);
-            log.info("Successfully deleted menu image: {}", imageId);
+            
+            log.info("Successfully deleted menu image: {} (path: {})", imageId, menuImage.getImagePath());
         } catch (Exception e) {
             log.error("Failed to delete menu image: {}", imageId, e);
-            throw new RuntimeException("이미지 삭제에 실패했습니다.");
+            throw new RuntimeException("이미지 삭제에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Delete physical file from filesystem
+     */
+    private void deletePhysicalFile(String imagePath) {
+        try {
+            // Sanitize the path to prevent directory traversal attacks
+            if (imagePath == null || imagePath.trim().isEmpty()) {
+                log.warn("Empty image path provided for deletion");
+                return;
+            }
+
+            // Ensure the path starts with /image/ to prevent unauthorized deletions
+            if (!imagePath.startsWith("/image/")) {
+                log.warn("Invalid image path for deletion: {}", imagePath);
+                throw new SecurityException("Invalid image path");
+            }
+
+            // Convert web path to filesystem path
+            String filePath = uploadDir + imagePath;
+            Path fileToDelete = Paths.get(filePath).normalize();
+            Path uploadPath = Paths.get(uploadDir).normalize();
+
+            // Ensure the file is within the upload directory (additional security check)
+            if (!fileToDelete.startsWith(uploadPath)) {
+                log.warn("Path traversal attempt detected: {}", imagePath);
+                throw new SecurityException("Path traversal attempt detected");
+            }
+
+            // Delete the file if it exists
+            if (Files.exists(fileToDelete)) {
+                Files.delete(fileToDelete);
+                log.info("Successfully deleted physical file: {}", fileToDelete);
+            } else {
+                log.warn("Physical file not found for deletion: {}", fileToDelete);
+            }
+        } catch (SecurityException e) {
+            throw e; // Re-throw security exceptions
+        } catch (Exception e) {
+            log.error("Failed to delete physical file: {}", imagePath, e);
+            // Don't throw exception for file deletion errors to avoid blocking database cleanup
         }
     }
 }

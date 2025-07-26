@@ -7,6 +7,7 @@
     
     <!-- CSS Framework -->
     <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/store-detail.css}">
     <link
             rel="stylesheet"
@@ -45,12 +46,11 @@
                     <span class="material-symbols-outlined">location_on</span>
                     <span th:text="${store.address}">강원특별자치도 강릉시 창해로 361-77</span>
                   </div>
-                  <div class="hashtags">
-                    <span class="hashtag">#강릉</span>
-                    <span class="hashtag">#디저트맛집</span>
-                    <span class="hashtag">#인스타핫플</span>
-                    <span class="hashtag">#아메리카노맛집</span>
-                    <span class="hashtag">#차림상차림여행</span>
+                  <div class="hashtags" th:if="${!store.hashtags.empty}">
+                    <span class="hashtag" th:each="hashtag : ${store.hashtags}" th:text="${hashtag}">Hashtag</span>
+                  </div>
+                  <div class="hashtags" th:if="${store.hashtags.empty}">
+                    <span class="hashtag">#새로운가게</span>
                   </div>
                   <div class="social-stats">
                     <button class="stat-btn like-btn" onclick="toggleLike()">
@@ -134,71 +134,68 @@
 
 
         <!-- Popular Menu Section -->
-        <div class="menu-section">
+        <div class="menu-section" th:if="${!popularMenus.empty}">
             <h3 class="menu-title">콜라보 인기 메뉴</h3>
             <div class="menu-grid">
-                <div class="menu-item" onclick="openMenuDetail('옥수수크림라떼')">
-                    <img src="/image/topping_M.png" alt="옥수수크림라떼">
+                <div class="menu-item" th:each="menu : ${popularMenus}" 
+                     th:onclick="'openMenuDetail(\'' + ${menu.name} + '\')'"
+                     onclick="openMenuDetail('메뉴')">
+                    <img th:if="${menu.mainImage != null}" 
+                         th:src="${menu.mainImage.imagePath}" 
+                         th:alt="${menu.name}">
+                    <img th:if="${menu.mainImage == null}" 
+                         th:src="${menu.imageUrl != null ? menu.imageUrl : '/image/topping_M.png'}" 
+                         th:alt="${menu.name}">
                     <div class="menu-info">
-                        <h4>옥수수크림라떼</h4>
-                        <p>진한 옥수수와 부드러운 크림이 어우러진 라떼</p>
-                        <div class="price">7,000원</div>
-                        <div class="reviews">리뷰 39</div>
-                    </div>
-                </div>
-                <div class="menu-item" onclick="openMenuDetail('아메리카노')">
-                    <img src="/image/topping_S.png" alt="아메리카노">
-                    <div class="menu-info">
-                        <h4>아메리카노</h4>
-                        <p>깔끔하고 고소한 맛이 일품인 아메리카노</p>
-                        <div class="price">5,500원</div>
-                        <div class="reviews">리뷰 552</div>
-                    </div>
-                </div>
-                <div class="menu-item" onclick="openMenuDetail('크로와상샌드위치')">
-                    <img src="/image/topping_L.png" alt="크로와상 샌드위치">
-                    <div class="menu-info">
-                        <h4>크로와상 샌드위치</h4>
-                        <p>바삭한 크로와상에 신선한 채소와 고급 치즈</p>
-                        <div class="price">10,900원</div>
-                        <div class="reviews">리뷰 108</div>
+                        <h4 th:text="${menu.name}">메뉴명</h4>
+                        <p th:text="${menu.description != null ? menu.description : '맛있는 메뉴입니다'}">메뉴 설명</p>
+                        <div class="price" th:text="${#numbers.formatDecimal(menu.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
+                        <div class="reviews" th:text="'리뷰 ' + ${menu.reviewCount}">리뷰 수</div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- No Popular Menus Message -->
+        <div class="menu-section" th:if="${popularMenus.empty}">
+            <h3 class="menu-title">콜라보 인기 메뉴</h3>
+            <div class="no-menu-message">
+                <p>아직 등록된 인기 메뉴가 없습니다.</p>
+                <small>가게 사장님께서 곧 멋진 메뉴들을 추가할 예정입니다.</small>
+            </div>
+        </div>
 
         <!-- Signature Menu Section -->
-        <div class="menu-section">
+        <div class="menu-section" th:if="${!signatureMenus.empty}">
             <h3 class="menu-title">시그니처 메뉴</h3>
             <div class="menu-description">이 가게만의 특별한 메뉴들입니다.</div>
             <div class="menu-grid">
-                <div class="menu-item" onclick="openMenuDetail('리치에이드')">
-                    <img src="/image/topping_M.png" alt="리치에이드">
+                <div class="menu-item" th:each="menu : ${signatureMenus}" 
+                     th:onclick="'openMenuDetail(\'' + ${menu.name} + '\')'"
+                     onclick="openMenuDetail('메뉴')">
+                    <img th:if="${menu.mainImage != null}" 
+                         th:src="${menu.mainImage.imagePath}" 
+                         th:alt="${menu.name}">
+                    <img th:if="${menu.mainImage == null}" 
+                         th:src="${menu.imageUrl != null ? menu.imageUrl : '/image/topping_L.png'}" 
+                         th:alt="${menu.name}">
                     <div class="menu-info">
-                        <h4>리치에이드</h4>
-                        <p>상큼하고 달콤한 리치의 맛</p>
-                        <div class="price">7,300원</div>
-                        <div class="reviews">리뷰 37</div>
+                        <h4 th:text="${menu.name}">메뉴명</h4>
+                        <p th:text="${menu.description != null ? menu.description : '특별한 시그니처 메뉴입니다'}">메뉴 설명</p>
+                        <div class="price" th:text="${#numbers.formatDecimal(menu.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
+                        <div class="reviews" th:text="'리뷰 ' + ${menu.reviewCount}">리뷰 수</div>
                     </div>
                 </div>
-                <div class="menu-item" onclick="openMenuDetail('차이버블샌드위치')">
-                    <img src="/image/topping_S.png" alt="차이버블 샌드위치">
-                    <div class="menu-info">
-                        <h4>차이버블 샌드위치</h4>
-                        <p>특제 소스와 차이버블이 들어간 샌드위치</p>
-                        <div class="price">23,000원</div>
-                        <div class="reviews">리뷰 8</div>
-                    </div>
-                </div>
-                <div class="menu-item" onclick="openMenuDetail('바닐라라떼')">
-                    <img src="/image/topping_L.png" alt="바닐라라떼">
-                    <div class="menu-info">
-                        <h4>바닐라라떼</h4>
-                        <p>진한 에스프레소와 달콤한 바닐라의 조화</p>
-                        <div class="price">6,500원</div>
-                        <div class="reviews">리뷰 63</div>
-                    </div>
-                </div>
+            </div>
+        </div>
+        
+        <!-- No Signature Menus Message -->
+        <div class="menu-section" th:if="${signatureMenus.empty}">
+            <h3 class="menu-title">시그니처 메뉴</h3>
+            <div class="menu-description">이 가게만의 특별한 메뉴들입니다.</div>
+            <div class="no-menu-message">
+                <p>아직 등록된 시그니처 메뉴가 없습니다.</p>
+                <small>가게 사장님께서 곧 특별한 메뉴들을 추가할 예정입니다.</small>
             </div>
         </div>
             </div>

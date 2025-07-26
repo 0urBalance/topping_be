@@ -55,6 +55,37 @@ public class UserController {
 	}
 
 	/**
+	 * 현재 사용자 정보 조회 API
+	 * 
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 사용자 기본 정보
+	 */
+	@GetMapping("/info")
+	@ResponseBody
+	public ResponseEntity<ApiResponseData<UserInfoDto>> getUserInfo(
+			@org.springframework.security.core.annotation.AuthenticationPrincipal 
+			org.balanceus.topping.infrastructure.security.UserDetailsImpl userDetails) {
+		try {
+			if (userDetails == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(ApiResponseData.failure(401, "인증이 필요합니다."));
+			}
+			
+			UserInfoDto userInfo = new UserInfoDto();
+			userInfo.setUsername(userDetails.getUser().getUsername());
+			userInfo.setEmail(userDetails.getUser().getEmail());
+			userInfo.setRole(userDetails.getUser().getRole().name());
+			
+			return ResponseEntity.ok(ApiResponseData.success(userInfo));
+			
+		} catch (Exception e) {
+			log.error("사용자 정보 조회 중 오류 발생", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(ApiResponseData.failure(500, "사용자 정보 조회 중 오류가 발생했습니다."));
+		}
+	}
+
+	/**
 	 * 카카오 로그인 상태 확인 API (개발/테스트용)
 	 * 
 	 * @param code 카카오 인가 코드
@@ -78,5 +109,23 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(ApiResponseData.failure(500, "카카오 로그인 처리 중 오류가 발생했습니다."));
 		}
+	}
+
+	/**
+	 * 사용자 정보 DTO
+	 */
+	public static class UserInfoDto {
+		private String username;
+		private String email;
+		private String role;
+
+		public String getUsername() { return username; }
+		public void setUsername(String username) { this.username = username; }
+		
+		public String getEmail() { return email; }
+		public void setEmail(String email) { this.email = email; }
+		
+		public String getRole() { return role; }
+		public void setRole(String role) { this.role = role; }
 	}
 }
