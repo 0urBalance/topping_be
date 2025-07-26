@@ -8,128 +8,593 @@
     <!-- CSS Framework -->
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
-    <link rel="stylesheet" th:href="@{/css/store-detail.css}">
     <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    
+    <style>
+        /* Store Detail Redesign Styles */
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        :root {
+            --primary-color: #ff6b35;
+            --brown-color: #87604f;
+            --success-color: #059669;
+            --error-color: #dc2626;
+            --warning-color: #856404;
+            --info-color: #2563eb;
+            --light-bg: #f8f9fa;
+            --dark-gray: #333;
+            --medium-gray: #666;
+            --light-gray: #999;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        body {
+            margin-left: 240px;
+            padding-bottom: 80px; /* Space for fixed action bar */
+            background-color: var(--light-bg);
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0;
+            }
+        }
+
+        .store-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* 1️⃣ Hero Section with Background Image */
+        .hero-section {
+            position: relative;
+            height: 500px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            align-items: center;
+        }
+
+        .store-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background-color: var(--brown-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .store-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .rating-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        .rating {
+            font-weight: 600;
+            color: #ffd700;
+        }
+
+        .review-count {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .address {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+
+        .hashtags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hashtag {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .hashtag:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .social-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .stat-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .hero-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-main-image {
+            width: 400px;
+            height: 300px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hero-main-image:hover {
+            transform: scale(1.02);
+        }
+
+        /* 2️⃣ Gallery Section */
+        .gallery-section {
+            background: white;
+            padding: 40px 20px;
+            margin: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--medium-gray);
+            margin-bottom: 24px;
+            font-size: 1rem;
+        }
+
+        .gallery-scroll {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 8px 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--light-gray) transparent;
+        }
+
+        .gallery-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: var(--light-bg);
+            border-radius: 3px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: var(--light-gray);
+            border-radius: 3px;
+        }
+
+        .gallery-item {
+            flex-shrink: 0;
+            width: 120px;
+            height: 120px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-images-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--medium-gray);
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--border-color);
+        }
+
+        /* 3️⃣ Menu Sections */
+        .menu-section {
+            background: white;
+            padding: 40px 20px;
+            margin: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .product-description {
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .product-reviews {
+            font-size: 0.85rem;
+            color: var(--light-gray);
+        }
+
+        /* 4️⃣ Fixed Action Bar */
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .collaboration-btn {
+            background: var(--brown-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .collaboration-btn:hover {
+            background: #75523f;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--brown-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .action-btn:hover {
+            background: #75523f;
+            transform: translateY(-2px);
+        }
+
+        /* 📱 Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+
+            .hero-main-image {
+                width: 300px;
+                height: 225px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .store-detail-container {
+                margin: 0;
+            }
+
+            .hero-section {
+                height: 400px;
+            }
+
+            .store-name {
+                font-size: 2rem;
+            }
+
+            .hero-main-image {
+                width: 250px;
+                height: 188px;
+            }
+
+            .gallery-section,
+            .menu-section {
+                margin: 10px;
+                padding: 30px 15px;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .action-bar {
+                padding: 12px 15px;
+            }
+
+            .collaboration-btn {
+                font-size: 0.9rem;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                height: 350px;
+            }
+
+            .store-name {
+                font-size: 1.8rem;
+            }
+
+            .social-stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .stat-btn {
+                justify-content: center;
+            }
+
+            .gallery-item {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
 </head>
 <body class="main-body">
 <a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="content-wrapper">
-    <main id="main-content" class="main-content">
-        <div class="store-detail-container">
+<main id="main-content" class="main-content">
+    <div class="store-detail-container">
 
-            <!-- Hero Section -->
-            <section class="hero-section">
-                <div class="hero-grid">
-
-                    <!-- 1. 가게 정보 -->
-                    <div class="store-info">
-                        <div class="category-badge" th:text="${store.category}">카페</div>
-                        <h1 class="store-name" th:text="${store.name}">에펠루아 본점</h1>
-                        <div class="rating-section">
-                            <span class="rating">⭐ <span th:text="${rating}">4.9</span></span>
-                            <span class="review-count">(<span th:text="${reviewCount}">1,114</span>)</span>
-                        </div>
-                        <div class="address">
-                            <span class="material-symbols-outlined">location_on</span>
-                            <span th:text="${store.address}">강릉시 창해로 361-77</span>
-                        </div>
-                        <div class="hashtags" th:if="${!store.hashtags.empty}">
-                  <span class="hashtag" th:each="hashtag : ${store.hashtags}"
-                        th:text="${hashtag}">#태그</span>
-                        </div>
-                        <div class="hashtags" th:if="${store.hashtags.empty}">
-                            <span class="hashtag">#새로운가게</span>
-                        </div>
-                        <div class="social-stats">
-                            <button class="stat-btn like-btn" onclick="toggleLike()">
-                                <span class="material-symbols-outlined">thumb_up</span>
-                                <span th:text="${likeCount}">23</span>
-                            </button>
-                            <button class="stat-btn wishlist-btn" onclick="toggleWishlist()">
-                                <span class="material-symbols-outlined">favorite</span>
-                                <span th:text="${wishlistCount}">1,115</span>
-                            </button>
-                        </div>
+        <!-- 1️⃣ Hero Section with Background Image -->
+        <section class="hero-section" 
+                 th:style="'background-image: url(' + (${store.mainImage != null ? store.mainImage.imagePath : (store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png')}) + ');'">
+            <div class="hero-content">
+                <!-- Left Column: Store Information -->
+                <div class="store-info">
+                    <div class="category-badge" th:text="${store.category}">카페</div>
+                    <h1 class="store-name" th:text="${store.name}">에펠루아 본점</h1>
+                    <div class="rating-section">
+                        <span class="rating">⭐ <span th:text="${rating}">4.9</span></span>
+                        <span class="review-count">(<span th:text="${reviewCount}">1,114</span>)</span>
                     </div>
-
-                    <!-- 2. 대표 이미지 -->
-                    <div class="hero-image">
-                        <img th:if="${store.mainImage != null}"
-                             th:src="${store.mainImage.imagePath}"
-                             th:alt="${store.name}"
-                             class="gallery-trigger"
-                             data-index="0" />
-                        <img th:if="${store.mainImage == null}"
-                             th:src="${store.mainImageUrl != null ? store.mainImageUrl : '/image/topping_L.png'}"
-                             th:alt="${store.name}"
-                             class="gallery-trigger"
-                             data-index="0" />
+                    <div class="address">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <span th:text="${store.address}">강릉시 창해로 361-77</span>
                     </div>
-
-                    <!-- 3. 콜라보 박스 (static onclick 유지) -->
-                    <div class="collaboration-box">
-                        <div class="collab-header">
-                            <span class="material-symbols-outlined">handshake</span>
-                            <h3>함께 콜라보 중인 가게</h3>
-                            <button class="toggle-btn" onclick="toggleCollaborationList()" aria-expanded="false">
-                                <span class="material-symbols-outlined" id="collab-chevron">expand_more</span>
-                            </button>
-                        </div>
-                        <ul class="collab-list" id="collaboration-list" style="display:none;">
-                            <li>…</li>
-                            <li>…</li>
-                        </ul>
-                        <div class="instagram-link">
-                            <span class="material-symbols-outlined">instagram</span>
-                            <a th:href="${store.snsOrWebsiteLink}" target="_blank" rel="noopener">
-                                <span th:text="${store.snsOrWebsiteLink}">instagram.com/…</span>
-                            </a>
-                        </div>
-                        <button class="btn btn-primary collaboration-request-btn"
-                                onclick="openCollaborationModal()">콜라보 요청하기</button>
+                    <div class="hashtags" th:if="${!store.hashtags.empty}">
+                        <span class="hashtag" th:each="hashtag : ${store.hashtags}" th:text="${hashtag}">#태그</span>
                     </div>
-
-                </div><!-- /.hero-grid -->
-            </section>
-
-            <!-- Image Gallery Section -->
-            <div class="image-gallery">
-                <div class="gallery-title">가게 사진</div>
-                <div class="gallery-description">분위기를 보여주는 사진들입니다.</div>
-
-                <div class="image-grid" th:if="${!store.images.empty}">
-                    <div class="gallery-item gallery-trigger"
-                         th:each="image, iterStat : ${store.images}"
-                         th:attr="data-index=${iterStat.index}">
-                        <img th:src="${image.imagePath}"
-                             th:alt="${image.imageType.displayName}"
-                             th:title="${image.imageType.displayName}" />
-                        <div class="image-type-badge"
-                             th:text="${image.imageType.displayName}">이미지 타입</div>
+                    <div class="hashtags" th:if="${store.hashtags.empty}">
+                        <span class="hashtag">#새로운가게</span>
+                    </div>
+                    <div class="social-stats">
+                        <button class="stat-btn like-btn" onclick="toggleLike()">
+                            <span class="material-symbols-outlined">thumb_up</span>
+                            <span th:text="${likeCount}">23</span>
+                        </button>
+                        <button class="stat-btn wishlist-btn" onclick="toggleWishlist()">
+                            <span class="material-symbols-outlined">favorite</span>
+                            <span th:text="${wishlistCount}">1,115</span>
+                        </button>
                     </div>
                 </div>
 
-                <div th:if="${store.images.empty}" class="no-images-message">
-                    <p>아직 등록된 이미지가 없습니다.</p>
+                <!-- Right Column: Large Image Display -->
+                <div class="hero-image-container">
+                    <img th:if="${store.mainImage != null}"
+                         th:src="${store.mainImage.imagePath}"
+                         th:alt="${store.name}"
+                         class="hero-main-image gallery-trigger"
+                         data-index="0" />
+                    <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
+                         th:src="${store.mainImageUrl}"
+                         th:alt="${store.name}"
+                         class="hero-main-image gallery-trigger"
+                         data-index="0" />
+                    <img th:if="${store.mainImage == null and store.mainImageUrl == null}"
+                         th:src="@{/image/topping_L.png}"
+                         th:alt="${store.name}"
+                         class="hero-main-image gallery-trigger"
+                         data-index="0" />
+                </div>
+            </div>
+        </section>
+
+        <!-- 2️⃣ Gallery Section (가게 사진) -->
+        <section class="gallery-section">
+            <h2 class="section-title">가게 사진</h2>
+            <p class="section-subtitle">가게의 분위기를 확인할 수 있어요.</p>
+
+            <div th:if="${!store.images.empty}" class="gallery-scroll">
+                <div class="gallery-item gallery-trigger"
+                     th:each="image, iterStat : ${store.images}"
+                     th:attr="data-index=${iterStat.index}">
+                    <img th:src="${image.imagePath}"
+                         th:alt="${image.imageType.displayName}"
+                         th:title="${image.imageType.displayName}" />
                 </div>
             </div>
 
-            <!-- Popular Product Section -->
-            <div class="menu-section">
-                <h3 class="menu-title">인기 상품</h3>
-                <div class="menu-description">가장 많이 판매된 상품입니다.</div>
-                
-                <!-- Dynamic product grid - renders only actual products -->
-                <div th:if="${!#lists.isEmpty(popularMenus)}" class="menu-grid">
-                    <div class="menu-item clickable-product"
-                         th:each="product : ${popularMenus}"
-                         th:attr="data-menu-name=${product.name},data-product-uuid=${product.uuid}">
+            <div th:if="${store.images.empty}" class="no-images-message">
+                <p>아직 등록된 이미지가 없습니다.</p>
+            </div>
+        </section>
+
+        <!-- 3️⃣ Menu Section 1: 콜라보 인기 메뉴 -->
+        <section class="menu-section">
+            <h2 class="section-title">콜라보 인기 메뉴</h2>
+            <p class="section-subtitle">고객들이 사랑하는 메뉴예요.</p>
+            
+            <div th:if="${!#lists.isEmpty(popularMenus)}" class="product-grid">
+                <div class="product-card clickable-product"
+                     th:each="product : ${popularMenus}"
+                     th:attr="data-product-uuid=${product.uuid}">
+                    <div class="product-image">
                         <img th:if="${product.mainImage != null}"
                              th:src="${product.mainImage.imagePath}"
                              th:alt="${product.name}" />
@@ -142,33 +607,31 @@
                         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
                              th:src="@{/image/topping_M.png}"
                              th:alt="${product.name}" />
-                        <div class="menu-info">
-                            <h4 th:text="${product.name}">상품명</h4>
-                            <p th:text="${product.description != null ? product.description : '맛있는 상품입니다'}">설명</p>
-                            <div class="price"
-                                 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
-                            <div class="reviews"
-                                 th:text="'리뷰 ' + ${product.reviewCount}">리뷰 0</div>
-                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" th:text="${product.name}">상품명</h3>
+                        <p class="product-description" th:text="${product.description != null ? product.description : '맛있는 상품입니다'}">설명</p>
+                        <div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                        <div class="product-reviews" th:text="'리뷰 ' + ${product.reviewCount} + '개'">리뷰 0개</div>
                     </div>
                 </div>
-                
-                <!-- Empty state message -->
-                <div th:if="${#lists.isEmpty(popularMenus)}" class="no-images-message">
-                    <p>아직 등록된 인기 상품이 없습니다.</p>
-                </div>
             </div>
+            
+            <div th:if="${#lists.isEmpty(popularMenus)}" class="no-images-message">
+                <p>아직 등록된 인기 상품이 없습니다.</p>
+            </div>
+        </section>
 
-            <!-- Signature Product Section -->
-            <div class="menu-section">
-                <h3 class="menu-title">시그니처 상품</h3>
-                <div class="menu-description">대표 상품을 소개합니다.</div>
-                
-                <!-- Dynamic product grid - renders only actual products -->
-                <div th:if="${!#lists.isEmpty(signatureMenus)}" class="menu-grid">
-                    <div class="menu-item clickable-product"
-                         th:each="product : ${signatureMenus}"
-                         th:attr="data-menu-name=${product.name},data-product-uuid=${product.uuid}">
+        <!-- 3️⃣ Menu Section 2: 시그니처 메뉴 -->
+        <section class="menu-section">
+            <h2 class="section-title">시그니처 메뉴</h2>
+            <p class="section-subtitle">이 가게만의 특별한 메뉴예요.</p>
+            
+            <div th:if="${!#lists.isEmpty(signatureMenus)}" class="product-grid">
+                <div class="product-card clickable-product"
+                     th:each="product : ${signatureMenus}"
+                     th:attr="data-product-uuid=${product.uuid}">
+                    <div class="product-image">
                         <img th:if="${product.mainImage != null}"
                              th:src="${product.mainImage.imagePath}"
                              th:alt="${product.name}" />
@@ -181,27 +644,37 @@
                         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
                              th:src="@{/image/topping_L.png}"
                              th:alt="${product.name}" />
-                        <div class="menu-info">
-                            <h4 th:text="${product.name}">상품명</h4>
-                            <p th:text="${product.description != null ? product.description : '특별한 상품입니다'}">설명</p>
-                            <div class="price"
-                                 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
-                            <div class="reviews"
-                                 th:text="'리뷰 ' + ${product.reviewCount}">리뷰 0</div>
-                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name" th:text="${product.name}">상품명</h3>
+                        <p class="product-description" th:text="${product.description != null ? product.description : '특별한 상품입니다'}">설명</p>
+                        <div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                        <div class="product-reviews" th:text="'리뷰 ' + ${product.reviewCount} + '개'">리뷰 0개</div>
                     </div>
                 </div>
-                
-                <!-- Empty state message -->
-                <div th:if="${#lists.isEmpty(signatureMenus)}" class="no-images-message">
-                    <p>아직 등록된 시그니처 상품이 없습니다.</p>
-                </div>
             </div>
+            
+            <div th:if="${#lists.isEmpty(signatureMenus)}" class="no-images-message">
+                <p>아직 등록된 시그니처 상품이 없습니다.</p>
+            </div>
+        </section>
 
-        </div>
-    </main>
+    </div>
+</main>
 
-    <div class="action-bar">…</div>
+<!-- 4️⃣ Fixed Action Bar -->
+<div class="action-bar">
+    <button class="collaboration-btn" onclick="openCollaborationModal()">
+        콜라보 요청하기
+    </button>
+    <div class="action-buttons">
+        <button class="action-btn wishlist-btn" onclick="toggleWishlist()" th:attr="data-store-id=${store.uuid}">
+            <span class="material-symbols-outlined">favorite</span>
+        </button>
+        <button class="action-btn share-btn" onclick="shareStore()">
+            <span class="material-symbols-outlined">share</span>
+        </button>
+    </div>
 </div>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
@@ -211,5 +684,35 @@
 <!-- Common Scripts -->
 <script th:src="@{/js/common.js}"></script>
 <script th:src="@{/js/store-detail.js}"></script>
+
+<script>
+// Additional functionality for redesigned page
+document.addEventListener('DOMContentLoaded', function() {
+    // Set dynamic background image with fallback
+    const heroSection = document.querySelector('.hero-section');
+    if (heroSection) {
+        const backgroundImage = heroSection.style.backgroundImage;
+        if (!backgroundImage || backgroundImage === 'url()') {
+            heroSection.style.backgroundImage = 'url(/image/topping_L.png)';
+        }
+    }
+});
+
+// Share store functionality
+function shareStore() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.querySelector('.store-name').textContent + ' - 토핑',
+            text: '이 가게를 확인해보세요!',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('링크가 클립보드에 복사되었습니다!');
+        });
+    }
+}
+</script>
 </body>
 </html>
