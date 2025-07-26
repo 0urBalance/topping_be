@@ -178,6 +178,7 @@ public class KakaoService {
 	/**
 	 * 카카오 정보로 신규 사용자 생성
 	 */
+	@Transactional(readOnly = true)
 	private User createNewUserFromKakao(KakaoUserInfoDto kakaoUserInfo) {
 		User user = new User();
 		user.setEmail(kakaoUserInfo.getEmail());
@@ -191,8 +192,9 @@ public class KakaoService {
 		if (defaultSggCode.isPresent()) {
 			user.setSggCode(defaultSggCode.get());
 		} else {
-			// 기본 지역이 없으면 첫 번째 지역으로 설정
-			sggCodeRepository.findAll().stream().findFirst().ifPresent(user::setSggCode);
+			// 기본 지역이 없으면 첫 번째 지역으로 설정 - 페이징으로 제한
+			sggCodeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 1))
+				.stream().findFirst().ifPresent(user::setSggCode);
 		}
 		
 		return user;

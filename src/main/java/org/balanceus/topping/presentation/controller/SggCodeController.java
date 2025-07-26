@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.repository.SggCodeRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ public class SggCodeController {
     private final SggCodeRepository sggCodeRepository;
     
     @GetMapping("/regions")
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getRegions() {
         try {
             List<SggCode> allCodes = sggCodeRepository.findAll();
@@ -48,6 +50,7 @@ public class SggCodeController {
     }
     
     @GetMapping("/cities")
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getCitiesByRegion(@RequestParam String region) {
         try {
             List<SggCode> codes = sggCodeRepository.findBySggCdNmRegion(region);
@@ -79,6 +82,7 @@ public class SggCodeController {
     }
     
     @GetMapping("/all")
+    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getAllSggCodes() {
         try {
             List<SggCode> allCodes = sggCodeRepository.findAll();
