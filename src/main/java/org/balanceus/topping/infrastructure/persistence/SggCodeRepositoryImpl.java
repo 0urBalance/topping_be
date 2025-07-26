@@ -3,6 +3,7 @@ package org.balanceus.topping.infrastructure.persistence;
 import lombok.RequiredArgsConstructor;
 import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.repository.SggCodeRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class SggCodeRepositoryImpl implements SggCodeRepository {
     }
     
     @Override
-    public List<SggCode> findAll() {
+    public List<SggCode> findAll(PageRequest pageRequest) {
         return sggCodeJpaRepository.findAll();
     }
     

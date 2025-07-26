@@ -1,6 +1,7 @@
 package org.balanceus.topping.domain.repository;
 
 import org.balanceus.topping.domain.model.SggCode;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface SggCodeRepository extends Repository<SggCode, Integer> {
     
     // Read operations
     Optional<SggCode> findById(Integer sggCd5);
-    List<SggCode> findAll();
+    List<SggCode> findAll(PageRequest pageRequest);
     List<SggCode> findAllById(Iterable<Integer> ids);
     
     // Custom business queries

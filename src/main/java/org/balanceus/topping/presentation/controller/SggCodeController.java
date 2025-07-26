@@ -3,6 +3,7 @@ package org.balanceus.topping.presentation.controller;
 import lombok.RequiredArgsConstructor;
 import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.repository.SggCodeRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,7 @@ public class SggCodeController {
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getRegions() {
         try {
-            List<SggCode> allCodes = sggCodeRepository.findAll();
+            List<SggCode> allCodes = sggCodeRepository.findAll(PageRequest.of(0, 1));
             
             // Group by region to get unique regions
             List<String> regions = allCodes.stream()
@@ -85,7 +86,7 @@ public class SggCodeController {
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getAllSggCodes() {
         try {
-            List<SggCode> allCodes = sggCodeRepository.findAll();
+            List<SggCode> allCodes = sggCodeRepository.findAll(PageRequest.of(0, 1));
             
             // Convert to map for dropdown usage
             List<Map<String, Object>> codes = allCodes.stream()
