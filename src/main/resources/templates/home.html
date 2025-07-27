@@ -209,9 +209,35 @@
         }
 
         .products-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 10px 0;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .products-section:active {
+            cursor: grabbing;
+        }
+
+        .products-section::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .products-section::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .products-section::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        .products-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
 
         .product-card {
@@ -220,6 +246,9 @@
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
+            flex-shrink: 0;
+            width: 280px;
+            min-width: 280px;
         }
 
         .product-card:hover {
@@ -439,7 +468,12 @@
             }
 
             .products-section {
-                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .product-card {
+                width: 250px;
+                min-width: 250px;
             }
 
             .registry-icons {
@@ -527,8 +561,9 @@
                     </div>
                 </div>
 
-                <div class="products-section">
-                    <div class="product-card clickable-product-card" th:each="product : ${recentProducts}" th:attr="data-product-uuid=${product.uuid}">
+                <div class="products-section" id="products-scroll-container">
+                    <th:block th:each="product, iterStat : ${recentProducts}" th:if="${iterStat.index} < 5">
+                        <div class="product-card clickable-product-card" th:attr="data-product-uuid=${product.uuid}">
                         <div class="product-image">
                             <img th:if="${product.mainImage != null}"
                                  th:src="${product.mainImage.imagePath}"
@@ -555,7 +590,8 @@
                                 <button class="btn-outline btn-primary apply-btn" th:attr="data-product-uuid=${product.uuid}">신청하기</button>
                             </div>
                         </div>
-                    </div>
+                        </div>
+                    </th:block>
 
                     <!-- Empty state when no products exist -->
                     <div th:if="${#lists.isEmpty(recentProducts)}" class="product-card" style="opacity: 0.6;">
@@ -642,8 +678,73 @@ function toggleWishlist(button, productUuid) {
     // await fetch(`/api/wishlist/${productUuid}`, { method: 'POST' });
 }
 
+// Drag-scroll functionality for products section
+function initializeProductsScroll() {
+    const scrollContainer = document.getElementById('products-scroll-container');
+    if (!scrollContainer) return;
+    
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    scrollContainer.addEventListener('mousedown', (e) => {
+        // Only enable drag if not clicking on buttons or cards
+        if (e.target.tagName === 'BUTTON' || e.target.closest('.product-card')) {
+            return;
+        }
+        
+        isDown = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+        e.preventDefault();
+    });
+
+    scrollContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+
+    scrollContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed multiplier
+        scrollContainer.scrollLeft = scrollLeft - walk;
+    });
+    
+    // Touch support for mobile devices
+    let touchStartX = 0;
+    let touchScrollLeft = 0;
+    
+    scrollContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchScrollLeft = scrollContainer.scrollLeft;
+    });
+    
+    scrollContainer.addEventListener('touchmove', (e) => {
+        if (!touchStartX) return;
+        const touchX = e.touches[0].clientX;
+        const touchWalk = (touchStartX - touchX) * 1.5;
+        scrollContainer.scrollLeft = touchScrollLeft + touchWalk;
+        e.preventDefault();
+    });
+    
+    scrollContainer.addEventListener('touchend', () => {
+        touchStartX = 0;
+    });
+}
+
 // Add hover effects and click handlers to product cards
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize drag-scroll functionality
+    initializeProductsScroll();
+    
     const productCards = document.querySelectorAll('.product-card');
     
     productCards.forEach(card => {
