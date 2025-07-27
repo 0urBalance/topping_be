@@ -83,9 +83,16 @@
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); }
 .flex-center { display: flex; align-items: center; justify-content: center; }
-.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-between { display: flex; align-items: center; justify-content: space-evenly; }
 .flex-col { display: flex; flex-direction: column; }
 .flex-wrap { display: flex; flex-wrap: wrap; }
+
+/* Hero section button container */
+.hero-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
 
 /* 🎨 Typography System */
 .heading-hero { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin: 0; }
@@ -315,6 +322,18 @@
     scrollbar-color: var(--light-gray) transparent;
 }
 
+.gallery-scroll .image-gallery {
+    width: 200px;
+    height: 200px;
+}
+
+.gallery-scroll .image-gallery:hover {
+    transform: scale(1.08);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+    position: relative;
+}
+
 .gallery-scroll::-webkit-scrollbar {
     height: 6px;
 }
@@ -514,6 +533,24 @@
     padding: var(--space-md);
     background: var(--gray-50);
     border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.sns-section .collaboration-btn {
+    padding: 18px 32px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: var(--space-md);
+    align-self: center;
+    min-width: 200px;
+}
+
+.sns-collab-btn {
+    width: 100%;
+    margin-top: var(--space-md);
 }
 
 .sns-link {
@@ -643,8 +680,8 @@
     .store-info { gap: var(--space-sm); }
     .btn-hero { justify-content: center; }
     .image-gallery { width: 100px; height: 100px; }
-    .social-stats { flex-direction: column; gap: var(--space-sm); }
-    .social-stats .btn-hero { width: 100%; justify-content: center; }
+    .hero-buttons-container { flex-direction: column; gap: var(--space-sm); }
+    .hero-buttons-container .btn-hero { width: 100%; justify-content: center; }
 }
 
 /* 🚀 Performance Optimizations */

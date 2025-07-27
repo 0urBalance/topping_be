@@ -36,8 +36,8 @@
                     <div th:replace="~{fragments/tag :: category(${store.category})}"></div>
                     <h1 class="heading-hero text-white" th:text="${store.name}">에펠루아 본점</h1>
                     <div class="rating-section flex-center" style="justify-content: flex-start;">
-                        <span th:if="${reviewCount > 0}" class="rating">⭐ <span th:text="${rating}">4.9</span> / 5</span>
-                        <span th:if="${reviewCount > 0}" class="text-white-80">(<span th:text="${reviewCount}">1,114</span>)</span>
+                        <span th:if="${reviewCount > 0}" class="rating">⭐ <span th:text="${rating}">5</span></span>
+                        <span th:if="${reviewCount > 0}" class="text-white-80">(<span th:text="${reviewCount}">0</span>)</span>
                         <span th:if="${reviewCount == 0}" class="text-white-80">아직 리뷰가 없습니다</span>
                     </div>
                     <div class="flex-center text-white-90" style="justify-content: flex-start;">
@@ -47,9 +47,9 @@
                     <div th:if="${!store.hashtags.empty}"
                          th:replace="~{fragments/tag :: hashtag-group(${store.hashtags})}"></div>
                     <div th:if="${store.hashtags.empty}" th:replace="~{fragments/tag :: default-hashtag}"></div>
-                    <div class="social-stats flex-wrap">
+                    <div class="social-stats hero-buttons-container">
                         <button class="btn-base btn-hero collab-product-count" title="이 가게와 콜라보된 상품 수">
-                            <span class="material-symbols-outlined">diversity_3</span>
+                            <span class="material-symbols-outlined">handshake</span>
                             <span th:text="${collabProductCount}">0</span>
                         </button>
                         <button class="btn-base btn-hero wishlist-btn">
@@ -203,7 +203,7 @@
                     </div>
 
                     <!-- Collaboration Action Button -->
-                    <button class="btn-base btn-primary collaboration-btn"
+                    <button class="btn-base btn-primary collaboration-btn sns-collab-btn"
                             th:attr="data-store-id=${store.uuid}">
                         콜라보 요청하기
                     </button>
@@ -216,6 +216,7 @@
 
 <!-- 4️⃣ Fixed Action Bar -->
 <div class="action-bar">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     <div class="action-bar-content flex-between">
         <button class="btn-base btn-primary collaboration-btn"
                 th:attr="data-store-id=${store.uuid}">
