@@ -102,8 +102,20 @@
                 <hr style="margin: var(--spacing-lg) 0;">
             </div>
 
-            <!-- Advanced Image Upload using API -->
-            <div class="form-group">
+            <!-- Image Upload Notice for Registration -->
+            <div th:if="${!isEdit}" class="form-group">
+                <div class="info-card">
+                    <div class="info-icon">📷</div>
+                    <div class="info-content">
+                        <h4>이미지 업로드</h4>
+                        <p>스토어 등록 완료 후 다음 단계에서 이미지를 추가할 수 있습니다.</p>
+                        <small>대표 이미지와 갤러리 이미지를 업로드하여 스토어를 더욱 매력적으로 꾸며보세요!</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Image Upload for Edit Mode -->
+            <div th:if="${isEdit}" class="form-group">
                 <!-- Main Image Upload -->
                 <div style="margin-bottom: var(--spacing-lg);">
                     <h4>대표 이미지 업로드</h4>
@@ -119,8 +131,8 @@
                     </div>
                 </div>
 
-                <!-- Gallery Images Upload (for registration too) -->
-                <div th:if="${!isEdit}">
+                <!-- Gallery Images Upload (edit mode only) -->
+                <div>
                     <h4>갤러리 이미지 업로드 <small>(선택사항)</small></h4>
                     <div class="upload-area" id="galleryImageUpload">
                         <input type="file" id="galleryImageFiles" name="galleryImageFiles" multiple 
@@ -325,6 +337,42 @@
         padding: 2px 6px;
         border-radius: 3px;
         font-size: 0.75rem;
+    }
+    
+    /* Info Card Styling for Registration */
+    .info-card {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
+        background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
+        border: 1px solid #d1e7ff;
+        border-radius: 12px;
+        margin: var(--spacing-lg) 0;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+    }
+    
+    .info-icon {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .info-content h4 {
+        margin: 0 0 var(--spacing-sm) 0;
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+    
+    .info-content p {
+        margin: 0 0 var(--spacing-xs) 0;
+        color: #374151;
+        line-height: 1.5;
+    }
+    
+    .info-content small {
+        color: #6b7280;
+        line-height: 1.4;
     }
     
     @media (max-width: 768px) {

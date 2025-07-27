@@ -128,7 +128,7 @@ public class StoreController {
             }
             
             redirectAttributes.addFlashAttribute("successMessage", "Store registered successfully!");
-            return "redirect:/stores/my-store";
+            return "redirect:/stores/setup-images";
         } catch (Exception e) {
             log.error("Store registration failed", e);
             model.addAttribute("storeForm", storeForm);
@@ -346,6 +346,51 @@ public class StoreController {
         model.addAttribute("isWishlisted", isWishlisted);
         
         return "store/detail";
+    }
+
+    @GetMapping("/setup-images")
+    public String showImageSetup(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        // Check if user has business owner role
+        String userRole = userDetails.getUser().getRole().name();
+        if (!userRole.equals("ROLE_BUSINESS_OWNER") && !userRole.equals("ROLE_ADMIN")) {
+            log.warn("User {} does not have business owner role - access denied", userDetails.getUser().getEmail());
+            return "redirect:/mypage?error=access_denied";
+        }
+
+        Optional<Store> store = storeService.getStoreByUser(userDetails.getUser().getUuid());
+        if (store.isEmpty()) {
+            log.warn("User {} tried to access image setup but has no store", userDetails.getUser().getEmail());
+            return "redirect:/stores/register";
+        }
+
+        model.addAttribute("store", store.get());
+        return "store/setup-images";
+    }
+
+    @PostMapping("/setup-images/complete")
+    public String completeImageSetup(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                   RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "스토어 설정이 완료되었습니다!");
+        return "redirect:/stores/my-store";
+    }
+
+    @PostMapping("/setup-images/skip")
+    public String skipImageSetup(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        redirectAttributes.addFlashAttribute("infoMessage", "이미지는 나중에 추가할 수 있습니다.");
+        return "redirect:/stores/my-store";
     }
 
     @PostMapping("/upload-images")

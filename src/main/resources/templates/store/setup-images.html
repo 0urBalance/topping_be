@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 설정 - Topping</title>
+    
+    <!-- CSS Framework -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    
+    <style>
+        .setup-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: var(--spacing-xl);
+        }
+        
+        .setup-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .setup-header h1 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .setup-header .store-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-2xl);
+            padding: var(--spacing-lg);
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-weight: 500;
+        }
+        
+        .progress-step.completed {
+            color: var(--success-color);
+        }
+        
+        .progress-step.current {
+            color: var(--primary-color);
+        }
+        
+        .progress-step.upcoming {
+            color: #9ca3af;
+        }
+        
+        .progress-arrow {
+            color: #d1d5db;
+            font-weight: 600;
+        }
+        
+        /* Advanced Upload Area Styling */
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: var(--spacing-xl);
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: var(--spacing-lg);
+            background: #fafafa;
+        }
+        
+        .upload-area:hover,
+        .upload-area.drag-over {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .upload-placeholder {
+            cursor: pointer;
+        }
+        
+        .upload-placeholder .icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            display: block;
+        }
+        
+        .upload-placeholder p {
+            margin: var(--spacing-sm) 0;
+            color: #333;
+        }
+        
+        .upload-placeholder small {
+            color: #666;
+        }
+        
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+        
+        .image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: var(--spacing-xs);
+            right: var(--spacing-xs);
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-btn:hover {
+            background: var(--error-color);
+        }
+        
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+            padding: var(--spacing-xs);
+            font-size: 0.75rem;
+            text-align: center;
+        }
+        
+        .success-indicator {
+            position: absolute;
+            bottom: var(--spacing-xs);
+            left: var(--spacing-xs);
+            background: rgba(0, 128, 0, 0.9);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+        }
+        
+        .tip-card {
+            background: #f0f9ff;
+            border: 1px solid #7dd3fc;
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .tip-card h4 {
+            color: #0369a1;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .tip-list {
+            margin: 0;
+            padding-left: var(--spacing-lg);
+            color: #475569;
+        }
+        
+        .tip-list li {
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        @media (max-width: 768px) {
+            .progress-indicator {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+            
+            .progress-arrow {
+                transform: rotate(90deg);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="main-body">
+    <!-- Include Navigation Bar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main id="main-content" class="main-content">
+        <div class="setup-container">
+            <div class="setup-header">
+                <h1>🎉 스토어 등록 완료!</h1>
+                <div class="store-name" th:text="${store.name}">스토어 이름</div>
+                <p>이제 이미지를 추가하여 스토어를 더욱 매력적으로 꾸며보세요</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step completed">
+                    <span>✅</span>
+                    <span>기본 정보 등록</span>
+                </div>
+                <div class="progress-arrow">→</div>
+                <div class="progress-step current">
+                    <span>📷</span>
+                    <span>이미지 추가</span>
+                </div>
+                <div class="progress-arrow">→</div>
+                <div class="progress-step upcoming">
+                    <span>🏪</span>
+                    <span>설정 완료</span>
+                </div>
+            </div>
+
+            <!-- Show success message from registration -->
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">
+                스토어가 성공적으로 등록되었습니다.
+            </div>
+
+            <!-- Tips Card -->
+            <div class="tip-card">
+                <h4>💡 이미지 업로드 팁</h4>
+                <ul class="tip-list">
+                    <li>대표 이미지는 스토어의 첫인상을 결정하니 신중히 선택해주세요</li>
+                    <li>갤러리 이미지로 스토어의 분위기와 메뉴를 다양하게 보여주세요</li>
+                    <li>JPG, PNG 형식만 지원하며, 각 파일은 최대 10MB까지 업로드 가능합니다</li>
+                    <li>이미지는 나중에 언제든지 수정하거나 추가할 수 있습니다</li>
+                </ul>
+            </div>
+
+            <!-- Main Image Upload -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">대표 이미지 업로드</h3>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="mainImageUpload">
+                        <input type="file" id="mainImageFiles" name="mainImageFiles" multiple 
+                               accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('mainImageFiles').click()">
+                            <span class="icon">📷</span>
+                            <p><strong>클릭하거나 드래그하여 대표 이미지를 업로드하세요</strong></p>
+                            <small>JPG, JPEG, PNG 파일만 업로드 가능 (최대 10MB)</small>
+                        </div>
+                        <div class="image-preview-container" id="mainImagePreviews"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Images Upload -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">갤러리 이미지 업로드 <small>(선택사항)</small></h3>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="galleryImageUpload">
+                        <input type="file" id="galleryImageFiles" name="galleryImageFiles" multiple 
+                               accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('galleryImageFiles').click()">
+                            <span class="icon">🖼️</span>
+                            <p><strong>클릭하거나 드래그하여 갤러리 이미지를 업로드하세요</strong></p>
+                            <small>여러 장 선택 가능 (각각 최대 10MB)</small>
+                        </div>
+                        <div class="image-preview-container" id="galleryImagePreviews"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <form th:action="@{/stores/setup-images/complete}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-primary">
+                        ✅ 설정 완료
+                    </button>
+                </form>
+                <form th:action="@{/stores/setup-images/skip}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary">
+                        ⏭️ 나중에 추가하기
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- Common Modals -->
+    <div th:replace="~{fragments/modals :: policy-modals}"></div>
+    <div th:replace="~{fragments/modals :: confirmation-modal}"></div>
+
+    <!-- Framework JavaScript -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/main-common.js}"></script>
+
+    <script>
+        // Advanced image upload functionality for setup mode (reusing edit mode logic)
+        document.addEventListener('DOMContentLoaded', function() {
+            setupImageUpload('mainImageFiles', 'mainImagePreviews', 'MAIN');
+            setupImageUpload('galleryImageFiles', 'galleryImagePreviews', 'GALLERY');
+        });
+
+        function setupImageUpload(inputId, previewId, imageType) {
+            const fileInput = document.getElementById(inputId);
+            const previewContainer = document.getElementById(previewId);
+            const uploadArea = fileInput ? fileInput.closest('.upload-area') : null;
+            
+            if (!fileInput || !previewContainer || !uploadArea) {
+                console.log(`Upload setup skipped for ${inputId} - elements not found`);
+                return;
+            }
+            
+            // File input change handler
+            fileInput.addEventListener('change', function(e) {
+                handleFiles(e.target.files, previewContainer, imageType);
+            });
+
+            // Drag and drop handlers
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                fileInput.files = files;
+                handleFiles(files, previewContainer, imageType);
+            });
+        }
+
+        function handleFiles(files, previewContainer, imageType) {
+            Array.from(files).forEach((file, index) => {
+                if (validateFile(file)) {
+                    const preview = createImagePreview(file, index, previewContainer, imageType);
+                    previewContainer.appendChild(preview);
+                }
+            });
+        }
+
+        function validateFile(file) {
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+
+            if (!allowedTypes.includes(file.type)) {
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
+                } else {
+                    alert('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
+                }
+                return false;
+            }
+
+            if (file.size > maxSize) {
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+                } else {
+                    alert('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        function createImagePreview(file, index, previewContainer, imageType) {
+            const preview = document.createElement('div');
+            preview.className = 'image-preview';
+            
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.onload = function() {
+                URL.revokeObjectURL(this.src);
+            };
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = function() {
+                preview.remove();
+            };
+            
+            preview.appendChild(img);
+            preview.appendChild(removeBtn);
+            
+            // Auto-upload after preview creation
+            uploadImage(file, imageType, preview);
+            
+            return preview;
+        }
+
+        function uploadImage(file, imageType, previewElement) {
+            const formData = new FormData();
+            formData.append('files', file);
+            formData.append('imageType', imageType);
+
+            // Add progress indicator
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'upload-progress';
+            progressDiv.innerHTML = '업로드 중...';
+            previewElement.appendChild(progressDiv);
+
+            fetch('/stores/upload-images', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                progressDiv.remove();
+                if (data.code === 200) {
+                    console.log('Upload successful:', data.data);
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'success-indicator';
+                    successDiv.innerHTML = '✓';
+                    previewElement.appendChild(successDiv);
+                    
+                    if (window.Topping && window.Topping.notify) {
+                        window.Topping.notify.success('이미지가 성공적으로 업로드되었습니다.');
+                    }
+                } else {
+                    const errorMsg = '업로드 실패: ' + (data.message || '알 수 없는 오류');
+                    if (window.Topping && window.Topping.notify) {
+                        window.Topping.notify.error(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
+                    previewElement.remove();
+                }
+            })
+            .catch(error => {
+                progressDiv.remove();
+                console.error('Upload error:', error);
+                const errorMsg = '업로드 중 오류가 발생했습니다: ' + error.message;
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error(errorMsg);
+                } else {
+                    alert(errorMsg);
+                }
+                previewElement.remove();
+            });
+        }
+    </script>
+</body>
+</html>
