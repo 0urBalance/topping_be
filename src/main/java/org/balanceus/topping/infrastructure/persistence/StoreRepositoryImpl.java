@@ -60,7 +60,24 @@ public class StoreRepositoryImpl implements StoreRepository {
 
     @Override
     public Optional<Store> findByIdWithProductsAndTags(UUID id) {
-        return storeJpaRepository.findByIdWithProductsAndTags(id);
+        // Load store with products first (single query, no Cartesian product)
+        Optional<Store> storeWithProducts = storeJpaRepository.findByIdWithProducts(id);
+        
+        if (storeWithProducts.isPresent()) {
+            Store store = storeWithProducts.get();
+            
+            // Load images separately (second query, no Cartesian product)
+            Optional<Store> storeWithImages = storeJpaRepository.findByIdWithImages(id);
+            if (storeWithImages.isPresent()) {
+                // Force initialization of the images collection
+                storeWithImages.get().getImages().size();
+                // The images are now available in the same entity session
+            }
+            
+            return Optional.of(store);
+        }
+        
+        return Optional.empty();
     }
 
     @Override

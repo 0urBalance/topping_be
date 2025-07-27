@@ -19,8 +19,12 @@ public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
     boolean existsByUser(User user);
     
     @Query("SELECT s FROM Store s " +
-           "LEFT JOIN FETCH s.products " +
+           "LEFT JOIN FETCH s.products p " +
+           "WHERE s.uuid = :id")
+    Optional<Store> findByIdWithProducts(@Param("id") UUID id);
+    
+    @Query("SELECT s FROM Store s " +
            "LEFT JOIN FETCH s.images " +
            "WHERE s.uuid = :id")
-    Optional<Store> findByIdWithProductsAndTags(@Param("id") UUID id);
+    Optional<Store> findByIdWithImages(@Param("id") UUID id);
 }
