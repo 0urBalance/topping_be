@@ -79,58 +79,122 @@
             </div>
         </section>
 
-        <!-- 2️⃣ Gallery Section (가게 사진) -->
-        <section class="section">
-            <h2 class="heading-lg text-dark">가게 사진</h2>
-            <p class="text-base text-medium" style="margin-bottom: 24px;">가게의 분위기를 확인할 수 있어요.</p>
+        <!-- 2️⃣ Main Content Layout with Two Columns -->
+        <div class="main-layout-wrapper">
+            <!-- Left Column: Main Content -->
+            <div class="main-content-column">
+                <!-- Gallery Section (가게 사진) -->
+                <section class="section">
+                    <h2 class="heading-lg text-dark">가게 사진</h2>
+                    <p class="text-base text-medium" style="margin-bottom: 24px;">가게의 분위기를 확인할 수 있어요.</p>
 
-            <div th:if="${!store.images.empty}" class="gallery-scroll">
-                <div class="image-gallery gallery-trigger"
-                     th:each="image, iterStat : ${store.images}"
-                     th:attr="data-index=${iterStat.index}">
-                    <img th:src="${image.imagePath}"
-                         th:alt="${image.imageType.displayName}"
-                         th:title="${image.imageType.displayName}"
-                         loading="lazy" />
+                    <div th:if="${!store.images.empty}" class="gallery-scroll">
+                        <div class="image-gallery gallery-trigger"
+                             th:each="image, iterStat : ${store.images}"
+                             th:attr="data-index=${iterStat.index}">
+                            <img th:src="${image.imagePath}"
+                                 th:alt="${image.imageType.displayName}"
+                                 th:title="${image.imageType.displayName}"
+                                 loading="lazy" />
+                        </div>
+                    </div>
+
+                    <div th:if="${store.images.empty}" class="empty-state">
+                        <p>아직 등록된 이미지가 없습니다.</p>
+                    </div>
+                </section>
+
+                <!-- Menu Introduction Section -->
+<!--                <section class="section">-->
+<!--                    <h2 class="heading-lg text-dark">메뉴 소개</h2>-->
+<!--                    <p class="text-base text-medium" style="margin-bottom: 24px;">고객들이 사랑하는 메뉴를 만나보세요.</p>-->
+<!--                </section>-->
+
+                <!-- Menu Section 1: 콜라보 인기 메뉴 -->
+                <section class="section">
+                    <h3 class="heading-md text-dark">콜라보 인기 상품</h3>
+
+                    <div th:if="${!#lists.isEmpty(popularMenus)}" class="grid-3">
+                        <th:block th:each="product : ${popularMenus}">
+                            <div th:replace="~{fragments/product-card :: card(${product})}"></div>
+                        </th:block>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(popularMenus)}" class="empty-state">
+                        <p>아직 등록된 인기 상품이 없습니다.</p>
+                    </div>
+                </section>
+
+                <!-- Menu Section 2: 시그니처 메뉴 -->
+                <section class="section">
+                    <h3 class="heading-md text-dark">시그니처 상품</h3>
+
+                    <div th:if="${!#lists.isEmpty(signatureMenus)}" class="grid-3">
+                        <th:block th:each="product : ${signatureMenus}">
+                            <div th:replace="~{fragments/product-card :: card(${product})}"></div>
+                        </th:block>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(signatureMenus)}" class="empty-state">
+                        <p>아직 등록된 시그니처 상품이 없습니다.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: SNS & Collaboration Info -->
+            <div class="sidebar-content-column">
+                <!-- SNS & Collaboration Section -->
+                <div class="store-social-collab-box">
+                    <h3 class="sidebar-heading" th:text="|${store.name}과 콜라보하고 있는 가게 보기|">에펠루아 본점과 콜라보하고 있는 가게 보기</h3>
+                    
+                    <!-- Collaboration Info -->
+                    <div class="collab-info">
+                        <div class="collab-badge">
+                            <span class="material-symbols-outlined">handshake</span>
+                            <span class="collab-text" th:text="${store.name}">에펠루아 본점</span>
+<!--                            <span class="collab-status">2.5 months</span>-->
+                        </div>
+                        
+                        <p class="collab-desc">
+                            이런 브랜드의 콜라보를 하고 있습니다<br>
+                            함께 할 수 있어서요!
+                        </p>
+                        
+                        <div class="collab-tags">
+                            <th:block th:if="${!store.hashtags.empty}">
+                                <span th:each="hashtag : ${store.hashtags}" 
+                                      th:text="${hashtag}" 
+                                      class="collab-tag"></span>
+                            </th:block>
+                            <th:block th:if="${store.hashtags.empty}">
+                                <span class="collab-tag">#아메리카노</span>
+                                <span class="collab-tag">#콜라보네이션</span>
+                                <span class="collab-tag">#커피맛집</span>
+                            </th:block>
+                        </div>
+                    </div>
+
+                    <!-- SNS Section -->
+                    <div class="sns-section">
+                        <a th:if="${store.snsOrWebsiteLink != null and !#strings.isEmpty(store.snsOrWebsiteLink)}" 
+                           th:href="${store.snsOrWebsiteLink}" 
+                           target="_blank" 
+                           class="sns-link">
+                            <span class="material-symbols-outlined">camera_alt</span>
+                            <span th:text="${store.snsOrWebsiteLink}">https://www.instagram.com/eiffelrua_gangneung</span>
+                        </a>
+                        <div th:if="${store.snsOrWebsiteLink == null or #strings.isEmpty(store.snsOrWebsiteLink)}" class="sns-placeholder">
+                            SNS 링크가 등록되지 않았습니다.
+                        </div>
+                    </div>
+
+                    <!-- Collaboration Action Button -->
+                    <button class="collab-action-btn">
+                        콜라보 요청하기
+                    </button>
                 </div>
             </div>
-
-            <div th:if="${store.images.empty}" class="empty-state">
-                <p>아직 등록된 이미지가 없습니다.</p>
-            </div>
-        </section>
-
-        <!-- 3️⃣ Menu Section 1: 콜라보 인기 메뉴 -->
-        <section class="section">
-            <h2 class="heading-lg text-dark">콜라보 인기 메뉴</h2>
-            <p class="text-base text-medium" style="margin-bottom: 24px;">고객들이 사랑하는 메뉴예요.</p>
-
-            <div th:if="${!#lists.isEmpty(popularMenus)}" class="grid-3">
-                <th:block th:each="product : ${popularMenus}">
-                    <div th:replace="~{fragments/product-card :: card(${product})}"></div>
-                </th:block>
-            </div>
-
-            <div th:if="${#lists.isEmpty(popularMenus)}" class="empty-state">
-                <p>아직 등록된 인기 상품이 없습니다.</p>
-            </div>
-        </section>
-
-        <!-- 3️⃣ Menu Section 2: 시그니처 메뉴 -->
-        <section class="section">
-            <h2 class="heading-lg text-dark">시그니처 메뉴</h2>
-            <p class="text-base text-medium" style="margin-bottom: 24px;">이 가게만의 특별한 메뉴예요.</p>
-
-            <div th:if="${!#lists.isEmpty(signatureMenus)}" class="grid-3">
-                <th:block th:each="product : ${signatureMenus}">
-                    <div th:replace="~{fragments/product-card :: card(${product})}"></div>
-                </th:block>
-            </div>
-
-            <div th:if="${#lists.isEmpty(signatureMenus)}" class="empty-state">
-                <p>아직 등록된 시그니처 상품이 없습니다.</p>
-            </div>
-        </section>
+        </div>
 
     </div>
 </main>

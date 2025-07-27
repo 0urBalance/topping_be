@@ -386,6 +386,10 @@ window.Topping.copyToClipboard(text);
 - ✅ **Image Management**: Entity relationships, repositories, and service layer for multiple images per store/menu
 - ✅ **Frontend Optimization**: Complete store detail page refactoring with component system, performance improvements, and visual refinements
 - ✅ **Environment-Specific File Upload**: Externalized upload path configuration with profile-based and environment variable support
+- ✅ **JPA Query Optimization**: Fixed product duplication issues caused by Cartesian Product in multiple JOIN FETCH operations
+- ✅ **Home Page Products Enhancement**: Horizontal scrolling layout with drag-and-scroll functionality, limited to 5 products max
+- ✅ **Store Detail Two-Column Layout**: Implemented sidebar with SNS & collaboration information, proper large screen constraints
+- ✅ **Thymeleaf Expression Safety**: Fixed null-safety issues and field binding errors across all templates
 
 ### Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -416,6 +420,9 @@ window.Topping.copyToClipboard(text);
 - **Session Auth**: Use Principal or UserDetailsImpl, not JWT tokens
 - **Entity Creation**: Never manually set UUID for @GeneratedValue entities
 - **Fragment Syntax**: Use `th:replace="~{fragments/navbar :: navbar}"` (Thymeleaf 3 syntax)
+- **JPA JOIN FETCH**: Avoid multiple JOIN FETCH in single query - causes Cartesian Product and data duplication
+- **DTO Field Binding**: Ensure Thymeleaf field references match actual DTO property names (e.g., `thumbnailPath` not `imageUrl`)
+- **Null-Safety in Templates**: Use proper null checks: `${object != null and !#strings.isEmpty(object.field)}`
 
 ### Template Best Practices
 - **MANDATORY CSS**: Use `base.css` framework for main templates, `auth.css` for authentication
@@ -489,6 +496,14 @@ window.Topping.copyToClipboard(text);
 - **Component System**: Created reusable fragments (`fragments/product-card.html`, `fragments/tag.html`) for improved maintainability
 - **Performance JavaScript**: Implemented `StoreDetailManager` class with event delegation and lazy loading
 - **Visual Refinements**: Full-height layout, proper spacing, scaled hero images (80%), centered button icons
+- **Two-Column Layout**: Main content with sidebar for SNS & collaboration information, responsive design
+- **Large Screen Constraints**: Media queries prevent elements from exceeding container bounds on screens >1400px
+
+### Home Page Enhancement
+- **Horizontal Products Section**: Limited to 5 products max with horizontal scrolling layout
+- **Drag-Scroll Functionality**: Mouse and touchpad drag support with smooth scrolling behavior
+- **Performance Optimization**: Reduced DOM complexity and improved scroll performance
+- **Responsive Design**: Proper scaling and layout adjustments across all screen sizes
 
 ### CSS Architecture Improvements
 - **Design Tokens**: Centralized CSS variables for colors, spacing, shadows, and transitions
@@ -501,6 +516,11 @@ window.Topping.copyToClipboard(text);
 - **Tag Components**: Modular category and hashtag display with hover effects
 - **Event Delegation**: Single event listener replacing multiple handlers for better performance
 - **Code Reusability**: Eliminated duplicate layout code with 30% DOM complexity reduction
+
+### JPA Query Optimization
+- **Cartesian Product Fix**: Resolved product duplication by separating multiple JOIN FETCH operations into individual queries
+- **Query Performance**: Improved data loading efficiency and eliminated N×M result multiplication
+- **Repository Pattern**: Maintained clean architecture while fixing query performance issues
 
 ## 🔍 Explore Page System
 
@@ -567,6 +587,16 @@ window.Topping.copyToClipboard(text);
 - **Optimistic Locking**: Fixed by removing manual UUID setting in SignupController
 - **UUID Generation**: Let Hibernate handle @GeneratedValue @UuidGenerator entities
 - **Repository Layer**: Consistent three-layer pattern across all domains
+
+### JPA & Query Issues
+- **Product Duplication**: Fixed Cartesian Product problem in StoreJpaRepository by separating multiple JOIN FETCH operations
+- **Query Optimization**: Replaced problematic queries like `LEFT JOIN FETCH s.products LEFT JOIN FETCH s.images` with separate queries
+- **Data Integrity**: Ensured 1:1 mapping between entities and their collections without N×M multiplication
+
+### Thymeleaf Template Issues  
+- **Field Binding Errors**: Fixed mismatched field references (e.g., `th:field="*{imageUrl}"` changed to `th:field="*{thumbnailPath}"`)
+- **Null-Safety**: Implemented proper null checks for template expressions to prevent evaluation errors
+- **Expression Safety**: Use `${object != null and !#strings.isEmpty(object.field)}` pattern for safe null checking
 
 ### Database & Connection Pool Issues
 - **Connection Pool Exhaustion**: Fixed transaction boundary issues in KakaoService and SggCodeController
