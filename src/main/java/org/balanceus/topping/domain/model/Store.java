@@ -65,6 +65,12 @@ public class Store {
 
     private String snsOrWebsiteLink;
 
+    @Column(length = 1000)
+    private String description;
+
+    @Column(name = "is_collaboration_open")
+    private Boolean isCollaborationOpen = true;
+
     @OneToOne
     @JoinColumn(name = "user_uuid", nullable = false, unique = true)
     private User user;

@@ -7,17 +7,15 @@
     
     <!-- CSS Framework -->
     <link rel="stylesheet" th:href="@{/css/base.css}">
-    <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-    />
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
-    
-    <!-- Favicon -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     
+    <!-- Store form fragment styles -->
+    <style th:replace="fragments/store-form :: styles"></style>
+    
     <style>
-        /* Page-specific styles */
         .edit-container { 
             max-width: 800px; 
             margin: 0 auto; 
@@ -34,27 +32,14 @@
             margin-bottom: var(--spacing-sm);
         }
         
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-lg);
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
         }
         
-        /* Image Management Styles */
-        .image-section {
-            background: white;
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .image-section h3 {
-            color: var(--primary-color);
-            margin-bottom: var(--spacing-md);
-            font-size: 1.25rem;
-        }
-        
+        /* Enhanced Image Management Styles for Edit Mode */
         .upload-area {
             border: 2px dashed #ddd;
             border-radius: 8px;
@@ -78,53 +63,6 @@
             font-size: 3rem;
             margin-bottom: var(--spacing-md);
             display: block;
-        }
-        
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: var(--spacing-md);
-        }
-        
-        .image-item {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        
-        .image-thumbnail {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-        }
-        
-        .image-info {
-            padding: var(--spacing-sm);
-            background: #f9f9f9;
-        }
-        
-        .image-type-badge {
-            font-size: 0.75rem;
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-        
-        .delete-btn {
-            background: var(--error-color);
-            color: white;
-            border: none;
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .delete-btn:hover {
-            background: #c0392b;
         }
         
         .image-preview-container {
@@ -190,18 +128,6 @@
             border-radius: 3px;
             font-size: 0.75rem;
         }
-        
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            .image-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            }
-            .image-preview-container {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-        }
     </style>
 </head>
 <body class="main-body">
@@ -223,89 +149,16 @@
                 성공적으로 수정되었습니다.
             </div>
 
-            <form th:action="@{/stores/edit}" method="post" th:object="${storeRegistrationRequest}">
-                <!-- Basic Information -->
+            <form th:action="@{/stores/edit}" method="post" th:object="${storeForm}">
+                <!-- Include the common store form -->
+                <div th:replace="~{fragments/store-form :: form(true)}"></div>
+
+                <!-- Advanced Image Management for Edit Mode -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">기본 정보</h3>
+                        <h3 class="card-title">고급 이미지 관리</h3>
                     </div>
                     <div class="card-body">
-                        <div class="form-group">
-                            <label class="form-label" for="name">스토어 이름 <span style="color: var(--error-color);">*</span></label>
-                            <input type="text" id="name" th:field="*{name}" class="form-control" required placeholder="스토어 이름을 입력하세요">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="address">주소 <span style="color: var(--error-color);">*</span></label>
-                            <input type="text" id="address" th:field="*{address}" class="form-control" required placeholder="주소를 입력하세요">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="contactNumber">연락처 <span style="color: var(--error-color);">*</span></label>
-                                <input type="tel" id="contactNumber" th:field="*{contactNumber}" class="form-control" required 
-                                       placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('contactNumber')}" th:errors="*{contactNumber}"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="category">카테고리 <span style="color: var(--error-color);">*</span></label>
-                                <select id="category" th:field="*{category}" class="form-control" required>
-                                    <option value="">카테고리를 선택하세요</option>
-                                    <option value="Cafe">카페</option>
-                                    <option value="Dessert">디저트</option>
-                                    <option value="Restaurant">레스토랑</option>
-                                    <option value="Bakery">베이커리</option>
-                                    <option value="Korean">한식</option>
-                                    <option value="Western">양식</option>
-                                    <option value="Asian">아시안</option>
-                                    <option value="Fast Food">패스트푸드</option>
-                                    <option value="Bar">바</option>
-                                    <option value="Other">기타</option>
-                                </select>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="businessHours">영업시간 <span style="color: var(--error-color);">*</span></label>
-                            <textarea id="businessHours" th:field="*{businessHours}" class="form-control" required 
-                                      placeholder="예: 평일 09:00-22:00, 주말 10:00-23:00"></textarea>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('businessHours')}" th:errors="*{businessHours}"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Image Management -->
-                <div class="image-section">
-                    <h3>📷 이미지 관리</h3>
-                    
-                    <!-- Current Images Display -->
-                    <div th:if="${store != null and !store.images.empty}">
-                        <h4>현재 등록된 이미지</h4>
-                        <div class="image-grid">
-                            <div class="image-item" th:each="image : ${store.images}">
-                                <img th:src="${image.imagePath}" alt="Store Image" class="image-thumbnail">
-                                <div class="image-info">
-                                    <div class="image-type-badge" th:text="${image.imageType.displayName}">이미지 타입</div>
-                                    <button type="button" class="delete-btn" 
-                                            th:data-image-id="${image.uuid}"
-                                            onclick="deleteExistingImage(this.dataset.imageId)">🗑️ 삭제</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div th:if="${store == null or store.images.empty}">
-                        <div class="alert alert-info">
-                            아직 등록된 이미지가 없습니다. 아래에서 이미지를 업로드해보세요.
-                        </div>
-                    </div>
-
-                    <!-- Upload Areas -->
-                    <div style="margin-top: var(--spacing-lg);">
                         <!-- Main Image Upload -->
                         <div style="margin-bottom: var(--spacing-lg);">
                             <h4>대표 이미지 업로드</h4>
@@ -338,30 +191,8 @@
                     </div>
                 </div>
 
-                <!-- Additional Information -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">추가 정보</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label class="form-label" for="mainImageUrl">메인 이미지 URL <small>(선택사항)</small></label>
-                            <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" class="form-control"
-                                   placeholder="https://example.com/image.jpg">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="snsOrWebsiteLink">SNS 또는 웹사이트 링크 <small>(선택사항)</small></label>
-                            <input type="url" id="snsOrWebsiteLink" th:field="*{snsOrWebsiteLink}" class="form-control"
-                                   placeholder="https://instagram.com/yourstore">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('snsOrWebsiteLink')}" th:errors="*{snsOrWebsiteLink}"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: var(--spacing-md); justify-content: center; margin-top: var(--spacing-xl);">
+                <div class="action-buttons">
                     <button type="submit" class="btn btn-primary">
                         💾 수정 저장
                     </button>
@@ -385,7 +216,7 @@
     <script th:src="@{/js/main-common.js}"></script>
 
     <script>
-        // Image upload functionality
+        // Enhanced image upload functionality for edit mode
         document.addEventListener('DOMContentLoaded', function() {
             setupImageUpload('mainImageFiles', 'mainImagePreviews', 'MAIN');
             setupImageUpload('galleryImageFiles', 'galleryImagePreviews', 'GALLERY');
@@ -435,12 +266,20 @@
             const maxSize = 10 * 1024 * 1024; // 10MB
 
             if (!allowedTypes.includes(file.type)) {
-                window.Topping.notify.error('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
+                } else {
+                    alert('지원하지 않는 파일 형식입니다. JPG, JPEG, PNG 파일만 업로드 가능합니다.');
+                }
                 return false;
             }
 
             if (file.size > maxSize) {
-                window.Topping.notify.error('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+                if (window.Topping && window.Topping.notify) {
+                    window.Topping.notify.error('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+                } else {
+                    alert('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+                }
                 return false;
             }
 
@@ -491,10 +330,8 @@
             .then(response => response.json())
             .then(data => {
                 progressDiv.remove();
-                // Check if the response indicates success (code 200)
                 if (data.code === 200) {
                     console.log('Upload successful:', data.data);
-                    // Add success indicator
                     const successDiv = document.createElement('div');
                     successDiv.className = 'success-indicator';
                     successDiv.innerHTML = '✓';
@@ -529,7 +366,6 @@
         function deleteExistingImage(imageId) {
             console.log('Delete button clicked for image:', imageId);
             
-            // Check if Topping framework is loaded
             if (!window.Topping || !window.Topping.showConfirmation) {
                 console.error('Topping framework not loaded');
                 alert('프레임워크 로딩 오류가 발생했습니다. 페이지를 새로고침해주세요.');
@@ -561,14 +397,12 @@
             })
             .then(data => {
                 console.log('Delete response data:', data);
-                // Check if the response indicates success (code 200)
                 if (data.code === 200) {
                     if (window.Topping && window.Topping.notify) {
                         window.Topping.notify.success('이미지가 성공적으로 삭제되었습니다.');
                     } else {
                         alert('이미지가 성공적으로 삭제되었습니다.');
                     }
-                    // Refresh page to update image list
                     setTimeout(() => {
                         location.reload();
                     }, 1000);

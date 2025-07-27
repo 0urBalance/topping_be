@@ -107,5 +107,9 @@ public class StoreService {
 
         return storeRepository.save(store);
     }
+
+    public Store updateStoreEntity(Store store) {
+        return storeRepository.save(store);
+    }
     
 }

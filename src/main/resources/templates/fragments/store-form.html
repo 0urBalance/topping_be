@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- Store Form Fragment -->
+<div th:fragment="form(isEdit)">
+    <!-- Basic Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">기본 정보</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="form-label" for="name">스토어 이름 <span style="color: var(--error-color);">*</span></label>
+                <input type="text" id="name" th:field="*{name}" class="form-control" required 
+                       placeholder="스토어 이름을 입력하세요" maxlength="100">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="category">카테고리 <span style="color: var(--error-color);">*</span></label>
+                    <select id="category" th:field="*{category}" class="form-control" required>
+                        <option value="">카테고리를 선택하세요</option>
+                        <option value="Cafe">카페</option>
+                        <option value="Dessert">디저트</option>
+                        <option value="Restaurant">레스토랑</option>
+                        <option value="Bakery">베이커리</option>
+                        <option value="Korean">한식</option>
+                        <option value="Western">양식</option>
+                        <option value="Asian">아시안</option>
+                        <option value="Fast Food">패스트푸드</option>
+                        <option value="Bar">바</option>
+                        <option value="Other">기타</option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="contactNumber">연락처 <span style="color: var(--error-color);">*</span></label>
+                    <input type="tel" id="contactNumber" th:field="*{contactNumber}" class="form-control" required 
+                           placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('contactNumber')}" th:errors="*{contactNumber}"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="address">주소 <span style="color: var(--error-color);">*</span></label>
+                <input type="text" id="address" th:field="*{address}" class="form-control" required 
+                       placeholder="주소를 입력하세요" maxlength="255">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">스토어 소개 <small>(선택사항)</small></label>
+                <textarea id="description" th:field="*{description}" class="form-control" rows="4"
+                          placeholder="스토어를 소개하는 글을 작성해주세요" maxlength="1000"></textarea>
+                <small class="form-text text-muted">최대 1000자까지 입력 가능합니다.</small>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="businessHours">영업시간 <span style="color: var(--error-color);">*</span></label>
+                <textarea id="businessHours" th:field="*{businessHours}" class="form-control" required rows="3"
+                          placeholder="예: 평일 09:00-22:00, 주말 10:00-23:00" maxlength="500"></textarea>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('businessHours')}" th:errors="*{businessHours}"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="tags">해시태그 <small>(선택사항)</small></label>
+                <input type="text" id="tags" th:field="*{tags}" class="form-control"
+                       placeholder="쉼표로 구분된 해시태그 (예: 카페, 디저트, 강남)">
+                <small class="form-text text-muted">쉼표(,)로 구분하여 입력하세요. # 기호는 자동으로 추가됩니다.</small>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('tags')}" th:errors="*{tags}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">이미지 업로드</h3>
+        </div>
+        <div class="card-body">
+            <!-- Current Images Display (only for edit mode) -->
+            <div th:if="${isEdit and store != null and !store.images.empty}">
+                <h4>현재 등록된 이미지</h4>
+                <div class="image-grid">
+                    <div class="image-item" th:each="image : ${store.images}">
+                        <img th:src="${image.imagePath}" alt="Store Image" class="image-thumbnail">
+                        <div class="image-info">
+                            <div class="image-type-badge" th:text="${image.imageType.displayName}">이미지 타입</div>
+                            <button type="button" class="delete-btn" 
+                                    th:data-image-id="${image.uuid}"
+                                    onclick="deleteExistingImage(this.dataset.imageId)">🗑️ 삭제</button>
+                        </div>
+                    </div>
+                </div>
+                <hr style="margin: var(--spacing-lg) 0;">
+            </div>
+
+            <!-- Advanced Image Upload using API -->
+            <div class="form-group">
+                <!-- Main Image Upload -->
+                <div style="margin-bottom: var(--spacing-lg);">
+                    <h4>대표 이미지 업로드</h4>
+                    <div class="upload-area" id="mainImageUpload">
+                        <input type="file" id="mainImageFiles" name="mainImageFiles" multiple 
+                               accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('mainImageFiles').click()">
+                            <span class="icon">📷</span>
+                            <p><strong>클릭하거나 드래그하여 대표 이미지를 업로드하세요</strong></p>
+                            <small>JPG, JPEG, PNG 파일만 업로드 가능 (최대 10MB)</small>
+                        </div>
+                        <div class="image-preview-container" id="mainImagePreviews"></div>
+                    </div>
+                </div>
+
+                <!-- Gallery Images Upload (for registration too) -->
+                <div th:if="${!isEdit}">
+                    <h4>갤러리 이미지 업로드 <small>(선택사항)</small></h4>
+                    <div class="upload-area" id="galleryImageUpload">
+                        <input type="file" id="galleryImageFiles" name="galleryImageFiles" multiple 
+                               accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('galleryImageFiles').click()">
+                            <span class="icon">🖼️</span>
+                            <p><strong>클릭하거나 드래그하여 갤러리 이미지를 업로드하세요</strong></p>
+                            <small>여러 장 선택 가능 (각각 최대 10MB)</small>
+                        </div>
+                        <div class="image-preview-container" id="galleryImagePreviews"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Image URL (fallback) -->
+            <div class="form-group">
+                <label class="form-label" for="mainImageUrl">또는 이미지 URL <small>(선택사항)</small></label>
+                <input type="url" id="mainImageUrl" th:field="*{mainImageUrl}" class="form-control"
+                       placeholder="https://example.com/image.jpg">
+                <small class="form-text text-muted">파일 업로드 대신 이미지 URL을 사용할 수 있습니다.</small>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('mainImageUrl')}" th:errors="*{mainImageUrl}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">추가 정보</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="form-label" for="snsOrWebsiteLink">SNS 또는 웹사이트 링크 <small>(선택사항)</small></label>
+                <input type="url" id="snsOrWebsiteLink" th:field="*{snsOrWebsiteLink}" class="form-control"
+                       placeholder="https://instagram.com/yourstore">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('snsOrWebsiteLink')}" th:errors="*{snsOrWebsiteLink}"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" id="isCollaborationOpen" th:field="*{isCollaborationOpen}" class="form-check-input" checked>
+                    <label class="form-check-label" for="isCollaborationOpen">
+                        콜라보 요청 받기
+                    </label>
+                </div>
+                <small class="form-text text-muted">체크하면 다른 스토어에서 콜라보 요청을 보낼 수 있습니다.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional styles for the form fragment -->
+<style th:fragment="styles">
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .image-item {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .image-thumbnail {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+    }
+    
+    .image-info {
+        padding: var(--spacing-sm);
+        background: #f9f9f9;
+    }
+    
+    .image-type-badge {
+        font-size: 0.75rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .delete-btn {
+        background: var(--error-color);
+        color: white;
+        border: none;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .delete-btn:hover {
+        background: #c0392b;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-lg);
+    }
+    
+    /* Advanced Upload Area Styling */
+    .upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: var(--spacing-xl);
+        text-align: center;
+        transition: all 0.3s ease;
+        margin-bottom: var(--spacing-lg);
+        background: #fafafa;
+    }
+    
+    .upload-area:hover,
+    .upload-area.drag-over {
+        border-color: var(--primary-color);
+        background-color: var(--primary-light);
+    }
+    
+    .upload-placeholder {
+        cursor: pointer;
+    }
+    
+    .upload-placeholder .icon {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-md);
+        display: block;
+    }
+    
+    .upload-placeholder p {
+        margin: var(--spacing-sm) 0;
+        color: #333;
+    }
+    
+    .upload-placeholder small {
+        color: #666;
+    }
+    
+    .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-md);
+    }
+    
+    .image-preview {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .image-preview img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+    
+    .remove-btn {
+        position: absolute;
+        top: var(--spacing-xs);
+        right: var(--spacing-xs);
+        background: rgba(231, 76, 60, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .remove-btn:hover {
+        background: var(--error-color);
+    }
+    
+    .upload-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 123, 255, 0.9);
+        color: white;
+        padding: var(--spacing-xs);
+        font-size: 0.75rem;
+        text-align: center;
+    }
+    
+    .success-indicator {
+        position: absolute;
+        bottom: var(--spacing-xs);
+        left: var(--spacing-xs);
+        background: rgba(0, 128, 0, 0.9);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.75rem;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+        
+        .image-preview-area {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
+    }
+</style>
+
+</body>
+</html>

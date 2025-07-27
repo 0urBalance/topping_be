@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
+import org.balanceus.topping.application.dto.StoreForm;
 import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
@@ -35,7 +36,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -74,16 +78,20 @@ public class StoreController {
             return "redirect:/stores/my-store";
         }
 
-        model.addAttribute("storeRegistrationRequest", new StoreRegistrationRequest());
+        model.addAttribute("storeForm", new StoreForm());
         return "store/register";
     }
 
     @PostMapping("/register")
     public String registerStore(
-            @Valid @ModelAttribute StoreRegistrationRequest request,
+            @Valid @ModelAttribute StoreForm storeForm,
             BindingResult bindingResult,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
+            Model model,
             RedirectAttributes redirectAttributes) {
+
+        log.info("Store registration request received. User: {}", 
+                userDetails != null ? userDetails.getUser().getEmail() : "null");
 
         if (userDetails == null) {
             return "redirect:/login";
@@ -97,17 +105,35 @@ public class StoreController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("storeForm", storeForm);
             return "store/register";
         }
 
         try {
-            storeService.registerStore(request, userDetails.getUser().getUuid());
+            // Convert StoreForm to StoreRegistrationRequest
+            StoreRegistrationRequest registrationRequest = convertToRegistrationRequest(storeForm);
+            
+            // Register the store (without image upload)
+            storeService.registerStore(registrationRequest, userDetails.getUser().getUuid());
+            
+            // Get the newly created store for additional updates
+            Optional<Store> newStore = storeService.getStoreByUser(userDetails.getUser().getUuid());
+            if (newStore.isPresent()) {
+                Store store = newStore.get();
+                
+                // Update additional fields (description, tags, collaboration status)
+                updateStoreWithFormData(store, storeForm);
+                
+                log.info("Store registered successfully without image. Store ID: {}", store.getUuid());
+            }
+            
             redirectAttributes.addFlashAttribute("successMessage", "Store registered successfully!");
             return "redirect:/stores/my-store";
         } catch (Exception e) {
             log.error("Store registration failed", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/stores/register";
+            model.addAttribute("storeForm", storeForm);
+            model.addAttribute("errorMessage", "스토어 등록 중 오류가 발생했습니다: " + e.getMessage());
+            return "store/register";
         }
     }
 
@@ -176,26 +202,23 @@ public class StoreController {
         }
 
         Store storeData = store.get();
-        StoreRegistrationRequest request = new StoreRegistrationRequest();
-        request.setName(storeData.getName());
-        request.setAddress(storeData.getAddress());
-        request.setContactNumber(storeData.getContactNumber());
-        request.setBusinessHours(storeData.getBusinessHours());
-        request.setCategory(storeData.getCategory());
-        request.setMainImageUrl(storeData.getMainImageUrl());
-        request.setSnsOrWebsiteLink(storeData.getSnsOrWebsiteLink());
+        StoreForm storeForm = convertToStoreForm(storeData);
 
-        model.addAttribute("storeRegistrationRequest", request);
+        model.addAttribute("storeForm", storeForm);
         model.addAttribute("store", storeData);
         return "store/edit";
     }
 
     @PostMapping("/edit")
     public String updateStore(
-            @Valid @ModelAttribute StoreRegistrationRequest request,
+            @Valid @ModelAttribute StoreForm storeForm,
             BindingResult bindingResult,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
+            Model model,
             RedirectAttributes redirectAttributes) {
+
+        log.debug("Store edit request received. User: {}", 
+                userDetails != null ? userDetails.getUser().getEmail() : "null");
 
         if (userDetails == null) {
             return "redirect:/login";
@@ -214,12 +237,33 @@ public class StoreController {
         }
 
         if (bindingResult.hasErrors()) {
+            // Re-populate store data for display of existing images
+            Optional<Store> currentStore = storeService.getStoreByUser(userDetails.getUser().getUuid());
+            if (currentStore.isPresent()) {
+                model.addAttribute("store", currentStore.get());
+            }
+            model.addAttribute("storeForm", storeForm);
             return "store/edit";
         }
 
         try {
             Store store = storeOptional.get();
-            storeService.updateStore(store.getUuid(), request, userDetails.getUser().getUuid());
+            
+            // Convert StoreForm to StoreRegistrationRequest for basic fields
+            StoreRegistrationRequest updateRequest = convertToRegistrationRequest(storeForm);
+            
+            // Update basic store fields
+            storeService.updateStore(store.getUuid(), updateRequest, userDetails.getUser().getUuid());
+            
+            // Refresh store instance and update additional fields
+            Optional<Store> updatedStoreOptional = storeService.getStoreById(store.getUuid());
+            if (updatedStoreOptional.isPresent()) {
+                Store updatedStore = updatedStoreOptional.get();
+                updateStoreWithFormData(updatedStore, storeForm);
+                
+                log.info("Store updated successfully. Store ID: {}", updatedStore.getUuid());
+            }
+            
             redirectAttributes.addFlashAttribute("successMessage", "Store updated successfully!");
             return "redirect:/stores/my-store";
         } catch (Exception e) {
@@ -415,6 +459,91 @@ public class StoreController {
                      userDetails.getUser().getEmail(), storeId, e);
             return ApiResponseData.failure(500, "Failed to update like status");
         }
+    }
+
+    // Test page for debugging multipart issues
+    @GetMapping("/test-multipart")
+    public String showMultipartTest() {
+        return "test-multipart";
+    }
+
+    // Test endpoint for debugging multipart issues
+    @PostMapping("/test-multipart")
+    @ResponseBody
+    public String testMultipart(HttpServletRequest request) {
+        log.debug("Test multipart endpoint called. Request type: {}", request.getClass().getSimpleName());
+        log.debug("Content type: {}", request.getContentType());
+        log.debug("Content length: {}", request.getContentLength());
+        
+        if (request instanceof MultipartHttpServletRequest) {
+            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+            log.debug("Successfully cast to MultipartHttpServletRequest");
+            log.debug("File names: {}", multipartRequest.getFileNames());
+            return "Multipart parsing successful";
+        } else {
+            log.debug("Request is not a MultipartHttpServletRequest");
+            return "Request is not multipart";
+        }
+    }
+
+    // Helper method to convert StoreForm to StoreRegistrationRequest
+    private StoreRegistrationRequest convertToRegistrationRequest(StoreForm storeForm) {
+        StoreRegistrationRequest request = new StoreRegistrationRequest();
+        request.setName(storeForm.getName());
+        request.setAddress(storeForm.getAddress());
+        request.setContactNumber(storeForm.getContactNumber());
+        request.setBusinessHours(storeForm.getBusinessHours());
+        request.setCategory(storeForm.getCategory());
+        request.setMainImageUrl(storeForm.getMainImageUrl());
+        request.setSnsOrWebsiteLink(storeForm.getSnsOrWebsiteLink());
+        return request;
+    }
+
+    // Helper method to update store with additional form data
+    private void updateStoreWithFormData(Store store, StoreForm storeForm) {
+        try {
+            if (storeForm.getDescription() != null && !storeForm.getDescription().trim().isEmpty()) {
+                store.setDescription(storeForm.getDescription().trim());
+            }
+            
+            if (storeForm.getIsCollaborationOpen() != null) {
+                store.setIsCollaborationOpen(storeForm.getIsCollaborationOpen());
+            }
+            
+            // Handle tags
+            List<String> tagsList = storeForm.getTagsList();
+            if (!tagsList.isEmpty()) {
+                store.getTags().clear();
+                tagsList.forEach(store::addTag);
+            }
+            
+            // Save the updated store
+            storeService.updateStoreEntity(store);
+            log.info("Store updated with additional data: tags={}, description length={}", 
+                    tagsList.size(), 
+                    storeForm.getDescription() != null ? storeForm.getDescription().length() : 0);
+        } catch (Exception e) {
+            log.warn("Failed to update store with additional form data", e);
+        }
+    }
+
+    // Helper method to convert Store to StoreForm for editing
+    private StoreForm convertToStoreForm(Store store) {
+        StoreForm form = new StoreForm();
+        form.setName(store.getName());
+        form.setCategory(store.getCategory());
+        form.setAddress(store.getAddress());
+        form.setDescription(store.getDescription());
+        form.setContactNumber(store.getContactNumber());
+        form.setBusinessHours(store.getBusinessHours());
+        form.setMainImageUrl(store.getMainImageUrl());
+        form.setSnsOrWebsiteLink(store.getSnsOrWebsiteLink());
+        form.setIsCollaborationOpen(store.getIsCollaborationOpen());
+        
+        // Convert tags list to comma-separated string
+        form.setTagsFromList(store.getTags());
+        
+        return form;
     }
 
 }
