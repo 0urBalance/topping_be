@@ -9,10 +9,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
+import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 	//스프링에서 감지하는 에러들
+
+	@ExceptionHandler(MultipartException.class)
+	public ResponseEntity<String> handleMultipartException(MultipartException e) {
+		log.error("Multipart parsing failed", e);
+		log.error("Multipart exception details - Cause: {}, Message: {}", 
+				e.getCause() != null ? e.getCause().getClass().getSimpleName() : "none", 
+				e.getMessage());
+		
+		// Log additional details about the root cause
+		Throwable rootCause = e;
+		while (rootCause.getCause() != null) {
+			rootCause = rootCause.getCause();
+		}
+		log.error("Root cause: {} - {}", rootCause.getClass().getSimpleName(), rootCause.getMessage());
+		
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body("파일 업로드 처리 중 오류가 발생했습니다. 파일 크기가 10MB를 초과하지 않는지, 지원되는 파일 형식(JPG, PNG)인지 확인해주세요.");
+	}
 
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
