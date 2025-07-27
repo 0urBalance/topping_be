@@ -1,7 +1,9 @@
 package org.balanceus.topping.presentation.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,9 +11,14 @@ import org.balanceus.topping.application.dto.StoreRegistrationRequest;
 import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreImage;
+import org.balanceus.topping.domain.model.StoreLike;
+import org.balanceus.topping.domain.repository.CollaborationRepository;
+import org.balanceus.topping.domain.repository.ProductRepository;
+import org.balanceus.topping.domain.repository.ReviewRepository;
 import org.balanceus.topping.domain.repository.StoreLikeRepository;
 import org.balanceus.topping.domain.repository.WishlistRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
@@ -43,6 +50,9 @@ public class StoreController {
     private final StoreService storeService;
     private final ProductService productService;
     private final ImageUploadService imageUploadService;
+    private final ProductRepository productRepository;
+    private final CollaborationRepository collaborationRepository;
+    private final ReviewRepository reviewRepository;
     private final StoreLikeRepository storeLikeRepository;
     private final WishlistRepository wishlistRepository;
 
@@ -258,6 +268,17 @@ public class StoreController {
         long likeCount = storeLikeRepository.countByStore(store);
         long wishlistCount = wishlistRepository.countByStore(store);
         
+        // Get collaboration product count
+        long collabProductCount = productRepository.countByStoreAndCollaborationIsNotNull(store);
+        
+        // Get collaborating stores (stores that have accepted collaborations with this store's products)
+        List<Collaboration> acceptedCollaborations = collaborationRepository.findByProductStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
+        List<Store> collaboratingStores = acceptedCollaborations.stream()
+            .map(collaboration -> collaboration.getApplicantProduct() != null ? collaboration.getApplicantProduct().getStore() : null)
+            .filter(collaboratingStore -> collaboratingStore != null && !collaboratingStore.getUuid().equals(store.getUuid()))
+            .distinct()
+            .toList();
+        
         boolean isLiked = false;
         boolean isWishlisted = false;
         
@@ -266,10 +287,17 @@ public class StoreController {
             isWishlisted = wishlistRepository.existsByUserAndStore(userDetails.getUser(), store);
         }
         
-        model.addAttribute("rating", 4.9); // Mock data - replace with actual review system
-        model.addAttribute("reviewCount", 1114); // Mock data - replace with actual review system
+        // Get actual review data
+        long reviewCount = reviewRepository.countByStoreAndIsActiveTrue(store);
+        Double averageRating = reviewRepository.findAverageRatingByStoreAndIsActiveTrue(store);
+        double rating = averageRating != null ? Math.round(averageRating * 10.0) / 10.0 : 0.0;
+        
+        model.addAttribute("rating", rating);
+        model.addAttribute("reviewCount", reviewCount);
         model.addAttribute("likeCount", likeCount);
         model.addAttribute("wishlistCount", wishlistCount);
+        model.addAttribute("collabProductCount", collabProductCount);
+        model.addAttribute("collaboratingStores", collaboratingStores);
         model.addAttribute("isLiked", isLiked);
         model.addAttribute("isWishlisted", isWishlisted);
         
@@ -332,6 +360,60 @@ public class StoreController {
         } catch (Exception e) {
             log.error("Store image deletion failed", e);
             return ApiResponseData.failure(500, e.getMessage());
+        }
+    }
+
+    @PostMapping("/api/{storeId}/like")
+    @ResponseBody
+    public ApiResponseData<Map<String, Object>> toggleStoreLike(
+            @PathVariable("storeId") UUID storeId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null) {
+            return ApiResponseData.failure(401, "Authentication required");
+        }
+
+        try {
+            Optional<Store> storeOptional = storeService.getStoreById(storeId);
+            if (storeOptional.isEmpty()) {
+                return ApiResponseData.failure(404, "Store not found");
+            }
+
+            Store store = storeOptional.get();
+            
+            // Check if user already liked this store
+            Optional<StoreLike> existingLike = storeLikeRepository.findByUserAndStore(userDetails.getUser(), store);
+            
+            boolean isLiked;
+            if (existingLike.isPresent()) {
+                // Unlike: remove existing like
+                storeLikeRepository.delete(existingLike.get());
+                isLiked = false;
+                log.debug("User {} unliked store {}", userDetails.getUser().getEmail(), store.getName());
+            } else {
+                // Like: create new like
+                StoreLike newLike = new StoreLike();
+                newLike.setUser(userDetails.getUser());
+                newLike.setStore(store);
+                storeLikeRepository.save(newLike);
+                isLiked = true;
+                log.debug("User {} liked store {}", userDetails.getUser().getEmail(), store.getName());
+            }
+            
+            // Get updated like count
+            long likeCount = storeLikeRepository.countByStore(store);
+            
+            // Return response data
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("isLiked", isLiked);
+            responseData.put("likeCount", likeCount);
+            
+            return ApiResponseData.success(responseData);
+            
+        } catch (Exception e) {
+            log.error("Failed to toggle store like for user: {}, store: {}", 
+                     userDetails.getUser().getEmail(), storeId, e);
+            return ApiResponseData.failure(500, "Failed to update like status");
         }
     }
 

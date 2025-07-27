@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,13 +9,15 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/store-detail-refactored.css}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 
     <!-- Performance Optimizations -->
-    <meta name="user-authenticated" th:content="${#authorization.expression('isAuthenticated()')}" />
+    <meta name="user-authenticated" th:content="${#authorization.expression('isAuthenticated()')}"/>
     <link rel="preload" th:href="@{/js/store-detail-optimized.js}" as="script">
-    <link rel="preload" th:href="${store.mainImage != null ? store.mainImage.imagePath : '/image/topping_L.png'}" as="image">
+    <link rel="preload" th:href="${store.mainImage != null ? store.mainImage.imagePath : '/image/topping_L.png'}"
+          as="image">
 </head>
 <body class="store-detail-body" th:attr="data-authenticated=${#authorization.expression('isAuthenticated()')}">
 <a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
@@ -34,19 +36,21 @@
                     <div th:replace="~{fragments/tag :: category(${store.category})}"></div>
                     <h1 class="heading-hero text-white" th:text="${store.name}">에펠루아 본점</h1>
                     <div class="rating-section flex-center" style="justify-content: flex-start;">
-                        <span class="rating">⭐ <span th:text="${rating}">4.9</span></span>
-                        <span class="text-white-80">(<span th:text="${reviewCount}">1,114</span>)</span>
+                        <span th:if="${reviewCount > 0}" class="rating">⭐ <span th:text="${rating}">4.9</span> / 5</span>
+                        <span th:if="${reviewCount > 0}" class="text-white-80">(<span th:text="${reviewCount}">1,114</span>)</span>
+                        <span th:if="${reviewCount == 0}" class="text-white-80">아직 리뷰가 없습니다</span>
                     </div>
                     <div class="flex-center text-white-90" style="justify-content: flex-start;">
                         <span class="material-symbols-outlined">location_on</span>
                         <span th:text="${store.address}">강릉시 창해로 361-77</span>
                     </div>
-                    <div th:if="${!store.hashtags.empty}" th:replace="~{fragments/tag :: hashtag-group(${store.hashtags})}"></div>
+                    <div th:if="${!store.hashtags.empty}"
+                         th:replace="~{fragments/tag :: hashtag-group(${store.hashtags})}"></div>
                     <div th:if="${store.hashtags.empty}" th:replace="~{fragments/tag :: default-hashtag}"></div>
                     <div class="social-stats flex-wrap">
-                        <button class="btn-base btn-hero like-btn">
-                            <span class="material-symbols-outlined">thumb_up</span>
-                            <span th:text="${likeCount}">23</span>
+                        <button class="btn-base btn-hero collab-product-count" title="이 가게와 콜라보된 상품 수">
+                            <span class="material-symbols-outlined">diversity_3</span>
+                            <span th:text="${collabProductCount}">0</span>
                         </button>
                         <button class="btn-base btn-hero wishlist-btn">
                             <span class="material-symbols-outlined">favorite</span>
@@ -62,19 +66,19 @@
                          th:alt="${store.name}"
                          class="image-hero gallery-trigger"
                          data-index="0"
-                         loading="eager" />
+                         loading="eager"/>
                     <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
                          th:src="${store.mainImageUrl}"
                          th:alt="${store.name}"
                          class="image-hero gallery-trigger"
                          data-index="0"
-                         loading="eager" />
+                         loading="eager"/>
                     <img th:if="${store.mainImage == null and store.mainImageUrl == null}"
                          th:src="@{/image/topping_L.png}"
                          th:alt="${store.name}"
                          class="image-hero gallery-trigger"
                          data-index="0"
-                         loading="eager" />
+                         loading="eager"/>
                 </div>
             </div>
         </section>
@@ -95,7 +99,7 @@
                             <img th:src="${image.imagePath}"
                                  th:alt="${image.imageType.displayName}"
                                  th:title="${image.imageType.displayName}"
-                                 loading="lazy" />
+                                 loading="lazy"/>
                         </div>
                     </div>
 
@@ -105,10 +109,10 @@
                 </section>
 
                 <!-- Menu Introduction Section -->
-<!--                <section class="section">-->
-<!--                    <h2 class="heading-lg text-dark">메뉴 소개</h2>-->
-<!--                    <p class="text-base text-medium" style="margin-bottom: 24px;">고객들이 사랑하는 메뉴를 만나보세요.</p>-->
-<!--                </section>-->
+                <!--                <section class="section">-->
+                <!--                    <h2 class="heading-lg text-dark">메뉴 소개</h2>-->
+                <!--                    <p class="text-base text-medium" style="margin-bottom: 24px;">고객들이 사랑하는 메뉴를 만나보세요.</p>-->
+                <!--                </section>-->
 
                 <!-- Menu Section 1: 콜라보 인기 메뉴 -->
                 <section class="section">
@@ -146,50 +150,61 @@
                 <!-- SNS & Collaboration Section -->
                 <div class="store-social-collab-box">
                     <h3 class="sidebar-heading" th:text="|${store.name}과 콜라보하고 있는 가게 보기|">에펠루아 본점과 콜라보하고 있는 가게 보기</h3>
-                    
+
                     <!-- Collaboration Info -->
                     <div class="collab-info">
                         <div class="collab-badge">
                             <span class="material-symbols-outlined">handshake</span>
                             <span class="collab-text" th:text="${store.name}">에펠루아 본점</span>
-<!--                            <span class="collab-status">2.5 months</span>-->
+                            <span class="material-symbols-outlined toggle-icon"
+                                  th:if="${!#lists.isEmpty(collaboratingStores)}">expand_more</span>
                         </div>
-                        
+
                         <p class="collab-desc">
                             이런 브랜드의 콜라보를 하고 있습니다<br>
                             함께 할 수 있어서요!
                         </p>
-                        
+
+                        <!-- Collapsible Collaboration List -->
+                        <ul id="collab-list" class="collab-list" style="display: none;"
+                            th:if="${!#lists.isEmpty(collaboratingStores)}">
+                            <li th:each="partner : ${collaboratingStores}" class="collab-item">
+                                <span th:text="${partner.name}">Partner Store Name</span>
+                            </li>
+                        </ul>
+
                         <div class="collab-tags">
                             <th:block th:if="${!store.hashtags.empty}">
-                                <span th:each="hashtag : ${store.hashtags}" 
-                                      th:text="${hashtag}" 
+                                <span th:each="hashtag : ${store.hashtags}"
+                                      th:text="${hashtag}"
                                       class="collab-tag"></span>
                             </th:block>
                             <th:block th:if="${store.hashtags.empty}">
-                                <span class="collab-tag">#아메리카노</span>
-                                <span class="collab-tag">#콜라보네이션</span>
-                                <span class="collab-tag">#커피맛집</span>
+                                <span class="collab-tag">#아직</span>
+                                <span class="collab-tag">#테그가</span>
+                                <span class="collab-tag">#없습니다</span>
                             </th:block>
                         </div>
                     </div>
 
                     <!-- SNS Section -->
                     <div class="sns-section">
-                        <a th:if="${store.snsOrWebsiteLink != null and !#strings.isEmpty(store.snsOrWebsiteLink)}" 
-                           th:href="${store.snsOrWebsiteLink}" 
-                           target="_blank" 
+                        <a th:if="${store.snsOrWebsiteLink != null and !#strings.isEmpty(store.snsOrWebsiteLink)}"
+                           th:href="${store.snsOrWebsiteLink}"
+                           target="_blank"
                            class="sns-link">
                             <span class="material-symbols-outlined">camera_alt</span>
                             <span th:text="${store.snsOrWebsiteLink}">https://www.instagram.com/eiffelrua_gangneung</span>
                         </a>
-                        <div th:if="${store.snsOrWebsiteLink == null or #strings.isEmpty(store.snsOrWebsiteLink)}" class="sns-placeholder">
+                        <div th:if="${store.snsOrWebsiteLink == null or #strings.isEmpty(store.snsOrWebsiteLink)}"
+                             class="sns-placeholder">
                             SNS 링크가 등록되지 않았습니다.
                         </div>
                     </div>
 
                     <!-- Collaboration Action Button -->
-                    <button class="collab-action-btn">
+                    <button class="btn-base btn-primary collaboration-btn"
+                            th:attr="data-store-id=${store.uuid}">
                         콜라보 요청하기
                     </button>
                 </div>
@@ -202,14 +217,19 @@
 <!-- 4️⃣ Fixed Action Bar -->
 <div class="action-bar">
     <div class="action-bar-content flex-between">
-        <button class="btn-base btn-primary collaboration-btn">
+        <button class="btn-base btn-primary collaboration-btn"
+                th:attr="data-store-id=${store.uuid}">
             콜라보 요청하기
         </button>
         <div class="action-buttons flex-center">
-            <button class="btn-base btn-action wishlist-btn" th:attr="data-store-id=${store.uuid}">
-                <span class="material-symbols-outlined">favorite</span>
+            <button class="btn-base btn-action wishlist-btn"
+                    th:attr="data-store-id=${store.uuid}"
+                    th:classappend="${isLiked} ? ' liked' : ''"
+                    title="좋아요">
+                <span class="material-symbols-outlined" th:text="${isLiked} ? 'favorite' : 'favorite_border'">favorite_border</span>
+                <span class="like-count" th:text="${likeCount}">0</span>
             </button>
-            <button class="btn-base btn-action share-btn">
+            <button class="btn-base btn-action share-btn" title="링크 공유">
                 <span class="material-symbols-outlined">share</span>
             </button>
         </div>

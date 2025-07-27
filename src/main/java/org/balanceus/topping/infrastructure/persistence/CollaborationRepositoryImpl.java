@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
@@ -57,6 +58,11 @@ public class CollaborationRepositoryImpl implements CollaborationRepository {
 	@Override
 	public List<Collaboration> findByParticipant(User user) {
 		return collaborationJpaRepository.findByParticipant(user);
+	}
+
+	@Override
+	public List<Collaboration> findByProductStoreAndStatus(Store store, CollaborationStatus status) {
+		return collaborationJpaRepository.findByProductStoreAndStatus(store, status);
 	}
 
 	@Override

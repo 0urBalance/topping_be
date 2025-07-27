@@ -56,20 +56,23 @@ class StoreDetailManager {
             }
             
             // Action buttons
-            else if (target.classList.contains('like-btn')) {
-                this.toggleLike();
+            else if (target.classList.contains('wishlist-btn') || target.closest('.wishlist-btn')) {
+                e.preventDefault();
+                this.toggleStoreLike(target.closest('.wishlist-btn'));
             }
-            else if (target.classList.contains('wishlist-btn')) {
-                this.toggleWishlist();
-            }
-            else if (target.classList.contains('share-btn')) {
+            else if (target.classList.contains('share-btn') || target.closest('.share-btn')) {
+                e.preventDefault();
                 this.shareStore();
             }
-            else if (target.classList.contains('collaboration-btn')) {
-                this.openCollaborationModal();
+            else if (target.classList.contains('collaboration-btn') || target.closest('.collaboration-btn')) {
+                e.preventDefault();
+                this.handleCollaborationRequest(target.closest('.collaboration-btn'));
             }
             
             // Collaboration list toggle
+            else if (target.closest('.collab-badge')) {
+                this.toggleCollaborationList();
+            }
             else if (target.closest('.toggle-btn')) {
                 this.toggleCollaborationList();
             }
@@ -191,64 +194,86 @@ class StoreDetailManager {
     }
 
     // 💝 Social Actions
-    toggleLike() {
-        const likeBtn = document.querySelector('.like-btn');
-        const likeCount = likeBtn.querySelector('span:last-child');
-        let currentCount = parseInt(likeCount.textContent) || 0;
-        
-        // Toggle visual state
-        if (likeBtn.classList.contains('active')) {
-            likeBtn.classList.remove('active');
-            likeCount.textContent = Math.max(0, currentCount - 1);
-            this.showToast('좋아요를 취소했습니다.', 'info');
-        } else {
-            likeBtn.classList.add('active');
-            likeCount.textContent = currentCount + 1;
-            this.showToast('좋아요를 눌렀습니다!', 'success');
-        }
-        
-        // TODO: Implement actual API call
-        // this.updateLikeStatus(storeId, likeBtn.classList.contains('active'));
-    }
-
-    toggleWishlist() {
-        const wishlistBtn = document.querySelector('.wishlist-btn');
-        const wishlistCount = wishlistBtn.querySelector('span:last-child');
-        let currentCount = parseInt(wishlistCount?.textContent || '0');
-        
-        // Check authentication
+    async toggleStoreLike(button) {
+        // Check authentication first
         if (!this.isAuthenticated()) {
-            if (confirm('찜하기 기능을 사용하려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
-                window.location.href = '/auth/login';
+            const currentUrl = encodeURIComponent(window.location.href);
+            if (confirm('좋아요 기능을 사용하려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+                window.location.href = `/auth/login?redirect=${currentUrl}`;
             }
             return;
         }
-        
-        // Toggle visual state
-        if (wishlistBtn.classList.contains('active')) {
-            wishlistBtn.classList.remove('active');
-            if (wishlistCount) wishlistCount.textContent = Math.max(0, currentCount - 1);
-            this.showToast('찜 목록에서 제거했습니다.', 'info');
-        } else {
-            wishlistBtn.classList.add('active');
-            if (wishlistCount) wishlistCount.textContent = currentCount + 1;
-            this.showToast('찜 목록에 추가했습니다!', 'success');
+
+        const storeId = button.dataset.storeId;
+        if (!storeId) {
+            this.showToast('스토어 정보를 찾을 수 없습니다.', 'error');
+            return;
         }
-        
-        // TODO: Implement actual API call
-        // this.updateWishlistStatus(storeId, wishlistBtn.classList.contains('active'));
+
+        // Disable button during request
+        const originalDisabled = button.disabled;
+        button.disabled = true;
+
+        try {
+            const response = await fetch(`/stores/api/${storeId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update UI based on API response
+                const icon = button.querySelector('.material-symbols-outlined');
+                const likeCountSpan = button.querySelector('.like-count');
+                
+                if (data.data.isLiked) {
+                    button.classList.add('liked');
+                    icon.textContent = 'favorite';
+                    this.showToast('좋아요를 눌렀습니다!', 'success');
+                } else {
+                    button.classList.remove('liked');
+                    icon.textContent = 'favorite_border';
+                    this.showToast('좋아요를 취소했습니다.', 'info');
+                }
+                
+                // Update like count
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = data.data.likeCount;
+                }
+            } else {
+                if (response.status === 401) {
+                    const currentUrl = encodeURIComponent(window.location.href);
+                    window.location.href = `/auth/login?redirect=${currentUrl}`;
+                } else {
+                    this.showToast(data.message || '좋아요 처리 중 오류가 발생했습니다.', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Like toggle error:', error);
+            this.showToast('네트워크 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        } finally {
+            button.disabled = originalDisabled;
+        }
     }
 
     shareStore() {
-        const storeTitle = document.querySelector('.store-name')?.textContent || '가게';
+        const storeTitle = document.querySelector('h1')?.textContent || '가게';
         
         if (navigator.share) {
             navigator.share({
                 title: `${storeTitle} - 토핑`,
                 text: '이 가게를 확인해보세요!',
                 url: window.location.href
-            }).catch(() => {
-                this.fallbackShare();
+            }).then(() => {
+                this.showToast('링크가 공유되었습니다!', 'success');
+            }).catch((error) => {
+                // User cancelled sharing or error occurred
+                if (error.name !== 'AbortError') {
+                    this.fallbackShare();
+                }
             });
         } else {
             this.fallbackShare();
@@ -256,29 +281,53 @@ class StoreDetailManager {
     }
 
     fallbackShare() {
-        if (navigator.clipboard) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(window.location.href).then(() => {
-                this.showToast('링크가 클립보드에 복사되었습니다!', 'success');
+                this.showToast('링크가 복사되었습니다!', 'success');
             }).catch(() => {
-                this.showToast('링크 복사에 실패했습니다.', 'error');
+                this.legacyCopyFallback();
             });
         } else {
+            this.legacyCopyFallback();
+        }
+    }
+
+    legacyCopyFallback() {
+        try {
             // Fallback for older browsers
             const textArea = document.createElement('textarea');
             textArea.value = window.location.href;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
             document.body.appendChild(textArea);
+            textArea.focus();
             textArea.select();
-            try {
-                document.execCommand('copy');
-                this.showToast('링크가 복사되었습니다!', 'success');
-            } catch (err) {
-                this.showToast('링크 복사에 실패했습니다.', 'error');
-            }
+            
+            const successful = document.execCommand('copy');
             document.body.removeChild(textArea);
+            
+            if (successful) {
+                this.showToast('링크가 복사되었습니다!', 'success');
+            } else {
+                this.showToast('링크 복사에 실패했습니다. 주소를 수동으로 복사해주세요.', 'error');
+            }
+        } catch (err) {
+            console.error('Copy fallback failed:', err);
+            this.showToast('링크 복사에 실패했습니다. 주소를 수동으로 복사해주세요.', 'error');
         }
     }
 
     // 🤝 Collaboration
+    handleCollaborationRequest(button) {
+        const storeId = button.dataset.storeId;
+        if (storeId) {
+            window.location.href = `/collaborations/apply?storeId=${storeId}`;
+        } else {
+            this.showToast('스토어 정보를 찾을 수 없습니다.', 'error');
+        }
+    }
+
     openCollaborationModal() {
         const modal = this.getOrCreateModal('collaborationModal');
         if (modal && typeof bootstrap !== 'undefined') {
@@ -288,21 +337,22 @@ class StoreDetailManager {
     }
 
     toggleCollaborationList() {
-        const collaborationList = document.getElementById('collaboration-list');
-        const toggleBtn = document.querySelector('.toggle-btn');
+        const collabInfo = document.querySelector('.collab-info');
+        const collabList = document.getElementById('collab-list');
         
-        if (!collaborationList || !toggleBtn) return;
+        if (!collabInfo || !collabList) return;
         
-        const isHidden = collaborationList.style.display === 'none' || !collaborationList.style.display;
+        // Toggle the open class on the collab-info container
+        collabInfo.classList.toggle('open');
         
-        if (isHidden) {
-            collaborationList.style.display = 'block';
-            collaborationList.classList.add('show');
-            toggleBtn.setAttribute('aria-expanded', 'true');
-        } else {
-            collaborationList.style.display = 'none';
-            collaborationList.classList.remove('show');
-            toggleBtn.setAttribute('aria-expanded', 'false');
+        // Toggle the display of the list
+        const isHidden = collabList.style.display === 'none';
+        collabList.style.display = isHidden ? 'block' : 'none';
+        
+        // Update aria attributes for accessibility
+        const toggleIcon = collabInfo.querySelector('.toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
         }
     }
 
@@ -381,11 +431,10 @@ class StoreDetailManager {
 const storeDetailManager = new StoreDetailManager();
 
 // Legacy support for existing function calls
-window.toggleLike = () => storeDetailManager.toggleLike();
-window.toggleWishlist = () => storeDetailManager.toggleWishlist();
 window.shareStore = () => storeDetailManager.shareStore();
 window.openCollaborationModal = () => storeDetailManager.openCollaborationModal();
 window.toggleCollaborationList = () => storeDetailManager.toggleCollaborationList();
+window.toggleCollabList = () => storeDetailManager.toggleCollaborationList(); // Alias for template onclick
 window.openProductDetail = (uuid) => storeDetailManager.navigateToProduct(uuid);
 
 // Export for module use

@@ -33,7 +33,7 @@ public class SecurityConfig {
 				// Public endpoints
 				.requestMatchers("/", "/auth/**", "/login").permitAll()
 				.requestMatchers("/signup/**").permitAll()
-				.requestMatchers("/explore", "/css/**", "/js/**", "/images/**", "/image/**").permitAll()
+				.requestMatchers("/explore", "/stores/**", "/css/**", "/js/**", "/images/**", "/image/**").permitAll()
 				.requestMatchers("/h2-console/**").permitAll() // For testing
 				// Public support endpoints
 				.requestMatchers("/support/cs", "/support/faq/**").permitAll()
@@ -64,7 +64,7 @@ public class SecurityConfig {
 			.formLogin(form -> form
 				.loginPage("/auth/login")
 				.loginProcessingUrl("/login")
-				.defaultSuccessUrl("/mypage", true)
+				.defaultSuccessUrl("/", true)
 				.failureUrl("/auth/login?error=true")
 				.permitAll()
 			)

@@ -32,4 +32,7 @@ public interface ProductRepository {
 	List<Product> findByStoreAndIsAvailable(Store store, Boolean isAvailable);
 	Page<Product> findByProductTypeOrderByReviewCountDesc(Product.ProductType productType, Pageable pageable);
 	Page<Product> findAllByOrderByReviewCountDesc(Pageable pageable);
+	
+	// Collaboration-related methods
+	long countByStoreAndCollaborationIsNotNull(Store store);
 }

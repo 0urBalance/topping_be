@@ -6,10 +6,12 @@ import java.security.Principal;
 
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
+import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
@@ -31,6 +33,7 @@ public class CollaborationController {
 
 	private final CollaborationRepository collaborationRepository;
 	private final ProductRepository productRepository;
+	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 	private final ProductService productService;
 
@@ -41,23 +44,63 @@ public class CollaborationController {
 		return "collaborations/list";
 	}
 
-	@GetMapping("/apply/{productId}")
-	public String applyForm(@PathVariable UUID productId, Model model, Principal principal) {
+	@GetMapping("/apply")
+	public String applyForm(@RequestParam(required = false) UUID productId, 
+	                       @RequestParam(required = false) UUID storeId, 
+	                       Model model, Principal principal) {
 		// Check authentication
 		if (principal == null) {
 			return "redirect:/login?error=authentication_required";
-		}
-		
-		// Get the target product
-		Product product = productRepository.findById(productId).orElse(null);
-		if (product == null) {
-			return "redirect:/products?error=product_not_found";
 		}
 		
 		// Get the authenticated user
 		User user = userRepository.findByEmail(principal.getName()).orElse(null);
 		if (user == null) {
 			return "redirect:/login?error=user_not_found";
+		}
+		
+		// Handle store-based collaboration requests
+		if (storeId != null) {
+			return handleStoreCollaborationForm(storeId, model, user);
+		}
+		
+		// Handle product-based collaboration requests (original logic)
+		if (productId != null) {
+			return handleProductCollaborationForm(productId, model, user);
+		}
+		
+		// Neither storeId nor productId provided
+		return "redirect:/collaborations?error=missing_target";
+	}
+
+	private String handleStoreCollaborationForm(UUID storeId, Model model, User user) {
+		// Get the target store
+		Store store = storeRepository.findById(storeId).orElse(null);
+		if (store == null) {
+			return "redirect:/explore?error=store_not_found";
+		}
+		
+		// Prevent self-application (user trying to collaborate with their own store)
+		if (store.getUser().getUuid().equals(user.getUuid())) {
+			return "redirect:/stores/" + storeId + "?error=cannot_apply_own_store";
+		}
+		
+		// Get user's products for selection
+		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
+		
+		model.addAttribute("store", store);
+		model.addAttribute("user", user);
+		model.addAttribute("userProducts", userProducts);
+		model.addAttribute("collaboration", new Collaboration());
+		model.addAttribute("collaborationType", "store");
+		return "collaborations/apply";
+	}
+
+	private String handleProductCollaborationForm(UUID productId, Model model, User user) {
+		// Get the target product
+		Product product = productRepository.findById(productId).orElse(null);
+		if (product == null) {
+			return "redirect:/products?error=product_not_found";
 		}
 		
 		// Prevent self-application
@@ -72,7 +115,14 @@ public class CollaborationController {
 		model.addAttribute("user", user);
 		model.addAttribute("userProducts", userProducts);
 		model.addAttribute("collaboration", new Collaboration());
+		model.addAttribute("collaborationType", "product");
 		return "collaborations/apply";
+	}
+
+	@GetMapping("/apply/{productId}")
+	public String applyFormLegacy(@PathVariable UUID productId, Model model, Principal principal) {
+		// Legacy support for product-based collaboration requests
+		return applyForm(productId, null, model, principal);
 	}
 
 	@PostMapping("/apply")

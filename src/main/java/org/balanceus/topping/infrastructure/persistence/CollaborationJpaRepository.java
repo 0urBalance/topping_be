@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,7 @@ public interface CollaborationJpaRepository extends JpaRepository<Collaboration,
 	
 	@Query("SELECT c FROM Collaboration c WHERE c.applicant = :user OR c.product.creator = :user")
 	List<Collaboration> findByParticipant(@Param("user") User user);
+	
+	@Query("SELECT c FROM Collaboration c WHERE c.product.store = :store AND c.status = :status")
+	List<Collaboration> findByProductStoreAndStatus(@Param("store") Store store, @Param("status") CollaborationStatus status);
 }

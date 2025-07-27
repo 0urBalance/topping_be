@@ -173,8 +173,8 @@
 }
 
 .btn-action {
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 50px;
     background: var(--brown-color);
     color: white;
     border-radius: var(--radius-md);
@@ -413,6 +413,18 @@
     padding: var(--space-sm) var(--space-md);
     background: var(--primary-light);
     border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.collab-badge:hover {
+    background: var(--primary-hover);
+    color: var(--white);
+}
+
+.collab-badge:hover .material-symbols-outlined,
+.collab-badge:hover .collab-text {
+    color: var(--white);
 }
 
 .collab-badge .material-symbols-outlined {
@@ -454,6 +466,47 @@
     border-radius: var(--radius-sm);
     font-size: 0.8rem;
     font-weight: 500;
+}
+
+/* Collapsible collaboration list styles */
+.toggle-icon {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+    font-size: 1.2rem;
+}
+
+.collab-info.open .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.collab-list {
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
+    padding-left: var(--space-lg);
+    list-style: none;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-left: 0;
+}
+
+.collab-item {
+    margin-bottom: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary-color);
+    font-size: 0.9rem;
+    color: var(--dark);
+    transition: background-color 0.2s ease;
+}
+
+.collab-item:hover {
+    background: var(--primary-light);
+}
+
+.collab-item:last-child {
+    margin-bottom: 0;
 }
 
 .sns-section {

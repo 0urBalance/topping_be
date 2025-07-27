@@ -80,4 +80,9 @@ public class ProductRepositoryImpl implements ProductRepository {
 	public Page<Product> findAllByOrderByReviewCountDesc(Pageable pageable) {
 		return productJpaRepository.findAllByOrderByReviewCountDesc(pageable);
 	}
+
+	@Override
+	public long countByStoreAndCollaborationIsNotNull(Store store) {
+		return productJpaRepository.countByStoreAndCollaborationIsNotNull(store);
+	}
 }

@@ -82,6 +82,10 @@ public class Store {
     @OrderBy("productType ASC, reviewCount DESC, name ASC")
     private List<Product> products = new ArrayList<>();
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt DESC")
+    private List<Review> reviews = new ArrayList<>();
+
     // Helper methods for image management
     public void addImage(StoreImage image) {
         images.add(image);
@@ -153,5 +157,39 @@ public class Store {
                 .filter(tag -> tag != null && !tag.trim().isEmpty())
                 .map(tag -> tag.startsWith("#") ? tag : "#" + tag)
                 .toList();
+    }
+
+    // Helper methods for review management
+    public void addReview(Review review) {
+        reviews.add(review);
+        review.setStore(this);
+    }
+
+    public void removeReview(Review review) {
+        reviews.remove(review);
+        review.setStore(null);
+    }
+
+    public List<Review> getActiveReviews() {
+        return reviews.stream()
+                .filter(review -> review.getIsActive())
+                .toList();
+    }
+
+    public double getAverageRating() {
+        List<Review> activeReviews = getActiveReviews();
+        if (activeReviews.isEmpty()) {
+            return 0.0;
+        }
+        return activeReviews.stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+    }
+
+    public int getReviewCount() {
+        return (int) reviews.stream()
+                .filter(review -> review.getIsActive())
+                .count();
     }
 }

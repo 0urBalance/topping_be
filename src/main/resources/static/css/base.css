@@ -127,6 +127,7 @@ body {
     color: white;
     padding: 8px;
     text-decoration: none;
+    text-decoration-color: #cccccc;
     border-radius: var(--radius-md);
     z-index: var(--z-tooltip);
 }
