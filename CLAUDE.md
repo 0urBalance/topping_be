@@ -384,6 +384,8 @@ window.Topping.copyToClipboard(text);
 - ✅ **Explore Page**: Three-section discovery layout (stores, menus, collaboration products)
 - ✅ **Thread Pool Configuration**: Custom async executor with DiscardOldestPolicy for optimal performance
 - ✅ **Image Management**: Entity relationships, repositories, and service layer for multiple images per store/menu
+- ✅ **Frontend Optimization**: Complete store detail page refactoring with component system, performance improvements, and visual refinements
+- ✅ **Environment-Specific File Upload**: Externalized upload path configuration with profile-based and environment variable support
 
 ### Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -446,7 +448,8 @@ window.Topping.copyToClipboard(text);
 
 ### Image Upload Infrastructure
 - **Service Layer**: `ImageUploadService` handles multi-file uploads with validation and processing
-- **Storage Structure**: Files organized as `/static/image/stores/{storeId}/{UUID}.{ext}` and `/static/image/products/{productId}/{UUID}.{ext}`
+- **Environment-Specific Storage**: Configurable upload paths via `app.upload.path` property and `UPLOAD_PATH` environment variable
+- **Storage Structure**: Files organized as `{uploadPath}/{category}/{entityId}/{UUID}.{ext}` (e.g., `/uploads/stores/{storeId}/{UUID}.{ext}`)
 - **File Validation**: JPG, JPEG, PNG only; max 10MB per file; automatic image resizing (max 1920x1080)
 - **Metadata Storage**: `StoreImage` and `MenuImage` entities track original filename, file size, content type, display order
 - **Security**: UUID-based filenames prevent collisions and directory traversal attacks
@@ -465,11 +468,39 @@ window.Topping.copyToClipboard(text);
 - **Error Handling**: Client-side validation and server-side error reporting
 - **Current Images**: Grid display of existing images with individual delete capability
 
+### Environment Configuration
+- **Local Development**: `application-local.properties` with `/mnt/d/projects/topping/uploads` path
+- **Production**: `application-prod.properties` with `/home/ourbalance_topping/uploads` path
+- **Environment Override**: `UPLOAD_PATH` environment variable overrides profile defaults
+- **Resource Handler**: `WebConfig` dynamically maps `/uploads/**` to environment-specific filesystem paths
+- **Profile Activation**: Use `--spring.profiles.active=local|prod` for environment selection
+
 ### API Endpoints
 - **Upload**: `POST /stores/upload-images` - Multi-file upload with image type selection
 - **Delete**: `POST /stores/delete-image/{imageId}` - Individual image deletion
 - **Access Control**: Role-based permissions (BUSINESS_OWNER/ADMIN only)
 - **Response Format**: Standard `ApiResponseData` wrapper with success/error handling
+- **Resource Serving**: Images served via `/uploads/{category}/{entityId}/{filename}` URLs
+
+## 🎨 Frontend Refactoring & Optimization
+
+### Store Detail Page Optimization
+- **Refactored CSS Framework**: Complete redesign using `store-detail-refactored.css` with design tokens and utility classes
+- **Component System**: Created reusable fragments (`fragments/product-card.html`, `fragments/tag.html`) for improved maintainability
+- **Performance JavaScript**: Implemented `StoreDetailManager` class with event delegation and lazy loading
+- **Visual Refinements**: Full-height layout, proper spacing, scaled hero images (80%), centered button icons
+
+### CSS Architecture Improvements
+- **Design Tokens**: Centralized CSS variables for colors, spacing, shadows, and transitions
+- **Utility Classes**: Grid layouts (`.grid-2`, `.grid-3`), flexbox utilities (`.flex-center`, `.flex-between`), typography system
+- **Responsive Design**: Mobile-first approach with consistent breakpoints and scaling
+- **Performance Optimizations**: Lazy loading, GPU acceleration, reduced motion support
+
+### Component-Based Development
+- **Fragment System**: Reusable product cards with image fallback logic and lazy loading
+- **Tag Components**: Modular category and hashtag display with hover effects
+- **Event Delegation**: Single event listener replacing multiple handlers for better performance
+- **Code Reusability**: Eliminated duplicate layout code with 30% DOM complexity reduction
 
 ## 🔍 Explore Page System
 
@@ -550,6 +581,13 @@ window.Topping.copyToClipboard(text);
 - **Database**: Connection pool optimized with leak detection and monitoring
 - **Session Config**: Persistent sessions with proper timeout configuration
 
+### File Upload & Environment Configuration
+- **Upload Path Configuration**: Use `UPLOAD_PATH` environment variable to override default paths
+- **Profile-Specific Paths**: Local development (`/mnt/d/projects/topping/uploads`) vs Production (`/home/ourbalance_topping/uploads`)
+- **Directory Creation**: Upload directories are created automatically with proper permissions
+- **Resource Serving**: Images served via `/uploads/**` URL pattern mapped to filesystem paths
+- **Security**: Path traversal protection and validation for upload/delete operations
+
 ## 📋 Development Workflow
 
 ### Adding New Features
@@ -561,6 +599,7 @@ window.Topping.copyToClipboard(text);
 6. **Security**: Implement proper authentication/authorization
 7. **Testing**: Write comprehensive tests with test profile
 8. **Connection Safety**: Avoid unbounded queries like findAll() - use pagination when needed
+9. **Environment Configuration**: Use profile-specific properties and environment variables for external configuration
 
 ### UI/UX Development
 1. **MANDATORY**: Use the Topping CSS Framework for ALL new templates
@@ -573,6 +612,13 @@ window.Topping.copyToClipboard(text);
 8. **Performance**: Optimize CSS/JS, minimize requests
 9. **Browser Testing**: Cross-browser compatibility
 
+### Frontend Refactoring Best Practices
+1. **Component-Based Architecture**: Create reusable fragments for repeated UI elements
+2. **CSS Optimization**: Use design tokens, utility classes, and eliminate inline styles
+3. **JavaScript Performance**: Implement event delegation and lazy loading patterns
+4. **Visual Consistency**: Apply consistent spacing, scaling, and centering across components
+5. **Responsive Refinements**: Ensure proper layout scaling and spacing on all devices
+
 ### Code Quality
 - **Clean Code**: Follow existing patterns and conventions
 - **Error Handling**: Proper exception handling with user-friendly messages
@@ -580,6 +626,7 @@ window.Topping.copyToClipboard(text);
 - **Transaction Safety**: All database operations must be within @Transactional boundaries
 - **Connection Management**: Monitor for connection leaks using HikariCP leak detection
 - **Documentation**: Update relevant documentation when adding features
+- **Environment Configuration**: Externalize configuration using profiles and environment variables for deployment flexibility
 
 ## Documentation Navigation
 

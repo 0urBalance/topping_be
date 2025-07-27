@@ -37,8 +37,8 @@ public class ImageUploadService {
     private final StoreImageRepository storeImageRepository;
     private final ProductImageRepository productImageRepository;
 
-    @Value("${app.upload.dir:src/main/resources/static}")
-    private String uploadDir;
+    @Value("${app.upload.path}")
+    private String uploadPath;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png"
@@ -96,8 +96,7 @@ public class ImageUploadService {
 
     private String saveImageFile(MultipartFile file, String category, String entityId) throws IOException {
         // Create directory structure: /image/{category}/{entityId}/
-        String relativePath = String.format("/image/%s/%s", category, entityId);
-        Path directoryPath = Paths.get(uploadDir, relativePath);
+        Path directoryPath = Paths.get(uploadPath, "image", category, entityId);
         
         // Create directories if they don't exist
         Files.createDirectories(directoryPath);
@@ -107,13 +106,17 @@ public class ImageUploadService {
         String extension = getFileExtension(originalFilename);
         String uniqueFilename = UUID.randomUUID().toString() + "." + extension;
         
-        // Full file path
+        // Full file path on filesystem
         Path filePath = directoryPath.resolve(uniqueFilename);
-        String webPath = relativePath + "/" + uniqueFilename;
+        
+        // Web path for serving via resource handler (/image/{category}/{entityId}/{filename})
+        String webPath = String.format("/image/%s/%s/%s", category, entityId, uniqueFilename);
         
         // Process and save image
         BufferedImage processedImage = processImage(file);
         ImageIO.write(processedImage, extension, filePath.toFile());
+        
+        log.info("Saved image file: {} -> {}", filePath, webPath);
         
         return webPath;
     }
@@ -211,13 +214,12 @@ public class ImageUploadService {
                 throw new SecurityException("Invalid image path");
             }
 
-            // Convert web path to filesystem path
-            String filePath = uploadDir + imagePath;
-            Path fileToDelete = Paths.get(filePath).normalize();
-            Path uploadPath = Paths.get(uploadDir).normalize();
+            // Convert web path to filesystem path 
+            Path fileToDelete = Paths.get(uploadPath, imagePath).normalize();
+            Path baseUploadPath = Paths.get(uploadPath).normalize();
 
             // Ensure the file is within the upload directory (additional security check)
-            if (!fileToDelete.startsWith(uploadPath)) {
+            if (!fileToDelete.startsWith(baseUploadPath)) {
                 log.warn("Path traversal attempt detected: {}", imagePath);
                 throw new SecurityException("Path traversal attempt detected");
             }
@@ -248,21 +250,22 @@ public class ImageUploadService {
         validateImageFile(file);
 
         try {
-            // Create product directory
-            String productDir = "/image/products/" + product.getUuid() + "/";
-            Path productPath = Paths.get(uploadDir + productDir);
+            // Create product directory using configurable upload path
+            Path productPath = Paths.get(uploadPath, "image", "products", product.getUuid().toString());
             Files.createDirectories(productPath);
 
             // Generate unique filename
             String originalFilename = file.getOriginalFilename();
             String extension = getFileExtension(originalFilename);
             String filename = UUID.randomUUID().toString() + "." + extension;
-            String imagePath = productDir + filename;
+            
+            // Full file path and web path
+            Path filePath = productPath.resolve(filename);
+            String imagePath = String.format("/image/products/%s/%s", product.getUuid(), filename);
 
             // Process and save image
             BufferedImage processedImage = processImage(file);
-            File outputFile = new File(uploadDir + imagePath);
-            ImageIO.write(processedImage, extension, outputFile);
+            ImageIO.write(processedImage, extension, filePath.toFile());
 
             // Save product image metadata
             ProductImage productImage = new ProductImage();
