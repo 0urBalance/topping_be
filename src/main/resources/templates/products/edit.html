@@ -102,10 +102,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="imageUrl">이미지 URL (선택사항)</label>
-                    <input type="url" id="imageUrl" th:field="*{imageUrl}" placeholder="https://example.com/image.jpg">
-                    <div th:if="${#fields.hasErrors('imageUrl')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
-                        <span th:each="error : ${#fields.errors('imageUrl')}" th:text="${error}">에러</span>
+                    <label for="thumbnailPath">이미지 URL (선택사항)</label>
+                    <input type="url" id="thumbnailPath" th:field="*{thumbnailPath}" placeholder="https://example.com/image.jpg">
+                    <div th:if="${#fields.hasErrors('thumbnailPath')}" class="field-error" style="color: #dc3545; font-size: 14px; margin-top: 5px;">
+                        <span th:each="error : ${#fields.errors('thumbnailPath')}" th:text="${error}">에러</span>
                     </div>
                 </div>
 
