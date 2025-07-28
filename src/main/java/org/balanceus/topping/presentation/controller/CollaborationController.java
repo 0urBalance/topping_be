@@ -1,15 +1,23 @@
 package org.balanceus.topping.presentation.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.security.Principal;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.balanceus.topping.domain.model.Collaboration;
+import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
+import org.balanceus.topping.domain.model.CollaborationProposal.ProposalStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
+import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
@@ -32,10 +40,12 @@ import lombok.RequiredArgsConstructor;
 public class CollaborationController {
 
 	private final CollaborationRepository collaborationRepository;
+	private final CollaborationProposalRepository collaborationProposalRepository;
 	private final ProductRepository productRepository;
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 	private final ProductService productService;
+	private final ObjectMapper objectMapper;
 
 	@GetMapping
 	public String listCollaborations(Model model) {
@@ -59,64 +69,108 @@ public class CollaborationController {
 			return "redirect:/login?error=user_not_found";
 		}
 		
-		// Handle store-based collaboration requests
+		// Add user to model for role-based rendering
+		model.addAttribute("user", user);
+		model.addAttribute("isBusinessOwner", user.getRole().name().equals("ROLE_BUSINESS_OWNER"));
+		
+		// Load data based on user role
+		if (user.getRole().name().equals("ROLE_BUSINESS_OWNER")) {
+			return handleBusinessOwnerForm(model, user);
+		} else {
+			return handleUserForm(productId, storeId, model, user);
+		}
+	}
+
+	private String handleBusinessOwnerForm(Model model, User user) {
+		// Get business owner's store
+		Optional<Store> userStoreOpt = storeRepository.findByUser(user);
+		if (userStoreOpt.isEmpty()) {
+			return "redirect:/stores/register?error=no_store_registered";
+		}
+		
+		Store userStore = userStoreOpt.get();
+		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
+		List<Store> allStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 100))
+			.stream()
+			.filter(store -> !store.getUuid().equals(userStore.getUuid()))
+			.toList();
+		
+		// Generate JSON for store-product mapping
+		String storeDataJson = generateStoreDataJson(allStores);
+		
+		model.addAttribute("userStore", userStore);
+		model.addAttribute("userProducts", userProducts);
+		model.addAttribute("allStores", allStores);
+		model.addAttribute("allProducts", productRepository.findAll());
+		model.addAttribute("storeDataJson", storeDataJson);
+		
+		return "collaborations/apply";
+	}
+	
+	private String handleUserForm(UUID productId, UUID storeId, Model model, User user) {
+		// Load all stores and products for selection
+		List<Store> allStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 100));
+		List<Product> allProducts = productRepository.findAll();
+		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
+		
+		// Generate JSON for store-product mapping
+		String storeDataJson = generateStoreDataJson(allStores);
+		
+		// If specific target provided, set it
 		if (storeId != null) {
-			return handleStoreCollaborationForm(storeId, model, user);
+			Store targetStore = storeRepository.findById(storeId).orElse(null);
+			if (targetStore != null) {
+				model.addAttribute("targetStore", targetStore);
+			}
 		}
 		
-		// Handle product-based collaboration requests (original logic)
 		if (productId != null) {
-			return handleProductCollaborationForm(productId, model, user);
+			Product targetProduct = productRepository.findById(productId).orElse(null);
+			if (targetProduct != null) {
+				model.addAttribute("targetProduct", targetProduct);
+			}
 		}
 		
-		// Neither storeId nor productId provided
-		return "redirect:/collaborations?error=missing_target";
-	}
-
-	private String handleStoreCollaborationForm(UUID storeId, Model model, User user) {
-		// Get the target store
-		Store store = storeRepository.findById(storeId).orElse(null);
-		if (store == null) {
-			return "redirect:/explore?error=store_not_found";
-		}
-		
-		// Prevent self-application (user trying to collaborate with their own store)
-		if (store.getUser().getUuid().equals(user.getUuid())) {
-			return "redirect:/stores/" + storeId + "?error=cannot_apply_own_store";
-		}
-		
-		// Get user's products for selection
-		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
-		
-		model.addAttribute("store", store);
-		model.addAttribute("user", user);
+		model.addAttribute("allStores", allStores);
+		model.addAttribute("allProducts", allProducts);
 		model.addAttribute("userProducts", userProducts);
-		model.addAttribute("collaboration", new Collaboration());
-		model.addAttribute("collaborationType", "store");
+		model.addAttribute("storeDataJson", storeDataJson);
+		
 		return "collaborations/apply";
 	}
-
-	private String handleProductCollaborationForm(UUID productId, Model model, User user) {
-		// Get the target product
-		Product product = productRepository.findById(productId).orElse(null);
-		if (product == null) {
-			return "redirect:/products?error=product_not_found";
+	
+	private String generateStoreDataJson(List<Store> stores) {
+		try {
+			Map<String, Object> storeData = stores.stream()
+				.collect(Collectors.toMap(
+					store -> store.getUuid().toString(),
+					store -> {
+						List<Product> products = productRepository.findByStore(store);
+						return Map.of(
+							"uuid", store.getUuid().toString(),
+							"name", store.getName(),
+							"category", store.getCategory(),
+							"products", products.stream()
+								.filter(Product::getIsAvailable)
+								.map(product -> Map.of(
+									"uuid", product.getUuid().toString(),
+									"name", product.getName(),
+									"category", product.getCategory() != null ? product.getCategory().toString() : "",
+									"productType", product.getProductType() != null ? product.getProductType().toString() : "",
+									"isAvailable", product.getIsAvailable(),
+									"price", product.getPrice() != null ? product.getPrice() : 0
+								))
+								.collect(Collectors.toList())
+						);
+					}
+				));
+			
+			return objectMapper.writeValueAsString(storeData);
+		} catch (JsonProcessingException e) {
+			// Log error and return empty object
+			System.err.println("Error generating store data JSON: " + e.getMessage());
+			return "{}";
 		}
-		
-		// Prevent self-application
-		if (product.getCreator().getUuid().equals(user.getUuid())) {
-			return "redirect:/products/" + productId + "?error=cannot_apply_own_product";
-		}
-		
-		// Get user's products for selection
-		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
-		
-		model.addAttribute("product", product);
-		model.addAttribute("user", user);
-		model.addAttribute("userProducts", userProducts);
-		model.addAttribute("collaboration", new Collaboration());
-		model.addAttribute("collaborationType", "product");
-		return "collaborations/apply";
 	}
 
 	@GetMapping("/apply/{productId}")
@@ -127,9 +181,15 @@ public class CollaborationController {
 
 	@PostMapping("/apply")
 	public String applyCollaboration(
-			@RequestParam UUID productId,
-			@RequestParam(required = false) UUID applicantProductId,
-			@RequestParam String message,
+			@RequestParam(required = false) UUID sourceStoreId,
+			@RequestParam(required = false) UUID targetStoreId,
+			@RequestParam(required = false) UUID sourceProductId,
+			@RequestParam(required = false) UUID targetProductId,
+			@RequestParam String collaborationTitle,
+			@RequestParam String description,
+			@RequestParam String startDate,
+			@RequestParam String endDate,
+			@RequestParam(required = false) String category,
 			Principal principal) {
 		
 		// Check authentication
@@ -143,6 +203,68 @@ public class CollaborationController {
 			return "redirect:/login?error=user_not_found";
 		}
 		
+		// Validate required fields
+		if (collaborationTitle == null || collaborationTitle.trim().isEmpty()) {
+			return "redirect:/collaborations/apply?error=title_required";
+		}
+		
+		if (description == null || description.trim().isEmpty()) {
+			return "redirect:/collaborations/apply?error=description_required";
+		}
+		
+		if (targetStoreId == null) {
+			return "redirect:/collaborations/apply?error=target_store_required";
+		}
+		
+		// Validate dates
+		java.time.LocalDateTime startDateTime;
+		java.time.LocalDateTime endDateTime;
+		try {
+			java.time.LocalDate start = java.time.LocalDate.parse(startDate);
+			java.time.LocalDate end = java.time.LocalDate.parse(endDate);
+			
+			if (end.isBefore(start) || end.isEqual(start)) {
+				return "redirect:/collaborations/apply?error=invalid_date_range";
+			}
+			
+			// Convert to LocalDateTime (start of day)
+			startDateTime = start.atStartOfDay();
+			endDateTime = end.atStartOfDay();
+			
+		} catch (Exception e) {
+			return "redirect:/collaborations/apply?error=invalid_date_format";
+		}
+		
+		// Get target store and its owner
+		Store targetStore = storeRepository.findById(targetStoreId).orElse(null);
+		if (targetStore == null) {
+			return "redirect:/collaborations/apply?error=target_store_not_found";
+		}
+		
+		User targetBusinessOwner = targetStore.getUser();
+		if (targetBusinessOwner == null) {
+			return "redirect:/collaborations/apply?error=store_owner_not_found";
+		}
+		
+		// Create CollaborationProposal entity
+		CollaborationProposal proposal = new CollaborationProposal();
+		proposal.setTitle(collaborationTitle);
+		proposal.setDescription(description);
+		proposal.setCategory(category);
+		proposal.setProposer(applicant);
+		proposal.setTargetBusinessOwner(targetBusinessOwner);
+		proposal.setStartDate(startDateTime);
+		proposal.setEndDate(endDateTime);
+		proposal.setStatus(ProposalStatus.PENDING);
+		proposal.setTrendScore(0); // Initialize trend score
+		
+		// Save the proposal
+		collaborationProposalRepository.save(proposal);
+		
+		return "redirect:/mypage/applications?success=proposal_submitted";
+	}
+
+	private String handleProductCollaborationSubmission(UUID productId, UUID applicantProductId, String message, User applicant) {
 		// Get target product
 		Product product = productRepository.findById(productId).orElse(null);
 		if (product == null) {

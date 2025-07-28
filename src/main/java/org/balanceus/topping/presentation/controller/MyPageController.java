@@ -228,6 +228,9 @@ public class MyPageController {
 		// Get user's collaboration applications (submitted via apply form)
 		List<Collaboration> myApplications = collaborationRepository.findByApplicant(user);
 		
+		// Get user's collaboration proposals (submitted via new enhanced form)
+		List<CollaborationProposal> myProposals = proposalRepository.findByProposer(user);
+		
 		// Separate by status
 		List<Collaboration> pendingApplications = myApplications.stream()
 				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.PENDING)
@@ -240,11 +243,31 @@ public class MyPageController {
 		List<Collaboration> rejectedApplications = myApplications.stream()
 				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.REJECTED)
 				.toList();
+		
+		// Separate proposals by status
+		List<CollaborationProposal> pendingProposals = myProposals.stream()
+				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.PENDING)
+				.toList();
+		
+		List<CollaborationProposal> acceptedProposals = myProposals.stream()
+				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.ACCEPTED)
+				.toList();
+		
+		List<CollaborationProposal> rejectedProposals = myProposals.stream()
+				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.REJECTED)
+				.toList();
 
 		model.addAttribute("myApplications", myApplications);
 		model.addAttribute("pendingApplications", pendingApplications);
 		model.addAttribute("acceptedApplications", acceptedApplications);
 		model.addAttribute("rejectedApplications", rejectedApplications);
+		
+		// Add proposal data
+		model.addAttribute("myProposals", myProposals);
+		model.addAttribute("pendingProposals", pendingProposals);
+		model.addAttribute("acceptedProposals", acceptedProposals);
+		model.addAttribute("rejectedProposals", rejectedProposals);
+		
 		return "mypage/applications";
 	}
 

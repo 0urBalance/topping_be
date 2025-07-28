@@ -390,6 +390,9 @@ window.Topping.copyToClipboard(text);
 - ✅ **Home Page Products Enhancement**: Horizontal scrolling layout with drag-and-scroll functionality, limited to 5 products max
 - ✅ **Store Detail Two-Column Layout**: Implemented sidebar with SNS & collaboration information, proper large screen constraints
 - ✅ **Thymeleaf Expression Safety**: Fixed null-safety issues and field binding errors across all templates
+- ✅ **Three-Phase Store Registration**: Resolved multipart parsing errors with architectural solution separating store creation from image upload
+- ✅ **Multipart Debug Resolution**: Comprehensive debugging and testing infrastructure for servlet-level multipart handling
+- ✅ **Collaboration Form Enhancement**: Refactored `/collaborations/apply` with auto-selection functionality, enhanced calendar UI, and critical bug fixes for entity creation and MyPage integration
 
 ### Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -423,6 +426,9 @@ window.Topping.copyToClipboard(text);
 - **JPA JOIN FETCH**: Avoid multiple JOIN FETCH in single query - causes Cartesian Product and data duplication
 - **DTO Field Binding**: Ensure Thymeleaf field references match actual DTO property names (e.g., `thumbnailPath` not `imageUrl`)
 - **Null-Safety in Templates**: Use proper null checks: `${object != null and !#strings.isEmpty(object.field)}`
+- **Template Parsing**: Avoid complex nested `th:if` and `th:each` within JavaScript inline sections - use JSON injection instead
+- **Entity Persistence**: Ensure POST endpoints create and save entities, not just validate form data
+- **Collaboration Forms**: Use server-side JSON generation with `ObjectMapper` for complex store-product data instead of nested Thymeleaf loops
 
 ### Template Best Practices
 - **MANDATORY CSS**: Use `base.css` framework for main templates, `auth.css` for authentication
@@ -435,6 +441,9 @@ window.Topping.copyToClipboard(text);
 - Handle null checks with `th:if="${object != null}"`
 - Use consistent variable naming (avoid 'application' - reserved word)
 - CSRF protection is disabled - no CSRF tokens needed in forms
+- **Collaboration Forms**: Use JSON injection approach for store-product data: `generateStoreDataJson()` + `th:inline="javascript"`
+- **Auto-Selection**: Implement comprehensive console logging for debugging dynamic form population
+- **Form Validation**: Always implement both client-side and server-side validation for collaboration forms
 
 ### Modal System Guidelines
 - **Policy Modals**: Use dynamic content loading with caching (`/policy/privacy-modal`, `/policy/terms-modal`)
@@ -488,6 +497,48 @@ window.Topping.copyToClipboard(text);
 - **Access Control**: Role-based permissions (BUSINESS_OWNER/ADMIN only)
 - **Response Format**: Standard `ApiResponseData` wrapper with success/error handling
 - **Resource Serving**: Images served via `/uploads/{category}/{entityId}/{filename}` URLs
+
+## 🤝 Collaboration Form System
+
+### Auto-Selection Functionality
+- **Store-Product Mapping**: `CollaborationController` generates JSON data mapping stores to their products using `ObjectMapper` 
+- **Dynamic Population**: When user selects a partner store, JavaScript automatically populates category field and product list
+- **Data Flow**: `generateStoreDataJson()` method creates store-product relationships for client-side consumption
+- **Event Handling**: Enhanced JavaScript with comprehensive console logging for debugging form interactions
+- **Template Integration**: JSON injection approach replaces complex nested Thymeleaf syntax to prevent parsing errors
+
+### Enhanced Calendar UI
+- **Custom Date Picker**: Modern calendar component with CSS framework variables and design tokens
+- **Quick Actions**: Preset buttons for common date ranges (1 week, 2 weeks, 1 month)
+- **Framework Compliance**: Uses `base.css` variables for consistent styling and animations
+- **Keyboard Support**: Arrow key navigation and Enter/Escape key handling
+- **Validation**: Client-side and server-side date range validation with user-friendly error messages
+
+### Controller Implementation
+- **Entity Creation**: Fixed critical bug where POST `/collaborations/apply` only validated but never saved entities
+- **CollaborationProposal Persistence**: Implemented complete entity creation with proper field mapping
+- **Dual Entity Support**: Handles both legacy `Collaboration` entities and new `CollaborationProposal` entities
+- **Validation Layer**: Comprehensive validation for required fields, date ranges, and store/user relationships
+- **Error Handling**: Specific error codes and redirect URLs for different validation failures
+
+### MyPage Integration
+- **Unified Applications View**: `MyPageController` displays both `Collaboration` and `CollaborationProposal` entities
+- **Status Management**: Proper handling of PENDING, ACCEPTED, REJECTED statuses for both entity types
+- **Data Aggregation**: Applications page (`/mypage/applications`) shows comprehensive view of all user submissions
+- **Statistics**: Updated dashboard counters to include proposal counts alongside collaboration counts
+
+### Technical Resolution Details
+- **Thymeleaf Parsing Fix**: Resolved "Malformed template: unnamed element is never closed" error
+- **JSON Injection Approach**: Replaced `th:if` and `th:each` within JavaScript with server-side JSON generation
+- **Product Selection Bug**: Fixed "store selection not populating products" with enhanced event handling
+- **MyPage Display Bug**: Fixed "proposals not appearing in applications" with proper entity querying
+- **Role-Based Forms**: Different form behavior for ROLE_USER vs ROLE_BUSINESS_OWNER with appropriate data loading
+
+### API Endpoints
+- **Form Display**: `GET /collaborations/apply` - Role-based form rendering with store-product data
+- **Form Submission**: `POST /collaborations/apply` - Complete entity creation and validation
+- **MyPage Integration**: `GET /mypage/applications` - Unified view of all collaboration submissions
+- **Error Handling**: Redirect-based error reporting with specific error codes
 
 ## 🎨 Frontend Refactoring & Optimization
 
@@ -618,6 +669,15 @@ window.Topping.copyToClipboard(text);
 - **Resource Serving**: Images served via `/uploads/**` URL pattern mapped to filesystem paths
 - **Security**: Path traversal protection and validation for upload/delete operations
 
+### Store Registration & Multipart Processing
+- **Three-Phase Registration**: Resolved multipart parsing errors by separating store creation from image upload
+- **Architectural Solution**: Store registration → image setup page → completion flow prevents chicken-and-egg problems
+- **Phase 1**: Basic store information registration without multipart handling
+- **Phase 2**: Dedicated image setup page (`/stores/setup-images`) with existing upload API
+- **Phase 3**: Completion with optional skip functionality
+- **Debugging Infrastructure**: Comprehensive test suite with H2 database proving multipart functionality works correctly
+- **Error Resolution**: Moved from servlet-level multipart configuration attempts to architectural separation of concerns
+
 ## 📋 Development Workflow
 
 ### Adding New Features
@@ -665,6 +725,8 @@ window.Topping.copyToClipboard(text);
 
 ### 🔧 Troubleshooting Guides
 - **[Session Persistence Troubleshooting](./docs/SESSION_PERSISTENCE_TROUBLESHOOTING.md)** - Authentication issues and resolutions
+- **[Complete Multipart Debug Resolution](./COMPLETE_MULTIPART_DEBUG_RESOLUTION.md)** - Comprehensive debugging journey and solution for multipart parsing errors
+- **[Three-Phase Registration Solution](./THREE_PHASE_REGISTRATION_SOLUTION.md)** - Architectural solution for store registration with image upload
 
 ### 🏗️ Quick Domain Access
 - [User Management](./docs/domains/user/README.md) - User accounts and roles
