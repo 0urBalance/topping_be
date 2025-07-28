@@ -6,7 +6,24 @@ This directory contains comprehensive documentation for the Topping collaboratio
 
 ### 🔧 Development Guides
 - **[CLAUDE.md](../CLAUDE.md)** - Primary development guide and project overview
-- **[Session Persistence Troubleshooting](./SESSION_PERSISTENCE_TROUBLESHOOTING.md)** - Authentication troubleshooting guide
+- **[Development Workflow](./development-workflow.md)** - Best practices and development standards
+
+### 💻 Technical Documentation
+- **[CSS Framework & UI System](./technical/css-framework.md)** - Complete UI framework guide
+- **[Multi-Image Upload System](./technical/image-upload.md)** - File upload infrastructure
+- **[Collaboration Forms](./technical/collaboration-forms.md)** - Dynamic form system
+- **[Frontend Optimization](./technical/frontend-optimization.md)** - Performance improvements
+- **[Database & Performance](./technical/database-performance.md)** - Connection pool & async config
+
+### 🔧 Troubleshooting Guides
+- **[Common Issues](./troubleshooting/common-issues.md)** - General troubleshooting guide
+- **[Session Persistence Troubleshooting](./SESSION_PERSISTENCE_TROUBLESHOOTING.md)** - Authentication issues and resolutions
+- **[Three-Phase Registration](./troubleshooting/THREE_PHASE_REGISTRATION_SOLUTION.md)** - Store registration architectural solution
+- **[Multipart Debug Resolution](./troubleshooting/multipart/COMPLETE_MULTIPART_DEBUG_RESOLUTION.md)** - Comprehensive multipart debugging journey
+
+### 📋 Migration Documentation
+- **[Session Auth Migration](./migration/SESSION_AUTH_MIGRATION.md)** - JWT to session-based auth migration
+- **[Documentation Migration](./DOCUMENTATION_MIGRATION.md)** - Migration status and process
 
 ### 🏗️ Architecture Documentation
 
@@ -32,8 +49,26 @@ This directory contains comprehensive documentation for the Topping collaboratio
 ```
 docs/
 ├── README.md                                    # This index file
-├── SESSION_PERSISTENCE_TROUBLESHOOTING.md      # Technical troubleshooting guides
-├── DOCUMENTATION_MIGRATION.md                  # Migration documentation
+├── development-workflow.md                     # Development practices and standards
+├── SESSION_PERSISTENCE_TROUBLESHOOTING.md      # Session authentication troubleshooting
+├── DOCUMENTATION_MIGRATION.md                  # Documentation migration status
+├── technical/                                  # Technical implementation guides
+│   ├── css-framework.md                        # Complete UI framework documentation
+│   ├── image-upload.md                         # Multi-image upload system
+│   ├── collaboration-forms.md                  # Dynamic form system
+│   ├── frontend-optimization.md                # Performance improvements
+│   ├── database-performance.md                 # Connection pool & async config
+│   ├── UPLOAD_API_SOLUTION.md                  # Upload API implementation
+│   └── REGISTRATION_UPLOAD_ENHANCEMENT.md      # Registration upload enhancement
+├── troubleshooting/                            # Troubleshooting guides
+│   ├── common-issues.md                        # General troubleshooting
+│   ├── THREE_PHASE_REGISTRATION_SOLUTION.md    # Store registration solution
+│   └── multipart/                              # Multipart-specific issues
+│       ├── MULTIPART_DEBUG_NOTES.md            # Debug notes
+│       ├── MULTIPART_SOLUTION_SUMMARY.md       # Solution summary
+│       └── COMPLETE_MULTIPART_DEBUG_RESOLUTION.md # Complete resolution
+├── migration/                                  # Migration documentation
+│   └── SESSION_AUTH_MIGRATION.md               # JWT to session migration
 └── domains/                                    # Domain-specific documentation
     ├── auth/README.md                          # Authentication domain
     ├── user/README.md                          # User management domain
