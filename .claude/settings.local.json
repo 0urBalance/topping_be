@@ -7,7 +7,10 @@
       "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
       "Bash(./gradlew:*)",
       "Bash(mkdir:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
