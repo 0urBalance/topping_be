@@ -304,23 +304,67 @@ public class CollaborationController {
 	}
 
 	@PostMapping("/{id}/accept")
-	public String acceptCollaboration(@PathVariable UUID id) {
-		Collaboration collaboration = collaborationRepository.findById(id).orElse(null);
-		if (collaboration != null) {
-			collaboration.setStatus(CollaborationStatus.ACCEPTED);
-			collaborationRepository.save(collaboration);
+	public String acceptCollaboration(@PathVariable UUID id, Principal principal) {
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
 		}
-		return "redirect:/collaborations";
+		
+		User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
+		if (currentUser == null) {
+			return "redirect:/login?error=user_not_found";
+		}
+		
+		Collaboration collaboration = collaborationRepository.findById(id).orElse(null);
+		if (collaboration == null) {
+			return "redirect:/mypage/received?error=collaboration_not_found";
+		}
+		
+		// Verify that the current user is the product owner
+		if (!collaboration.getProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
+			return "redirect:/mypage/received?error=unauthorized_action";
+		}
+		
+		// Check if already processed
+		if (collaboration.getStatus() != CollaborationStatus.PENDING) {
+			return "redirect:/mypage/received?error=already_processed";
+		}
+		
+		collaboration.setStatus(CollaborationStatus.ACCEPTED);
+		collaborationRepository.save(collaboration);
+		
+		return "redirect:/mypage/received?success=collaboration_accepted";
 	}
 
 	@PostMapping("/{id}/reject")
-	public String rejectCollaboration(@PathVariable UUID id) {
-		Collaboration collaboration = collaborationRepository.findById(id).orElse(null);
-		if (collaboration != null) {
-			collaboration.setStatus(CollaborationStatus.REJECTED);
-			collaborationRepository.save(collaboration);
+	public String rejectCollaboration(@PathVariable UUID id, Principal principal) {
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
 		}
-		return "redirect:/collaborations";
+		
+		User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
+		if (currentUser == null) {
+			return "redirect:/login?error=user_not_found";
+		}
+		
+		Collaboration collaboration = collaborationRepository.findById(id).orElse(null);
+		if (collaboration == null) {
+			return "redirect:/mypage/received?error=collaboration_not_found";
+		}
+		
+		// Verify that the current user is the product owner
+		if (!collaboration.getProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
+			return "redirect:/mypage/received?error=unauthorized_action";
+		}
+		
+		// Check if already processed
+		if (collaboration.getStatus() != CollaborationStatus.PENDING) {
+			return "redirect:/mypage/received?error=already_processed";
+		}
+		
+		collaboration.setStatus(CollaborationStatus.REJECTED);
+		collaborationRepository.save(collaboration);
+		
+		return "redirect:/mypage/received?success=collaboration_rejected";
 	}
 
 	@GetMapping("/api")

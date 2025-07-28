@@ -144,13 +144,44 @@
             <p>내 상품에 온 콜라보 신청을 검토하고 관리하세요</p>
         </div>
 
+        <!-- Success/Error Messages -->
+        <div th:if="${param.success}" class="alert alert-success" style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+            <div th:if="${param.success[0] == 'collaboration_accepted'}" class="alert-content">
+                <strong>✅ 성공!</strong> 콜라보 신청을 수락했습니다. 진행중 콜라보에서 관리하실 수 있습니다.
+            </div>
+            <div th:if="${param.success[0] == 'collaboration_rejected'}" class="alert-content">
+                <strong>❌ 처리 완료!</strong> 콜라보 신청을 거절했습니다.
+            </div>
+            <div th:if="${param.success[0] == 'proposal_accepted'}" class="alert-content">
+                <strong>✅ 성공!</strong> 콜라보 제안을 수락했습니다. 진행중 콜라보에서 관리하실 수 있습니다.
+            </div>
+            <div th:if="${param.success[0] == 'proposal_rejected'}" class="alert-content">
+                <strong>❌ 처리 완료!</strong> 콜라보 제안을 거절했습니다.
+            </div>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+            <div th:if="${param.error[0] == 'collaboration_not_found'}" class="alert-content">
+                <strong>❌ 오류!</strong> 해당 콜라보 신청을 찾을 수 없습니다.
+            </div>
+            <div th:if="${param.error[0] == 'proposal_not_found'}" class="alert-content">
+                <strong>❌ 오류!</strong> 해당 콜라보 제안을 찾을 수 없습니다.
+            </div>
+            <div th:if="${param.error[0] == 'unauthorized_action'}" class="alert-content">
+                <strong>🚫 권한 없음!</strong> 권한이 없는 작업입니다.
+            </div>
+            <div th:if="${param.error[0] == 'already_processed'}" class="alert-content">
+                <strong>⚠️ 주의!</strong> 이미 처리된 요청입니다.
+            </div>
+        </div>
+
         <!-- Urgent Banner -->
-        <div class="urgent-banner" th:classappend="${#lists.size(pendingReceived) == 0} ? 'hidden' : ''">
+        <div class="urgent-banner" th:classappend="${#lists.size(pendingReceived) + #lists.size(pendingProposals) == 0} ? 'hidden' : ''">
             <div class="urgent-content">
                 <div class="urgent-icon">⚡</div>
                 <div class="urgent-text">
                     <h3>새로운 콜라보 신청이 있습니다!</h3>
-                    <p th:text="${#lists.size(pendingReceived)} + '개의 신청이 응답을 기다리고 있습니다'">신청 대기중</p>
+                    <p th:text="${#lists.size(pendingReceived) + #lists.size(pendingProposals)} + '개의 신청이 응답을 기다리고 있습니다'">신청 대기중</p>
                 </div>
             </div>
             <a href="#pending" class="urgent-action" onclick="showSection('pending')">지금 확인</a>
@@ -159,26 +190,26 @@
         <!-- Statistics Summary -->
         <div class="stats-summary">
             <div class="stat-item total">
-                <div class="stat-number" th:text="${#lists.size(receivedApplications)}">0</div>
+                <div class="stat-number" th:text="${#lists.size(receivedApplications) + #lists.size(receivedProposals)}">0</div>
                 <div class="stat-label">전체 받은 신청</div>
             </div>
             <div class="stat-item pending">
-                <div class="stat-number" th:text="${#lists.size(pendingReceived)}">0</div>
+                <div class="stat-number" th:text="${#lists.size(pendingReceived) + #lists.size(pendingProposals)}">0</div>
                 <div class="stat-label">대기중 신청</div>
             </div>
             <div class="stat-item accepted">
-                <div class="stat-number" th:text="${#lists.size(acceptedReceived)}">0</div>
+                <div class="stat-number" th:text="${#lists.size(acceptedReceived) + #lists.size(acceptedProposals)}">0</div>
                 <div class="stat-label">수락한 신청</div>
             </div>
             <div class="stat-item rejected">
-                <div class="stat-number" th:text="${#lists.size(rejectedReceived)}">0</div>
+                <div class="stat-number" th:text="${#lists.size(rejectedReceived) + #lists.size(rejectedProposals)}">0</div>
                 <div class="stat-label">거절한 신청</div>
             </div>
         </div>
 
         <!-- Section Tabs -->
         <div class="section-tabs">
-            <a href="#pending" class="tab pending active" th:attr="data-count=${#lists.size(pendingReceived)}" onclick="showSection('pending')">대기중 신청</a>
+            <a href="#pending" class="tab pending active" th:attr="data-count=${#lists.size(pendingReceived) + #lists.size(pendingProposals)}" onclick="showSection('pending')">대기중 신청</a>
             <a href="#all" class="tab" onclick="showSection('all')">전체</a>
             <a href="#accepted" class="tab" onclick="showSection('accepted')">수락한 신청</a>
             <a href="#rejected" class="tab" onclick="showSection('rejected')">거절한 신청</a>
@@ -259,7 +290,63 @@
                 </div>
             </div>
             
-            <div th:if="${#lists.isEmpty(pendingReceived)}" class="empty-state">
+                <!-- Pending Proposals -->
+                <div th:each="pendingProp : ${pendingProposals}" class="application-card pending">
+                    <div class="card-header">
+                        <span class="urgency-indicator urgency-high">제안</span>
+                        <span class="status-badge status-pending">대기중</span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(pendingProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${pendingProp.proposer.username}">제안자명</h3>
+                            <p>콜라보 제안자 (파트너)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="message-section">
+                        <div class="message-title">
+                            <span class="icon">📋</span>
+                            <span th:text="${pendingProp.title}">제안 제목</span>
+                        </div>
+                        <div class="message-content" th:text="${pendingProp.description}">제안 내용</div>
+                        <div style="margin-top: 10px;">
+                            <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
+                                  th:text="'카테고리: ' + ${pendingProp.category}">카테고리</span>
+                            <span th:if="${pendingProp.revenueSharePreference != null}" 
+                                  style="background: #d1ecf1; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #0c5460; margin-left: 8px;" 
+                                  th:text="'수익분배: ' + ${pendingProp.revenueSharePreference}">수익분배</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span th:text="'제안일: ' + ${#temporals.format(pendingProp.createdAt, 'MM-dd')}">제안일</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📈</span>
+                            <span th:text="'트렌드 점수: ' + ${pendingProp.trendScore}">트렌드 점수</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <form th:action="@{/proposals/{id}/accept/form(id=${pendingProp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-accept">✅ 수락하기</button>
+                        </form>
+                        <form th:action="@{/proposals/{id}/reject/form(id=${pendingProp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-reject">❌ 거절하기</button>
+                        </form>
+                    </div>
+                    
+                    <div class="action-buttons single" style="margin-top: 10px;">
+                        <a th:href="@{'/users/' + ${pendingProp.proposer.uuid}}" class="action-btn btn-outline">제안자 프로필</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(pendingReceived) && #lists.isEmpty(pendingProposals)}" class="empty-state">
                 <div class="icon">✨</div>
                 <h3>모든 신청을 처리했습니다!</h3>
                 <p>새로운 콜라보 신청이 오면<br>여기에 표시됩니다</p>
@@ -353,7 +440,76 @@
                 </div>
             </div>
             
-            <div th:if="${#lists.isEmpty(receivedApplications)}" class="empty-state">
+                
+                <!-- All Proposals -->
+                <div th:each="allProp : ${receivedProposals}" class="application-card" th:classappend="${allProp.status.name().toLowerCase()}">
+                    <div class="card-header">
+                        <span class="urgency-indicator" 
+                              th:classappend="${allProp.status.name() == 'PENDING'} ? 'urgency-high' : 'urgency-low'"
+                              th:text="${allProp.status.name() == 'PENDING'} ? '제안' : '처리완료'">상태</span>
+                        <span class="status-badge" 
+                              th:classappend="'status-' + ${allProp.status.name().toLowerCase()}"
+                              th:text="${allProp.status.name() == 'PENDING'} ? '대기중' : 
+                                       (${allProp.status.name() == 'ACCEPTED'} ? '수락됨' : '거절됨')">
+                            상태
+                        </span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(allProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${allProp.proposer.username}">제안자명</h3>
+                            <p>콜라보 제안자 (파트너)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="message-section">
+                        <div class="message-title">
+                            <span class="icon">📋</span>
+                            <span th:text="${allProp.title}">제안 제목</span>
+                        </div>
+                        <div class="message-content" th:text="${allProp.description}">제안 내용</div>
+                        <div style="margin-top: 10px;">
+                            <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
+                                  th:text="'카테고리: ' + ${allProp.category}">카테고리</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span th:text="'제안일: ' + ${#temporals.format(allProp.createdAt, 'MM-dd')}">제안일</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👤</span>
+                            <span th:text="'제안자: ' + ${allProp.proposer.username}">제안자</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action buttons for pending proposals -->
+                    <div th:if="${allProp.status.name() == 'PENDING'}" class="action-buttons">
+                        <form th:action="@{/proposals/{id}/accept/form(id=${allProp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-accept">✅ 수락하기</button>
+                        </form>
+                        <form th:action="@{/proposals/{id}/reject/form(id=${allProp.uuid})}" method="post" style="display: contents;">
+                            <button type="submit" class="action-btn btn-reject">❌ 거절하기</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Action buttons for accepted proposals -->
+                    <div th:if="${allProp.status.name() == 'ACCEPTED'}" class="action-buttons">
+                        <a href="/chat/rooms" class="action-btn btn-chat">💬 채팅하기</a>
+                        <a href="/mypage/ongoing" class="action-btn btn-view">콜라보 관리</a>
+                    </div>
+                    
+                    <!-- Action buttons for rejected proposals -->
+                    <div th:if="${allProp.status.name() == 'REJECTED'}" class="action-buttons single">
+                        <a th:href="@{'/users/' + ${allProp.proposer.uuid}}" class="action-btn btn-outline">제안자 프로필</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(receivedApplications) && #lists.isEmpty(receivedProposals)}" class="empty-state">
                 <div class="icon">📭</div>
                 <h3>아직 받은 신청이 없습니다</h3>
                 <p>상품을 등록하고 홍보하여<br>콜라보 신청을 받아보세요!</p>
@@ -405,7 +561,42 @@
                 </div>
             </div>
             
-            <div th:if="${#lists.isEmpty(acceptedReceived)}" class="empty-state">
+                
+                <!-- Accepted Proposals -->
+                <div th:each="acceptedProp : ${acceptedProposals}" class="application-card accepted">
+                    <div class="card-header">
+                        <span class="urgency-indicator urgency-low">완료</span>
+                        <span class="status-badge status-accepted">수락됨</span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(acceptedProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${acceptedProp.proposer.username}">파트너명</h3>
+                            <p>콜라보 파트너</p>
+                        </div>
+                    </div>
+                    
+                    <div class="message-section">
+                        <div class="message-title">
+                            <span class="icon">📋</span>
+                            <span th:text="${acceptedProp.title}">제안 제목</span>
+                        </div>
+                        <div class="message-content" th:text="${acceptedProp.description}">제안 내용</div>
+                        <div style="margin-top: 10px;">
+                            <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
+                                  th:text="'카테고리: ' + ${acceptedProp.category}">카테고리</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <a href="/chat/rooms" class="action-btn btn-chat">💬 채팅하기</a>
+                        <a href="/mypage/ongoing" class="action-btn btn-view">콜라보 관리</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(acceptedReceived) && #lists.isEmpty(acceptedProposals)}" class="empty-state">
                 <div class="icon">🤝</div>
                 <h3>수락한 신청이 없습니다</h3>
                 <p>콜라보 신청을 수락하면<br>여기에 표시됩니다</p>
@@ -434,15 +625,15 @@
                         <div class="product-grid">
                             <div class="product-item target">
                                 <div class="product-icon">🎯</div>
-                                <div class="product-name" th:text="${acceptedApp.product.title}">내 상품</div>
+                                <div class="product-name" th:text="${rejectedApp.product.title}">내 상품</div>
                                 <div class="product-type">콜라보 대상</div>
                             </div>
-                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct != null}">
+                            <div class="product-item offered" th:if="${rejectedApp.applicantProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${acceptedApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-name" th:text="${rejectedApp.applicantProduct.title}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
-                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct == null}">
+                            <div class="product-item offered" th:if="${rejectedApp.applicantProduct == null}">
                                 <div class="product-icon">🛠️</div>
                                 <div class="product-name">서비스 제안</div>
                                 <div class="product-type">신청자 서비스</div>
@@ -451,12 +642,46 @@
                     </div>
                     
                     <div class="action-buttons single">
-                        <a th:href="@{'/products/' + ${acceptedApp.product.uuid}}" class="action-btn btn-outline">상품 보기</a>
+                        <a th:href="@{'/products/' + ${rejectedApp.product.uuid}}" class="action-btn btn-outline">상품 보기</a>
                     </div>
                 </div>
             </div>
             
-            <div th:if="${#lists.isEmpty(rejectedReceived)}" class="empty-state">
+                
+                <!-- Rejected Proposals -->
+                <div th:each="rejectedProp : ${rejectedProposals}" class="application-card rejected">
+                    <div class="card-header">
+                        <span class="urgency-indicator urgency-medium">처리완료</span>
+                        <span class="status-badge status-rejected">거절됨</span>
+                    </div>
+                    
+                    <div class="applicant-info">
+                        <div class="applicant-avatar" th:text="${#strings.substring(rejectedProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-details">
+                            <h3 th:text="${rejectedProp.proposer.username}">제안자명</h3>
+                            <p>거절된 제안</p>
+                        </div>
+                    </div>
+                    
+                    <div class="message-section">
+                        <div class="message-title">
+                            <span class="icon">📋</span>
+                            <span th:text="${rejectedProp.title}">제안 제목</span>
+                        </div>
+                        <div class="message-content" th:text="${rejectedProp.description}">제안 내용</div>
+                        <div style="margin-top: 10px;">
+                            <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
+                                  th:text="'카테고리: ' + ${rejectedProp.category}">카테고리</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons single">
+                        <a th:href="@{'/users/' + ${rejectedProp.proposer.uuid}}" class="action-btn btn-outline">제안자 프로필</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(rejectedReceived) && #lists.isEmpty(rejectedProposals)}" class="empty-state">
                 <div class="icon">🚫</div>
                 <h3>거절한 신청이 없습니다</h3>
                 <p>신중하게 선택하신 결과입니다!</p>

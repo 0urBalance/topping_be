@@ -76,6 +76,9 @@ public class MyPageController {
 		// Get collaborations where user is the product owner (received applications)
 		List<Collaboration> receivedApplications = collaborationRepository.findByProductCreator(user);
 		
+		// Get collaboration proposals where user is the target business owner
+		List<CollaborationProposal> receivedProposals = proposalRepository.findByTargetBusinessOwner(user);
+		
 		// Get user's registered products
 		List<Product> myProducts = productService.getProductsByCreator(user.getUuid());
 		
@@ -93,13 +96,16 @@ public class MyPageController {
 		int applicationCount = myApplications.size();
 		int ongoingCollaborationCount = ongoingCollaborations.size();
 		int pendingApplicationCount = pendingApplications.size();
-		int receivedApplicationCount = receivedApplications.size();
+		int receivedApplicationCount = receivedApplications.size() + receivedProposals.size(); // Include both types
 		int productCount = myProducts.size();
 		int chatRoomCount = activeChatRooms.size();
 
 		// Calculate pending actions for alerts
 		int pendingActionsCount = receivedApplications.stream()
 				.mapToInt(collab -> collab.getStatus() == Collaboration.CollaborationStatus.PENDING ? 1 : 0)
+				.sum() + 
+				receivedProposals.stream()
+				.mapToInt(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.PENDING ? 1 : 0)
 				.sum();
 
 		model.addAttribute("user", user);
@@ -319,7 +325,14 @@ public class MyPageController {
 		// Get collaborations where user is the product owner (received applications)
 		List<Collaboration> receivedApplications = collaborationRepository.findByProductCreator(user);
 		
-		// Separate by status
+		// Get collaboration proposals where user is the target business owner
+		List<CollaborationProposal> receivedProposals = proposalRepository.findByTargetBusinessOwner(user);
+		
+		// Sort by creation date (newest first)
+		receivedApplications.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+		receivedProposals.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+		
+		// Separate collaborations by status
 		List<Collaboration> pendingReceived = receivedApplications.stream()
 				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.PENDING)
 				.toList();
@@ -331,11 +344,30 @@ public class MyPageController {
 		List<Collaboration> rejectedReceived = receivedApplications.stream()
 				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.REJECTED)
 				.toList();
+		
+		// Separate proposals by status
+		List<CollaborationProposal> pendingProposals = receivedProposals.stream()
+				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.PENDING)
+				.toList();
+		
+		List<CollaborationProposal> acceptedProposals = receivedProposals.stream()
+				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.ACCEPTED)
+				.toList();
+		
+		List<CollaborationProposal> rejectedProposals = receivedProposals.stream()
+				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.REJECTED)
+				.toList();
 
+		// Add all received items for display
 		model.addAttribute("receivedApplications", receivedApplications);
+		model.addAttribute("receivedProposals", receivedProposals);
 		model.addAttribute("pendingReceived", pendingReceived);
 		model.addAttribute("acceptedReceived", acceptedReceived);
 		model.addAttribute("rejectedReceived", rejectedReceived);
+		model.addAttribute("pendingProposals", pendingProposals);
+		model.addAttribute("acceptedProposals", acceptedProposals);
+		model.addAttribute("rejectedProposals", rejectedProposals);
+		
 		return "mypage/received";
 	}
 

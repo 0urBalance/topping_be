@@ -140,6 +140,89 @@ public class CollaborationProposalController {
 		return ApiResponseData.success("협업 제안이 거절되었습니다.");
 	}
 
+	@PostMapping("/{proposalId}/accept/form")
+	@PreAuthorize("hasRole('BUSINESS_OWNER')")
+	public String acceptProposalForm(
+			@PathVariable UUID proposalId,
+			Principal principal) {
+
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
+		}
+		
+		User businessOwner = userRepository.findByEmail(principal.getName()).orElse(null);
+		if (businessOwner == null) {
+			return "redirect:/login?error=user_not_found";
+		}
+
+		CollaborationProposal proposal = proposalRepository.findById(proposalId).orElse(null);
+		if (proposal == null) {
+			return "redirect:/mypage/received?error=proposal_not_found";
+		}
+
+		// Verify that the current user is the target business owner (or can accept)
+		// For proposals, any business owner can accept initially
+		if (!businessOwner.getRole().name().equals("ROLE_BUSINESS_OWNER") && 
+		    !businessOwner.getRole().name().equals("ROLE_ADMIN")) {
+			return "redirect:/mypage/received?error=unauthorized_action";
+		}
+		
+		// Check if already processed
+		if (proposal.getStatus() != CollaborationProposal.ProposalStatus.PENDING) {
+			return "redirect:/mypage/received?error=already_processed";
+		}
+
+		proposal.setStatus(CollaborationProposal.ProposalStatus.ACCEPTED);
+		proposal.setTargetBusinessOwner(businessOwner);
+		proposalRepository.save(proposal);
+
+		// 제안자에게 수락 알림 전송
+		notificationService.notifyProposalAccepted(proposal);
+
+		return "redirect:/mypage/received?success=proposal_accepted";
+	}
+
+	@PostMapping("/{proposalId}/reject/form")
+	@PreAuthorize("hasRole('BUSINESS_OWNER')")
+	public String rejectProposalForm(
+			@PathVariable UUID proposalId,
+			Principal principal) {
+
+		if (principal == null) {
+			return "redirect:/login?error=authentication_required";
+		}
+		
+		User businessOwner = userRepository.findByEmail(principal.getName()).orElse(null);
+		if (businessOwner == null) {
+			return "redirect:/login?error=user_not_found";
+		}
+
+		CollaborationProposal proposal = proposalRepository.findById(proposalId).orElse(null);
+		if (proposal == null) {
+			return "redirect:/mypage/received?error=proposal_not_found";
+		}
+
+		// Verify that the current user is the target business owner (or can reject)
+		if (!businessOwner.getRole().name().equals("ROLE_BUSINESS_OWNER") && 
+		    !businessOwner.getRole().name().equals("ROLE_ADMIN")) {
+			return "redirect:/mypage/received?error=unauthorized_action";
+		}
+		
+		// Check if already processed
+		if (proposal.getStatus() != CollaborationProposal.ProposalStatus.PENDING) {
+			return "redirect:/mypage/received?error=already_processed";
+		}
+
+		proposal.setStatus(CollaborationProposal.ProposalStatus.REJECTED);
+		proposal.setTargetBusinessOwner(businessOwner);
+		proposalRepository.save(proposal);
+
+		// 제안자에게 거절 알림 전송
+		notificationService.notifyProposalRejected(proposal);
+
+		return "redirect:/mypage/received?success=proposal_rejected";
+	}
+
 	@GetMapping("/browse")
 	public String browseProposals(
 			@RequestParam(required = false) String category,
