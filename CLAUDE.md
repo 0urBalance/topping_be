@@ -182,6 +182,7 @@ All repositories follow a consistent three-layer pattern:
 - ✅ **Three-Phase Store Registration**: Resolved multipart parsing errors with architectural solution separating store creation from image upload
 - ✅ **Multipart Debug Resolution**: Comprehensive debugging and testing infrastructure for servlet-level multipart handling
 - ✅ **Collaboration Form Enhancement**: Refactored `/collaborations/apply` with auto-selection functionality, enhanced calendar UI, and critical bug fixes for entity creation and MyPage integration
+- ✅ **Dual Collaboration System**: Unified `/mypage/received` dashboard displaying both guest applications and business proposals with consistent statistics and management actions
 
 ## Documentation Navigation
 
@@ -192,6 +193,7 @@ All repositories follow a consistent three-layer pattern:
 - **[CSS Framework & UI System](./docs/technical/css-framework.md)** - Complete UI framework documentation
 - **[Multi-Image Upload System](./docs/technical/image-upload.md)** - File upload infrastructure
 - **[Collaboration Forms](./docs/technical/collaboration-forms.md)** - Dynamic form system
+- **[Collaboration Received Page](./docs/technical/COLLABORATION_RECEIVED_PAGE.md)** - Dual collaboration system architecture
 - **[Frontend Optimization](./docs/technical/frontend-optimization.md)** - Performance improvements
 - **[Database & Performance](./docs/technical/database-performance.md)** - Connection pool & async config
 
