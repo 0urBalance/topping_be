@@ -4,22 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore - Topping</title>
-    
+
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-T5T3CSLT');</script>
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        });
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-T5T3CSLT');</script>
     <!-- End Google Tag Manager -->
 
     <!-- Google tag (gtag.js) -->
     <script async src='https://www.googletagmanager.com/gtag/js?id=G-Y1ZSWHSQD0'></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-Y1ZSWHSQD0');
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'G-Y1ZSWHSQD0');
     </script>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
@@ -44,17 +56,17 @@
             --border-radius: 8px;
         }
 
-        body { 
+        body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            margin: 0; 
+            margin: 0;
             margin-left: 240px; /* Account for sidebar */
-            padding: 0; 
+            padding: 0;
             background-color: var(--light-bg);
             color: var(--dark-gray);
             line-height: 1.6;
             transition: margin-left 0.3s ease;
         }
-        
+
         @media (max-width: 768px) {
             body {
                 margin-left: 0; /* No sidebar offset on mobile */
@@ -298,237 +310,258 @@
     </style>
 </head>
 <body class="main-body">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src='https://www.googletagmanager.com/ns.html?id=GTM-T5T3CSLT'
-    height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    
-    <!-- Include Navigation Bar -->
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
-    
-    <div class="main-content">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>🔍 Explore</h1>
-            <p>다양한 가게와 맛있는 메뉴, 특별한 콜라보 제품을 발견하세요</p>
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+    <iframe src='https://www.googletagmanager.com/ns.html?id=GTM-T5T3CSLT'
+            height='0' width='0' style='display:none;visibility:hidden'></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- Include Navigation Bar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🔍 Explore</h1>
+        <p>다양한 가게와 맛있는 메뉴, 특별한 콜라보 제품을 발견하세요</p>
+    </div>
+
+    <!-- Section 1: Store List -->
+    <section class="explore-section" id="stores-section">
+        <div class="section-header">
+            <span class="section-icon">🏪</span>
+            <h2>가게 리스트</h2>
         </div>
 
-        <!-- Section 1: Store List -->
-        <section class="explore-section" id="stores-section">
-            <div class="section-header">
-                <span class="section-icon">🏪</span>
-                <h2>가게 리스트</h2>
-            </div>
-            
-            <div th:if="${!#lists.isEmpty(stores)}" class="card-grid">
-                <a th:each="store : ${stores}" 
-                   th:href="@{/stores/{id}(id=${store.uuid})}" 
-                   class="explore-card store-card">
-                    <div class="card-image">
-                        <img th:if="${store.mainImage != null}" 
-                             th:src="${store.mainImage.imagePath}" 
-                             th:alt="${store.name}"
-                             loading="lazy">
-                        <img th:if="${store.mainImage == null and store.mainImageUrl != null}" 
-                             th:src="${store.mainImageUrl}" 
-                             th:alt="${store.name}"
-                             loading="lazy">
-                        <div th:if="${store.mainImage == null and store.mainImageUrl == null}" 
-                             class="placeholder">🏪</div>
+        <div th:if="${!#lists.isEmpty(stores)}" class="card-grid">
+            <a th:each="store : ${stores}"
+               th:href="@{/stores/{id}(id=${store.uuid})}"
+               class="explore-card store-card">
+                <div class="card-image">
+                    <img th:if="${store.mainImage != null}"
+                         th:src="${store.mainImage.imagePath}"
+                         th:alt="${store.name}"
+                         loading="lazy">
+                    <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
+                         th:src="${store.mainImageUrl}"
+                         th:alt="${store.name}"
+                         loading="lazy">
+                    <div th:if="${store.mainImage == null and store.mainImageUrl == null}"
+                         class="placeholder">🏪
                     </div>
-                    <div class="card-content">
-                        <h3 class="card-title" th:text="${store.name}">가게 이름</h3>
-                        <p class="card-subtitle" th:text="${store.address}">가게 주소</p>
-                        <div class="card-tags">
-                            <span class="tag" th:text="${store.category}">카테고리</span>
-                        </div>
-                        <div class="card-subtitle" th:text="${store.businessHours}">영업시간</div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title" th:text="${store.name}">가게 이름</h3>
+                    <p class="card-subtitle" th:text="${store.address}">가게 주소</p>
+                    <div class="card-tags">
+                        <span class="tag" th:text="${store.category}">카테고리</span>
                     </div>
-                </a>
-            </div>
-            
-            <div th:if="${#lists.isEmpty(stores)}" class="empty-state">
-                <div class="empty-icon">🏪</div>
-                <h3>등록된 가게가 없습니다</h3>
-                <p>곧 멋진 가게들이 등록될 예정입니다!</p>
-            </div>
-        </section>
+                    <div class="card-subtitle" th:text="${store.businessHours}">영업시간</div>
+                </div>
+            </a>
+        </div>
 
-        <!-- Section 2: Product List -->
-        <section class="explore-section" id="products-section">
-            <div class="section-header">
-                <span class="section-icon">🍽️</span>
-                <h2>인기 상품</h2>
-            </div>
-            
-            <div th:if="${!#lists.isEmpty(popularMenus)}" class="card-grid">
-                <a th:each="product : ${popularMenus}" 
-                   th:href="@{/stores/{id}(id=${product.store.uuid})}" 
-                   class="explore-card menu-card">
-                    <div class="card-image">
-                        <img th:if="${product.mainImage != null}" 
-                             th:src="${product.mainImage.imagePath}" 
-                             th:alt="${product.name}"
-                             loading="lazy">
-                        <img th:if="${product.mainImage == null and product.thumbnailPath != null}" 
-                             th:src="${product.thumbnailPath}" 
-                             th:alt="${product.name}"
-                             loading="lazy">
-                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}" 
-                             th:src="${product.imageUrl}" 
-                             th:alt="${product.name}"
-                             loading="lazy">
-                        <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}" 
-                             class="placeholder">🍽️</div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="card-title" th:text="${product.name}">상품 이름</h3>
-                        <p class="card-subtitle" th:text="${product.description}">상품 설명</p>
-                        <div class="card-tags">
-                            <span class="tag" th:text="${product.productType.displayName}">상품 타입</span>
-                            <span class="tag" th:text="${product.category.displayName}">카테고리</span>
-                        </div>
-                        <div class="card-meta">
-                            <span class="card-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
-                            <span class="card-store" th:text="${product.store.name}">가게명</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            
-            <div th:if="${#lists.isEmpty(popularMenus)}" class="empty-state">
-                <div class="empty-icon">🍽️</div>
-                <h3>등록된 상품이 없습니다</h3>
-                <p>곧 맛있는 상품들이 등록될 예정입니다!</p>
-            </div>
-        </section>
+        <div th:if="${#lists.isEmpty(stores)}" class="empty-state">
+            <div class="empty-icon">🏪</div>
+            <h3>등록된 가게가 없습니다</h3>
+            <p>곧 멋진 가게들이 등록될 예정입니다!</p>
+        </div>
+    </section>
 
-        <!-- Section 3: Collaboration Products -->
-        <section class="explore-section" id="collaboration-section">
-            <div class="section-header">
-                <span class="section-icon">🤝</span>
-                <h2>콜라보 제품</h2>
-            </div>
-            
-            <div th:if="${!#lists.isEmpty(collaborationMenus)}" class="card-grid">
-                <a th:each="product : ${collaborationMenus}" 
-                   th:href="@{/stores/{id}(id=${product.store.uuid})}" 
-                   class="explore-card menu-card">
-                    <div class="card-image">
-                        <img th:if="${product.mainImage != null}" 
-                             th:src="${product.mainImage.imagePath}" 
-                             th:alt="${product.name}"
-                             loading="lazy">
-                        <img th:if="${product.mainImage == null and product.thumbnailPath != null}" 
-                             th:src="${product.thumbnailPath}" 
-                             th:alt="${product.name}"
-                             loading="lazy">
-                        <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}" 
-                             th:src="${product.imageUrl}" 
-                             th:alt="${product.name}"
-                             loading="lazy">
-                        <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}" 
-                             class="placeholder">🤝</div>
+    <!-- Section 2: Product List -->
+    <section class="explore-section" id="products-section">
+        <div class="section-header">
+            <span class="section-icon">🍽️</span>
+            <h2>인기 상품</h2>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(popularMenus)}" class="card-grid">
+            <a th:each="product : ${popularMenus}"
+               th:href="@{/stores/{id}(id=${product.store.uuid})}"
+               class="explore-card menu-card">
+                <div class="card-image">
+                    <img th:if="${product.mainImage != null}"
+                         th:src="${product.mainImage.imagePath}"
+                         th:alt="${product.name}"
+                         loading="lazy">
+                    <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+                         th:src="${product.thumbnailPath}"
+                         th:alt="${product.name}"
+                         loading="lazy">
+                    <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+                         th:src="${product.imageUrl}"
+                         th:alt="${product.name}"
+                         loading="lazy">
+                    <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+                         class="placeholder">🍽️
                     </div>
-                    <div class="card-content">
-                        <h3 class="card-title" th:text="${product.name}">콜라보 상품 이름</h3>
-                        <p class="card-subtitle" th:text="${product.description}">상품 설명</p>
-                        <div class="card-tags">
-                            <span class="tag">콜라보</span>
-                            <span class="tag" th:text="${product.category.displayName}">카테고리</span>
-                        </div>
-                        <div class="card-meta">
-                            <span class="card-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
-                            <span class="card-store" th:text="${product.store.name}">가게명</span>
-                        </div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title" th:text="${product.name}">상품 이름</h3>
+                    <p class="card-subtitle" th:text="${product.description}">상품 설명</p>
+                    <div class="card-tags">
+                        <span class="tag" th:text="${product.productType.displayName}">상품 타입</span>
+                        <span class="tag" th:text="${product.category.displayName}">카테고리</span>
                     </div>
-                </a>
-            </div>
-            
-            <div th:if="${!#lists.isEmpty(liveProducts)}" class="card-grid" style="margin-top: 20px;">
-                <div th:each="product : ${liveProducts}" class="explore-card">
-                    <div class="card-image">
-                        <div class="placeholder">🔥</div>
+                    <div class="card-meta">
+                        <span class="card-price"
+                              th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
+                        <span class="card-store" th:text="${product.store.name}">가게명</span>
                     </div>
-                    <div class="card-content">
-                        <h3 class="card-title" th:text="${product.name}">라이브 제품명</h3>
-                        <p class="card-subtitle" th:text="${product.description}">제품 설명</p>
-                        <div class="card-tags">
-                            <span class="tag">LIVE</span>
-                        </div>
-                        <div class="card-meta">
-                            <span class="card-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
-                            <span class="card-store" th:text="'재고: ' + ${product.stockQuantity} + '개'">재고</span>
-                        </div>
+                </div>
+            </a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(popularMenus)}" class="empty-state">
+            <div class="empty-icon">🍽️</div>
+            <h3>등록된 상품이 없습니다</h3>
+            <p>곧 맛있는 상품들이 등록될 예정입니다!</p>
+        </div>
+    </section>
+
+    <!-- Section 3: Collaboration Products -->
+    <section class="explore-section" id="collaboration-section">
+        <div class="section-header">
+            <span class="section-icon">🤝</span>
+            <h2>콜라보 제품</h2>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(collaborationMenus)}" class="card-grid">
+            <a th:each="product : ${collaborationMenus}"
+               th:href="@{/stores/{id}(id=${product.store.uuid})}"
+               class="explore-card menu-card">
+                <div class="card-image">
+                    <img th:if="${product.mainImage != null}"
+                         th:src="${product.mainImage.imagePath}"
+                         th:alt="${product.name}"
+                         loading="lazy">
+                    <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
+                         th:src="${product.thumbnailPath}"
+                         th:alt="${product.name}"
+                         loading="lazy">
+                    <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
+                         th:src="${product.imageUrl}"
+                         th:alt="${product.name}"
+                         loading="lazy">
+                    <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
+                         class="placeholder">🤝
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title" th:text="${product.name}">콜라보 상품 이름</h3>
+                    <p class="card-subtitle" th:text="${product.description}">상품 설명</p>
+                    <div class="card-tags">
+                        <span class="tag">콜라보</span>
+                        <span class="tag" th:text="${product.category.displayName}">카테고리</span>
+                    </div>
+                    <div class="card-meta">
+                        <span class="card-price"
+                              th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
+                        <span class="card-store" th:text="${product.store.name}">가게명</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(liveProducts)}" class="card-grid" style="margin-top: 20px;">
+            <div th:each="product : ${liveProducts}" class="explore-card">
+                <div class="card-image">
+                    <div class="placeholder">🔥</div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title" th:text="${product.name}">라이브 제품명</h3>
+                    <p class="card-subtitle" th:text="${product.description}">제품 설명</p>
+                    <div class="card-tags">
+                        <span class="tag">LIVE</span>
+                    </div>
+                    <div class="card-meta">
+                        <span class="card-price"
+                              th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">가격</span>
+                        <span class="card-store" th:text="'재고: ' + ${product.stockQuantity} + '개'">재고</span>
                     </div>
                 </div>
             </div>
-            
-            <div th:if="${#lists.isEmpty(collaborationMenus) and #lists.isEmpty(liveProducts)}" class="empty-state">
-                <div class="empty-icon">🤝</div>
-                <h3>콜라보 상품이 없습니다</h3>
-                <p>특별한 콜라보 상품들이 곧 출시될 예정입니다!</p>
-            </div>
-        </section>
-    </div>
+        </div>
 
-    <!-- Include Footer -->
-    <div th:replace="~{fragments/footer :: footer}"></div>
+        <div th:if="${#lists.isEmpty(collaborationMenus) and #lists.isEmpty(liveProducts)}" class="empty-state">
+            <div class="empty-icon">🤝</div>
+            <h3>콜라보 상품이 없습니다</h3>
+            <p>특별한 콜라보 상품들이 곧 출시될 예정입니다!</p>
+        </div>
+    </section>
+</div>
 
-    <!-- Include Common Scripts -->
-    <script th:src="@{/js/common.js}"></script>
-    <script th:src="@{/js/main-common.js}"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7334667748813914"
+        crossorigin="anonymous"></script>
+<!-- topping_explore -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-7334667748813914"
+     data-ad-slot="7390382692"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 
-    <script>
-        // Lazy loading for images
-        document.addEventListener('DOMContentLoaded', function() {
-            // Image lazy loading
-            const images = document.querySelectorAll('img[loading="lazy"]');
-            
-            if ('IntersectionObserver' in window) {
-                const imageObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            img.addEventListener('load', () => {
-                                img.classList.add('loaded');
-                            });
-                            observer.unobserve(img);
-                        }
-                    });
-                });
-                
-                images.forEach(img => imageObserver.observe(img));
-            }
+<!-- Include Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
 
-            // Smooth scrolling for section navigation
-            function scrollToSection(sectionId) {
-                const section = document.getElementById(sectionId);
-                if (section) {
-                    section.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            }
+<!-- Include Common Scripts -->
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/main-common.js}"></script>
 
-            // Handle image load errors
-            images.forEach(img => {
-                img.addEventListener('error', function() {
-                    this.style.display = 'none';
-                    const placeholder = this.parentElement.querySelector('.placeholder');
-                    if (placeholder) {
-                        placeholder.style.display = 'flex';
-                    } else {
-                        // Create placeholder if it doesn't exist
-                        const newPlaceholder = document.createElement('div');
-                        newPlaceholder.className = 'placeholder';
-                        newPlaceholder.textContent = '🖼️';
-                        this.parentElement.appendChild(newPlaceholder);
+<script>
+    // Lazy loading for images
+    document.addEventListener('DOMContentLoaded', function () {
+        // Image lazy loading
+        const images = document.querySelectorAll('img[loading="lazy"]');
+
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.addEventListener('load', () => {
+                            img.classList.add('loaded');
+                        });
+                        observer.unobserve(img);
                     }
                 });
             });
+
+            images.forEach(img => imageObserver.observe(img));
+        }
+
+        // Smooth scrolling for section navigation
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Handle image load errors
+        images.forEach(img => {
+            img.addEventListener('error', function () {
+                this.style.display = 'none';
+                const placeholder = this.parentElement.querySelector('.placeholder');
+                if (placeholder) {
+                    placeholder.style.display = 'flex';
+                } else {
+                    // Create placeholder if it doesn't exist
+                    const newPlaceholder = document.createElement('div');
+                    newPlaceholder.className = 'placeholder';
+                    newPlaceholder.textContent = '🖼️';
+                    this.parentElement.appendChild(newPlaceholder);
+                }
+            });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
