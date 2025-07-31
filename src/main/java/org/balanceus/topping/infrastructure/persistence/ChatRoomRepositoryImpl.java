@@ -1,10 +1,12 @@
 package org.balanceus.topping.infrastructure.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.ChatRoom;
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
@@ -34,13 +36,28 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
 	}
 
 	@Override
+	public Optional<ChatRoom> findByCollaboration(Collaboration collaboration) {
+		return jpaRepository.findByCollaboration(collaboration);
+	}
+
+	@Override
 	public List<ChatRoom> findByIsActiveTrue() {
 		return jpaRepository.findByIsActiveTrue();
 	}
 
 	@Override
 	public List<ChatRoom> findByParticipant(User user) {
-		return jpaRepository.findByParticipant(user);
+		List<ChatRoom> result = new ArrayList<>();
+		
+		// Get rooms from collaboration proposals
+		List<ChatRoom> proposalRooms = jpaRepository.findByCollaborationProposalParticipant(user);
+		result.addAll(proposalRooms);
+		
+		// Get rooms from collaborations
+		List<ChatRoom> collaborationRooms = jpaRepository.findByCollaborationParticipant(user);
+		result.addAll(collaborationRooms);
+		
+		return result;
 	}
 
 	@Override

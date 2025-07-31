@@ -22,6 +22,7 @@ import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.application.service.ProductService;
+import org.balanceus.topping.application.service.CollaborationService;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,6 +46,7 @@ public class CollaborationController {
 	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 	private final ProductService productService;
+	private final CollaborationService collaborationService;
 	private final ObjectMapper objectMapper;
 
 	@GetMapping
@@ -329,8 +331,8 @@ public class CollaborationController {
 			return "redirect:/mypage/received?error=already_processed";
 		}
 		
-		collaboration.setStatus(CollaborationStatus.ACCEPTED);
-		collaborationRepository.save(collaboration);
+		// Use service layer for collaboration acceptance with automatic chat room creation
+		collaborationService.acceptCollaboration(id);
 		
 		return "redirect:/mypage/received?success=collaboration_accepted";
 	}
@@ -361,8 +363,8 @@ public class CollaborationController {
 			return "redirect:/mypage/received?error=already_processed";
 		}
 		
-		collaboration.setStatus(CollaborationStatus.REJECTED);
-		collaborationRepository.save(collaboration);
+		// Use service layer for collaboration rejection
+		collaborationService.rejectCollaboration(id);
 		
 		return "redirect:/mypage/received?success=collaboration_rejected";
 	}

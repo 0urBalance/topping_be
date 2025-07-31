@@ -12,6 +12,7 @@ import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.response.Code;
 import org.balanceus.topping.infrastructure.security.Role;
 import org.balanceus.topping.infrastructure.service.NotificationService;
+import org.balanceus.topping.application.service.ChatService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +33,7 @@ public class CollaborationProposalController {
 	private final CollaborationProposalRepository proposalRepository;
 	private final UserRepository userRepository;
 	private final NotificationService notificationService;
+	private final ChatService chatService;
 
 	@GetMapping("/suggest")
 	public String suggestForm() {
@@ -114,6 +116,14 @@ public class CollaborationProposalController {
 		// 제안자에게 수락 알림 전송
 		notificationService.notifyProposalAccepted(proposal);
 
+		// 자동으로 채팅방 생성
+		try {
+			chatService.createChatRoomForCollaborationProposal(proposalId);
+		} catch (Exception e) {
+			// 채팅방 생성 실패는 로그만 남기고 제안 수락은 성공으로 처리
+			System.err.println("Failed to create chat room for proposal: " + proposalId + ", error: " + e.getMessage());
+		}
+
 		return ApiResponseData.success("협업 제안이 수락되었습니다.");
 	}
 
@@ -178,6 +188,14 @@ public class CollaborationProposalController {
 
 		// 제안자에게 수락 알림 전송
 		notificationService.notifyProposalAccepted(proposal);
+
+		// 자동으로 채팅방 생성
+		try {
+			chatService.createChatRoomForCollaborationProposal(proposalId);
+		} catch (Exception e) {
+			// 채팅방 생성 실패는 로그만 남기고 제안 수락은 성공으로 처리
+			System.err.println("Failed to create chat room for proposal: " + proposalId + ", error: " + e.getMessage());
+		}
 
 		return "redirect:/mypage/received?success=proposal_accepted";
 	}

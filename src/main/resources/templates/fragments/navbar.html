@@ -65,6 +65,14 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="/chat/rooms" class="menu-link"
+                       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/chat/rooms') ? 'active' : ''}">
+                        <span class="material-symbols-outlined"> chat </span>
+                        <!--<span class="material-symbols-outlined"> mark_unread_chat_alt</span>-->
+                    </a>
+
+                </li>
+                <li class="menu-item">
                     <a href="/mypage" class="menu-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/mypage') ? 'active' : ''}">
                         <span class="material-symbols-outlined">person</span>

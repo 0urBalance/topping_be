@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.ChatRoom;
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.User;
 
@@ -15,6 +16,8 @@ public interface ChatRoomRepository {
 	Optional<ChatRoom> findById(UUID uuid);
 	
 	Optional<ChatRoom> findByCollaborationProposal(CollaborationProposal proposal);
+	
+	Optional<ChatRoom> findByCollaboration(Collaboration collaboration);
 	
 	List<ChatRoom> findByIsActiveTrue();
 	
