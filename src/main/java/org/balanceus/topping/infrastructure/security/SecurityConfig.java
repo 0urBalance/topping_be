@@ -35,6 +35,7 @@ public class SecurityConfig {
 				.requestMatchers("/signup/**").permitAll()
 				.requestMatchers("/explore", "/stores/**", "/css/**", "/js/**", "/images/**", "/image/**").permitAll()
 				.requestMatchers("/h2-console/**").permitAll() // For testing
+				.requestMatchers("/ads.txt","/robots.txt", "/sitemap.xml").permitAll()
 				// Public support endpoints
 				.requestMatchers("/support/cs", "/support/faq/**").permitAll()
 				.requestMatchers("/support/api/faqs").permitAll()
