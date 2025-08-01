@@ -20,9 +20,11 @@
 4. **Fragments**: Always use Thymeleaf fragments for navbar, footer, and modals
 5. **Design Review**: Check existing patterns and brand guidelines
 6. **Responsive Design**: Mobile-first approach with CSS Variables system
-7. **Accessibility**: Proper labels, keyboard navigation, ARIA attributes
-8. **Performance**: Optimize CSS/JS, minimize requests
-9. **Browser Testing**: Cross-browser compatibility
+7. **Accessibility**: Proper labels, keyboard navigation, ARIA attributes, screen reader support
+8. **Message UI**: Use `.bubble.mine` for own messages (right-aligned, `#6B3410`) and `.bubble.their` for others (left-aligned, light gray)
+9. **Badge System**: Implement unread badges with `.unread-badge` class, auto-hide on interaction
+10. **Performance**: Optimize CSS/JS, minimize requests
+11. **Browser Testing**: Cross-browser compatibility
 
 ## Frontend Refactoring Best Practices
 

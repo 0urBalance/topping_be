@@ -136,6 +136,8 @@ All repositories follow a consistent three-layer pattern:
 - **Mobile Navbar**: Use both inline `onclick` and JavaScript event listeners for maximum browser compatibility
 - **WebSocket Libraries**: Include SockJS and STOMP CDN libraries in chat templates before custom JavaScript
 - **API Content-Type**: Check response content-type before parsing JSON to avoid "Unexpected token '<'" errors
+- **ChatMessage Entity**: Use `readAt` and `isRead` fields for message read tracking, auto-set when user views chat room
+- **Unread Badge Styling**: Use `.unread-badge.hidden` class to hide badges when count is 0, not `display: none` directly
 
 ## Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -176,11 +178,19 @@ All repositories follow a consistent three-layer pattern:
 - **Integration Points**: Automatic chat creation in `CollaborationController` and `CollaborationProposalController`
 
 ### Chat API Endpoints
-- **`GET /chat/room/{roomId}/data`**: Returns complete chat room data as JSON (room info, messages, participants)
+- **`GET /chat/room/{roomId}/data`**: Returns complete chat room data as JSON (room info, messages, participants) and auto-marks messages as read
 - **`POST /chat/message/send`**: Accepts JSON message requests with roomId and message content
 - **`GET /api/session/user`**: Returns current authenticated user information for chat UI
 - **WebSocket**: `/ws` endpoint with SockJS fallback and STOMP messaging to `/topic/chat/{roomId}`
 - **Error Handling**: Comprehensive null-safety for collaboration participants and fallback user creation
+
+### Chat UI & UX Features
+- **Message Bubble Design**: Right-aligned bubbles for own messages (`.bubble.mine`), left-aligned for others (`.bubble.their`)
+- **Color Scheme**: Dark brown (`#6B3410`) for own messages with white text, light gray (`#f1f1f1`) for received messages with dark text
+- **Unread Message Badges**: Red circular badges (`#dc3545`) with count display, hidden when no unread messages
+- **Accessibility**: ARIA labels for screen readers (`aria-label="읽지 않은 메시지 N개"`), high contrast support
+- **Real-time Updates**: Auto-hide badges on room selection, immediate visual feedback for read status
+- **Responsive Design**: Mobile-optimized bubble sizing and badge positioning
 
 ## Recent Status & Improvements
 - ✅ **Authentication System**: Migrated from JWT to session-based, fully stable
@@ -219,6 +229,10 @@ All repositories follow a consistent three-layer pattern:
 - ✅ **Chat API Endpoints**: Complete JSON API implementation with room data, user session, and message sending endpoints
 - ✅ **WebSocket Integration**: Modern SockJS/STOMP implementation with proper error handling and reconnection logic
 - ✅ **Mobile Navbar Fixes**: Resolved hamburger menu functionality with proper event handling and CSS positioning
+- ✅ **Chat UI Enhancement**: Modern message bubble design with proper alignment, color scheme (#6B3410 for own messages), and accessibility features
+- ✅ **Unread Message System**: Red circular badges with real-time count tracking, automatic read status management, and ARIA labels for accessibility
+- ✅ **Message Read Tracking**: Database-level read/unread status with `ChatMessage.readAt` and `ChatMessage.isRead` fields
+- ✅ **Chat UX Improvements**: Auto-hide badges on room selection, proper message alignment (right for own, left for others), and enhanced visual feedback
 
 ## Documentation Navigation
 
@@ -231,6 +245,7 @@ All repositories follow a consistent three-layer pattern:
 - **[Collaboration Forms](./docs/technical/collaboration-forms.md)** - Dynamic form system
 - **[Collaboration Received Page](./docs/technical/COLLABORATION_RECEIVED_PAGE.md)** - Dual collaboration system architecture
 - **[Chat System Integration](./docs/technical/chat-system-integration.md)** - Real-time chat with automatic room creation
+- **[Chat UI Enhancements](./docs/technical/chat-ui-enhancements.md)** - Message bubble design & unread message system
 - **[Frontend Optimization](./docs/technical/frontend-optimization.md)** - Performance improvements
 - **[Database & Performance](./docs/technical/database-performance.md)** - Connection pool & async config
 

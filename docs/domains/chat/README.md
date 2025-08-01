@@ -55,8 +55,18 @@ public class ChatMessage {
     
     @CreationTimestamp
     private LocalDateTime createdAt;
+    
+    // Read/Unread tracking
+    private LocalDateTime readAt;
+    private boolean isRead = false;
 }
 ```
+
+**Enhanced Features:**
+- **Read Status Tracking**: `readAt` timestamp and `isRead` boolean flag
+- **Automatic Read Management**: Messages marked as read when user views chat room
+- **Unread Count Queries**: Efficient counting of unread messages per room
+- **Real-time Badge Updates**: UI badges update automatically on room selection
 
 ### Service Layer
 
@@ -67,6 +77,9 @@ public class ChatMessage {
 - `createChatRoomForCollaborationProposal(UUID proposalId)` - Creates chat room for business proposals
 - `createChatRoomForCollaboration(UUID collaborationId)` - Creates chat room for product collaborations
 - `createChatRoomIfNotExists(UUID id, boolean isProposal)` - Unified creation with duplicate prevention
+- `getUnreadCountsByRoomsForUser(List<ChatRoom> chatRooms, User user)` - Bulk unread message counting
+- `getUnreadMessageCount(ChatRoom chatRoom, User user)` - Single room unread count
+- `markMessagesAsRead(ChatRoom chatRoom, User user)` - Mark messages as read for specific user
 
 **Business Logic:**
 - **Duplicate Prevention**: Checks for existing rooms before creation
@@ -87,6 +100,20 @@ public interface ChatRoomRepository {
     Optional<ChatRoom> findByCollaboration(Collaboration collaboration);
     List<ChatRoom> findByParticipant(User user);
     List<ChatRoom> findByIsActiveTrue();
+}
+```
+
+**Enhanced Message Repository** (`ChatMessageRepository`)
+```java
+public interface ChatMessageRepository {
+    ChatMessage save(ChatMessage message);
+    Optional<ChatMessage> findById(UUID uuid);
+    List<ChatMessage> findByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
+    
+    // Unread message management
+    long countUnreadMessagesInRoom(ChatRoom chatRoom, User user);
+    Map<UUID, Long> getUnreadCountsByRoomsForUser(List<ChatRoom> chatRooms, User user);
+    void markMessagesAsRead(ChatRoom chatRoom, User user);
 }
 ```
 
@@ -160,16 +187,22 @@ graph TD
 #### Chat Room List Features
 - **User Avatars**: Generated from username initials with gradient backgrounds
 - **Room Previews**: Last message and timestamp display
-- **Unread Badges**: Visual indicators for new messages
+- **Unread Message Badges**: Red circular badges (`#dc3545`) with count display
+- **Badge Auto-Hide**: Badges automatically hidden when room is selected
 - **Search Functionality**: Real-time filtering of chat rooms
 - **Status Indicators**: Online/offline status for participants
+- **Accessibility**: ARIA labels for screen readers (`aria-label="읽지 않은 메시지 N개"`)
 
 #### Chat Interface Features
-- **Message Bubbles**: Distinctive styling for sent/received messages
+- **Message Bubble Alignment**: Right-aligned for own messages (`.bubble.mine`), left-aligned for others (`.bubble.their`)
+- **Enhanced Color Scheme**: Dark brown (`#6B3410`) for own messages, light gray (`#f1f1f1`) for received messages
+- **Balanced Border Radius**: Proper message tails on appropriate sides (4px radius on tail side, 16px on others)
+- **High Contrast Support**: `@media (prefers-contrast: high)` for accessibility
 - **Date Separators**: Automatic date grouping for message organization
 - **Proposal Cards**: Special message types for collaboration details
 - **Real-time Updates**: WebSocket integration for instant messaging
 - **Enter-to-Send**: Keyboard shortcuts for improved UX
+- **Responsive Design**: Mobile-optimized bubble sizing (85% max-width on mobile)
 
 ### WebSocket Integration
 
@@ -204,6 +237,11 @@ this.stompClient.connect({}, (frame) => {
 ```http
 GET /chat/room/{roomId}/data
 ```
+**Functionality:**
+- Returns complete chat room data as JSON
+- **Auto-marks messages as read** for the requesting user
+- Includes participant information and message history
+
 **Response Structure:**
 ```json
 {
@@ -275,11 +313,28 @@ GET /api/session/user
 - **Animation**: Smooth transitions and hover effects
 
 ### Key CSS Classes
+
+#### Layout Classes
 - `.chat-container` - Main chat layout container
 - `.chat-sidebar` - Left sidebar with room list
 - `.chat-main` - Right panel with chat interface
-- `.bubble.mine/.bubble.their` - Message bubble styling
+
+#### Message Styling
+- `.bubble.mine` - Own messages (right-aligned, dark brown `#6B3410`)
+- `.bubble.their` - Received messages (left-aligned, light gray `#f1f1f1`)
+- `.message-time` - Timestamp styling with appropriate contrast
+- `.date-separator` - Date grouping separators
+
+#### UI Components
+- `.unread-badge` - Red circular badge (`#dc3545`) with count
+- `.unread-badge.hidden` - Hidden state for badges with no unread messages
+- `.chat-room-item` - Individual room list items
+- `.chat-room-item.active` - Selected room styling
 - `.proposal-card` - Special collaboration proposal messages
+
+#### Responsive Classes
+- Mobile breakpoint at `768px` with adjusted bubble sizing
+- High contrast media query support for accessibility
 
 ## Performance Considerations
 

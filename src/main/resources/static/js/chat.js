@@ -76,6 +76,13 @@ class ChatInterface {
         const selectedRoom = document.querySelector(`[data-room-id="${roomId}"]`);
         if (selectedRoom) {
             selectedRoom.classList.add('active');
+            
+            // Hide unread badge when room is selected (messages will be marked as read)
+            const unreadBadge = selectedRoom.querySelector('.unread-badge');
+            if (unreadBadge) {
+                unreadBadge.classList.add('hidden');
+                unreadBadge.textContent = '0';
+            }
         }
         
         this.selectedRoomId = roomId;
@@ -338,6 +345,17 @@ class ChatInterface {
         
         chatBody.insertAdjacentHTML('beforeend', messageHTML);
         this.scrollToBottom();
+        
+        // Update unread badge for other rooms (if this message is from a different room)
+        if (!isOwn) {
+            this.updateUnreadBadges();
+        }
+    }
+    
+    updateUnreadBadges() {
+        // This could be enhanced to make an API call to get updated unread counts
+        // For now, we'll just refresh the page periodically or on focus
+        // In a production app, you might want to use WebSocket events for real-time updates
     }
     
     scrollToBottom() {

@@ -65,7 +65,13 @@
                     </div>
                     <div class="room-meta">
                         <div class="room-time">오후 12:31</div>
-                        <div class="unread-badge" th:if="false">1</div>
+                        <div class="unread-badge" 
+                             th:if="${chatRoom.unreadCount != null and chatRoom.unreadCount > 0}"
+                             th:text="${chatRoom.unreadCount}"
+                             th:classappend="${chatRoom.unreadCount == null or chatRoom.unreadCount == 0} ? 'hidden' : ''"
+                             th:attr="aria-label='읽지 않은 메시지 ' + ${chatRoom.unreadCount} + '개'"
+                             role="status">
+                        </div>
                     </div>
                 </div>
             </div>

@@ -57,6 +57,7 @@ docs/
 │   ├── css-framework.md                        # Complete UI framework documentation
 │   ├── image-upload.md                         # Multi-image upload system
 │   ├── collaboration-forms.md                  # Dynamic form system
+│   ├── chat-ui-enhancements.md                 # Chat UI design & unread message system
 │   ├── frontend-optimization.md                # Performance improvements
 │   ├── database-performance.md                 # Connection pool & async config
 │   ├── UPLOAD_API_SOLUTION.md                  # Upload API implementation

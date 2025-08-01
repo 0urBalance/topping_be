@@ -42,4 +42,8 @@ public class ChatMessage {
 
 	@CreationTimestamp
 	private LocalDateTime createdAt;
+
+	private LocalDateTime readAt;
+
+	private boolean isRead = false;
 }

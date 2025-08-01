@@ -2,8 +2,10 @@ package org.balanceus.topping.presentation.controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import org.balanceus.topping.application.service.ChatService;
 import org.balanceus.topping.domain.model.ChatMessage;
 import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
@@ -37,6 +39,7 @@ public class ChatController {
 	private final ChatMessageRepository chatMessageRepository;
 	private final CollaborationProposalRepository proposalRepository;
 	private final UserRepository userRepository;
+	private final ChatService chatService;
 
 	@PostMapping("/room/create/{proposalId}")
 	@ResponseBody
@@ -87,10 +90,13 @@ public class ChatController {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 				.orElseThrow(() -> new RuntimeException("Chat room not found"));
 
-		List<ChatMessage> messages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
-
 		User currentUser = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// Mark messages as read when user views the chat room
+		chatService.markMessagesAsRead(chatRoom, currentUser);
+
+		List<ChatMessage> messages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
 
 		// Find the other user in the chat (not the current user)
 		CollaborationProposal proposal = chatRoom.getCollaborationProposal();
@@ -191,7 +197,15 @@ public class ChatController {
 				})
 				.toList();
 
-		model.addAttribute("chatRooms", userChatRooms);
+		// Get unread message counts for each room
+		Map<UUID, Long> unreadCounts = chatService.getUnreadCountsByRoomsForUser(userChatRooms, user);
+		
+		// Create enhanced chat room data with unread counts
+		List<ChatRoomWithUnreadCount> chatRoomsWithCounts = userChatRooms.stream()
+				.map(room -> new ChatRoomWithUnreadCount(room, unreadCounts.get(room.getUuid())))
+				.toList();
+
+		model.addAttribute("chatRooms", chatRoomsWithCounts);
 		return "chat/rooms";
 	}
 
@@ -276,5 +290,27 @@ public class ChatController {
 		
 		public java.time.LocalDateTime getCreatedAt() { return createdAt; }
 		public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
+	}
+
+	// Wrapper class to add unread count to ChatRoom for template usage
+	public static class ChatRoomWithUnreadCount {
+		private final ChatRoom chatRoom;
+		private final Long unreadCount;
+
+		public ChatRoomWithUnreadCount(ChatRoom chatRoom, Long unreadCount) {
+			this.chatRoom = chatRoom;
+			this.unreadCount = unreadCount != null ? unreadCount : 0L;
+		}
+
+		// Delegate ChatRoom methods
+		public UUID getUuid() { return chatRoom.getUuid(); }
+		public String getRoomName() { return chatRoom.getRoomName(); }
+		public Boolean getIsActive() { return chatRoom.getIsActive(); }
+		public java.time.LocalDateTime getCreatedAt() { return chatRoom.getCreatedAt(); }
+		public CollaborationProposal getCollaborationProposal() { return chatRoom.getCollaborationProposal(); }
+		public Collaboration getCollaboration() { return chatRoom.getCollaboration(); }
+
+		// Unread count
+		public Long getUnreadCount() { return unreadCount; }
 	}
 }
