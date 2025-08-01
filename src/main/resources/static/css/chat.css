@@ -252,6 +252,14 @@
     padding: 40px;
 }
 
+/* Empty chat room placeholder when no messages */
+.chat-body .chat-placeholder {
+    background: #ffffff;
+    border-radius: 12px;
+    margin: 20px;
+    border: 1px solid #e5e5e5;
+}
+
 .placeholder-icon {
     margin-bottom: 24px;
 }
@@ -351,6 +359,7 @@
     overflow-y: auto;
     padding: 24px;
     background: #f8f9fa;
+    scroll-behavior: smooth;
 }
 
 .date-separator {
@@ -380,6 +389,18 @@
 /* Message Bubbles */
 .message-group {
     margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Default to left alignment */
+}
+
+/* Message group alignment for mine vs their */
+.message-group.mine {
+    align-items: flex-end;
+}
+
+.message-group.their {
+    align-items: flex-start;
 }
 
 .bubble {

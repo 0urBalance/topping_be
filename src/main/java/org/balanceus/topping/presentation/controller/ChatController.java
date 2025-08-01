@@ -19,6 +19,7 @@ import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.response.Code;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +30,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/chat")
 @RequiredArgsConstructor
+@Slf4j
 public class ChatController {
 
 	private final ChatRoomRepository chatRoomRepository;
@@ -40,6 +43,7 @@ public class ChatController {
 	private final CollaborationProposalRepository proposalRepository;
 	private final UserRepository userRepository;
 	private final ChatService chatService;
+	private final SimpMessagingTemplate messagingTemplate;
 
 	@PostMapping("/room/create/{proposalId}")
 	@ResponseBody
@@ -68,21 +72,6 @@ public class ChatController {
 		return ApiResponseData.success(saved);
 	}
 
-	@GetMapping("/room/{roomId}")
-	public String chatRoom(@PathVariable UUID roomId, Model model, Principal principal) {
-		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-				.orElseThrow(() -> new RuntimeException("Chat room not found"));
-
-		List<ChatMessage> messages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
-
-		User currentUser = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		model.addAttribute("chatRoom", chatRoom);
-		model.addAttribute("messages", messages);
-		model.addAttribute("currentUser", currentUser);
-		return "chat/room";
-	}
 
 	@GetMapping("/room/{roomId}/data")
 	@ResponseBody
@@ -164,7 +153,7 @@ public class ChatController {
 
 		ChatMessage saved = chatMessageRepository.save(chatMessage);
 		
-		// Return DTO instead of raw entity to prevent circular references
+		// Create DTO for response and WebSocket broadcast
 		MessageInfo messageDto = new MessageInfo(
 			saved.getUuid(),
 			saved.getSender().getUuid(),
@@ -173,13 +162,34 @@ public class ChatController {
 			saved.getCreatedAt()
 		);
 		
+		// Broadcast message to WebSocket subscribers in the room
+		WebSocketMessageData wsMessage = new WebSocketMessageData();
+		wsMessage.setMessageId(saved.getUuid());
+		wsMessage.setSender(new WebSocketUserInfo(saved.getSender().getUuid(), saved.getSender().getUsername()));
+		wsMessage.setMessage(saved.getMessage());
+		wsMessage.setCreatedAt(saved.getCreatedAt());
+		
+		messagingTemplate.convertAndSend("/topic/chat/" + request.getRoomId(), wsMessage);
+		
+		log.info("Message sent and broadcasted - Room: {}, Sender: {}, Message: {}", 
+			request.getRoomId(), sender.getUsername(), saved.getMessage().substring(0, Math.min(50, saved.getMessage().length())));
+		
 		return ApiResponseData.success(messageDto);
 	}
 
 	@MessageMapping("/chat/{roomId}")
 	@SendTo("/topic/chat/{roomId}")
-	public ChatMessage handleMessage(ChatMessage message) {
-		return chatMessageRepository.save(message);
+	public MessageInfo handleMessage(@PathVariable UUID roomId, ChatMessage message) {
+		ChatMessage saved = chatMessageRepository.save(message);
+		
+		// Return DTO to prevent circular references in WebSocket
+		return new MessageInfo(
+			saved.getUuid(),
+			saved.getSender().getUuid(),
+			saved.getSender().getUsername(),
+			saved.getMessage(),
+			saved.getCreatedAt()
+		);
 	}
 
 	@GetMapping("/rooms")
@@ -312,5 +322,43 @@ public class ChatController {
 
 		// Unread count
 		public Long getUnreadCount() { return unreadCount; }
+	}
+
+	// WebSocket message data class for broadcasting
+	public static class WebSocketMessageData {
+		private UUID messageId;
+		private WebSocketUserInfo sender;
+		private String message;
+		private java.time.LocalDateTime createdAt;
+		
+		// Getters and setters
+		public UUID getMessageId() { return messageId; }
+		public void setMessageId(UUID messageId) { this.messageId = messageId; }
+		
+		public WebSocketUserInfo getSender() { return sender; }
+		public void setSender(WebSocketUserInfo sender) { this.sender = sender; }
+		
+		public String getMessage() { return message; }
+		public void setMessage(String message) { this.message = message; }
+		
+		public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+		public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
+	}
+
+	// WebSocket user info with uuid field (to match frontend expectations)
+	public static class WebSocketUserInfo {
+		private UUID uuid;
+		private String username;
+
+		public WebSocketUserInfo(UUID uuid, String username) {
+			this.uuid = uuid;
+			this.username = username;
+		}
+
+		public UUID getUuid() { return uuid; }
+		public void setUuid(UUID uuid) { this.uuid = uuid; }
+		
+		public String getUsername() { return username; }
+		public void setUsername(String username) { this.username = username; }
 	}
 }

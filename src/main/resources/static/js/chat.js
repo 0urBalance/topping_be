@@ -11,7 +11,9 @@ class ChatInterface {
     init() {
         this.bindEvents();
         this.setupSearch();
-        this.loadUserInfo();
+        this.loadUserInfo().then(() => {
+            console.log('Chat interface initialized with user:', this.currentUser);
+        });
     }
     
     bindEvents() {
@@ -208,8 +210,18 @@ class ChatInterface {
             const isOwn = message.senderId === this.currentUser?.uuid;
             const bubbleClass = isOwn ? 'mine' : 'their';
             
+            // Debug logging for message alignment
+            console.log('Message bubble alignment:', {
+                messageId: message.messageId,
+                senderId: message.senderId,
+                currentUserId: this.currentUser?.uuid,
+                isOwn: isOwn,
+                bubbleClass: bubbleClass,
+                createdAt: message.createdAt
+            });
+            
             messagesHTML += `
-                <div class="message-group">
+                <div class="message-group ${bubbleClass}">
                     <div class="bubble ${bubbleClass}">
                         ${this.escapeHtml(message.message)}
                         <div class="message-time">${this.formatTime(message.createdAt)}</div>
@@ -255,8 +267,13 @@ class ChatInterface {
                 
                 // Subscribe to chat room messages
                 this.stompClient.subscribe(`/topic/chat/${roomId}`, (message) => {
-                    const messageData = JSON.parse(message.body);
-                    this.appendMessage(messageData);
+                    try {
+                        const messageData = JSON.parse(message.body);
+                        console.log('Received WebSocket message:', messageData);
+                        this.appendMessage(messageData);
+                    } catch (error) {
+                        console.error('Error parsing WebSocket message:', error, message.body);
+                    }
                 });
             },
             onStompError: (frame) => {
@@ -331,11 +348,20 @@ class ChatInterface {
             `;
         }
         
-        const isOwn = messageData.sender.uuid === this.currentUser?.uuid;
+        const isOwn = messageData.sender?.uuid === this.currentUser?.uuid;
         const bubbleClass = isOwn ? 'mine' : 'their';
         
+        // Debug logging for real-time message alignment
+        console.log('Real-time message bubble alignment:', {
+            senderUuid: messageData.sender?.uuid,
+            currentUserId: this.currentUser?.uuid,
+            isOwn: isOwn,
+            bubbleClass: bubbleClass,
+            messageData: messageData
+        });
+        
         messageHTML += `
-            <div class="message-group">
+            <div class="message-group ${bubbleClass}">
                 <div class="bubble ${bubbleClass}">
                     ${this.escapeHtml(messageData.message)}
                     <div class="message-time">${this.formatTime(messageData.createdAt)}</div>
@@ -369,7 +395,14 @@ class ChatInterface {
         try {
             const response = await fetch('/api/session/user');
             if (response.ok) {
-                this.currentUser = await response.json();
+                const responseData = await response.json();
+                console.log('User session API response:', responseData);
+                
+                // Extract user data from ApiResponseData wrapper
+                this.currentUser = responseData.data || responseData;
+                console.log('Current user loaded:', this.currentUser);
+            } else {
+                console.error('Failed to load user info, status:', response.status);
             }
         } catch (error) {
             console.error('Error loading user info:', error);
@@ -386,28 +419,65 @@ class ChatInterface {
     }
     
     formatDate(timestamp) {
-        const date = new Date(timestamp);
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
+        if (!timestamp) {
+            console.warn('formatDate called with null/undefined timestamp');
+            return '날짜 오류';
+        }
         
-        if (this.isSameDay(date, today)) {
-            return '오늘';
-        } else if (this.isSameDay(date, yesterday)) {
-            return '어제';
-        } else {
-            return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+        try {
+            const date = new Date(timestamp);
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                console.warn('Invalid timestamp format for date:', timestamp);
+                return '날짜 오류';
+            }
+            
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            
+            if (this.isSameDay(date, today)) {
+                return '오늘';
+            } else if (this.isSameDay(date, yesterday)) {
+                return '어제';
+            } else {
+                return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+            }
+        } catch (error) {
+            console.error('Error formatting date:', error, timestamp);
+            return '날짜 오류';
         }
     }
     
     formatTime(timestamp) {
-        const date = new Date(timestamp);
-        const hours = date.getHours();
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const period = hours < 12 ? '오전' : '오후';
-        const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+        if (!timestamp) {
+            console.warn('formatTime called with null/undefined timestamp');
+            return '';
+        }
         
-        return `${period} ${displayHours}:${minutes}`;
+        try {
+            // Handle various timestamp formats from server
+            const date = new Date(timestamp);
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                console.warn('Invalid timestamp format:', timestamp);
+                return '시간 오류';
+            }
+            
+            const hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const period = hours < 12 ? '오전' : '오후';
+            const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+            
+            const formattedTime = `${period} ${displayHours}:${minutes}`;
+            console.log('Formatted time:', { timestamp, date, formattedTime });
+            return formattedTime;
+        } catch (error) {
+            console.error('Error formatting time:', error, timestamp);
+            return '시간 오류';
+        }
     }
     
     isSameDay(date1, date2) {
