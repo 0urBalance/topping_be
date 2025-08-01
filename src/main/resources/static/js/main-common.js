@@ -23,11 +23,24 @@ class UserSessionManager {
         try {
             const response = await fetch('/api/user/info');
             if (response.ok) {
-                this.user = await response.json();
-                this.updateUI();
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    this.user = await response.json();
+                    this.updateUI();
+                } else {
+                    console.warn('User info endpoint returned non-JSON response, user likely not authenticated');
+                    this.user = null;
+                }
+            } else if (response.status === 401) {
+                console.log('User not authenticated');
+                this.user = null;
+            } else {
+                console.warn('Failed to load user info, status:', response.status);
+                this.user = null;
             }
         } catch (error) {
-            console.error('Failed to load user info:', error);
+            console.warn('Failed to load user info (network/parse error):', error.message);
+            this.user = null;
         }
     }
 
@@ -57,10 +70,19 @@ class UserSessionManager {
         try {
             const response = await fetch('/api/session/check');
             if (!response.ok) {
+                console.log('Session check failed, status:', response.status);
                 this.handleSessionExpiry();
+            } else {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    console.log('Session is valid');
+                } else {
+                    console.warn('Session check returned non-JSON response');
+                    this.handleSessionExpiry();
+                }
             }
         } catch (error) {
-            console.error('Session check failed:', error);
+            console.warn('Session check failed (network error):', error.message);
         }
     }
 
