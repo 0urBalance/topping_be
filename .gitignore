@@ -84,3 +84,5 @@ application-local.yml
 jdk-17.0.12+7/
 /홈화면 (1).png
 design/
+/src/main/resources/static/image/stores/**
+/src/main/resources/static/image/products/**
