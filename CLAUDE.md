@@ -86,6 +86,13 @@ All repositories follow a consistent three-layer pattern:
 - **Fragments**: Always use navbar, footer, and modals fragments
 - **❌ FORBIDDEN**: Bootstrap CDN, inline styles, external CSS frameworks
 
+### Mobile Navigation System
+- **Responsive Design**: Sidebar navigation with hamburger menu for mobile devices
+- **JavaScript Integration**: Dual event handling (inline + event listeners) for maximum compatibility
+- **CSS Framework**: Proper z-index layering and mobile breakpoints at 768px
+- **Accessibility**: Keyboard navigation, focus management, and screen reader support
+- **Touch Support**: Swipe gestures for mobile sidebar open/close functionality
+
 ## Key Technical References
 
 ### Specialized Documentation
@@ -124,6 +131,11 @@ All repositories follow a consistent three-layer pattern:
 - **Template Parsing**: Avoid complex nested `th:if` and `th:each` within JavaScript inline sections - use JSON injection instead
 - **Entity Persistence**: Ensure POST endpoints create and save entities, not just validate form data
 - **Collaboration Forms**: Use server-side JSON generation with `ObjectMapper` for complex store-product data instead of nested Thymeleaf loops
+- **Entity Method Names**: All entities use `getUuid()` method, NOT `getUserId()`, `getRoomId()`, etc. (Lombok generates getters from field names)
+- **Chat Room Participants**: Always add null checks for collaboration participants - `targetBusinessOwner` can be null
+- **Mobile Navbar**: Use both inline `onclick` and JavaScript event listeners for maximum browser compatibility
+- **WebSocket Libraries**: Include SockJS and STOMP CDN libraries in chat templates before custom JavaScript
+- **API Content-Type**: Check response content-type before parsing JSON to avoid "Unexpected token '<'" errors
 
 ## Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -151,6 +163,24 @@ All repositories follow a consistent three-layer pattern:
 - **Repository Pattern**: Follows three-layer pattern (`SupportInquiryRepository`, `FAQRepository`)
 - **Entity Design**: Uses enums for categories and status tracking
 - **Template Structure**: Modern responsive design with search and pagination
+
+## Chat System Integration
+- **Automatic Room Creation**: Chat rooms automatically created when collaborations are accepted
+- **Dual Entity Support**: Works with both `Collaboration` and `CollaborationProposal` entities
+- **Service Layer Architecture**: `ChatService` handles room creation with duplicate prevention
+- **WebSocket Integration**: Real-time messaging using STOMP protocol over SockJS with modern client implementation
+- **Modern UI Design**: Horizontal layout with sidebar chat list and main chat panel
+- **Search & Navigation**: Chat room search functionality and responsive design
+- **Route**: `/chat/rooms` displays chat interface with automatic room selection
+- **Repository Pattern**: Three-layer pattern with dual query support for participant lookup
+- **Integration Points**: Automatic chat creation in `CollaborationController` and `CollaborationProposalController`
+
+### Chat API Endpoints
+- **`GET /chat/room/{roomId}/data`**: Returns complete chat room data as JSON (room info, messages, participants)
+- **`POST /chat/message/send`**: Accepts JSON message requests with roomId and message content
+- **`GET /api/session/user`**: Returns current authenticated user information for chat UI
+- **WebSocket**: `/ws` endpoint with SockJS fallback and STOMP messaging to `/topic/chat/{roomId}`
+- **Error Handling**: Comprehensive null-safety for collaboration participants and fallback user creation
 
 ## Recent Status & Improvements
 - ✅ **Authentication System**: Migrated from JWT to session-based, fully stable
@@ -183,6 +213,12 @@ All repositories follow a consistent three-layer pattern:
 - ✅ **Multipart Debug Resolution**: Comprehensive debugging and testing infrastructure for servlet-level multipart handling
 - ✅ **Collaboration Form Enhancement**: Refactored `/collaborations/apply` with auto-selection functionality, enhanced calendar UI, and critical bug fixes for entity creation and MyPage integration
 - ✅ **Dual Collaboration System**: Unified `/mypage/received` dashboard displaying both guest applications and business proposals with consistent statistics and management actions
+- ✅ **Chat System Integration**: Real-time chat with automatic room creation for accepted collaborations, modern UI with dual collaboration support
+- ✅ **Chat Service Architecture**: Clean service layer with automatic chat room management for both `Collaboration` and `CollaborationProposal` entities  
+- ✅ **Modern Chat Interface**: Complete UI redesign with sidebar navigation, WebSocket integration, search functionality, and responsive design
+- ✅ **Chat API Endpoints**: Complete JSON API implementation with room data, user session, and message sending endpoints
+- ✅ **WebSocket Integration**: Modern SockJS/STOMP implementation with proper error handling and reconnection logic
+- ✅ **Mobile Navbar Fixes**: Resolved hamburger menu functionality with proper event handling and CSS positioning
 
 ## Documentation Navigation
 
@@ -194,6 +230,7 @@ All repositories follow a consistent three-layer pattern:
 - **[Multi-Image Upload System](./docs/technical/image-upload.md)** - File upload infrastructure
 - **[Collaboration Forms](./docs/technical/collaboration-forms.md)** - Dynamic form system
 - **[Collaboration Received Page](./docs/technical/COLLABORATION_RECEIVED_PAGE.md)** - Dual collaboration system architecture
+- **[Chat System Integration](./docs/technical/chat-system-integration.md)** - Real-time chat with automatic room creation
 - **[Frontend Optimization](./docs/technical/frontend-optimization.md)** - Performance improvements
 - **[Database & Performance](./docs/technical/database-performance.md)** - Connection pool & async config
 

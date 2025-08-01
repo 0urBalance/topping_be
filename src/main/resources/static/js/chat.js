@@ -86,7 +86,19 @@ class ChatInterface {
         try {
             const response = await fetch(`/chat/room/${roomId}/data`);
             if (response.ok) {
-                const chatData = await response.json();
+                const responseData = await response.json();
+                console.log('Chat room API response:', responseData);
+                
+                // Extract the actual data from ApiResponseData wrapper
+                const chatData = responseData.data || responseData;
+                
+                // Defensive check to ensure required data exists
+                if (!chatData || !chatData.otherUser) {
+                    console.error('Invalid chat data structure:', chatData);
+                    this.showError('채팅방 데이터가 올바르지 않습니다.');
+                    return;
+                }
+                
                 this.renderChatInterface(chatData);
                 this.connectWebSocket(roomId);
             } else {
@@ -102,14 +114,21 @@ class ChatInterface {
     renderChatInterface(chatData) {
         const chatMain = document.getElementById('chatMain');
         
+        // Additional defensive checks
+        const otherUser = chatData.otherUser || { username: 'Unknown User' };
+        const roomName = chatData.roomName || '채팅방';
+        const messages = chatData.messages || [];
+        
+        console.log('Rendering chat interface with:', { otherUser, roomName, messagesCount: messages.length });
+        
         const chatHTML = `
             <div class="chat-header">
                 <div class="chat-user-info">
                     <div class="chat-user-avatar">
-                        ${this.getAvatarText(chatData.otherUser.username)}
+                        ${this.getAvatarText(otherUser.username)}
                     </div>
                     <div class="chat-user-details">
-                        <h4>${chatData.otherUser.username}</h4>
+                        <h4>${otherUser.username}</h4>
                         <p class="chat-user-status">접속</p>
                     </div>
                 </div>
@@ -122,7 +141,7 @@ class ChatInterface {
             </div>
             
             <div class="chat-body" id="chatBody">
-                ${this.renderMessages(chatData.messages)}
+                ${this.renderMessages(messages)}
             </div>
             
             <div class="chat-input">
@@ -161,6 +180,12 @@ class ChatInterface {
         let currentDate = '';
         
         messages.forEach(message => {
+            // Defensive checks for message properties
+            if (!message || !message.senderId || !message.message) {
+                console.warn('Invalid message data:', message);
+                return; // Skip invalid messages
+            }
+            
             const messageDate = this.formatDate(message.createdAt);
             
             // Add date separator if date changed
@@ -173,7 +198,7 @@ class ChatInterface {
                 currentDate = messageDate;
             }
             
-            const isOwn = message.sender.uuid === this.currentUser?.uuid;
+            const isOwn = message.senderId === this.currentUser?.uuid;
             const bubbleClass = isOwn ? 'mine' : 'their';
             
             messagesHTML += `
@@ -208,24 +233,36 @@ class ChatInterface {
     
     connectWebSocket(roomId) {
         if (this.stompClient) {
-            this.stompClient.disconnect();
+            this.stompClient.deactivate();
         }
         
-        const socket = new SockJS('/ws');
-        this.stompClient = Stomp.over(socket);
-        
-        this.stompClient.connect({}, (frame) => {
-            console.log('Connected to WebSocket:', frame);
-            
-            // Subscribe to chat room messages
-            this.stompClient.subscribe(`/topic/chat/${roomId}`, (message) => {
-                const messageData = JSON.parse(message.body);
-                this.appendMessage(messageData);
-            });
-        }, (error) => {
-            console.error('WebSocket connection error:', error);
-            this.showError('실시간 채팅 연결에 실패했습니다.');
+        // Use modern STOMP client
+        this.stompClient = new StompJs.Client({
+            brokerURL: null, // We'll use SockJS instead
+            webSocketFactory: () => new SockJS('/ws'),
+            debug: (str) => {
+                console.log('STOMP Debug:', str);
+            },
+            onConnect: (frame) => {
+                console.log('Connected to WebSocket:', frame);
+                
+                // Subscribe to chat room messages
+                this.stompClient.subscribe(`/topic/chat/${roomId}`, (message) => {
+                    const messageData = JSON.parse(message.body);
+                    this.appendMessage(messageData);
+                });
+            },
+            onStompError: (frame) => {
+                console.error('STOMP error:', frame);
+                this.showError('실시간 채팅 연결에 실패했습니다.');
+            },
+            onWebSocketError: (event) => {
+                console.error('WebSocket error:', event);
+                this.showError('실시간 채팅 연결에 실패했습니다.');
+            }
         });
+        
+        this.stompClient.activate();
     }
     
     async sendMessage() {

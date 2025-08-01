@@ -113,4 +113,49 @@ public class SessionAuthController {
                 .body(ApiResponseData.failure(401, "세션 만료"));
         }
     }
+
+    @org.springframework.web.bind.annotation.GetMapping("/api/session/user")
+    @ResponseBody
+    public ResponseEntity<ApiResponseData<SessionUserInfo>> getSessionUser(HttpServletRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        
+        log.debug("Session user request - Authentication: {}", auth);
+        
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+            
+            SessionUserInfo userInfo = new SessionUserInfo();
+            userInfo.setUuid(userDetails.getUser().getUuid());
+            userInfo.setUsername(userDetails.getUser().getUsername());
+            userInfo.setEmail(userDetails.getUser().getEmail());
+            userInfo.setRole(userDetails.getUser().getRole().name());
+            
+            return ResponseEntity.ok(ApiResponseData.success(userInfo));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponseData.failure(401, "인증되지 않음"));
+        }
+    }
+
+    /**
+     * Session user information DTO
+     */
+    public static class SessionUserInfo {
+        private java.util.UUID uuid;
+        private String username;
+        private String email;
+        private String role;
+
+        public java.util.UUID getUuid() { return uuid; }
+        public void setUuid(java.util.UUID uuid) { this.uuid = uuid; }
+        
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        
+        public String getRole() { return role; }
+        public void setRole(String role) { this.role = role; }
+    }
 }

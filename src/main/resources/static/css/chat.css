@@ -1,12 +1,43 @@
 /* Chat Interface Styles */
+
+/* Main content wrapper - consistent with other pages */
+.main-content {
+    margin-left: 150px;
+    padding: 20px 0 0 0;
+    transition: margin-left 0.3s ease;
+    min-height: calc(100vh - var(--navbar-height, 80px));
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 10px 0 0 0;
+    }
+}
+
+/* Skip link for accessibility */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 1000;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
 .chat-container {
     display: flex;
-    height: calc(100vh - var(--navbar-height, 80px));
-    position: fixed;
-    top: var(--navbar-height, 80px);
-    left: 0;
-    right: 0;
+    height: calc(100vh - var(--navbar-height, 80px) - 40px);
     background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Chat Sidebar */
@@ -525,6 +556,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - var(--navbar-height, 80px) - 20px);
+        border-radius: 4px;
+    }
+    
     .chat-sidebar {
         width: 100%;
         position: absolute;

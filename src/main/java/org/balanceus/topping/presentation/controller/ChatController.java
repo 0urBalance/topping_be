@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.ChatMessage;
 import org.balanceus.topping.domain.model.ChatRoom;
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ChatMessageRepository;
@@ -80,14 +81,71 @@ public class ChatController {
 		return "chat/room";
 	}
 
+	@GetMapping("/room/{roomId}/data")
+	@ResponseBody
+	public ApiResponseData<ChatRoomData> getChatRoomData(@PathVariable UUID roomId, Principal principal) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+				.orElseThrow(() -> new RuntimeException("Chat room not found"));
+
+		List<ChatMessage> messages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
+
+		User currentUser = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// Find the other user in the chat (not the current user)
+		CollaborationProposal proposal = chatRoom.getCollaborationProposal();
+		User otherUser = null;
+		
+		if (proposal.getProposer().equals(currentUser)) {
+			otherUser = proposal.getTargetBusinessOwner();
+		} else {
+			otherUser = proposal.getProposer();
+		}
+		
+		// If otherUser is still null, try to find from collaboration
+		if (otherUser == null && chatRoom.getCollaboration() != null) {
+			Collaboration collaboration = chatRoom.getCollaboration();
+			// Get the product owner (business owner) and applicant
+			User productOwner = collaboration.getProduct() != null ? collaboration.getProduct().getStore().getUser() : null;
+			User applicant = collaboration.getApplicant();
+			
+			if (productOwner != null && applicant != null) {
+				otherUser = productOwner.equals(currentUser) ? applicant : productOwner;
+			}
+		}
+		
+		// Fallback: create a placeholder user if still null
+		if (otherUser == null) {
+			otherUser = new User();
+			otherUser.setUuid(UUID.randomUUID());
+			otherUser.setUsername("Unknown User");
+		}
+
+		ChatRoomData data = new ChatRoomData();
+		data.setRoomId(chatRoom.getUuid());
+		data.setRoomName(chatRoom.getRoomName());
+		data.setCollaborationId(proposal.getUuid());
+		data.setOtherUser(new UserInfo(otherUser.getUuid(), otherUser.getUsername()));
+		data.setMessages(messages.stream()
+			.map(msg -> new MessageInfo(
+				msg.getUuid(),
+				msg.getSender().getUuid(),
+				msg.getSender().getUsername(),
+				msg.getMessage(),
+				msg.getCreatedAt()
+			))
+			.toList());
+
+		return ApiResponseData.success(data);
+	}
+
 	@PostMapping("/message/send")
 	@ResponseBody
-	public ApiResponseData<ChatMessage> sendMessage(
-			@RequestParam UUID roomId,
-			@RequestParam String message,
+	public ApiResponseData<MessageInfo> sendMessage(
+			@org.springframework.web.bind.annotation.RequestBody SendMessageRequest request,
 			Principal principal) {
 
-		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+		ChatRoom chatRoom = chatRoomRepository.findById(request.getRoomId())
 				.orElseThrow(() -> new RuntimeException("Chat room not found"));
 
 		User sender = userRepository.findByEmail(principal.getName())
@@ -96,10 +154,20 @@ public class ChatController {
 		ChatMessage chatMessage = new ChatMessage();
 		chatMessage.setChatRoom(chatRoom);
 		chatMessage.setSender(sender);
-		chatMessage.setMessage(message);
+		chatMessage.setMessage(request.getMessage());
 
 		ChatMessage saved = chatMessageRepository.save(chatMessage);
-		return ApiResponseData.success(saved);
+		
+		// Return DTO instead of raw entity to prevent circular references
+		MessageInfo messageDto = new MessageInfo(
+			saved.getUuid(),
+			saved.getSender().getUuid(),
+			saved.getSender().getUsername(),
+			saved.getMessage(),
+			saved.getCreatedAt()
+		);
+		
+		return ApiResponseData.success(messageDto);
 	}
 
 	@MessageMapping("/chat/{roomId}")
@@ -125,5 +193,88 @@ public class ChatController {
 
 		model.addAttribute("chatRooms", userChatRooms);
 		return "chat/rooms";
+	}
+
+	// DTO classes for JSON requests and responses
+	public static class SendMessageRequest {
+		private UUID roomId;
+		private String message;
+
+		public UUID getRoomId() { return roomId; }
+		public void setRoomId(UUID roomId) { this.roomId = roomId; }
+		
+		public String getMessage() { return message; }
+		public void setMessage(String message) { this.message = message; }
+	}
+
+	public static class ChatRoomData {
+		private UUID roomId;
+		private String roomName;
+		private UUID collaborationId;
+		private UserInfo otherUser;
+		private List<MessageInfo> messages;
+
+		// Getters and setters
+		public UUID getRoomId() { return roomId; }
+		public void setRoomId(UUID roomId) { this.roomId = roomId; }
+		
+		public String getRoomName() { return roomName; }
+		public void setRoomName(String roomName) { this.roomName = roomName; }
+		
+		public UUID getCollaborationId() { return collaborationId; }
+		public void setCollaborationId(UUID collaborationId) { this.collaborationId = collaborationId; }
+		
+		public UserInfo getOtherUser() { return otherUser; }
+		public void setOtherUser(UserInfo otherUser) { this.otherUser = otherUser; }
+		
+		public List<MessageInfo> getMessages() { return messages; }
+		public void setMessages(List<MessageInfo> messages) { this.messages = messages; }
+	}
+
+	public static class UserInfo {
+		private UUID userId;
+		private String username;
+
+		public UserInfo(UUID userId, String username) {
+			this.userId = userId;
+			this.username = username;
+		}
+
+		public UUID getUserId() { return userId; }
+		public void setUserId(UUID userId) { this.userId = userId; }
+		
+		public String getUsername() { return username; }
+		public void setUsername(String username) { this.username = username; }
+	}
+
+	public static class MessageInfo {
+		private UUID messageId;
+		private UUID senderId;
+		private String senderName;
+		private String message;
+		private java.time.LocalDateTime createdAt;
+
+		public MessageInfo(UUID messageId, UUID senderId, String senderName, String message, java.time.LocalDateTime createdAt) {
+			this.messageId = messageId;
+			this.senderId = senderId;
+			this.senderName = senderName;
+			this.message = message;
+			this.createdAt = createdAt;
+		}
+
+		public UUID getMessageId() { return messageId; }
+		public void setMessageId(UUID messageId) { this.messageId = messageId; }
+		
+		public UUID getSenderId() { return senderId; }
+		public void setSenderId(UUID senderId) { this.senderId = senderId; }
+		
+		public String getSenderName() { return senderName; }
+		public void setSenderName(String senderName) { this.senderName = senderName; }
+		
+		public String getMessage() { return message; }
+		public void setMessage(String message) { this.message = message; }
+		
+		public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+		public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
 	}
 }

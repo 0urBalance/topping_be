@@ -25,6 +25,22 @@
 - **Field Binding Errors**: Fixed mismatched field references (e.g., `th:field="*{imageUrl}"` changed to `th:field="*{thumbnailPath}"`)
 - **Null-Safety**: Implemented proper null checks for template expressions to prevent evaluation errors
 - **Expression Safety**: Use `${object != null and !#strings.isEmpty(object.field)}` pattern for safe null checking
+- **Entity Method Names**: Use `getUuid()` for all entities, not domain-specific names like `getUserId()` or `getRoomId()`
+
+## Frontend & JavaScript Issues
+
+### Mobile Navigation
+- **Hamburger Menu Not Working**: Fixed CSS width property and z-index issues
+- **Event Handler Conflicts**: Resolved by using dual approach (inline + JavaScript listeners)
+- **Touch Responsiveness**: Implemented proper mobile breakpoints and touch gesture support
+
+### Chat System
+- **WebSocket Library Missing**: Added SockJS and STOMP CDN libraries to chat templates
+- **Undefined User Errors**: Fixed null-safety issues in collaboration participant resolution
+- **Modern STOMP Client**: Updated from legacy STOMP syntax to modern `StompJs.Client`
+- **JSON Parse Errors**: Added content-type validation before parsing API responses
+
+**See:** [Mobile Navbar & Chat System Fixes](./MOBILE_NAVBAR_CHAT_FIXES.md) for detailed solutions
 
 ## Database & Connection Pool Issues
 

@@ -12,6 +12,7 @@ This directory contains comprehensive documentation for the Topping collaboratio
 - **[CSS Framework & UI System](./technical/css-framework.md)** - Complete UI framework guide
 - **[Multi-Image Upload System](./technical/image-upload.md)** - File upload infrastructure
 - **[Collaboration Forms](./technical/collaboration-forms.md)** - Dynamic form system
+- **[Chat System Integration](./technical/chat-system-integration.md)** - Real-time chat with automatic room creation
 - **[Frontend Optimization](./technical/frontend-optimization.md)** - Performance improvements
 - **[Database & Performance](./technical/database-performance.md)** - Connection pool & async config
 
