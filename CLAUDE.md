@@ -171,26 +171,31 @@ All repositories follow a consistent three-layer pattern:
 - **Dual Entity Support**: Works with both `Collaboration` and `CollaborationProposal` entities
 - **Service Layer Architecture**: `ChatService` handles room creation with duplicate prevention
 - **WebSocket Integration**: Real-time messaging using STOMP protocol over SockJS with modern client implementation
-- **Modern UI Design**: Horizontal layout with sidebar chat list and main chat panel
+- **Modern UI Design**: Unified single-page interface with sidebar chat list and main chat panel
 - **Search & Navigation**: Chat room search functionality and responsive design
-- **Route**: `/chat/rooms` displays chat interface with automatic room selection
+- **Route**: `/chat/rooms` displays complete chat interface with automatic room selection
 - **Repository Pattern**: Three-layer pattern with dual query support for participant lookup
 - **Integration Points**: Automatic chat creation in `CollaborationController` and `CollaborationProposalController`
+- **Immediate Message Display**: Real-time WebSocket broadcasting ensures messages appear instantly for all users
 
 ### Chat API Endpoints
 - **`GET /chat/room/{roomId}/data`**: Returns complete chat room data as JSON (room info, messages, participants) and auto-marks messages as read
-- **`POST /chat/message/send`**: Accepts JSON message requests with roomId and message content
-- **`GET /api/session/user`**: Returns current authenticated user information for chat UI
+- **`POST /chat/message/send`**: Accepts JSON message requests, saves to database, and broadcasts via WebSocket for immediate display
+- **`GET /api/session/user`**: Returns current authenticated user information wrapped in `ApiResponseData<SessionUserInfo>`
 - **WebSocket**: `/ws` endpoint with SockJS fallback and STOMP messaging to `/topic/chat/{roomId}`
+- **Real-time Broadcasting**: Uses `SimpMessagingTemplate` to broadcast messages immediately after saving to database
 - **Error Handling**: Comprehensive null-safety for collaboration participants and fallback user creation
 
 ### Chat UI & UX Features
+- **Unified Interface**: Single-page chat experience with proper room-based message loading and display
 - **Message Bubble Design**: Right-aligned bubbles for own messages (`.bubble.mine`), left-aligned for others (`.bubble.their`)
 - **Color Scheme**: Dark brown (`#6B3410`) for own messages with white text, light gray (`#f1f1f1`) for received messages with dark text
+- **Timestamp Display**: Korean-formatted time display (오전/오후 HH:mm) with date separators (오늘, 어제, YYYY년 MM월 DD일)
 - **Unread Message Badges**: Red circular badges (`#dc3545`) with count display, hidden when no unread messages
 - **Accessibility**: ARIA labels for screen readers (`aria-label="읽지 않은 메시지 N개"`), high contrast support
-- **Real-time Updates**: Auto-hide badges on room selection, immediate visual feedback for read status
-- **Responsive Design**: Mobile-optimized bubble sizing and badge positioning
+- **Real-time Updates**: Immediate message display with proper "mine" vs "their" alignment and WebSocket broadcasting
+- **Responsive Design**: Mobile-optimized bubble sizing, badge positioning, and CSS framework compliance
+- **Session Integration**: Proper user session handling with `ApiResponseData` wrapper extraction for UUID comparison
 
 ## Recent Status & Improvements
 - ✅ **Authentication System**: Migrated from JWT to session-based, fully stable
@@ -233,6 +238,11 @@ All repositories follow a consistent three-layer pattern:
 - ✅ **Unread Message System**: Red circular badges with real-time count tracking, automatic read status management, and ARIA labels for accessibility
 - ✅ **Message Read Tracking**: Database-level read/unread status with `ChatMessage.readAt` and `ChatMessage.isRead` fields
 - ✅ **Chat UX Improvements**: Auto-hide badges on room selection, proper message alignment (right for own, left for others), and enhanced visual feedback
+- ✅ **Chat System Refactoring**: Unified single-page interface, removed legacy Bootstrap template, modernized with CSS framework compliance
+- ✅ **Real-time Message Broadcasting**: Fixed immediate message display with `SimpMessagingTemplate` WebSocket broadcasting after database save
+- ✅ **Message Bubble Alignment**: Fixed "mine" vs "their" message styling with proper UUID comparison and session data extraction
+- ✅ **Timestamp Display Fix**: Korean-formatted timestamps (오전/오후 HH:mm) with robust date parsing and error handling
+- ✅ **Session Integration Enhancement**: Proper handling of `ApiResponseData<SessionUserInfo>` wrapper for accurate user identification
 
 ## Documentation Navigation
 
@@ -246,6 +256,7 @@ All repositories follow a consistent three-layer pattern:
 - **[Collaboration Received Page](./docs/technical/COLLABORATION_RECEIVED_PAGE.md)** - Dual collaboration system architecture
 - **[Chat System Integration](./docs/technical/chat-system-integration.md)** - Real-time chat with automatic room creation
 - **[Chat UI Enhancements](./docs/technical/chat-ui-enhancements.md)** - Message bubble design & unread message system
+- **[Chat Real-time Messaging](./docs/technical/chat-real-time-messaging.md)** - Unified interface, immediate message display, and WebSocket broadcasting
 - **[Frontend Optimization](./docs/technical/frontend-optimization.md)** - Performance improvements
 - **[Database & Performance](./docs/technical/database-performance.md)** - Connection pool & async config
 

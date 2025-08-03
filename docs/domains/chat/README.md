@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Chat Domain provides real-time messaging functionality with automatic chat room creation for collaboration partnerships. The system supports both legacy `Collaboration` and enhanced `CollaborationProposal` entities, creating seamless communication channels when business partnerships are established.
+The Chat Domain provides real-time messaging functionality with automatic chat room creation for collaboration partnerships. The system features a modern unified interface, immediate message display via WebSocket broadcasting, and comprehensive UI/UX enhancements. It supports both legacy `Collaboration` and enhanced `CollaborationProposal` entities, creating seamless communication channels when business partnerships are established.
 
 ## Domain Architecture
 
@@ -227,8 +227,8 @@ this.stompClient.connect({}, (frame) => {
 ## API Endpoints
 
 ### Chat Management (HTML Views)
-- `GET /chat/rooms` - Chat interface with room list
-- `GET /chat/room/{roomId}` - Individual chat room view
+- `GET /chat/rooms` - **Unified chat interface** with complete room list and message display
+- ~~`GET /chat/room/{roomId}`~~ - **Removed**: Legacy Bootstrap template eliminated in favor of unified interface
 - `POST /chat/room/create/{proposalId}` - Manual chat room creation
 
 ### JSON API Endpoints
@@ -274,6 +274,26 @@ Content-Type: application/json
 {
   "roomId": "uuid",
   "message": "string"
+}
+```
+
+**Enhanced Functionality:**
+- Accepts JSON message requests with roomId and message content
+- Saves message to database with sender, timestamp, and read tracking
+- **Real-time WebSocket Broadcasting**: Uses `SimpMessagingTemplate` to broadcast message immediately to `/topic/chat/{roomId}`
+- **Immediate Display**: Messages appear instantly for all connected users without page refresh
+- Returns standardized `ApiResponseData<MessageInfo>` response
+
+**WebSocket Broadcast Format:**
+```json
+{
+  "messageId": "uuid",
+  "sender": {
+    "uuid": "user-uuid",
+    "username": "username"  
+  },
+  "message": "Hello, world!",
+  "createdAt": "2025-08-01T12:30:45"
 }
 ```
 
@@ -335,6 +355,28 @@ GET /api/session/user
 #### Responsive Classes
 - Mobile breakpoint at `768px` with adjusted bubble sizing
 - High contrast media query support for accessibility
+
+### Recent UI/UX Enhancements (2025)
+
+#### Unified Interface Design
+- **Single-Page Experience**: Eliminated dual-page design in favor of unified `/chat/rooms` interface
+- **Legacy Removal**: Removed Bootstrap-based `/chat/room.html` template for CSS framework compliance
+- **Framework Consistency**: Uses only internal CSS files (base.css, navbar.css, chat.css) without external dependencies
+
+#### Message Display Improvements
+- **Proper Bubble Alignment**: Fixed "mine" vs "their" message positioning with flexbox layout
+- **Session Integration**: Enhanced user session handling with `ApiResponseData<SessionUserInfo>` wrapper extraction
+- **UUID Comparison**: Accurate sender identification for message styling (`messageData.sender?.uuid === this.currentUser?.uuid`)
+
+#### Timestamp & Date Display
+- **Korean Formatting**: Proper time display (오전/오후 HH:mm) with robust date parsing
+- **Date Separators**: Automatic grouping with "오늘", "어제", or "YYYY년 MM월 DD일" labels
+- **Error Handling**: Fallback messages for invalid timestamps with comprehensive debugging
+
+#### Real-time Message Flow
+- **Immediate Display**: Messages appear instantly via WebSocket broadcasting after database save
+- **Broadcast Architecture**: `SimpMessagingTemplate` integration ensures all room participants see messages immediately
+- **Debugging Support**: Comprehensive console logging for troubleshooting message flow and alignment issues
 
 ## Performance Considerations
 
