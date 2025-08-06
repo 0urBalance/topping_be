@@ -142,10 +142,54 @@ class ChatInterface {
                     </div>
                 </div>
                 <div class="chat-header-actions">
-                    <button class="proposal-btn" onclick="viewProposal('${chatData.collaborationId}')">
+                    <button class="proposal-btn" id="toggleProposalBtn" onclick="chatInterface.toggleProposalPanel()">
                         <span class="material-symbols-outlined">description</span>
                         제안서 보기
                     </button>
+                </div>
+            </div>
+            
+            <!-- Proposal Panel -->
+            <div class="proposal-panel" id="proposalPanel" style="display: none;">
+                <div class="proposal-panel-header">
+                    <h4>제안서</h4>
+                    <button class="close-btn" onclick="chatInterface.toggleProposalPanel()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="proposal-panel-content">
+                    <div class="proposal-info">
+                        <div class="proposal-images">
+                            <img src="/api/placeholder/200/150" alt="업종 이미지" class="proposal-image">
+                            <img src="/api/placeholder/200/150" alt="상품 이미지" class="proposal-image">
+                        </div>
+                        <div class="proposal-details">
+                            <div class="proposal-field">
+                                <label>업종</label>
+                                <span>음식점</span>
+                            </div>
+                            <div class="proposal-field">
+                                <label>상품</label>
+                                <span>a개 치킨<br>b개 맥주</span>
+                            </div>
+                            <div class="proposal-field">
+                                <label>수익 배분 구조</label>
+                                <span>???</span>
+                            </div>
+                            <div class="proposal-field">
+                                <label>콜라보 진행 기간</label>
+                                <span>1개월</span>
+                            </div>
+                            <div class="proposal-field">
+                                <label>콜라보 장소</label>
+                                <span>각자 필림</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proposal-actions">
+                        <button class="proposal-action-btn reject-btn">제안하기</button>
+                        <button class="proposal-action-btn accept-btn">수락하기</button>
+                    </div>
                 </div>
             </div>
             
@@ -491,6 +535,34 @@ class ChatInterface {
         div.textContent = text;
         return div.innerHTML;
     }
+    
+    toggleProposalPanel() {
+        const panel = document.getElementById('proposalPanel');
+        const toggleBtn = document.getElementById('toggleProposalBtn');
+        
+        if (!panel || !toggleBtn) return;
+        
+        const isVisible = panel.style.display !== 'none';
+        
+        if (isVisible) {
+            // Hide panel
+            panel.style.display = 'none';
+            toggleBtn.innerHTML = `
+                <span class="material-symbols-outlined">description</span>
+                제안서 보기
+            `;
+        } else {
+            // Show panel
+            panel.style.display = 'block';
+            toggleBtn.innerHTML = `
+                <span class="material-symbols-outlined">close</span>
+                제안서 닫기
+            `;
+        }
+        
+        // Scroll chat body to accommodate panel
+        this.scrollToBottom();
+    }
 }
 
 // Utility function for debouncing
@@ -506,10 +578,12 @@ function debounce(func, wait) {
     };
 }
 
-// Global function for viewing proposals
+// Legacy function - now replaced by ChatInterface.toggleProposalPanel()
+// Kept for backward compatibility if needed
 function viewProposal(collaborationId) {
-    // Open proposal in modal or new page
-    window.open(`/proposals/${collaborationId}`, '_blank');
+    if (window.chatInterface) {
+        window.chatInterface.toggleProposalPanel();
+    }
 }
 
 // Initialize chat interface when DOM is loaded
