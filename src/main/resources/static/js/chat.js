@@ -40,6 +40,16 @@ class ChatInterface {
                 this.sendMessage();
             }
         });
+        
+        // Proposal action buttons
+        document.addEventListener('click', async (e) => {
+            if (e.target.id === 'btn-proposal-submit') {
+                await this.handleProposalSubmit();
+            }
+            if (e.target.id === 'btn-proposal-accept') {
+                await this.handleProposalAccept();
+            }
+        });
     }
     
     setupSearch() {
@@ -149,48 +159,61 @@ class ChatInterface {
                 </div>
             </div>
             
-            <!-- Proposal Panel -->
-            <div class="proposal-panel" id="proposalPanel" style="display: none;">
-                <div class="proposal-panel-header">
-                    <h4>제안서</h4>
-                    <button class="close-btn" onclick="chatInterface.toggleProposalPanel()">
-                        <span class="material-symbols-outlined">close</span>
+            <!-- Proposal Panel (Right Drawer) -->
+            <div class="proposal-panel" id="proposalPanel" aria-hidden="true">
+              <div class="proposal-sheet">
+                <header class="proposal-sheet-header">
+                  <h4 class="proposal-title">제안서</h4>
+                  <div class="proposal-header-actions">
+                    <button class="icon-btn" id="proposalEditBtn" aria-label="편집">
+                      <span class="material-symbols-outlined">edit</span>
                     </button>
-                </div>
+                    <button class="icon-btn" id="proposalCloseBtn" aria-label="닫기" onclick="chatInterface.toggleProposalPanel()">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                </header>
+
                 <div class="proposal-panel-content">
-                    <div class="proposal-info">
-                        <div class="proposal-images">
-                            <img src="/api/placeholder/200/150" alt="업종 이미지" class="proposal-image">
-                            <img src="/api/placeholder/200/150" alt="상품 이미지" class="proposal-image">
-                        </div>
-                        <div class="proposal-details">
-                            <div class="proposal-field">
-                                <label>업종</label>
-                                <span>음식점</span>
-                            </div>
-                            <div class="proposal-field">
-                                <label>상품</label>
-                                <span>a개 치킨<br>b개 맥주</span>
-                            </div>
-                            <div class="proposal-field">
-                                <label>수익 배분 구조</label>
-                                <span>???</span>
-                            </div>
-                            <div class="proposal-field">
-                                <label>콜라보 진행 기간</label>
-                                <span>1개월</span>
-                            </div>
-                            <div class="proposal-field">
-                                <label>콜라보 장소</label>
-                                <span>각자 필림</span>
-                            </div>
-                        </div>
+                  <div class="proposal-photos">
+                    <img src="/image/sample_food.jpg" alt="상품 이미지 1" class="proposal-photo">
+                    <img src="/image/sample_beer.jpg" alt="상품 이미지 2" class="proposal-photo">
+                  </div>
+
+                  <div class="proposal-form">
+                    <div class="field-row">
+                      <label class="field-label">업종</label>
+                      <input class="field-input" id="p-industry" placeholder="음식점" value="음식점">
                     </div>
-                    <div class="proposal-actions">
-                        <button class="proposal-action-btn reject-btn">제안하기</button>
-                        <button class="proposal-action-btn accept-btn">수락하기</button>
+
+                    <div class="field-row">
+                      <label class="field-label">상품</label>
+                      <textarea class="field-input" id="p-products" rows="2" placeholder="예: a가게 치킨 + b가게 맥주">a가게 치킨
+b가게 맥주</textarea>
                     </div>
+
+                    <div class="field-row">
+                      <label class="field-label">수익 배분 구조</label>
+                      <input class="field-input" id="p-share" placeholder="예: 5:5"> 
+                    </div>
+
+                    <div class="field-row">
+                      <label class="field-label">콜라보 진행 기간</label>
+                      <input class="field-input" id="p-duration" placeholder="예: 1개월" value="1개월">
+                    </div>
+
+                    <div class="field-row">
+                      <label class="field-label">콜라보 장소</label>
+                      <input class="field-input" id="p-place" placeholder="예: 각자 픽업" value="각각 픽업">
+                    </div>
+                  </div>
                 </div>
+
+                <footer class="proposal-sheet-footer">
+                  <button class="btn btn-outline" id="btn-proposal-submit">제안하기</button>
+                  <button class="btn btn-solid" id="btn-proposal-accept">수락하기</button>
+                </footer>
+              </div>
             </div>
             
             <div class="chat-body" id="chatBody">
@@ -539,29 +562,73 @@ class ChatInterface {
     toggleProposalPanel() {
         const panel = document.getElementById('proposalPanel');
         const toggleBtn = document.getElementById('toggleProposalBtn');
-        
         if (!panel || !toggleBtn) return;
-        
-        const isVisible = panel.style.display !== 'none';
-        
-        if (isVisible) {
-            // Hide panel
-            panel.style.display = 'none';
-            toggleBtn.innerHTML = `
-                <span class="material-symbols-outlined">description</span>
-                제안서 보기
-            `;
-        } else {
-            // Show panel
-            panel.style.display = 'block';
-            toggleBtn.innerHTML = `
-                <span class="material-symbols-outlined">close</span>
-                제안서 닫기
-            `;
+
+        const willOpen = !panel.classList.contains('open');
+
+        panel.classList.toggle('open', willOpen);
+        panel.setAttribute('aria-hidden', String(!willOpen));
+        toggleBtn.setAttribute('aria-expanded', String(willOpen));
+        toggleBtn.innerHTML = willOpen
+            ? `<span class="material-symbols-outlined">close</span> 제안서 닫기`
+            : `<span class="material-symbols-outlined">description</span> 제안서 보기`;
+
+        // Focusing & scrolling
+        if (willOpen) {
+            requestAnimationFrame(() => document.getElementById('p-industry')?.focus());
         }
-        
-        // Scroll chat body to accommodate panel
         this.scrollToBottom();
+    }
+    
+    async handleProposalSubmit() {
+        const payload = {
+            roomId: this.selectedRoomId,
+            industry: document.getElementById('p-industry')?.value,
+            products: document.getElementById('p-products')?.value,
+            share: document.getElementById('p-share')?.value,
+            duration: document.getElementById('p-duration')?.value,
+            place: document.getElementById('p-place')?.value,
+        };
+        
+        try {
+            const response = await fetch('/api/proposals', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload) 
+            });
+            
+            if (response.ok) {
+                this.showError('제안서가 전송되었습니다.');
+                this.toggleProposalPanel();
+            } else {
+                this.showError('제안서 전송에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error submitting proposal:', error);
+            this.showError('제안서 전송 중 오류가 발생했습니다.');
+        }
+    }
+    
+    async handleProposalAccept() {
+        const payload = { roomId: this.selectedRoomId };
+        
+        try {
+            const response = await fetch('/api/proposals/accept', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload) 
+            });
+            
+            if (response.ok) {
+                this.showError('제안서를 수락했습니다.');
+                this.toggleProposalPanel();
+            } else {
+                this.showError('제안서 수락에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error accepting proposal:', error);
+            this.showError('제안서 수락 중 오류가 발생했습니다.');
+        }
     }
 }
 

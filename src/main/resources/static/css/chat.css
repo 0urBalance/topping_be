@@ -241,6 +241,11 @@
     position: relative;
 }
 
+/* Parent positioning for right drawer */
+#chatMain { 
+    position: relative; 
+}
+
 /* Chat Placeholder */
 .chat-placeholder {
     flex: 1;
@@ -574,188 +579,188 @@
     font-size: 20px;
 }
 
-/* Proposal Panel */
+/* Proposal Panel - Right Drawer */
 .proposal-panel {
-    background: #6B3410;
-    color: white;
-    border-radius: 12px;
-    margin: 16px 24px;
-    max-height: 400px;
+    position: absolute;
+    inset: 0 0 0 auto;        /* top:0; right:0; bottom:0 */
+    width: 380px;             /* 360~420px 사이 취향대로 */
+    transform: translateX(100%);
+    transition: transform .25s ease;
+    z-index: 5;
+    pointer-events: none;     /* 닫혀 있을 때 클릭 막기 */
+}
+
+/* 실제 시트 */
+.proposal-sheet {
+    height: 100%;
+    background: #ffffff;
+    border-left: 1px solid #E9E2DC;
+    box-shadow: -10px 0 30px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    animation: slideDown 0.3s ease-out;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-        max-height: 0;
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 400px;
-    }
+/* 열림 상태 */
+.proposal-panel.open {
+    transform: translateX(0);
+    pointer-events: auto;
 }
 
-.proposal-panel-header {
-    display: flex;
-    align-items: center;
+/* 헤더 */
+.proposal-sheet-header {
+    display: flex; 
+    align-items: center; 
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 18px 16px 10px 16px;
 }
 
-.proposal-panel-header h4 {
-    font-size: 16px;
-    font-weight: 600;
+.proposal-title { 
+    font-size: 22px; 
+    font-weight: 800; 
+    color: #1a1a1a;
     margin: 0;
-    color: white;
 }
 
-.close-btn {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-}
-
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.close-btn .material-symbols-outlined {
-    font-size: 20px;
-}
-
-.proposal-panel-content {
-    padding: 20px;
-    max-height: 320px;
-    overflow-y: auto;
-}
-
-.proposal-info {
-    margin-bottom: 20px;
-}
-
-.proposal-images {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-    justify-content: center;
-}
-
-.proposal-image {
-    width: 80px;
-    height: 60px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.proposal-details {
-    display: grid;
-    gap: 12px;
-}
-
-.proposal-field {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.proposal-field:last-child {
-    border-bottom: none;
-}
-
-.proposal-field label {
-    font-size: 14px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
-    min-width: 100px;
-    text-align: left;
-}
-
-.proposal-field span {
-    font-size: 14px;
-    font-weight: 400;
-    color: white;
-    text-align: right;
-    flex: 1;
-    margin-left: 16px;
-}
-
-.proposal-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.proposal-action-btn {
-    flex: 1;
-    max-width: 120px;
-    padding: 10px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
+.proposal-header-actions .icon-btn {
+    border: 0; 
+    background: transparent; 
+    cursor: pointer; 
+    padding: 6px; 
+    border-radius: 10px;
+    color: #666;
     transition: all 0.2s ease;
-    text-align: center;
 }
 
-.proposal-action-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
+.proposal-header-actions .icon-btn:hover {
+    background: #f8f9fa;
+    color: #333;
 }
 
-.proposal-action-btn.accept-btn {
-    background: rgba(40, 167, 69, 0.8);
-    border-color: rgba(40, 167, 69, 0.8);
+/* 콘텐츠 */
+.proposal-panel-content { 
+    padding: 8px 16px 0 16px; 
+    overflow: auto; 
+    flex: 1;
 }
 
-.proposal-action-btn.accept-btn:hover {
-    background: rgba(40, 167, 69, 1);
-    border-color: rgba(40, 167, 69, 1);
+/* 이미지 두 장 나란히 */
+.proposal-photos {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px;
+    margin: 8px 0 14px 0;
 }
 
-.proposal-action-btn.reject-btn {
-    background: rgba(108, 117, 125, 0.8);
-    border-color: rgba(108, 117, 125, 0.8);
+.proposal-photo {
+    width: 100%; 
+    height: 120px; 
+    object-fit: cover; 
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
 }
 
-.proposal-action-btn.reject-btn:hover {
-    background: rgba(108, 117, 125, 1);
-    border-color: rgba(108, 117, 125, 1);
+/* 폼 영역 */
+.proposal-form { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
 }
 
-/* Buttons */
-.btn {
-    display: inline-flex;
+.field-row { 
+    display: grid; 
+    grid-template-columns: 110px 1fr; 
+    align-items: center; 
+    gap: 12px;
+}
+
+.field-label { 
+    color: #6A615B; 
+    font-size: 14px; 
+    font-weight: 500;
+}
+
+.field-input {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #E9E2DC;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: #333;
+    transition: border-color 0.2s ease;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #8B4513);
+}
+
+.field-input::placeholder {
+    color: #999;
+}
+
+/* 푸터 버튼 */
+.proposal-sheet-footer {
+    margin-top: auto;
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px;
+    padding: 12px 16px 16px 16px;
+    background: #fff;
+    border-top: 1px solid #F1EBE7;
+    flex-shrink: 0;
+}
+
+.btn { 
+    height: 44px; 
+    border-radius: 12px; 
+    font-weight: 600; 
+    border: 1px solid transparent; 
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    gap: 8px;
 }
 
+.btn-outline { 
+    background: #fff; 
+    border-color: #A07A63; 
+    color: #6C4E3E;
+}
+
+.btn-outline:hover {
+    background: #f8f9fa;
+    border-color: #8E654D;
+}
+
+.btn-solid { 
+    background: #8E654D; 
+    color: #fff;
+    border-color: #8E654D;
+}
+
+.btn-solid:hover {
+    background: #6B3410;
+    border-color: #6B3410;
+}
+
+.btn:disabled { 
+    opacity: .6; 
+    cursor: not-allowed; 
+}
+
+/* 아이콘 크기 조정 */
+.material-symbols-outlined { 
+    font-size: 22px; 
+    vertical-align: middle; 
+}
+
+/* Legacy button styles for compatibility */
 .btn-primary {
     background: var(--primary-color, #8B4513);
     color: white;
@@ -763,17 +768,6 @@
 
 .btn-primary:hover {
     background: var(--primary-color-dark, #6B3410);
-    color: white;
-}
-
-.btn-outline {
-    background: transparent;
-    color: var(--primary-color, #8B4513);
-    border: 1px solid var(--primary-color, #8B4513);
-}
-
-.btn-outline:hover {
-    background: var(--primary-color, #8B4513);
     color: white;
 }
 
@@ -808,51 +802,51 @@
         max-width: 90%;
     }
     
-    /* Proposal Panel Responsive */
+    /* Proposal Panel Responsive - Mobile Drawer */
     .proposal-panel {
-        margin: 12px 16px;
-        max-height: 350px;
+        width: 100%;
+        inset: 0;
     }
     
-    .proposal-panel-content {
-        padding: 16px;
-        max-height: 270px;
+    .proposal-sheet {
+        border-radius: 0;
+        border-left: none;
+        border-top: 1px solid #E9E2DC;
     }
     
-    .proposal-images {
-        flex-direction: column;
-        align-items: center;
+    .proposal-photos {
+        grid-template-columns: 1fr;
         gap: 8px;
     }
     
-    .proposal-image {
-        width: 100px;
-        height: 75px;
+    .proposal-photo {
+        height: 100px;
     }
     
-    .proposal-field {
-        flex-direction: column;
+    .field-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
         align-items: stretch;
-        gap: 4px;
     }
     
-    .proposal-field label {
-        min-width: auto;
-        text-align: left;
+    .field-label {
+        font-size: 13px;
     }
     
-    .proposal-field span {
-        text-align: left;
-        margin-left: 0;
+    .field-input {
+        padding: 8px 10px;
+        font-size: 14px;
     }
     
-    .proposal-actions {
-        flex-direction: column;
+    .proposal-sheet-footer {
+        grid-template-columns: 1fr;
         gap: 8px;
+        padding: 16px;
     }
     
-    .proposal-action-btn {
-        max-width: none;
+    .btn {
+        height: 40px;
+        font-size: 14px;
     }
 }
 
