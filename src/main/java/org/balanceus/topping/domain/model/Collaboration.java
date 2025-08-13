@@ -1,14 +1,18 @@
 package org.balanceus.topping.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -32,27 +36,44 @@ public class Collaboration {
 	@UuidGenerator
 	private UUID uuid;
 
-	@ManyToOne
-	@JoinColumn(name = "product_uuid")
-	private Product product;
+	// Initiating and partner stores
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "initiator_store_uuid")
+	private Store initiatorStore;
 
-	@ManyToOne
-	@JoinColumn(name = "applicant_uuid")
-	private User applicant;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "partner_store_uuid")
+	private Store partnerStore;
 
-	@ManyToOne
-	@JoinColumn(name = "applicant_product_uuid")
-	private Product applicantProduct;
+	// Products from each store
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "initiator_product_uuid")
+	private Product initiatorProduct;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "partner_product_uuid")
+	private Product partnerProduct;
+
+	// Period and status
+	private LocalDate startDate;
+	private LocalDate endDate;
 
 	@Enumerated(EnumType.STRING)
 	private CollaborationStatus status;
 
-	private String message;
+	// Meta
+	private String title;
+
+	@Column(length = 2000)
+	private String description;
 
 	@CreationTimestamp
-	private LocalDateTime createdAt;
+	private Instant createdAt;
+
+	@UpdateTimestamp
+	private Instant updatedAt;
 
 	public enum CollaborationStatus {
-		PENDING, ACCEPTED, REJECTED
+		PENDING, ACCEPTED, REJECTED, CANCELLED, ENDED
 	}
 }

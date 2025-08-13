@@ -1,6 +1,7 @@
 package org.balanceus.topping.infrastructure.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Collaboration;
@@ -16,18 +17,37 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CollaborationJpaRepository extends JpaRepository<Collaboration, UUID> {
 	
-	List<Collaboration> findByProduct(Product product);
-	
-	List<Collaboration> findByApplicant(User applicant);
-	
 	List<Collaboration> findByStatus(CollaborationStatus status);
 	
-	@Query("SELECT c FROM Collaboration c WHERE c.product.creator = :creator")
-	List<Collaboration> findByProductCreator(@Param("creator") User creator);
+	List<Collaboration> findByInitiatorStore(Store initiatorStore);
 	
-	@Query("SELECT c FROM Collaboration c WHERE c.applicant = :user OR c.product.creator = :user")
-	List<Collaboration> findByParticipant(@Param("user") User user);
+	List<Collaboration> findByPartnerStore(Store partnerStore);
 	
-	@Query("SELECT c FROM Collaboration c WHERE c.product.store = :store AND c.status = :status")
-	List<Collaboration> findByProductStoreAndStatus(@Param("store") Store store, @Param("status") CollaborationStatus status);
+	@Query("SELECT c FROM Collaboration c WHERE c.initiatorStore = :store1 OR c.partnerStore = :store2")
+	List<Collaboration> findByInitiatorStoreOrPartnerStore(@Param("store1") Store store1, @Param("store2") Store store2);
+	
+	List<Collaboration> findByInitiatorProduct(Product initiatorProduct);
+	
+	List<Collaboration> findByPartnerProduct(Product partnerProduct);
+	
+	@Query("SELECT c FROM Collaboration c WHERE c.initiatorProduct = :product1 OR c.partnerProduct = :product2")
+	List<Collaboration> findByInitiatorProductOrPartnerProduct(@Param("product1") Product product1, @Param("product2") Product product2);
+	
+	@Query("SELECT c FROM Collaboration c WHERE c.initiatorStore = :initiatorStore AND c.partnerStore = :partnerStore AND c.initiatorProduct = :initiatorProduct AND c.partnerProduct = :partnerProduct")
+	List<Collaboration> findByStoresAndProducts(@Param("initiatorStore") Store initiatorStore, 
+												@Param("partnerStore") Store partnerStore,
+												@Param("initiatorProduct") Product initiatorProduct, 
+												@Param("partnerProduct") Product partnerProduct);
+	
+	@Query("SELECT c FROM Collaboration c WHERE (c.initiatorStore = :store OR c.partnerStore = :store) AND c.status = :status")
+	List<Collaboration> findByStoreAndStatus(@Param("store") Store store, @Param("status") CollaborationStatus status);
+	
+	@Query("SELECT c FROM Collaboration c WHERE c.initiatorStore = :store OR c.partnerStore = :store")
+	List<Collaboration> findByStoreParticipation(@Param("store") Store store);
+	
+	@Query("SELECT c FROM Collaboration c WHERE ((c.initiatorStore = :store1 AND c.partnerStore = :store2) OR (c.initiatorStore = :store2 AND c.partnerStore = :store1)) AND ((c.initiatorProduct = :product1 AND c.partnerProduct = :product2) OR (c.initiatorProduct = :product2 AND c.partnerProduct = :product1)) AND c.status IN ('PENDING', 'ACCEPTED')")
+	Optional<Collaboration> findActiveCollaborationBetweenStoresAndProducts(@Param("store1") Store store1, 
+																			@Param("store2") Store store2,
+																			@Param("product1") Product product1, 
+																			@Param("product2") Product product2);
 }

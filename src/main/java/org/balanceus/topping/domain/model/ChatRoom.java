@@ -49,18 +49,32 @@ public class ChatRoom {
 
 	public User getFirstParticipant() {
 		if (collaborationProposal != null) {
-			return collaborationProposal.getProposer();
+			// For proposals, return the proposer user or the owner of the proposer store
+			if (collaborationProposal.getProposerUser() != null) {
+				return collaborationProposal.getProposerUser();
+			} else if (collaborationProposal.getProposerStore() != null) {
+				return collaborationProposal.getProposerStore().getUser();
+			}
 		} else if (collaboration != null) {
-			return collaboration.getApplicant();
+			// For collaborations, return the owner of the initiator store
+			if (collaboration.getInitiatorStore() != null) {
+				return collaboration.getInitiatorStore().getUser();
+			}
 		}
 		return null;
 	}
 
 	public User getSecondParticipant() {
 		if (collaborationProposal != null) {
-			return collaborationProposal.getTargetBusinessOwner();
+			// For proposals, return the owner of the target store
+			if (collaborationProposal.getTargetStore() != null) {
+				return collaborationProposal.getTargetStore().getUser();
+			}
 		} else if (collaboration != null) {
-			return collaboration.getProduct().getCreator();
+			// For collaborations, return the owner of the partner store
+			if (collaboration.getPartnerStore() != null) {
+				return collaboration.getPartnerStore().getUser();
+			}
 		}
 		return null;
 	}
@@ -74,9 +88,11 @@ public class ChatRoom {
 
 	public String getCollaborationTitle() {
 		if (collaborationProposal != null) {
-			return collaborationProposal.getTitle();
+			return collaborationProposal.getTitle() != null ? 
+				collaborationProposal.getTitle() : "협업 제안";
 		} else if (collaboration != null) {
-			return collaboration.getProduct().getName() + " 협업";
+			return collaboration.getTitle() != null ? 
+				collaboration.getTitle() : "협업 채팅";
 		}
 		return "채팅방";
 	}

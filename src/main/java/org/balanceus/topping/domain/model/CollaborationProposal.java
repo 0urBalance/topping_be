@@ -1,19 +1,23 @@
 package org.balanceus.topping.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,40 +37,51 @@ public class CollaborationProposal {
 	@UuidGenerator
 	private UUID uuid;
 
+	@Enumerated(EnumType.STRING)
+	private ProposalSource source;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "proposer_user_uuid")
+	private User proposerUser;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "proposer_store_uuid")
+	private Store proposerStore;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "target_store_uuid")
+	private Store targetStore;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "proposer_product_uuid")
+	private Product proposerProduct;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "target_product_uuid")
+	private Product targetProduct;
+
+	private LocalDate proposedStart;
+	private LocalDate proposedEnd;
+
 	private String title;
 
+	@Column(length = 2000)
 	private String description;
 
-	private String category;
-
-	@ManyToOne
-	@JoinColumn(name = "proposer_uuid")
-	private User proposer;
-
-	@ManyToOne
-	@JoinColumn(name = "target_business_owner_uuid")
-	private User targetBusinessOwner;
-
 	@Enumerated(EnumType.STRING)
-	private ProposalStatus status;
-
-	private String revenueSharePreference;
-
-	private LocalDateTime startDate;
-
-	private LocalDateTime endDate;
-
-	private String promotionalMedia;
-
-	private Integer trendScore;
+	private CollaborationStatus status;
 
 	@CreationTimestamp
-	private LocalDateTime createdAt;
+	private Instant createdAt;
 
 	@UpdateTimestamp
-	private LocalDateTime updatedAt;
+	private Instant updatedAt;
 
-	public enum ProposalStatus {
-		PENDING, ACCEPTED, REJECTED, LIVE
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "collaboration_uuid")
+	private Collaboration collaboration;
+
+	public enum CollaborationStatus {
+		PENDING, ACCEPTED, REJECTED, CANCELLED, ENDED
 	}
 }

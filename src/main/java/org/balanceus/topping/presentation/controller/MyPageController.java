@@ -5,13 +5,11 @@ import java.util.List;
 
 import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
-import org.balanceus.topping.domain.model.CollaborationProduct;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
-import org.balanceus.topping.domain.repository.CollaborationProductRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.application.service.ProductService;
@@ -35,7 +33,6 @@ public class MyPageController {
 	private final CollaborationProposalRepository proposalRepository;
 	private final CollaborationRepository collaborationRepository;
 	private final ProductService productService;
-	private final CollaborationProductRepository collaborationProductRepository;
 	private final ChatRoomRepository chatRoomRepository;
 	private final StoreRepository storeRepository;
 
@@ -52,13 +49,25 @@ public class MyPageController {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
-		log.debug("User found: {}", user.getEmail());
+		log.debug("User found: {} with UUID: {}", user.getEmail(), user.getUuid());
 
-		// Get user's proposals
-		List<CollaborationProposal> proposals = proposalRepository.findByProposer(user);
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		log.debug("User store: {}", userStore != null ? userStore.getUuid() : "null");
+
+		// Get user's proposals (both as user and store owner)
+		List<CollaborationProposal> proposals = proposalRepository.findByProposerUser(user);
+		log.debug("Found {} proposals by proposer user: {}", proposals.size(), user.getUuid());
+		if (userStore != null) {
+			List<CollaborationProposal> storeProposals = proposalRepository.findByProposerStore(userStore);
+			log.debug("Found {} proposals by proposer store: {}", storeProposals.size(), userStore.getUuid());
+			proposals.addAll(storeProposals);
+		}
+		log.debug("Total proposals for user: {}", proposals.size());
 		
 		// Get user's collaboration applications (submitted via apply form)
-		List<Collaboration> myApplications = collaborationRepository.findByApplicant(user);
+		List<Collaboration> myApplications = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
 		
 		// Get ongoing collaborations (accepted applications by user)
 		List<Collaboration> ongoingCollaborations = myApplications.stream()
@@ -73,23 +82,32 @@ public class MyPageController {
 				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.PENDING)
 				.toList();
 		
-		// Get collaborations where user is the product owner (received applications)
-		List<Collaboration> receivedApplications = collaborationRepository.findByProductCreator(user);
+		// Get collaborations where user's store is involved (received applications)
+		List<Collaboration> receivedApplications = userStore != null ? 
+			collaborationRepository.findByStoreAndStatus(userStore, Collaboration.CollaborationStatus.PENDING) : List.of();
 		
-		// Get collaboration proposals where user is the target business owner
-		List<CollaborationProposal> receivedProposals = proposalRepository.findByTargetBusinessOwner(user);
+		// Get collaboration proposals where user's store is the target
+		List<CollaborationProposal> receivedProposals = userStore != null ? 
+			proposalRepository.findByTargetStore(userStore) : List.of();
+		
+		// Also include proposals with null target store (general proposals for business owners)
+		if (userStore != null) {
+			List<CollaborationProposal> generalProposals = proposalRepository.findByTargetStoreIsNull();
+			log.debug("Found {} general proposals (null target store)", generalProposals.size());
+			receivedProposals.addAll(generalProposals);
+		}
+		log.debug("Total received proposals: {}", receivedProposals.size());
 		
 		// Get user's registered products
 		List<Product> myProducts = productService.getProductsByCreator(user.getUuid());
 		
-		// Get user's collaboration products
-		List<CollaborationProduct> myCollaborationProducts = collaborationProductRepository.findAll();
+		// Get user's collaboration products (COLLABORATION type products)
+		List<Product> myCollaborationProducts = myProducts.stream()
+			.filter(p -> p.getProductType() == Product.ProductType.COLLABORATION)
+			.toList();
 		
 		// Get active chat rooms
 		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
-
-		// Get user's store if exists
-		Store userStore = storeRepository.findByUser(user).orElse(null);
 
 		// Calculate statistics
 		int proposalCount = proposals.size();
@@ -105,7 +123,7 @@ public class MyPageController {
 				.mapToInt(collab -> collab.getStatus() == Collaboration.CollaborationStatus.PENDING ? 1 : 0)
 				.sum() + 
 				receivedProposals.stream()
-				.mapToInt(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.PENDING ? 1 : 0)
+				.mapToInt(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.PENDING ? 1 : 0)
 				.sum();
 
 		model.addAttribute("user", user);
@@ -195,18 +213,23 @@ public class MyPageController {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
-		// Get user's proposals
-		List<CollaborationProposal> proposals = proposalRepository.findByProposer(user);
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		
+		// Get user's proposals (both as user and store owner)
+		List<CollaborationProposal> proposals = proposalRepository.findByProposerUser(user);
+		if (userStore != null) {
+			proposals.addAll(proposalRepository.findByProposerStore(userStore));
+		}
 		
 		// Get user's collaboration applications (submitted via apply form)
-		List<Collaboration> myApplications = collaborationRepository.findByApplicant(user);
+		List<Collaboration> myApplications = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
 		
 		// Get collaborations where user is involved
 		List<CollaborationProposal> acceptedCollaborations = proposalRepository
-				.findByStatus(CollaborationProposal.ProposalStatus.ACCEPTED);
+				.findByStatus(CollaborationProposal.CollaborationStatus.ACCEPTED);
 		
-		// Get user's collaboration products
-		List<CollaborationProduct> myCollaborationProducts = collaborationProductRepository.findAll();
 		
 		// Get active chat rooms
 		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
@@ -214,7 +237,6 @@ public class MyPageController {
 		model.addAttribute("proposals", proposals);
 		model.addAttribute("myApplications", myApplications);
 		model.addAttribute("acceptedCollaborations", acceptedCollaborations);
-		model.addAttribute("myCollaborationProducts", myCollaborationProducts);
 		model.addAttribute("activeChatRooms", activeChatRooms);
 		return "mypage/collabos";
 	}
@@ -231,11 +253,18 @@ public class MyPageController {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		
 		// Get user's collaboration applications (submitted via apply form)
-		List<Collaboration> myApplications = collaborationRepository.findByApplicant(user);
+		List<Collaboration> myApplications = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
 		
 		// Get user's collaboration proposals (submitted via new enhanced form)
-		List<CollaborationProposal> myProposals = proposalRepository.findByProposer(user);
+		List<CollaborationProposal> myProposals = proposalRepository.findByProposerUser(user);
+		if (userStore != null) {
+			myProposals.addAll(proposalRepository.findByProposerStore(userStore));
+		}
 		
 		// Separate by status
 		List<Collaboration> pendingApplications = myApplications.stream()
@@ -252,15 +281,15 @@ public class MyPageController {
 		
 		// Separate proposals by status
 		List<CollaborationProposal> pendingProposals = myProposals.stream()
-				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.PENDING)
+				.filter(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.PENDING)
 				.toList();
 		
 		List<CollaborationProposal> acceptedProposals = myProposals.stream()
-				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.ACCEPTED)
+				.filter(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.ACCEPTED)
 				.toList();
 		
 		List<CollaborationProposal> rejectedProposals = myProposals.stream()
-				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.REJECTED)
+				.filter(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.REJECTED)
 				.toList();
 
 		model.addAttribute("myApplications", myApplications);
@@ -289,17 +318,20 @@ public class MyPageController {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		
 		// Get user's accepted collaboration applications
-		List<Collaboration> myApplications = collaborationRepository.findByApplicant(user);
+		List<Collaboration> myApplications = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
 		List<Collaboration> ongoingCollaborations = myApplications.stream()
 				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.ACCEPTED)
 				.toList();
 		
-		// Get collaborations where user is the product owner and accepted
-		List<Collaboration> receivedApplications = collaborationRepository.findByProductCreator(user);
-		List<Collaboration> acceptedReceivedApplications = receivedApplications.stream()
-				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.ACCEPTED)
-				.toList();
+		// Get collaborations where user's store is involved and accepted
+		List<Collaboration> acceptedReceivedApplications = userStore != null ?
+			collaborationRepository.findByStoreAndStatus(userStore, Collaboration.CollaborationStatus.ACCEPTED) :
+			List.of();
 		
 		// Get active chat rooms
 		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
@@ -323,10 +355,22 @@ public class MyPageController {
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
 		// Get collaborations where user is the product owner (received applications)
-		List<Collaboration> receivedApplications = collaborationRepository.findByProductCreator(user);
+		// Get user's store and find collaborations involving their store
+		Store userStore2 = storeRepository.findByUser(user).orElse(null);
+		List<Collaboration> receivedApplications = userStore2 != null ? 
+			collaborationRepository.findByStoreParticipation(userStore2) : List.of();
 		
 		// Get collaboration proposals where user is the target business owner
-		List<CollaborationProposal> receivedProposals = proposalRepository.findByTargetBusinessOwner(user);
+		List<CollaborationProposal> receivedProposals = userStore2 != null ? 
+			proposalRepository.findByTargetStore(userStore2) : List.of();
+		
+		// Also include general proposals (null target store) for business owners  
+		if (userStore2 != null) {
+			List<CollaborationProposal> generalProposals = proposalRepository.findByTargetStoreIsNull();
+			log.debug("Found {} general proposals for received page", generalProposals.size());
+			receivedProposals.addAll(generalProposals);
+		}
+		log.debug("Total received proposals for received page: {}", receivedProposals.size());
 		
 		// Sort by creation date (newest first)
 		receivedApplications.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
@@ -347,15 +391,15 @@ public class MyPageController {
 		
 		// Separate proposals by status
 		List<CollaborationProposal> pendingProposals = receivedProposals.stream()
-				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.PENDING)
+				.filter(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.PENDING)
 				.toList();
 		
 		List<CollaborationProposal> acceptedProposals = receivedProposals.stream()
-				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.ACCEPTED)
+				.filter(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.ACCEPTED)
 				.toList();
 		
 		List<CollaborationProposal> rejectedProposals = receivedProposals.stream()
-				.filter(prop -> prop.getStatus() == CollaborationProposal.ProposalStatus.REJECTED)
+				.filter(prop -> prop.getStatus() == CollaborationProposal.CollaborationStatus.REJECTED)
 				.toList();
 
 		// Add all received items for display

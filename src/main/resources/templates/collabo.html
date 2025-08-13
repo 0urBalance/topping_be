@@ -164,16 +164,16 @@
                         상태
                     </span>
                     <div style="margin-top: 15px;">
-                        <a th:href="@{/collaboration-products/{id}(id=${product.uuid})}" class="btn">관리하기</a>
+                        <a th:href="@{/products/edit/{id}(id=${product.uuid})}" class="btn">관리하기</a>
                         <a th:if="${product.status.name() == 'DRAFT'}" 
-                           th:href="@{/collaboration-products/{id}/launch(id=${product.uuid})}" 
+                           th:href="@{/products/edit/{id}(id=${product.uuid})}" 
                            class="btn btn-success">출시하기</a>
                     </div>
                 </div>
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
-                <a href="/collaboration-products/create" class="btn btn-success">새 제품 등록</a>
+                <a href="/products/create" class="btn btn-success">새 제품 등록</a>
             </div>
         </div>
     </div>

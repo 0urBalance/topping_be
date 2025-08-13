@@ -2,11 +2,9 @@ package org.balanceus.topping.presentation.controller;
 
 import java.util.List;
 
-import org.balanceus.topping.domain.model.CollaborationProduct;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
-import org.balanceus.topping.domain.repository.CollaborationProductRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
@@ -26,7 +24,6 @@ public class ExploreController {
 
 	private final ProductRepository productRepository;
 	private final CollaborationProposalRepository proposalRepository;
-	private final CollaborationProductRepository collaborationProductRepository;
 	private final StoreRepository storeRepository;
 
 	@GetMapping
@@ -46,9 +43,10 @@ public class ExploreController {
 		// Original collaboration data
 		List<Product> products = productRepository.findByIsActiveTrue();
 		List<CollaborationProposal> proposals = proposalRepository.findByStatus(
-				CollaborationProposal.ProposalStatus.PENDING);
-		List<CollaborationProduct> liveProducts = collaborationProductRepository
-				.findByStatus(CollaborationProduct.ProductStatus.ACTIVE);
+				CollaborationProposal.CollaborationStatus.PENDING);
+		// CollaborationProduct entity removed - using Product.COLLABORATION type instead
+		Pageable pageable2 = PageRequest.of(0, 10);
+		List<Product> liveProducts = productRepository.findByProductTypeOrderByReviewCountDesc(Product.ProductType.COLLABORATION, pageable2).getContent();
 
 		// Add new data for store and product sections
 		model.addAttribute("stores", stores);

@@ -53,7 +53,6 @@ public class SecurityConfig {
 				.requestMatchers("/products/**").authenticated()
 				.requestMatchers("/proposals/**").authenticated()
 				.requestMatchers("/collaborations/**").authenticated()
-				.requestMatchers("/collaboration-products/**").authenticated()
 				.requestMatchers("/stores/**").authenticated()
 				// Support endpoints requiring authentication
 				.requestMatchers("/support/inquiry-form", "/support/inquiry", "/support/my-inquiries", "/support/inquiry/**").authenticated()

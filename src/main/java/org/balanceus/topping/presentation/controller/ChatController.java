@@ -54,7 +54,7 @@ public class ChatController {
 		CollaborationProposal proposal = proposalRepository.findById(proposalId)
 				.orElseThrow(() -> new RuntimeException("Proposal not found"));
 
-		if (proposal.getStatus() != CollaborationProposal.ProposalStatus.ACCEPTED) {
+		if (proposal.getStatus() != CollaborationProposal.CollaborationStatus.ACCEPTED) {
 			throw new RuntimeException("Only accepted proposals can have chat rooms");
 		}
 
@@ -91,21 +91,25 @@ public class ChatController {
 		CollaborationProposal proposal = chatRoom.getCollaborationProposal();
 		User otherUser = null;
 		
-		if (proposal.getProposer().equals(currentUser)) {
-			otherUser = proposal.getTargetBusinessOwner();
+		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		
+		if (proposerUser != null && proposerUser.equals(currentUser)) {
+			otherUser = targetUser;
 		} else {
-			otherUser = proposal.getProposer();
+			otherUser = proposerUser;
 		}
 		
 		// If otherUser is still null, try to find from collaboration
 		if (otherUser == null && chatRoom.getCollaboration() != null) {
 			Collaboration collaboration = chatRoom.getCollaboration();
-			// Get the product owner (business owner) and applicant
-			User productOwner = collaboration.getProduct() != null ? collaboration.getProduct().getStore().getUser() : null;
-			User applicant = collaboration.getApplicant();
+			// Get the partner store owner and initiator store owner
+			User initiatorOwner = collaboration.getInitiatorStore() != null ? collaboration.getInitiatorStore().getUser() : null;
+			User partnerOwner = collaboration.getPartnerStore() != null ? collaboration.getPartnerStore().getUser() : null;
 			
-			if (productOwner != null && applicant != null) {
-				otherUser = productOwner.equals(currentUser) ? applicant : productOwner;
+			if (initiatorOwner != null && partnerOwner != null) {
+				otherUser = initiatorOwner.equals(currentUser) ? partnerOwner : initiatorOwner;
 			}
 		}
 		
@@ -202,8 +206,11 @@ public class ChatController {
 		List<ChatRoom> userChatRooms = activeChatRooms.stream()
 				.filter(room -> {
 					CollaborationProposal proposal = room.getCollaborationProposal();
-					return proposal.getProposer().equals(user) || 
-						   (proposal.getTargetBusinessOwner() != null && proposal.getTargetBusinessOwner().equals(user));
+					User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+						(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+					User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+					return (proposerUser != null && proposerUser.equals(user)) || 
+						   (targetUser != null && targetUser.equals(user));
 				})
 				.toList();
 

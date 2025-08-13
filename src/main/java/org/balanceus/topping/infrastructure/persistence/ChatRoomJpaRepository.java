@@ -22,11 +22,12 @@ public interface ChatRoomJpaRepository extends JpaRepository<ChatRoom, UUID> {
 	
 	@Query("SELECT cr FROM ChatRoom cr WHERE " +
 	       "cr.collaborationProposal IS NOT NULL AND " +
-	       "(cr.collaborationProposal.proposer = :user OR cr.collaborationProposal.targetBusinessOwner = :user)")
+	       "(cr.collaborationProposal.proposerUser = :user OR cr.collaborationProposal.targetStore.user = :user)")
 	List<ChatRoom> findByCollaborationProposalParticipant(@Param("user") User user);
 	
-	@Query("SELECT cr FROM ChatRoom cr JOIN cr.collaboration c JOIN c.product p WHERE " +
+	@Query("SELECT cr FROM ChatRoom cr JOIN cr.collaboration c " +
+	       "JOIN c.initiatorStore is JOIN c.partnerStore ps WHERE " +
 	       "cr.collaboration IS NOT NULL AND " +
-	       "(c.applicant = :user OR p.creator = :user)")
+	       "(is.user = :user OR ps.user = :user)")
 	List<ChatRoom> findByCollaborationParticipant(@Param("user") User user);
 }

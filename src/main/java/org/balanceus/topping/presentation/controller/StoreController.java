@@ -316,10 +316,11 @@ public class StoreController {
         long collabProductCount = productRepository.countByStoreAndCollaborationIsNotNull(store);
         
         // Get collaborating stores (stores that have accepted collaborations with this store's products)
-        List<Collaboration> acceptedCollaborations = collaborationRepository.findByProductStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
+        List<Collaboration> acceptedCollaborations = collaborationRepository.findByStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
         List<Store> collaboratingStores = acceptedCollaborations.stream()
-            .map(collaboration -> collaboration.getApplicantProduct() != null ? collaboration.getApplicantProduct().getStore() : null)
-            .filter(collaboratingStore -> collaboratingStore != null && !collaboratingStore.getUuid().equals(store.getUuid()))
+            .map(collaboration -> collaboration.getInitiatorProduct() != null ? collaboration.getInitiatorProduct().getStore() : null)
+            .filter(collaboratingStore -> collaboratingStore != null && !((Store)collaboratingStore).getUuid().equals(store.getUuid()))
+            .map(collaboratingStore -> (Store)collaboratingStore)
             .distinct()
             .toList();
         

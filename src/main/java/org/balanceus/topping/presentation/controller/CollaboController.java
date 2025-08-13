@@ -6,11 +6,11 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
-import org.balanceus.topping.domain.model.CollaborationProduct;
+import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.infrastructure.security.Role;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
-import org.balanceus.topping.domain.repository.CollaborationProductRepository;
+import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.springframework.stereotype.Controller;
@@ -28,7 +28,7 @@ public class CollaboController {
 
 	private final CollaborationRepository collaborationRepository;
 	private final ChatRoomRepository chatRoomRepository;
-	private final CollaborationProductRepository collaborationProductRepository;
+	private final StoreRepository storeRepository;
 	private final UserRepository userRepository;
 
 	@GetMapping
@@ -37,13 +37,14 @@ public class CollaboController {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		
-		List<Collaboration> currentCollaborations = collaborationRepository.findByApplicant(user);
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		List<Collaboration> currentCollaborations = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
 		List<ChatRoom> chatRooms = chatRoomRepository.findByIsActiveTrue();
-		List<CollaborationProduct> collaborationProducts = collaborationProductRepository.findAll();
 
 		model.addAttribute("currentCollaborations", currentCollaborations);
 		model.addAttribute("chatRooms", chatRooms);
-		model.addAttribute("collaborationProducts", collaborationProducts);
 
 		return "collabo";
 	}

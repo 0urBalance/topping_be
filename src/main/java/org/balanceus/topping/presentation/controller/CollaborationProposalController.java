@@ -4,8 +4,16 @@ import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
+import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.ProposalSource;
+import org.balanceus.topping.domain.repository.StoreRepository;
+import org.balanceus.topping.domain.repository.ProductRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
@@ -13,15 +21,19 @@ import org.balanceus.topping.infrastructure.response.Code;
 import org.balanceus.topping.infrastructure.security.Role;
 import org.balanceus.topping.infrastructure.service.NotificationService;
 import org.balanceus.topping.application.service.ChatService;
+import org.balanceus.topping.application.service.CollaborationService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,12 +44,46 @@ public class CollaborationProposalController {
 
 	private final CollaborationProposalRepository proposalRepository;
 	private final UserRepository userRepository;
+	private final StoreRepository storeRepository;
+	private final ProductRepository productRepository;
 	private final NotificationService notificationService;
 	private final ChatService chatService;
+	private final CollaborationService collaborationService;
+	private final ImageUploadService imageUploadService;
 
 	@GetMapping("/suggest")
-	public String suggestForm() {
+	public String suggestForm(Model model, Principal principal) {
+		// Get all stores for selection, excluding user's own store if they have one
+		List<Store> allStores = storeRepository.findAll(Pageable.unpaged());
+		List<Product> userProducts = List.of();
+		
+		// If user is logged in, exclude their own store from the list and get their products
+		if (principal != null) {
+			User user = userRepository.findByEmail(principal.getName()).orElse(null);
+			if (user != null) {
+				Store userStore = storeRepository.findByUser(user).orElse(null);
+				if (userStore != null) {
+					allStores = allStores.stream()
+							.filter(store -> !store.getUuid().equals(userStore.getUuid()))
+							.toList();
+					userProducts = productRepository.findByStore(userStore);
+				}
+			}
+		}
+		
+		model.addAttribute("stores", allStores);
+		model.addAttribute("userProducts", userProducts);
 		return "proposals/suggest";
+	}
+	
+	@GetMapping("/api/stores/{storeId}/products")
+	@ResponseBody
+	public ApiResponseData<List<Product>> getStoreProducts(@PathVariable UUID storeId) {
+		Store store = storeRepository.findById(storeId)
+				.orElseThrow(() -> new RuntimeException("Store not found"));
+		
+		List<Product> products = productRepository.findByStore(store);
+		return ApiResponseData.success(products);
 	}
 
 	@PostMapping("/suggest")
@@ -47,19 +93,75 @@ public class CollaborationProposalController {
 			@RequestParam String description,
 			@RequestParam String category,
 			@RequestParam(required = false) String revenueSharePreference,
+			@RequestParam String targetStoreId,
+			@RequestParam(required = false) String targetProductId,
+			@RequestParam(required = false) String proposerProductId,
 			Principal principal) {
+
+		// Convert string parameters to UUIDs, handling empty strings as null
+		UUID targetStoreUuid = parseUUID(targetStoreId, "Target store ID is required");
+		UUID targetProductUuid = parseUUID(targetProductId, null);
+		UUID proposerProductUuid = parseUUID(proposerProductId, null);
 
 		User proposer = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
+		// Validation: Check that target store exists
+		Store targetStore = storeRepository.findById(targetStoreUuid)
+				.orElseThrow(() -> new RuntimeException("Target store not found"));
+		
+		// Get proposer's store
+		Store proposerStore = storeRepository.findByUser(proposer).orElse(null);
+		
+		// Validation: Prevent self-collaboration
+		if (proposerStore != null && proposerStore.getUuid().equals(targetStoreUuid)) {
+			throw new RuntimeException("Cannot propose collaboration with your own store");
+		}
+		
+		// Validation: Check target product if provided
+		Product targetProduct = null;
+		if (targetProductUuid != null) {
+			targetProduct = productRepository.findById(targetProductUuid)
+					.orElseThrow(() -> new RuntimeException("Target product not found"));
+			
+			// Verify that the target product belongs to the target store
+			if (!targetProduct.getStore().getUuid().equals(targetStoreUuid)) {
+				throw new RuntimeException("Target product does not belong to the selected target store");
+			}
+		}
+		
+		// Validation: Check proposer product if provided
+		Product proposerProduct = null;
+		if (proposerProductUuid != null) {
+			proposerProduct = productRepository.findById(proposerProductUuid)
+					.orElseThrow(() -> new RuntimeException("Proposer product not found"));
+			
+			// Verify that the proposer product belongs to the proposer's store
+			if (proposerStore == null || !proposerProduct.getStore().getUuid().equals(proposerStore.getUuid())) {
+				throw new RuntimeException("Proposer product does not belong to your store");
+			}
+		}
+
 		CollaborationProposal proposal = new CollaborationProposal();
 		proposal.setTitle(title);
 		proposal.setDescription(description);
-		proposal.setCategory(category);
-		proposal.setProposer(proposer);
-		proposal.setRevenueSharePreference(revenueSharePreference);
-		proposal.setStatus(CollaborationProposal.ProposalStatus.PENDING);
-		proposal.setTrendScore(0);
+		proposal.setProposerUser(proposer);
+		proposal.setSource(ProposalSource.CUSTOMER);
+		proposal.setStatus(CollaborationProposal.CollaborationStatus.PENDING);
+		
+		// Set proposer's store and product
+		if (proposerStore != null) {
+			proposal.setProposerStore(proposerStore);
+		}
+		if (proposerProduct != null) {
+			proposal.setProposerProduct(proposerProduct);
+		}
+		
+		// Set target store and product
+		proposal.setTargetStore(targetStore);
+		if (targetProduct != null) {
+			proposal.setTargetProduct(targetProduct);
+		}
 
 		CollaborationProposal saved = proposalRepository.save(proposal);
 		
@@ -68,13 +170,27 @@ public class CollaborationProposalController {
 		
 		return ApiResponseData.success(saved);
 	}
+	
+	private UUID parseUUID(String uuidString, String errorMessage) {
+		if (uuidString == null || uuidString.trim().isEmpty()) {
+			if (errorMessage != null) {
+				throw new RuntimeException(errorMessage);
+			}
+			return null;
+		}
+		try {
+			return UUID.fromString(uuidString.trim());
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Invalid UUID format: " + uuidString);
+		}
+	}
 
 	@GetMapping("/mypage")
 	public String myPage(Model model, Principal principal) {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
-		List<CollaborationProposal> myProposals = proposalRepository.findByProposer(user);
+		List<CollaborationProposal> myProposals = proposalRepository.findByProposerUser(user);
 		model.addAttribute("proposals", myProposals);
 		return "proposals/mypage";
 	}
@@ -86,10 +202,10 @@ public class CollaborationProposalController {
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
 		List<CollaborationProposal> pendingProposals = 
-				proposalRepository.findByStatusOrderByTrendScoreDesc(CollaborationProposal.ProposalStatus.PENDING);
+				proposalRepository.findByStatusOrderByCreatedAtDesc(CollaborationProposal.CollaborationStatus.PENDING);
 		
-		List<CollaborationProposal> myTargetedProposals = 
-				proposalRepository.findByTargetBusinessOwner(businessOwner);
+		// Target business owner proposals handled through targetStore relationship
+		List<CollaborationProposal> myTargetedProposals = List.of(); // TODO: Implement with targetStore query
 
 		model.addAttribute("pendingProposals", pendingProposals);
 		model.addAttribute("myTargetedProposals", myTargetedProposals);
@@ -103,28 +219,15 @@ public class CollaborationProposalController {
 			@PathVariable UUID proposalId,
 			Principal principal) {
 
-		User businessOwner = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		CollaborationProposal proposal = proposalRepository.findById(proposalId)
-				.orElseThrow(() -> new RuntimeException("Proposal not found"));
-
-		proposal.setStatus(CollaborationProposal.ProposalStatus.ACCEPTED);
-		proposal.setTargetBusinessOwner(businessOwner);
-		proposalRepository.save(proposal);
-
-		// 제안자에게 수락 알림 전송
-		notificationService.notifyProposalAccepted(proposal);
-
-		// 자동으로 채팅방 생성
 		try {
-			chatService.createChatRoomForCollaborationProposal(proposalId);
+			// Use CollaborationService to properly approve the proposal
+			// This will create the Collaboration entity and set collaboration_uuid
+			collaborationService.approve(proposalId);
+			
+			return ApiResponseData.success("협업 제안이 수락되었습니다.");
 		} catch (Exception e) {
-			// 채팅방 생성 실패는 로그만 남기고 제안 수락은 성공으로 처리
-			System.err.println("Failed to create chat room for proposal: " + proposalId + ", error: " + e.getMessage());
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), "제안 수락 중 오류가 발생했습니다: " + e.getMessage());
 		}
-
-		return ApiResponseData.success("협업 제안이 수락되었습니다.");
 	}
 
 	@PostMapping("/{proposalId}/reject")
@@ -140,8 +243,8 @@ public class CollaborationProposalController {
 		CollaborationProposal proposal = proposalRepository.findById(proposalId)
 				.orElseThrow(() -> new RuntimeException("Proposal not found"));
 
-		proposal.setStatus(CollaborationProposal.ProposalStatus.REJECTED);
-		proposal.setTargetBusinessOwner(businessOwner);
+		proposal.setStatus(CollaborationProposal.CollaborationStatus.REJECTED);
+		// Target business owner handled through store relationship
 		proposalRepository.save(proposal);
 
 		// 제안자에게 거절 알림 전송
@@ -165,39 +268,15 @@ public class CollaborationProposalController {
 			return "redirect:/login?error=user_not_found";
 		}
 
-		CollaborationProposal proposal = proposalRepository.findById(proposalId).orElse(null);
-		if (proposal == null) {
-			return "redirect:/mypage/received?error=proposal_not_found";
-		}
-
-		// Verify that the current user is the target business owner (or can accept)
-		// For proposals, any business owner can accept initially
-		if (!businessOwner.getRole().name().equals("ROLE_BUSINESS_OWNER") && 
-		    !businessOwner.getRole().name().equals("ROLE_ADMIN")) {
-			return "redirect:/mypage/received?error=unauthorized_action";
-		}
-		
-		// Check if already processed
-		if (proposal.getStatus() != CollaborationProposal.ProposalStatus.PENDING) {
-			return "redirect:/mypage/received?error=already_processed";
-		}
-
-		proposal.setStatus(CollaborationProposal.ProposalStatus.ACCEPTED);
-		proposal.setTargetBusinessOwner(businessOwner);
-		proposalRepository.save(proposal);
-
-		// 제안자에게 수락 알림 전송
-		notificationService.notifyProposalAccepted(proposal);
-
-		// 자동으로 채팅방 생성
 		try {
-			chatService.createChatRoomForCollaborationProposal(proposalId);
+			// Use CollaborationService to properly approve the proposal
+			// This will create the Collaboration entity and set collaboration_uuid
+			collaborationService.approve(proposalId);
+			
+			return "redirect:/mypage/received?success=proposal_accepted";
 		} catch (Exception e) {
-			// 채팅방 생성 실패는 로그만 남기고 제안 수락은 성공으로 처리
-			System.err.println("Failed to create chat room for proposal: " + proposalId + ", error: " + e.getMessage());
+			return "redirect:/mypage/received?error=approval_failed&message=" + e.getMessage();
 		}
-
-		return "redirect:/mypage/received?success=proposal_accepted";
 	}
 
 	@PostMapping("/{proposalId}/reject/form")
@@ -227,12 +306,12 @@ public class CollaborationProposalController {
 		}
 		
 		// Check if already processed
-		if (proposal.getStatus() != CollaborationProposal.ProposalStatus.PENDING) {
+		if (proposal.getStatus() != CollaborationProposal.CollaborationStatus.PENDING) {
 			return "redirect:/mypage/received?error=already_processed";
 		}
 
-		proposal.setStatus(CollaborationProposal.ProposalStatus.REJECTED);
-		proposal.setTargetBusinessOwner(businessOwner);
+		proposal.setStatus(CollaborationProposal.CollaborationStatus.REJECTED);
+		// Target business owner handled through store relationship
 		proposalRepository.save(proposal);
 
 		// 제안자에게 거절 알림 전송
@@ -248,13 +327,134 @@ public class CollaborationProposalController {
 
 		List<CollaborationProposal> proposals;
 		if (category != null && !category.isEmpty()) {
-			proposals = proposalRepository.findByCategoryOrderByCreatedAtDesc(category);
+			// Category removed from new structure - showing all pending proposals
+			proposals = proposalRepository.findByStatusOrderByCreatedAtDesc(CollaborationProposal.CollaborationStatus.PENDING);
 		} else {
-			proposals = proposalRepository.findByStatusOrderByTrendScoreDesc(CollaborationProposal.ProposalStatus.PENDING);
+			proposals = proposalRepository.findByStatusOrderByCreatedAtDesc(CollaborationProposal.CollaborationStatus.PENDING);
 		}
 
 		model.addAttribute("proposals", proposals);
 		model.addAttribute("selectedCategory", category);
 		return "proposals/browse";
+	}
+
+	// New API endpoints for proposal updates and image management
+
+	@PutMapping("/{proposalId}")
+	@ResponseBody
+	public ApiResponseData<CollaborationProposal> updateProposal(
+			@PathVariable UUID proposalId,
+			@RequestBody UpdateProposalRequest request,
+			Principal principal) {
+		
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		CollaborationProposal proposal = proposalRepository.findById(proposalId)
+				.orElseThrow(() -> new RuntimeException("Proposal not found"));
+		
+		// Check authorization - only proposer or target store owner can update
+		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		
+		boolean isAuthorized = (proposerUser != null && proposerUser.getUuid().equals(user.getUuid())) ||
+			(targetUser != null && targetUser.getUuid().equals(user.getUuid()));
+		
+		if (!isAuthorized) {
+			throw new RuntimeException("Unauthorized to update this proposal");
+		}
+		
+		// Update proposal fields
+		// Industry field removed from new structure
+		// Products field removed from new structure - handled through proposerProduct/targetProduct
+		// ProfitShare, Duration, Location fields removed from new structure
+		
+		CollaborationProposal updatedProposal = proposalRepository.save(proposal);
+		return ApiResponseData.success(updatedProposal);
+	}
+
+	@PostMapping("/{proposalId}/images")
+	@ResponseBody
+	public ApiResponseData<List<String>> uploadProposalImages(
+			@PathVariable UUID proposalId,
+			@RequestParam("images") MultipartFile[] files,
+			Principal principal) {
+		
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		CollaborationProposal proposal = proposalRepository.findById(proposalId)
+				.orElseThrow(() -> new RuntimeException("Proposal not found"));
+		
+		// Check authorization
+		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		
+		boolean isAuthorized = (proposerUser != null && proposerUser.getUuid().equals(user.getUuid())) ||
+			(targetUser != null && targetUser.getUuid().equals(user.getUuid()));
+		
+		if (!isAuthorized) {
+			throw new RuntimeException("Unauthorized to upload images for this proposal");
+		}
+		
+		// TODO: Replace with Product image upload
+		List<String> imagePaths = List.of(); // imageUploadService.uploadCollaborationProposalImages(proposal, files);
+		return ApiResponseData.success(imagePaths);
+	}
+
+	@GetMapping("/{proposalId}/images")
+	@ResponseBody
+	public ApiResponseData<List<Object>> getProposalImages(
+			@PathVariable UUID proposalId,
+			Principal principal) {
+		
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		CollaborationProposal proposal = proposalRepository.findById(proposalId)
+				.orElseThrow(() -> new RuntimeException("Proposal not found"));
+		
+		// Check authorization
+		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		
+		boolean isAuthorized = (proposerUser != null && proposerUser.getUuid().equals(user.getUuid())) ||
+			(targetUser != null && targetUser.getUuid().equals(user.getUuid()));
+		
+		if (!isAuthorized) {
+			throw new RuntimeException("Unauthorized to view images for this proposal");
+		}
+		
+		// TODO: Replace with Product image retrieval
+		List<Object> images = List.of(); // imageUploadService.getCollaborationProposalImages(proposal);
+		return ApiResponseData.success(images);
+	}
+
+	// DTO for update request
+	public static class UpdateProposalRequest {
+		private String industry;
+		private String products;
+		private String profitShare;
+		private String duration;
+		private String location;
+		
+		// Getters and setters
+		public String getIndustry() { return industry; }
+		public void setIndustry(String industry) { this.industry = industry; }
+		
+		public String getProducts() { return products; }
+		public void setProducts(String products) { this.products = products; }
+		
+		public String getProfitShare() { return profitShare; }
+		public void setProfitShare(String profitShare) { this.profitShare = profitShare; }
+		
+		public String getDuration() { return duration; }
+		public void setDuration(String duration) { this.duration = duration; }
+		
+		public String getLocation() { return location; }
+		public void setLocation(String location) { this.location = location; }
 	}
 }

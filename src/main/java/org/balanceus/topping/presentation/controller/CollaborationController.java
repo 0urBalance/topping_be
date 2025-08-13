@@ -14,8 +14,8 @@ import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.model.ProposalSource;
 import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
-import org.balanceus.topping.domain.model.CollaborationProposal.ProposalStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
@@ -248,17 +248,51 @@ public class CollaborationController {
 			return "redirect:/collaborations/apply?error=store_owner_not_found";
 		}
 		
+		// Get source/proposer store if user has one
+		Store sourceStore = storeRepository.findByUser(applicant).orElse(null);
+		
+		// Get source product if provided
+		Product sourceProduct = null;
+		if (sourceProductId != null) {
+			sourceProduct = productRepository.findById(sourceProductId).orElse(null);
+			if (sourceProduct != null && sourceStore != null && 
+				!sourceProduct.getStore().getUuid().equals(sourceStore.getUuid())) {
+				return "redirect:/collaborations/apply?error=source_product_mismatch";
+			}
+		}
+		
+		// Get target product if provided
+		Product targetProduct = null;
+		if (targetProductId != null) {
+			targetProduct = productRepository.findById(targetProductId).orElse(null);
+			if (targetProduct != null && !targetProduct.getStore().getUuid().equals(targetStoreId)) {
+				return "redirect:/collaborations/apply?error=target_product_mismatch";
+			}
+		}
+
 		// Create CollaborationProposal entity
 		CollaborationProposal proposal = new CollaborationProposal();
 		proposal.setTitle(collaborationTitle);
 		proposal.setDescription(description);
-		proposal.setCategory(category);
-		proposal.setProposer(applicant);
-		proposal.setTargetBusinessOwner(targetBusinessOwner);
-		proposal.setStartDate(startDateTime);
-		proposal.setEndDate(endDateTime);
-		proposal.setStatus(ProposalStatus.PENDING);
-		proposal.setTrendScore(0); // Initialize trend score
+		proposal.setProposerUser(applicant);
+		proposal.setSource(ProposalSource.CUSTOMER);
+		proposal.setProposedStart(startDateTime.toLocalDate());
+		proposal.setProposedEnd(endDateTime.toLocalDate());
+		proposal.setStatus(CollaborationProposal.CollaborationStatus.PENDING);
+		
+		// Set store relationships
+		if (sourceStore != null) {
+			proposal.setProposerStore(sourceStore);
+		}
+		proposal.setTargetStore(targetStore);
+		
+		// Set product relationships
+		if (sourceProduct != null) {
+			proposal.setProposerProduct(sourceProduct);
+		}
+		if (targetProduct != null) {
+			proposal.setTargetProduct(targetProduct);
+		}
 		
 		// Save the proposal
 		collaborationProposalRepository.save(proposal);
@@ -295,11 +329,12 @@ public class CollaborationController {
 
 		// Create collaboration
 		Collaboration collaboration = new Collaboration();
-		collaboration.setProduct(product);
-		collaboration.setApplicant(applicant);
-		collaboration.setApplicantProduct(applicantProduct);
-		collaboration.setMessage(message.trim());
-		collaboration.setStatus(CollaborationStatus.PENDING);
+		collaboration.setPartnerProduct(product);
+		collaboration.setPartnerStore(product.getStore());
+		collaboration.setInitiatorProduct(applicantProduct);
+		collaboration.setInitiatorStore(applicantProduct.getStore());
+		collaboration.setDescription(message.trim());
+		collaboration.setStatus(Collaboration.CollaborationStatus.PENDING);
 
 		collaborationRepository.save(collaboration);
 		return "redirect:/collaborations?success=application_submitted";
@@ -322,7 +357,7 @@ public class CollaborationController {
 		}
 		
 		// Verify that the current user is the product owner
-		if (!collaboration.getProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
+		if (!collaboration.getPartnerProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
 			return "redirect:/mypage/received?error=unauthorized_action";
 		}
 		
@@ -354,7 +389,7 @@ public class CollaborationController {
 		}
 		
 		// Verify that the current user is the product owner
-		if (!collaboration.getProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
+		if (!collaboration.getPartnerProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
 			return "redirect:/mypage/received?error=unauthorized_action";
 		}
 		
@@ -383,7 +418,10 @@ public class CollaborationController {
 		if (user == null) {
 			return ApiResponseData.failure(404, "User not found");
 		}
-		List<Collaboration> collaborations = collaborationRepository.findByApplicant(user);
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		List<Collaboration> collaborations = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
 		return ApiResponseData.success(collaborations);
 	}
 }

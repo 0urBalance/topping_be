@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
+import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.ProductImage;
 import org.balanceus.topping.domain.model.Store;
@@ -292,22 +293,4 @@ public class ImageUploadService {
         return (int) productImageRepository.countByProduct(product);
     }
 
-    public void deleteProductImage(UUID imageId) {
-        try {
-            // First, get the image details before deletion
-            ProductImage productImage = productImageRepository.findByUuid(imageId)
-                    .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
-            
-            // Delete the physical file
-            deletePhysicalFile(productImage.getImagePath());
-            
-            // Delete the database record
-            productImageRepository.deleteByUuid(imageId);
-            
-            log.info("Successfully deleted product image: {} (path: {})", imageId, productImage.getImagePath());
-        } catch (Exception e) {
-            log.error("Failed to delete product image: {}", imageId, e);
-            throw new RuntimeException("이미지 삭제에 실패했습니다: " + e.getMessage());
-        }
-    }
 }

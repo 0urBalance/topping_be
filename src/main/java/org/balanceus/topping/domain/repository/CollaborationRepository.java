@@ -18,17 +18,31 @@ public interface CollaborationRepository {
 	
 	List<Collaboration> findAll();
 	
-	List<Collaboration> findByProduct(Product product);
-	
-	List<Collaboration> findByApplicant(User applicant);
-	
 	List<Collaboration> findByStatus(CollaborationStatus status);
 	
-	List<Collaboration> findByProductCreator(User creator);
+	// New methods for refactored entity structure
+	List<Collaboration> findByInitiatorStore(Store initiatorStore);
 	
-	List<Collaboration> findByParticipant(User user);
+	List<Collaboration> findByPartnerStore(Store partnerStore);
 	
-	List<Collaboration> findByProductStoreAndStatus(Store store, CollaborationStatus status);
+	List<Collaboration> findByInitiatorStoreOrPartnerStore(Store store1, Store store2);
+	
+	List<Collaboration> findByInitiatorProduct(Product initiatorProduct);
+	
+	List<Collaboration> findByPartnerProduct(Product partnerProduct);
+	
+	List<Collaboration> findByInitiatorProductOrPartnerProduct(Product product1, Product product2);
+	
+	List<Collaboration> findByStoresAndProducts(Store initiatorStore, Store partnerStore, 
+												Product initiatorProduct, Product partnerProduct);
+	
+	List<Collaboration> findByStoreAndStatus(Store store, CollaborationStatus status);
+	
+	List<Collaboration> findByStoreParticipation(Store store);
+	
+	// Check for existing active collaboration between stores and products
+	Optional<Collaboration> findActiveCollaborationBetweenStoresAndProducts(Store store1, Store store2, 
+																			Product product1, Product product2);
 	
 	void deleteById(UUID id);
 }

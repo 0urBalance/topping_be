@@ -175,9 +175,8 @@ class ChatInterface {
                 </header>
 
                 <div class="proposal-panel-content">
-                  <div class="proposal-photos">
-                    <img src="/image/sample_food.jpg" alt="상품 이미지 1" class="proposal-photo">
-                    <img src="/image/sample_beer.jpg" alt="상품 이미지 2" class="proposal-photo">
+                  <div class="proposal-photos" id="proposalPhotos">
+                    <!-- Images will be loaded dynamically -->
                   </div>
 
                   <div class="proposal-form">
@@ -573,8 +572,9 @@ b가게 맥주</textarea>
             ? `<span class="material-symbols-outlined">close</span> 제안서 닫기`
             : `<span class="material-symbols-outlined">description</span> 제안서 보기`;
 
-        // Focusing & scrolling
+        // Load proposal data and focusing & scrolling
         if (willOpen) {
+            this.loadProposalData();
             requestAnimationFrame(() => document.getElementById('p-industry')?.focus());
         }
         this.scrollToBottom();
@@ -629,6 +629,151 @@ b가게 맥주</textarea>
             console.error('Error accepting proposal:', error);
             this.showError('제안서 수락 중 오류가 발생했습니다.');
         }
+    }
+    
+    async loadProposalData() {
+        if (!this.selectedRoomId) return;
+        
+        try {
+            // First, try to get proposal ID from chat room data
+            const proposalId = await this.getProposalIdFromRoom(this.selectedRoomId);
+            if (!proposalId) {
+                console.warn('No proposal found for this chat room');
+                this.showDefaultProposalData();
+                return;
+            }
+            
+            // Load proposal images
+            await this.loadProposalImages(proposalId);
+            
+            // Load proposal details (if needed)
+            await this.loadProposalDetails(proposalId);
+            
+        } catch (error) {
+            console.error('Error loading proposal data:', error);
+            this.showDefaultProposalData();
+        }
+    }
+    
+    async getProposalIdFromRoom(roomId) {
+        // This would need to be implemented based on how you store the proposal reference
+        // For now, we'll make a simple API call to get room details
+        try {
+            const response = await fetch(`/chat/room/${roomId}/proposal`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.proposalId;
+            }
+        } catch (error) {
+            console.error('Error getting proposal ID from room:', error);
+        }
+        return null;
+    }
+    
+    async loadProposalImages(proposalId) {
+        try {
+            const response = await fetch(`/proposals/${proposalId}/images`);
+            if (response.ok) {
+                const responseData = await response.json();
+                const images = responseData.data || [];
+                this.renderProposalImages(images);
+            } else {
+                this.showDefaultImages();
+            }
+        } catch (error) {
+            console.error('Error loading proposal images:', error);
+            this.showDefaultImages();
+        }
+    }
+    
+    async loadProposalDetails(proposalId) {
+        try {
+            const response = await fetch(`/proposals/${proposalId}`);
+            if (response.ok) {
+                const responseData = await response.json();
+                const proposal = responseData.data || responseData;
+                this.populateProposalForm(proposal);
+            }
+        } catch (error) {
+            console.error('Error loading proposal details:', error);
+        }
+    }
+    
+    renderProposalImages(images) {
+        const photosContainer = document.getElementById('proposalPhotos');
+        if (!photosContainer) return;
+        
+        if (images && images.length > 0) {
+            photosContainer.innerHTML = '';
+            
+            // Show up to 2 images (as per design)
+            const imagesToShow = images.slice(0, 2);
+            imagesToShow.forEach((image, index) => {
+                const img = document.createElement('img');
+                img.src = image.imagePath;
+                img.alt = `상품 이미지 ${index + 1}`;
+                img.className = 'proposal-photo';
+                img.onerror = () => {
+                    img.src = '/image/placeholder-food.jpg'; // Fallback image
+                };
+                photosContainer.appendChild(img);
+            });
+            
+            // If we have less than 2 images, add placeholders
+            for (let i = images.length; i < 2; i++) {
+                const img = document.createElement('img');
+                img.src = '/image/placeholder-food.jpg';
+                img.alt = `상품 이미지 ${i + 1}`;
+                img.className = 'proposal-photo';
+                photosContainer.appendChild(img);
+            }
+        } else {
+            this.showDefaultImages();
+        }
+    }
+    
+    showDefaultImages() {
+        const photosContainer = document.getElementById('proposalPhotos');
+        if (!photosContainer) return;
+        
+        photosContainer.innerHTML = `
+            <img src="/image/placeholder-food.jpg" alt="상품 이미지 1" class="proposal-photo">
+            <img src="/image/placeholder-food.jpg" alt="상품 이미지 2" class="proposal-photo">
+        `;
+    }
+    
+    populateProposalForm(proposal) {
+        // Populate form fields with proposal data
+        if (proposal.industry) {
+            const industryField = document.getElementById('p-industry');
+            if (industryField) industryField.value = proposal.industry;
+        }
+        
+        if (proposal.products) {
+            const productsField = document.getElementById('p-products');
+            if (productsField) productsField.value = proposal.products;
+        }
+        
+        if (proposal.profitShare) {
+            const shareField = document.getElementById('p-share');
+            if (shareField) shareField.value = proposal.profitShare;
+        }
+        
+        if (proposal.duration) {
+            const durationField = document.getElementById('p-duration');
+            if (durationField) durationField.value = proposal.duration;
+        }
+        
+        if (proposal.location) {
+            const locationField = document.getElementById('p-place');
+            if (locationField) locationField.value = proposal.location;
+        }
+    }
+    
+    showDefaultProposalData() {
+        // Show default placeholder data
+        this.showDefaultImages();
+        // Form fields will keep their default values from the HTML template
     }
 }
 

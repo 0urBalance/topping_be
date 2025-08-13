@@ -281,8 +281,8 @@
             <div th:each="received : ${#lists.size(receivedApplications) > 2 ? #lists.subList(receivedApplications, 0, 2) : receivedApplications}" class="activity-item">
                 <div class="activity-icon received">📩</div>
                 <div class="activity-content">
-                    <div class="activity-title" th:text="'신청 받음: ' + ${received.product.name}">받은 신청</div>
-                    <div class="activity-description" th:text="${received.applicant.username} + '님의 신청'">신청자 정보</div>
+                    <div class="activity-title" th:text="'신청 받음: ' + ${received.partnerProduct.name}">받은 신청</div>
+                    <div class="activity-description" th:text="${received.initiatorStore != null ? received.initiatorStore.user.username : 'Unknown'} + '님의 신청'">신청자 정보</div>
                 </div>
                 <div class="activity-time" th:text="${#temporals.format(received.createdAt, 'MM-dd')}">날짜</div>
             </div>

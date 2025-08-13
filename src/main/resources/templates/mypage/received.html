@@ -225,9 +225,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(receivedApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-avatar" th:text="${#strings.substring(receivedApp.initiatorStore != null ? receivedApp.initiatorStore.user.username : 'Unknown', 0, 1)}">A</div>
                         <div class="applicant-details">
-                            <h3 th:text="${receivedApp.applicant.username}">신청자명</h3>
+                            <h3 th:text="${receivedApp.initiatorStore != null ? receivedApp.initiatorStore.user.username : 'Unknown User'}">신청자명</h3>
                             <p>콜라보 신청자</p>
                         </div>
                     </div>
@@ -236,15 +236,15 @@
                         <div class="product-grid">
                             <div class="product-item target">
                                 <div class="product-icon">🎯</div>
-                                <div class="product-name" th:text="${receivedApp.product.title}">내 상품</div>
+                                <div class="product-name" th:text="${receivedApp.partnerProduct.title}">내 상품</div>
                                 <div class="product-type">콜라보 대상</div>
                             </div>
-                            <div class="product-item offered" th:if="${receivedApp.applicantProduct != null}">
+                            <div class="product-item offered" th:if="${receivedApp.initiatorProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${receivedApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-name" th:text="${receivedApp.initiatorProduct.title}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
-                            <div class="product-item offered" th:if="${receivedApp.applicantProduct == null}">
+                            <div class="product-item offered" th:if="${receivedApp.initiatorProduct == null}">
                                 <div class="product-icon">🛠️</div>
                                 <div class="product-name">서비스 제안</div>
                                 <div class="product-type">신청자 서비스</div>
@@ -298,9 +298,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(pendingProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-avatar" th:text="${pendingProp.proposerUser != null ? #strings.substring(pendingProp.proposerUser.username, 0, 1) : 'P'}">P</div>
                         <div class="applicant-details">
-                            <h3 th:text="${pendingProp.proposer.username}">제안자명</h3>
+                            <h3 th:text="${pendingProp.proposerUser != null ? pendingProp.proposerUser.username : 'Unknown User'}">제안자명</h3>
                             <p>콜라보 제안자 (파트너)</p>
                         </div>
                     </div>
@@ -308,15 +308,15 @@
                     <div class="message-section">
                         <div class="message-title">
                             <span class="icon">📋</span>
-                            <span th:text="${pendingProp.title}">제안 제목</span>
+                            <span th:text="${pendingProp.title != null ? pendingProp.title : '제목 없음'}">제안 제목</span>
                         </div>
-                        <div class="message-content" th:text="${pendingProp.description}">제안 내용</div>
+                        <div class="message-content" th:text="${pendingProp.description != null ? pendingProp.description : '내용 없음'}">제안 내용</div>
                         <div style="margin-top: 10px;">
                             <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
-                                  th:text="'카테고리: ' + ${pendingProp.category}">카테고리</span>
-                            <span th:if="${pendingProp.revenueSharePreference != null}" 
+                                  th:text="'출처: ' + ${pendingProp.source != null ? pendingProp.source : '미지정'}">출처</span>
+                            <span th:if="${pendingProp.proposerStore != null}" 
                                   style="background: #d1ecf1; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #0c5460; margin-left: 8px;" 
-                                  th:text="'수익분배: ' + ${pendingProp.revenueSharePreference}">수익분배</span>
+                                  th:text="'제안 스토어: ' + ${pendingProp.proposerStore.name}">제안 스토어</span>
                         </div>
                     </div>
                     
@@ -326,8 +326,8 @@
                             <span th:text="'제안일: ' + ${#temporals.format(pendingProp.createdAt, 'MM-dd')}">제안일</span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-icon">📈</span>
-                            <span th:text="'트렌드 점수: ' + ${pendingProp.trendScore}">트렌드 점수</span>
+                            <span class="meta-icon">🏢</span>
+                            <span th:text="'상태: ' + ${pendingProp.status != null ? pendingProp.status : '미지정'}">상태</span>
                         </div>
                     </div>
                     
@@ -341,7 +341,7 @@
                     </div>
                     
                     <div class="action-buttons single" style="margin-top: 10px;">
-                        <a th:href="@{'/users/' + ${pendingProp.proposer.uuid}}" class="action-btn btn-outline">제안자 프로필</a>
+                        <a th:href="@{'/users/' + ${pendingProp.proposerUser.uuid}}" class="action-btn btn-outline" th:if="${pendingProp.proposerUser != null}">제안자 프로필</a>
                     </div>
                 </div>
             </div>
@@ -456,9 +456,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(allProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-avatar" th:text="${allProp.proposerUser != null ? #strings.substring(allProp.proposerUser.username, 0, 1) : 'P'}">P</div>
                         <div class="applicant-details">
-                            <h3 th:text="${allProp.proposer.username}">제안자명</h3>
+                            <h3 th:text="${allProp.proposerUser != null ? allProp.proposerUser.username : 'Unknown User'}">제안자명</h3>
                             <p>콜라보 제안자 (파트너)</p>
                         </div>
                     </div>
@@ -466,12 +466,12 @@
                     <div class="message-section">
                         <div class="message-title">
                             <span class="icon">📋</span>
-                            <span th:text="${allProp.title}">제안 제목</span>
+                            <span th:text="${allProp.title != null ? allProp.title : '제목 없음'}">제안 제목</span>
                         </div>
-                        <div class="message-content" th:text="${allProp.description}">제안 내용</div>
+                        <div class="message-content" th:text="${allProp.description != null ? allProp.description : '내용 없음'}">제안 내용</div>
                         <div style="margin-top: 10px;">
                             <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
-                                  th:text="'카테고리: ' + ${allProp.category}">카테고리</span>
+                                  th:text="'출처: ' + ${allProp.source}">출처</span>
                         </div>
                     </div>
                     
@@ -482,7 +482,7 @@
                         </div>
                         <div class="meta-item">
                             <span class="meta-icon">👤</span>
-                            <span th:text="'제안자: ' + ${allProp.proposer.username}">제안자</span>
+                            <span th:text="'제안자: ' + ${allProp.proposerUser != null ? allProp.proposerUser.username : 'Unknown User'}">제안자</span>
                         </div>
                     </div>
                     
@@ -504,7 +504,7 @@
                     
                     <!-- Action buttons for rejected proposals -->
                     <div th:if="${allProp.status.name() == 'REJECTED'}" class="action-buttons single">
-                        <a th:href="@{'/users/' + ${allProp.proposer.uuid}}" class="action-btn btn-outline">제안자 프로필</a>
+                        <a th:href="@{'/users/' + ${allProp.proposerUser.uuid}}" class="action-btn btn-outline" th:if="${allProp.proposerUser != null}">제안자 프로필</a>
                     </div>
                 </div>
             </div>
@@ -570,9 +570,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(acceptedProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-avatar" th:text="${acceptedProp.proposerUser != null ? #strings.substring(acceptedProp.proposerUser.username, 0, 1) : 'P'}">P</div>
                         <div class="applicant-details">
-                            <h3 th:text="${acceptedProp.proposer.username}">파트너명</h3>
+                            <h3 th:text="${acceptedProp.proposerUser != null ? acceptedProp.proposerUser.username : 'Unknown User'}">파트너명</h3>
                             <p>콜라보 파트너</p>
                         </div>
                     </div>
@@ -585,7 +585,7 @@
                         <div class="message-content" th:text="${acceptedProp.description}">제안 내용</div>
                         <div style="margin-top: 10px;">
                             <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
-                                  th:text="'카테고리: ' + ${acceptedProp.category}">카테고리</span>
+                                  th:text="'출처: ' + ${acceptedProp.source}">출처</span>
                         </div>
                     </div>
                     
@@ -656,9 +656,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(rejectedProp.proposer.username, 0, 1)}">P</div>
+                        <div class="applicant-avatar" th:text="${rejectedProp.proposerUser != null ? #strings.substring(rejectedProp.proposerUser.username, 0, 1) : 'P'}">P</div>
                         <div class="applicant-details">
-                            <h3 th:text="${rejectedProp.proposer.username}">제안자명</h3>
+                            <h3 th:text="${rejectedProp.proposerUser != null ? rejectedProp.proposerUser.username : 'Unknown User'}">제안자명</h3>
                             <p>거절된 제안</p>
                         </div>
                     </div>
@@ -671,12 +671,12 @@
                         <div class="message-content" th:text="${rejectedProp.description}">제안 내용</div>
                         <div style="margin-top: 10px;">
                             <span style="background: #e9ecef; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; color: #495057;" 
-                                  th:text="'카테고리: ' + ${rejectedProp.category}">카테고리</span>
+                                  th:text="'출처: ' + ${rejectedProp.source}">출처</span>
                         </div>
                     </div>
                     
                     <div class="action-buttons single">
-                        <a th:href="@{'/users/' + ${rejectedProp.proposer.uuid}}" class="action-btn btn-outline">제안자 프로필</a>
+                        <a th:href="@{'/users/' + ${rejectedProp.proposerUser.uuid}}" class="action-btn btn-outline" th:if="${rejectedProp.proposerUser != null}">제안자 프로필</a>
                     </div>
                 </div>
             </div>

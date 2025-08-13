@@ -111,13 +111,13 @@
                     </span>
                     
                     <div style="font-size: 14px; color: #666; margin-top: 10px;">
-                        <p>카테고리: <span th:text="${proposal.category}">카테고리</span></p>
+                        <p>출처: <span th:text="${proposal.source}">출처</span></p>
                         <p>작성일: <span th:text="${#temporals.format(proposal.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
                     </div>
                     
-                    <div th:if="${proposal.targetBusinessOwner != null}" style="margin-top: 10px;">
+                    <div th:if="${proposal.targetStore != null}" style="margin-top: 10px;">
                         <small style="color: #17a2b8;">
-                            콜라보 파트너: <span th:text="${proposal.targetBusinessOwner.username}">파트너명</span>
+                            타겟 스토어: <span th:text="${proposal.targetStore.name}">타겟 스토어명</span>
                         </small>
                     </div>
                     
@@ -232,13 +232,13 @@
                         <p>재고: <span th:text="${product.stockQuantity}">재고</span>개</p>
                     </div>
                     <div class="actions">
-                        <a th:href="@{/collaboration-products/{id}(id=${product.uuid})}" class="btn">관리하기</a>
+                        <a th:href="@{/products/edit/{id}(id=${product.uuid})}" class="btn">관리하기</a>
                     </div>
                 </div>
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
-                <a href="/collaboration-products/create" class="btn btn-success">새 콜라보 상품 등록</a>
+                <a href="/products/create" class="btn btn-success">새 콜라보 상품 등록</a>
             </div>
         </div>
 

@@ -36,33 +36,62 @@ public class CollaborationRepositoryImpl implements CollaborationRepository {
 	}
 
 	@Override
-	public List<Collaboration> findByProduct(Product product) {
-		return collaborationJpaRepository.findByProduct(product);
-	}
-
-	@Override
-	public List<Collaboration> findByApplicant(User applicant) {
-		return collaborationJpaRepository.findByApplicant(applicant);
-	}
-
-	@Override
 	public List<Collaboration> findByStatus(CollaborationStatus status) {
 		return collaborationJpaRepository.findByStatus(status);
 	}
 
 	@Override
-	public List<Collaboration> findByProductCreator(User creator) {
-		return collaborationJpaRepository.findByProductCreator(creator);
+	public List<Collaboration> findByInitiatorStore(Store initiatorStore) {
+		return collaborationJpaRepository.findByInitiatorStore(initiatorStore);
 	}
 
 	@Override
-	public List<Collaboration> findByParticipant(User user) {
-		return collaborationJpaRepository.findByParticipant(user);
+	public List<Collaboration> findByPartnerStore(Store partnerStore) {
+		return collaborationJpaRepository.findByPartnerStore(partnerStore);
 	}
 
 	@Override
-	public List<Collaboration> findByProductStoreAndStatus(Store store, CollaborationStatus status) {
-		return collaborationJpaRepository.findByProductStoreAndStatus(store, status);
+	public List<Collaboration> findByInitiatorStoreOrPartnerStore(Store store1, Store store2) {
+		return collaborationJpaRepository.findByInitiatorStoreOrPartnerStore(store1, store2);
+	}
+
+	@Override
+	public List<Collaboration> findByInitiatorProduct(Product initiatorProduct) {
+		return collaborationJpaRepository.findByInitiatorProduct(initiatorProduct);
+	}
+
+	@Override
+	public List<Collaboration> findByPartnerProduct(Product partnerProduct) {
+		return collaborationJpaRepository.findByPartnerProduct(partnerProduct);
+	}
+
+	@Override
+	public List<Collaboration> findByInitiatorProductOrPartnerProduct(Product product1, Product product2) {
+		return collaborationJpaRepository.findByInitiatorProductOrPartnerProduct(product1, product2);
+	}
+
+	@Override
+	public List<Collaboration> findByStoresAndProducts(Store initiatorStore, Store partnerStore,
+			Product initiatorProduct, Product partnerProduct) {
+		return collaborationJpaRepository.findByStoresAndProducts(initiatorStore, partnerStore, 
+				initiatorProduct, partnerProduct);
+	}
+
+	@Override
+	public List<Collaboration> findByStoreAndStatus(Store store, CollaborationStatus status) {
+		return collaborationJpaRepository.findByStoreAndStatus(store, status);
+	}
+
+	@Override
+	public List<Collaboration> findByStoreParticipation(Store store) {
+		return collaborationJpaRepository.findByStoreParticipation(store);
+	}
+
+	@Override
+	public Optional<Collaboration> findActiveCollaborationBetweenStoresAndProducts(Store store1, Store store2,
+			Product product1, Product product2) {
+		return collaborationJpaRepository.findActiveCollaborationBetweenStoresAndProducts(store1, store2, 
+				product1, product2);
 	}
 
 	@Override

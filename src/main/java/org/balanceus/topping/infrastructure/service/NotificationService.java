@@ -20,26 +20,40 @@ public class NotificationService {
 				.forEach(businessOwner -> {
 					sendNotification(businessOwner, 
 							"새로운 협업 제안", 
-							proposal.getProposer().getUsername() + "님이 '" + proposal.getTitle() + "' 협업을 제안했습니다.",
+							(proposal.getProposerUser() != null ? proposal.getProposerUser().getUsername() : 
+								(proposal.getProposerStore() != null ? proposal.getProposerStore().getName() : "Unknown")) + 
+							"님이 '" + proposal.getTitle() + "' 협업을 제안했습니다.",
 							Notification.NotificationType.COLLABORATION_PROPOSAL,
 							proposal.getUuid().toString());
 				});
 	}
 
 	public void notifyProposalAccepted(CollaborationProposal proposal) {
-		sendNotification(proposal.getProposer(),
-				"협업 제안 수락됨 🎉",
-				proposal.getTargetBusinessOwner().getUsername() + "님이 귀하의 '" + proposal.getTitle() + "' 협업 제안을 수락했습니다!",
-				Notification.NotificationType.PROPOSAL_ACCEPTED,
-				proposal.getUuid().toString());
+		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		
+		if (proposerUser != null && targetUser != null) {
+			sendNotification(proposerUser,
+					"협업 제안 수락됨 🎉",
+					targetUser.getUsername() + "님이 귀하의 '" + proposal.getTitle() + "' 협업 제안을 수락했습니다!",
+					Notification.NotificationType.PROPOSAL_ACCEPTED,
+					proposal.getUuid().toString());
+		}
 	}
 
 	public void notifyProposalRejected(CollaborationProposal proposal) {
-		sendNotification(proposal.getProposer(),
-				"협업 제안 결과",
-				proposal.getTargetBusinessOwner().getUsername() + "님이 '" + proposal.getTitle() + "' 협업 제안을 거절했습니다.",
-				Notification.NotificationType.PROPOSAL_REJECTED,
-				proposal.getUuid().toString());
+		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		
+		if (proposerUser != null && targetUser != null) {
+			sendNotification(proposerUser,
+					"협업 제안 결과",
+					targetUser.getUsername() + "님이 '" + proposal.getTitle() + "' 협업 제안을 거절했습니다.",
+					Notification.NotificationType.PROPOSAL_REJECTED,
+					proposal.getUuid().toString());
+		}
 	}
 
 	private void sendNotification(User recipient, String title, String message, 

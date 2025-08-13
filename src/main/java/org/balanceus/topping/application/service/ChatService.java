@@ -2,6 +2,7 @@ package org.balanceus.topping.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.balanceus.topping.domain.model.ChatMessage;
 import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
@@ -10,8 +11,11 @@ import org.balanceus.topping.domain.repository.ChatMessageRepository;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +32,8 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final CollaborationRepository collaborationRepository;
     private final CollaborationProposalRepository collaborationProposalRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ObjectMapper objectMapper;
 
     public ChatRoom createChatRoomForCollaborationProposal(UUID proposalId) {
         Optional<CollaborationProposal> proposalOpt = collaborationProposalRepository.findById(proposalId);
@@ -79,25 +85,27 @@ public class ChatService {
         return savedRoom;
     }
 
-    public ChatRoom createChatRoomIfNotExists(UUID collaborationId, boolean isProposal) {
-        if (isProposal) {
-            return createChatRoomForCollaborationProposal(collaborationId);
-        } else {
-            return createChatRoomForCollaboration(collaborationId);
-        }
-    }
-
     private String generateRoomName(CollaborationProposal proposal) {
-        return String.format("%s - %s", 
-                proposal.getProposer().getUsername(), 
-                proposal.getTargetBusinessOwner() != null ? 
-                    proposal.getTargetBusinessOwner().getUsername() : "비즈니스 오너");
+        String proposerName = "";
+        if (proposal.getProposerUser() != null) {
+            proposerName = proposal.getProposerUser().getUsername();
+        } else if (proposal.getProposerStore() != null) {
+            proposerName = proposal.getProposerStore().getName();
+        }
+        
+        String targetName = proposal.getTargetStore() != null ? 
+            proposal.getTargetStore().getName() : "Target Store";
+            
+        return String.format("%s - %s", proposerName, targetName);
     }
 
     private String generateRoomName(Collaboration collaboration) {
-        return String.format("%s - %s", 
-                collaboration.getApplicant().getUsername(), 
-                collaboration.getProduct().getCreator().getUsername());
+        String initiatorName = collaboration.getInitiatorStore() != null ? 
+            collaboration.getInitiatorStore().getName() : "Initiator";
+        String partnerName = collaboration.getPartnerStore() != null ? 
+            collaboration.getPartnerStore().getName() : "Partner";
+            
+        return String.format("%s - %s", initiatorName, partnerName);
     }
 
     // Unread message management
