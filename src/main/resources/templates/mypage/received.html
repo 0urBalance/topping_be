@@ -236,12 +236,12 @@
                         <div class="product-grid">
                             <div class="product-item target">
                                 <div class="product-icon">🎯</div>
-                                <div class="product-name" th:text="${receivedApp.partnerProduct.title}">내 상품</div>
+                                <div class="product-name" th:text="${receivedApp.partnerProduct.name}">내 상품</div>
                                 <div class="product-type">콜라보 대상</div>
                             </div>
                             <div class="product-item offered" th:if="${receivedApp.initiatorProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${receivedApp.initiatorProduct.title}">제안 상품</div>
+                                <div class="product-name" th:text="${receivedApp.initiatorProduct.name}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
                             <div class="product-item offered" th:if="${receivedApp.initiatorProduct == null}">
@@ -257,7 +257,7 @@
                             <span class="icon">💬</span>
                             신청 메시지
                         </div>
-                        <div class="message-content" th:text="${receivedApp.message}">신청 메시지 내용</div>
+                        <div class="message-content" th:text="${receivedApp.description}">신청 메시지 내용</div>
                     </div>
                     
                     <div class="application-meta">
@@ -281,11 +281,11 @@
                     </div>
                     
                     <div class="action-buttons triple" style="margin-top: 10px;">
-                        <a th:href="@{'/products/' + ${receivedApp.product.uuid}}" class="action-btn btn-view">상품 보기</a>
-                        <a th:if="${receivedApp.applicantProduct != null}" 
-                           th:href="@{'/products/' + ${receivedApp.applicantProduct.uuid}}" 
+                        <a th:href="@{'/products/' + ${receivedApp.partnerProduct != null ? receivedApp.partnerProduct.uuid : (receivedApp.initiatorProduct != null ? receivedApp.initiatorProduct.uuid : '#')}}" class="action-btn btn-view">상품 보기</a>
+                        <a th:if="${receivedApp.initiatorProduct != null}" 
+                           th:href="@{'/products/' + ${receivedApp.initiatorProduct.uuid}}" 
                            class="action-btn btn-outline">제안상품 보기</a>
-                        <a th:href="@{'/users/' + ${receivedApp.applicant.uuid}}" class="action-btn btn-outline">프로필 보기</a>
+                        <a th:href="@{'/users/' + ${receivedApp.initiatorStore != null ? receivedApp.initiatorStore.user.uuid : '#'}}" class="action-btn btn-outline">프로필 보기</a>
                     </div>
                 </div>
             </div>
@@ -371,9 +371,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(allApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-avatar" th:text="${allApp.initiatorStore != null ? #strings.substring(allApp.initiatorStore.user.username, 0, 1) : 'A'}">A</div>
                         <div class="applicant-details">
-                            <h3 th:text="${allApp.applicant.username}">신청자명</h3>
+                            <h3 th:text="${allApp.initiatorStore != null ? allApp.initiatorStore.user.username : 'Unknown User'}">신청자명</h3>
                             <p>콜라보 신청자</p>
                         </div>
                     </div>
@@ -382,15 +382,15 @@
                         <div class="product-grid">
                             <div class="product-item target">
                                 <div class="product-icon">🎯</div>
-                                <div class="product-name" th:text="${allApp.product.title}">내 상품</div>
+                                <div class="product-name" th:text="${allApp.partnerProduct != null ? allApp.partnerProduct.name : (allApp.initiatorProduct != null ? allApp.initiatorProduct.name : '상품명 없음')}">내 상품</div>
                                 <div class="product-type">콜라보 대상</div>
                             </div>
-                            <div class="product-item offered" th:if="${allApp.applicantProduct != null}">
+                            <div class="product-item offered" th:if="${allApp.initiatorProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${allApp.applicantProduct.name}">제안 상품</div>
+                                <div class="product-name" th:text="${allApp.initiatorProduct.name}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
-                            <div class="product-item offered" th:if="${allApp.applicantProduct == null}">
+                            <div class="product-item offered" th:if="${allApp.initiatorProduct == null}">
                                 <div class="product-icon">🛠️</div>
                                 <div class="product-name">서비스 제안</div>
                                 <div class="product-type">신청자 서비스</div>
@@ -403,7 +403,7 @@
                             <span class="icon">💬</span>
                             신청 메시지
                         </div>
-                        <div class="message-content" th:text="${allApp.message}">신청 메시지 내용</div>
+                        <div class="message-content" th:text="${allApp.description}">신청 메시지 내용</div>
                     </div>
                     
                     <div class="application-meta">
@@ -413,7 +413,7 @@
                         </div>
                         <div class="meta-item">
                             <span class="meta-icon">👤</span>
-                            <span th:text="'신청자: ' + ${allApp.applicant.username}">신청자</span>
+                            <span th:text="'신청자: ' + ${allApp.initiatorStore != null ? allApp.initiatorStore.user.username : 'Unknown User'}">신청자</span>
                         </div>
                     </div>
                     
@@ -435,7 +435,7 @@
                     
                     <!-- Action buttons for rejected applications -->
                     <div th:if="${allApp.status.name() == 'REJECTED'}" class="action-buttons single">
-                        <a th:href="@{'/products/' + ${allApp.product.uuid}}" class="action-btn btn-outline">상품 보기</a>
+                        <a th:href="@{'/products/' + ${allApp.partnerProduct != null ? allApp.partnerProduct.uuid : (allApp.initiatorProduct != null ? allApp.initiatorProduct.uuid : '#')}}" class="action-btn btn-outline">상품 보기</a>
                     </div>
                 </div>
             </div>
@@ -527,9 +527,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(acceptedApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-avatar" th:text="${acceptedApp.initiatorStore != null ? #strings.substring(acceptedApp.initiatorStore.user.username, 0, 1) : 'A'}">A</div>
                         <div class="applicant-details">
-                            <h3 th:text="${acceptedApp.applicant.username}">파트너명</h3>
+                            <h3 th:text="${acceptedApp.initiatorStore != null ? acceptedApp.initiatorStore.user.username : 'Unknown User'}">파트너명</h3>
                             <p>콜라보 파트너</p>
                         </div>
                     </div>
@@ -538,15 +538,15 @@
                         <div class="product-grid">
                             <div class="product-item target">
                                 <div class="product-icon">🎯</div>
-                                <div class="product-name" th:text="${acceptedApp.product.title}">내 상품</div>
+                                <div class="product-name" th:text="${acceptedApp.partnerProduct != null ? acceptedApp.partnerProduct.name : (acceptedApp.initiatorProduct != null ? acceptedApp.initiatorProduct.name : '상품명 없음')}">내 상품</div>
                                 <div class="product-type">콜라보 대상</div>
                             </div>
-                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct != null}">
+                            <div class="product-item offered" th:if="${acceptedApp.initiatorProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${acceptedApp.applicantProduct.name}">파트너 상품</div>
+                                <div class="product-name" th:text="${acceptedApp.initiatorProduct.name}">파트너 상품</div>
                                 <div class="product-type">파트너 제공</div>
                             </div>
-                            <div class="product-item offered" th:if="${acceptedApp.applicantProduct == null}">
+                            <div class="product-item offered" th:if="${acceptedApp.initiatorProduct == null}">
                                 <div class="product-icon">🛠️</div>
                                 <div class="product-name">서비스 제공</div>
                                 <div class="product-type">파트너 서비스</div>
@@ -614,9 +614,9 @@
                     </div>
                     
                     <div class="applicant-info">
-                        <div class="applicant-avatar" th:text="${#strings.substring(rejectedApp.applicant.username, 0, 1)}">A</div>
+                        <div class="applicant-avatar" th:text="${rejectedApp.initiatorStore != null ? #strings.substring(rejectedApp.initiatorStore.user.username, 0, 1) : 'A'}">A</div>
                         <div class="applicant-details">
-                            <h3 th:text="${rejectedApp.applicant.username}">신청자명</h3>
+                            <h3 th:text="${rejectedApp.initiatorStore != null ? rejectedApp.initiatorStore.user.username : 'Unknown User'}">신청자명</h3>
                             <p>거절된 신청</p>
                         </div>
                     </div>
@@ -625,15 +625,15 @@
                         <div class="product-grid">
                             <div class="product-item target">
                                 <div class="product-icon">🎯</div>
-                                <div class="product-name" th:text="${rejectedApp.product.title}">내 상품</div>
+                                <div class="product-name" th:text="${rejectedApp.partnerProduct != null ? rejectedApp.partnerProduct.name : (rejectedApp.initiatorProduct != null ? rejectedApp.initiatorProduct.name : '상품명 없음')}">내 상품</div>
                                 <div class="product-type">콜라보 대상</div>
                             </div>
-                            <div class="product-item offered" th:if="${rejectedApp.applicantProduct != null}">
+                            <div class="product-item offered" th:if="${rejectedApp.initiatorProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${rejectedApp.applicantProduct.name}">제안 상품</div>
+                                <div class="product-name" th:text="${rejectedApp.initiatorProduct.name}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
-                            <div class="product-item offered" th:if="${rejectedApp.applicantProduct == null}">
+                            <div class="product-item offered" th:if="${rejectedApp.initiatorProduct == null}">
                                 <div class="product-icon">🛠️</div>
                                 <div class="product-name">서비스 제안</div>
                                 <div class="product-type">신청자 서비스</div>
@@ -642,7 +642,7 @@
                     </div>
                     
                     <div class="action-buttons single">
-                        <a th:href="@{'/products/' + ${rejectedApp.product.uuid}}" class="action-btn btn-outline">상품 보기</a>
+                        <a th:href="@{'/products/' + ${rejectedApp.partnerProduct != null ? rejectedApp.partnerProduct.uuid : (rejectedApp.initiatorProduct != null ? rejectedApp.initiatorProduct.uuid : '#')}}" class="action-btn btn-outline">상품 보기</a>
                     </div>
                 </div>
             </div>

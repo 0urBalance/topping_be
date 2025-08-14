@@ -122,10 +122,10 @@ The Product domain manages product listings, creation, editing, and product-rela
 ## Critical Implementation Notes
 
 ### ⚠️ Template Field Reference
-**IMPORTANT**: Product entity uses `title` field, NOT `name`
-- **Correct**: `${product.title}`, `${myApp.applicantProduct.title}`
-- **Incorrect**: `${product.name}`, `${myApp.applicantProduct.name}`
-- **Error Result**: Thymeleaf runtime errors if using `.name`
+**IMPORTANT**: Product entity uses `name` field, NOT `title`
+- **Correct**: `${product.name}`, `${myApp.applicantProduct.name}`
+- **Incorrect**: `${product.title}`, `${myApp.applicantProduct.title}`
+- **Error Result**: Thymeleaf runtime errors if using `.title`
 
 ### ⚠️ Routing Endpoints
 **IMPORTANT**: Product creation endpoint is `/create`, NOT `/register`
@@ -135,7 +135,7 @@ The Product domain manages product listings, creation, editing, and product-rela
 ## Recent Updates and Fixes
 
 ### Template Field Name Resolution (Fixed)
-- ✅ Fixed all template references from `product.name` to `product.title`
+- ✅ Fixed all template references from `product.title` to `product.name`
 - ✅ Updated MyPage templates: applications.html, ongoing.html, received.html, collabos.html
 - ✅ Resolved Thymeleaf runtime errors related to field access
 

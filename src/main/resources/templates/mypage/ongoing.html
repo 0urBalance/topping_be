@@ -157,14 +157,14 @@
             <div class="content-grid">
                 <div th:each="collaboration : ${ongoingCollaborations}" class="collaboration-card">
                     <div class="collab-header">
-                        <h3 class="collab-title" th:text="${collaboration.product.title}">상품명</h3>
+                        <h3 class="collab-title" th:text="${collaboration.partnerProduct != null ? collaboration.partnerProduct.name : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.name : '상품명 없음')}">상품명</h3>
                         <span class="collab-status">진행중</span>
                     </div>
                     
                     <div class="partner-info">
-                        <div class="partner-avatar" th:text="${collaboration.product.creator != null ? #strings.substring(collaboration.product.creator.username, 0, 1) : '?'}">P</div>
+                        <div class="partner-avatar" th:text="${collaboration.partnerProduct != null and collaboration.partnerProduct.creator != null ? #strings.substring(collaboration.partnerProduct.creator.username, 0, 1) : (collaboration.initiatorProduct != null and collaboration.initiatorProduct.creator != null ? #strings.substring(collaboration.initiatorProduct.creator.username, 0, 1) : '?')}">P</div>
                         <div class="partner-details">
-                            <h4 th:text="${collaboration.product.creator != null ? collaboration.product.creator.username : '알 수 없음'}">파트너명</h4>
+                            <h4 th:text="${collaboration.partnerProduct != null and collaboration.partnerProduct.creator != null ? collaboration.partnerProduct.creator.username : (collaboration.initiatorProduct != null and collaboration.initiatorProduct.creator != null ? collaboration.initiatorProduct.creator.username : '알 수 없음')}">파트너명</h4>
                             <p>콜라보 파트너</p>
                         </div>
                     </div>
@@ -172,7 +172,7 @@
                     <div class="product-showcase">
                         <div class="product-item partner-product">
                             <div class="product-icon">🎯</div>
-                            <div class="product-name" th:text="${collaboration.product.title}">대상 상품</div>
+                            <div class="product-name" th:text="${collaboration.partnerProduct != null ? collaboration.partnerProduct.name : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.name : '상품명 없음')}">대상 상품</div>
                             <div class="product-role">콜라보 대상</div>
                         </div>
                         <div class="product-item my-product" th:if="${collaboration.initiatorProduct != null}">
@@ -207,7 +207,7 @@
                     </div>
                     
                     <div class="collaboration-actions">
-                        <a th:href="@{'/products/' + ${collaboration.product.uuid}}" class="action-btn btn-primary">상품 보기</a>
+                        <a th:href="@{'/products/' + ${collaboration.partnerProduct != null ? collaboration.partnerProduct.uuid : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.uuid : '#')}}" class="action-btn btn-primary">상품 보기</a>
                         <a href="/chat/rooms" class="action-btn btn-success">채팅하기</a>
                         <a th:if="${collaboration.partnerProduct != null}" 
                            th:href="@{'/products/' + ${collaboration.partnerProduct.uuid}}" 
@@ -230,7 +230,7 @@
             <div class="content-grid">
                 <div th:each="collaboration : ${acceptedReceivedApplications}" class="collaboration-card">
                     <div class="collab-header">
-                        <h3 class="collab-title" th:text="${collaboration.product.title}">내 상품명</h3>
+                        <h3 class="collab-title" th:text="${collaboration.partnerProduct != null ? collaboration.partnerProduct.name : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.name : '상품명 없음')}">내 상품명</h3>
                         <span class="collab-status">진행중</span>
                     </div>
                     
@@ -245,7 +245,7 @@
                     <div class="product-showcase">
                         <div class="product-item my-product">
                             <div class="product-icon">🏪</div>
-                            <div class="product-name" th:text="${collaboration.product.title}">내 상품</div>
+                            <div class="product-name" th:text="${collaboration.partnerProduct != null ? collaboration.partnerProduct.name : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.name : '상품명 없음')}">내 상품</div>
                             <div class="product-role">내가 제공</div>
                         </div>
                         <div class="product-item partner-product" th:if="${collaboration.partnerProduct != null}">
@@ -280,7 +280,7 @@
                     </div>
                     
                     <div class="collaboration-actions">
-                        <a th:href="@{'/products/' + ${collaboration.product.uuid}}" class="action-btn btn-primary">내 상품 관리</a>
+                        <a th:href="@{'/products/' + ${collaboration.partnerProduct != null ? collaboration.partnerProduct.uuid : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.uuid : '#')}}" class="action-btn btn-primary">내 상품 관리</a>
                         <a href="/chat/rooms" class="action-btn btn-success">채팅하기</a>
                         <a th:if="${collaboration.partnerProduct != null}" 
                            th:href="@{'/products/' + ${collaboration.partnerProduct.uuid}}" 

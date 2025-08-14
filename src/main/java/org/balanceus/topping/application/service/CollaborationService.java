@@ -134,6 +134,17 @@ public class CollaborationService {
             ChatRoom chatRoom = chatService.createChatRoomForCollaboration(savedCollaboration.getUuid());
             log.info("Created chat room {} for approved collaboration: {}", 
                     chatRoom.getUuid(), savedCollaboration.getUuid());
+                    
+            // Send system message about proposal acceptance
+            User actionUser = determineActionUser(proposal);
+            String statusMessage = String.format("🎉 %s님이 제안서를 수락했습니다!", actionUser.getUsername());
+            chatService.sendProposalStatusMessage(
+                chatRoom, 
+                org.balanceus.topping.domain.model.ChatMessage.MessageType.PROPOSAL_ACCEPTED,
+                statusMessage,
+                proposal,
+                actionUser
+            );
         } catch (Exception e) {
             log.error("Failed to create chat room for collaboration: {}", savedCollaboration.getUuid(), e);
         }
@@ -154,6 +165,25 @@ public class CollaborationService {
         CollaborationProposal proposal = proposalOpt.get();
         proposal.setStatus(org.balanceus.topping.domain.model.CollaborationProposal.CollaborationStatus.REJECTED);
         collaborationProposalRepository.save(proposal);
+
+        // Send system message about proposal rejection if there's an existing chat room
+        try {
+            Optional<org.balanceus.topping.domain.model.ChatRoom> chatRoomOpt = 
+                chatService.findChatRoomByProposal(proposal);
+            if (chatRoomOpt.isPresent()) {
+                User actionUser = determineActionUser(proposal);
+                String statusMessage = String.format("❌ %s님이 제안서를 거절했습니다.", actionUser.getUsername());
+                chatService.sendProposalStatusMessage(
+                    chatRoomOpt.get(),
+                    org.balanceus.topping.domain.model.ChatMessage.MessageType.PROPOSAL_REJECTED,
+                    statusMessage,
+                    proposal,
+                    actionUser
+                );
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send rejection message for proposal: {}", proposalId, e);
+        }
 
         log.info("Collaboration proposal rejected: {}", proposalId);
     }
@@ -196,5 +226,27 @@ public class CollaborationService {
         collaborationRepository.save(collaboration);
 
         log.info("Collaboration rejected: {}", collaborationId);
+    }
+    
+    /**
+     * Helper method to determine who is taking the action on a proposal
+     */
+    private User determineActionUser(CollaborationProposal proposal) {
+        // For acceptance/rejection, the target store owner is typically the one taking action
+        if (proposal.getTargetStore() != null && proposal.getTargetStore().getUser() != null) {
+            return proposal.getTargetStore().getUser();
+        }
+        
+        // Fallback to proposer if target is not available
+        if (proposal.getProposerUser() != null) {
+            return proposal.getProposerUser();
+        }
+        
+        if (proposal.getProposerStore() != null && proposal.getProposerStore().getUser() != null) {
+            return proposal.getProposerStore().getUser();
+        }
+        
+        // This should not happen in a well-formed proposal
+        throw new IllegalStateException("Cannot determine action user for proposal: " + proposal.getUuid());
     }
 }

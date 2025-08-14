@@ -48,9 +48,9 @@
 
         <div class="collaborations-grid">
             <div th:each="collaboration : ${collaborations}" class="collaboration-card">
-                <h3 th:text="${collaboration.product.name}">프로젝트 제목</h3>
+                <h3 th:text="${collaboration.partnerProduct != null ? collaboration.partnerProduct.name : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.name : '프로젝트 제목')}">프로젝트 제목</h3>
                 
-                <p><strong>프로젝트 작성자:</strong> <span th:text="${collaboration.product.creator != null ? collaboration.product.creator.username : '알 수 없음'}">작성자</span></p>
+                <p><strong>프로젝트 작성자:</strong> <span th:text="${collaboration.partnerProduct != null and collaboration.partnerProduct.creator != null ? collaboration.partnerProduct.creator.username : (collaboration.initiatorProduct != null and collaboration.initiatorProduct.creator != null ? collaboration.initiatorProduct.creator.username : '알 수 없음')}">작성자</span></p>
                 <p><strong>콜라보 신청자:</strong> <span th:text="${collaboration.initiatorStore != null and collaboration.initiatorStore.user != null ? collaboration.initiatorStore.user.username : '알 수 없음'}">신청자</span></p>
                 <p th:if="${collaboration.initiatorProduct != null}"><strong>신청자 상품:</strong> <span th:text="${collaboration.initiatorProduct.name}">신청자 상품</span></p>
                 
@@ -61,12 +61,12 @@
 
                 <div class="collaboration-message">
                     <strong>콜라보 신청 메시지:</strong><br>
-                    <span th:text="${collaboration.message}">콜라보 신청 메시지</span>
+                    <span th:text="${collaboration.description}">콜라보 신청 메시지</span>
                 </div>
 
                 <div class="collaboration-meta">
                     <p><strong>신청일:</strong> <span th:text="${#temporals.format(collaboration.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</span></p>
-                    <p><strong>카테고리:</strong> <span th:text="${collaboration.product.category}">카테고리</span></p>
+                    <p><strong>카테고리:</strong> <span th:text="${collaboration.partnerProduct != null and collaboration.partnerProduct.category != null ? collaboration.partnerProduct.category.displayName : (collaboration.initiatorProduct != null and collaboration.initiatorProduct.category != null ? collaboration.initiatorProduct.category.displayName : '카테고리 없음')}">카테고리</span></p>
                 </div>
 
                 <div class="actions" th:if="${collaboration.status.name() == 'PENDING'}">
@@ -79,7 +79,7 @@
                 </div>
 
                 <div class="actions">
-                    <a th:href="@{/products/{id}(id=${collaboration.product.uuid})}" class="btn btn-primary">프로젝트 보기</a>
+                    <a th:href="@{/products/{id}(id=${collaboration.partnerProduct != null ? collaboration.partnerProduct.uuid : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.uuid : '#')})}" class="btn btn-primary">프로젝트 보기</a>
                 </div>
             </div>
         </div>

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -121,5 +122,65 @@ public class ChatService {
     public void markMessagesAsRead(ChatRoom chatRoom, User user) {
         chatMessageRepository.markMessagesAsRead(chatRoom, user);
         log.info("Marked messages as read for user {} in room {}", user.getUuid(), chatRoom.getUuid());
+    }
+
+    // Proposal event messaging
+    @Transactional
+    public void sendProposalStatusMessage(ChatRoom chatRoom, ChatMessage.MessageType messageType, 
+                                        String statusMessage, CollaborationProposal proposal, User actionUser) {
+        ChatMessage systemMessage = new ChatMessage();
+        systemMessage.setChatRoom(chatRoom);
+        systemMessage.setSender(actionUser);
+        systemMessage.setMessage(statusMessage);
+        systemMessage.setMessageType(messageType);
+        systemMessage.setCollaborationProposal(proposal);
+        
+        // Store proposal data as JSON for potential future use
+        if (proposal != null) {
+            try {
+                Map<String, Object> proposalData = Map.of(
+                    "proposalId", proposal.getUuid(),
+                    "title", proposal.getTitle() != null ? proposal.getTitle() : "",
+                    "status", proposal.getStatus().name(),
+                    "actionUserId", actionUser.getUuid(),
+                    "timestamp", LocalDateTime.now().toString()
+                );
+                systemMessage.setProposalData(objectMapper.writeValueAsString(proposalData));
+            } catch (JsonProcessingException e) {
+                log.warn("Failed to serialize proposal data for message", e);
+            }
+        }
+        
+        ChatMessage savedMessage = chatMessageRepository.save(systemMessage);
+        log.info("Created proposal system message: {} in room {}", messageType, chatRoom.getUuid());
+        
+        // Broadcast via WebSocket
+        broadcastProposalMessage(chatRoom.getUuid(), savedMessage);
+    }
+    
+    private void broadcastProposalMessage(UUID roomId, ChatMessage message) {
+        try {
+            // Create message data for WebSocket broadcast
+            Map<String, Object> wsMessage = Map.of(
+                "messageId", message.getUuid(),
+                "messageType", message.getMessageType().name(),
+                "message", message.getMessage(),
+                "createdAt", message.getCreatedAt(),
+                "sender", Map.of(
+                    "uuid", message.getSender().getUuid(),
+                    "username", message.getSender().getUsername()
+                ),
+                "proposalData", message.getProposalData() != null ? message.getProposalData() : ""
+            );
+            
+            messagingTemplate.convertAndSend("/topic/chat/" + roomId, wsMessage);
+            log.info("Broadcasted proposal message to room {}", roomId);
+        } catch (Exception e) {
+            log.error("Failed to broadcast proposal message for room {}", roomId, e);
+        }
+    }
+    
+    public Optional<ChatRoom> findChatRoomByProposal(CollaborationProposal proposal) {
+        return chatRoomRepository.findByCollaborationProposal(proposal);
     }
 }

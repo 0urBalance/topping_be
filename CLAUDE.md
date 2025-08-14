@@ -138,6 +138,12 @@ All repositories follow a consistent three-layer pattern:
 - **API Content-Type**: Check response content-type before parsing JSON to avoid "Unexpected token '<'" errors
 - **ChatMessage Entity**: Use `readAt` and `isRead` fields for message read tracking, auto-set when user views chat room
 - **Unread Badge Styling**: Use `.unread-badge.hidden` class to hide badges when count is 0, not `display: none` directly
+- **⚠️ CRITICAL SpringEL Field References**: Collaboration entity ONLY has `initiatorProduct`, `partnerProduct`, `initiatorStore`, `partnerStore`, `title`, `description` fields. NEVER reference non-existent fields:
+  - ❌ `collaboration.product` → ✅ Use `collaboration.partnerProduct != null ? collaboration.partnerProduct : collaboration.initiatorProduct`
+  - ❌ `collaboration.applicantProduct` → ✅ Use `collaboration.initiatorProduct` 
+  - ❌ `collaboration.message` → ✅ Use `collaboration.description`
+  - ❌ `application.product` → ✅ Use conditional logic with `application.partnerProduct` and `application.initiatorProduct`
+  - **SpringEL Evaluation Exception Prevention**: Always verify entity field existence before template references to avoid runtime `Property or field 'X' cannot be found` errors
 
 ## Session Authentication Details
 - **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
@@ -243,6 +249,13 @@ All repositories follow a consistent three-layer pattern:
 - ✅ **Message Bubble Alignment**: Fixed "mine" vs "their" message styling with proper UUID comparison and session data extraction
 - ✅ **Timestamp Display Fix**: Korean-formatted timestamps (오전/오후 HH:mm) with robust date parsing and error handling
 - ✅ **Session Integration Enhancement**: Proper handling of `ApiResponseData<SessionUserInfo>` wrapper for accurate user identification
+- ✅ **SpringEL Evaluation Error Resolution**: Comprehensive fix for all non-existent entity field references across templates (37 total fixes)
+  - Fixed `collaboration.product` → conditional `partnerProduct`/`initiatorProduct` logic (12 occurrences)
+  - Fixed `applicantProduct` → `initiatorProduct` field references (12 occurrences)  
+  - Fixed `application.product` → conditional product field logic (6 occurrences)
+  - Fixed `receivedApp.product` → conditional product field logic (6 occurrences)
+  - Fixed `.message` → `.description` field references (3 occurrences)
+  - **Zero Runtime SpringEL Exceptions**: All "Property or field 'X' cannot be found" errors eliminated
 
 ## Documentation Navigation
 

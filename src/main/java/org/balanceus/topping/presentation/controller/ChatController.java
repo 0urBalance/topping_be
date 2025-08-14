@@ -387,4 +387,116 @@ public class ChatController {
 		public String getUsername() { return username; }
 		public void setUsername(String username) { this.username = username; }
 	}
+	
+	// Proposal update endpoints
+	@PostMapping("/room/{roomId}/proposal/update")
+	@ResponseBody
+	public ApiResponseData<Void> broadcastProposalUpdate(
+			@PathVariable UUID roomId,
+			@org.springframework.web.bind.annotation.RequestBody ProposalUpdateRequest request,
+			Principal principal) {
+		
+		try {
+			ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+					.orElseThrow(() -> new RuntimeException("Chat room not found"));
+			
+			User currentUser = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			
+			// Create proposal update message
+			String updateMessage = String.format("📝 %s님이 제안서를 수정했습니다.", currentUser.getUsername());
+			chatService.sendProposalStatusMessage(
+				chatRoom,
+				org.balanceus.topping.domain.model.ChatMessage.MessageType.PROPOSAL_MODIFIED,
+				updateMessage,
+				chatRoom.getCollaborationProposal(),
+				currentUser
+			);
+			
+			// Also broadcast proposal data update via separate channel
+			ProposalUpdateData updateData = new ProposalUpdateData();
+			updateData.setRoomId(roomId);
+			updateData.setUpdatedBy(currentUser.getUsername());
+			updateData.setUpdateType("PROPOSAL_MODIFIED");
+			updateData.setTimestamp(java.time.LocalDateTime.now());
+			
+			messagingTemplate.convertAndSend("/topic/proposal/" + roomId, updateData);
+			
+			return ApiResponseData.success(null);
+		} catch (Exception e) {
+			log.error("Failed to broadcast proposal update for room: {}", roomId, e);
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.ordinal(), "Failed to broadcast proposal update");
+		}
+	}
+	
+	// Request/Response classes for proposal updates
+	public static class ProposalUpdateRequest {
+		private String updateType;
+		private String message;
+		
+		public String getUpdateType() { return updateType; }
+		public void setUpdateType(String updateType) { this.updateType = updateType; }
+		
+		public String getMessage() { return message; }
+		public void setMessage(String message) { this.message = message; }
+	}
+	
+	public static class ProposalUpdateData {
+		private UUID roomId;
+		private String updatedBy;
+		private String updateType;
+		private java.time.LocalDateTime timestamp;
+		
+		public UUID getRoomId() { return roomId; }
+		public void setRoomId(UUID roomId) { this.roomId = roomId; }
+		
+		public String getUpdatedBy() { return updatedBy; }
+		public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
+		
+		public String getUpdateType() { return updateType; }
+		public void setUpdateType(String updateType) { this.updateType = updateType; }
+		
+		public java.time.LocalDateTime getTimestamp() { return timestamp; }
+		public void setTimestamp(java.time.LocalDateTime timestamp) { this.timestamp = timestamp; }
+	}
+	
+	// Get proposal ID for a chat room
+	@GetMapping("/room/{roomId}/proposal")
+	@ResponseBody
+	public ApiResponseData<ProposalInfo> getRoomProposal(@PathVariable UUID roomId) {
+		try {
+			ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+					.orElseThrow(() -> new RuntimeException("Chat room not found"));
+			
+			CollaborationProposal proposal = chatRoom.getCollaborationProposal();
+			if (proposal == null) {
+				return ApiResponseData.success(null);
+			}
+			
+			ProposalInfo proposalInfo = new ProposalInfo();
+			proposalInfo.setProposalId(proposal.getUuid());
+			proposalInfo.setTitle(proposal.getTitle());
+			proposalInfo.setStatus(proposal.getStatus().name());
+			
+			return ApiResponseData.success(proposalInfo);
+		} catch (Exception e) {
+			log.error("Failed to get proposal for room: {}", roomId, e);
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), "Failed to get proposal information");
+		}
+	}
+	
+	public static class ProposalInfo {
+		private UUID proposalId;
+		private String title;
+		private String status;
+		
+		public UUID getProposalId() { return proposalId; }
+		public void setProposalId(UUID proposalId) { this.proposalId = proposalId; }
+		
+		public String getTitle() { return title; }
+		public void setTitle(String title) { this.title = title; }
+		
+		public String getStatus() { return status; }
+		public void setStatus(String status) { this.status = status; }
+	}
 }

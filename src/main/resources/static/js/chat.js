@@ -216,6 +216,7 @@ b가게 맥주</textarea>
             </div>
             
             <div class="chat-body" id="chatBody">
+                ${this.renderProposalSummaryIfNeeded(messages, chatData)}
                 ${this.renderMessages(messages)}
             </div>
             
@@ -273,27 +274,33 @@ b가게 맥주</textarea>
                 currentDate = messageDate;
             }
             
-            const isOwn = message.senderId === this.currentUser?.uuid;
-            const bubbleClass = isOwn ? 'mine' : 'their';
-            
-            // Debug logging for message alignment
-            console.log('Message bubble alignment:', {
-                messageId: message.messageId,
-                senderId: message.senderId,
-                currentUserId: this.currentUser?.uuid,
-                isOwn: isOwn,
-                bubbleClass: bubbleClass,
-                createdAt: message.createdAt
-            });
-            
-            messagesHTML += `
-                <div class="message-group ${bubbleClass}">
-                    <div class="bubble ${bubbleClass}">
-                        ${this.escapeHtml(message.message)}
-                        <div class="message-time">${this.formatTime(message.createdAt)}</div>
+            // Check if this is a system message
+            const messageType = message.messageType || 'TEXT';
+            if (this.isSystemMessageType(messageType)) {
+                messagesHTML += this.renderSystemMessage(message);
+            } else {
+                const isOwn = message.senderId === this.currentUser?.uuid;
+                const bubbleClass = isOwn ? 'mine' : 'their';
+                
+                // Debug logging for message alignment
+                console.log('Message bubble alignment:', {
+                    messageId: message.messageId,
+                    senderId: message.senderId,
+                    currentUserId: this.currentUser?.uuid,
+                    isOwn: isOwn,
+                    bubbleClass: bubbleClass,
+                    createdAt: message.createdAt
+                });
+                
+                messagesHTML += `
+                    <div class="message-group ${bubbleClass}">
+                        <div class="bubble ${bubbleClass}">
+                            ${this.escapeHtml(message.message)}
+                            <div class="message-time">${this.formatTime(message.createdAt)}</div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         });
         
         return messagesHTML;
@@ -339,6 +346,17 @@ b가게 맥주</textarea>
                         this.appendMessage(messageData);
                     } catch (error) {
                         console.error('Error parsing WebSocket message:', error, message.body);
+                    }
+                });
+                
+                // Subscribe to proposal updates for this room
+                this.stompClient.subscribe(`/topic/proposal/${roomId}`, (message) => {
+                    try {
+                        const proposalUpdateData = JSON.parse(message.body);
+                        console.log('Received proposal update:', proposalUpdateData);
+                        this.handleProposalUpdate(proposalUpdateData);
+                    } catch (error) {
+                        console.error('Error parsing proposal update:', error, message.body);
                     }
                 });
             },
@@ -393,7 +411,7 @@ b가게 맥주</textarea>
         if (!chatBody) return;
         
         // Check if we need a date separator
-        const lastMessage = chatBody.querySelector('.message-group:last-child');
+        const lastMessage = chatBody.querySelector('.message-group:last-child, .system-message:last-child');
         const messageDate = this.formatDate(messageData.createdAt);
         let needDateSeparator = true;
         
@@ -414,32 +432,38 @@ b가게 맥주</textarea>
             `;
         }
         
-        const isOwn = messageData.sender?.uuid === this.currentUser?.uuid;
-        const bubbleClass = isOwn ? 'mine' : 'their';
-        
-        // Debug logging for real-time message alignment
-        console.log('Real-time message bubble alignment:', {
-            senderUuid: messageData.sender?.uuid,
-            currentUserId: this.currentUser?.uuid,
-            isOwn: isOwn,
-            bubbleClass: bubbleClass,
-            messageData: messageData
-        });
-        
-        messageHTML += `
-            <div class="message-group ${bubbleClass}">
-                <div class="bubble ${bubbleClass}">
-                    ${this.escapeHtml(messageData.message)}
-                    <div class="message-time">${this.formatTime(messageData.createdAt)}</div>
+        // Check if this is a system message (proposal status change)
+        const messageType = messageData.messageType || 'TEXT';
+        if (this.isSystemMessageType(messageType)) {
+            messageHTML += this.renderSystemMessage(messageData);
+        } else {
+            const isOwn = messageData.sender?.uuid === this.currentUser?.uuid;
+            const bubbleClass = isOwn ? 'mine' : 'their';
+            
+            // Debug logging for real-time message alignment
+            console.log('Real-time message bubble alignment:', {
+                senderUuid: messageData.sender?.uuid,
+                currentUserId: this.currentUser?.uuid,
+                isOwn: isOwn,
+                bubbleClass: bubbleClass,
+                messageData: messageData
+            });
+            
+            messageHTML += `
+                <div class="message-group ${bubbleClass}">
+                    <div class="bubble ${bubbleClass}">
+                        ${this.escapeHtml(messageData.message)}
+                        <div class="message-time">${this.formatTime(messageData.createdAt)}</div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
         
         chatBody.insertAdjacentHTML('beforeend', messageHTML);
         this.scrollToBottom();
         
         // Update unread badge for other rooms (if this message is from a different room)
-        if (!isOwn) {
+        if (messageType === 'TEXT' && !(messageData.sender?.uuid === this.currentUser?.uuid)) {
             this.updateUnreadBadges();
         }
     }
@@ -774,6 +798,204 @@ b가게 맥주</textarea>
         // Show default placeholder data
         this.showDefaultImages();
         // Form fields will keep their default values from the HTML template
+    }
+    
+    // System message handling
+    isSystemMessageType(messageType) {
+        return ['PROPOSAL_ACCEPTED', 'PROPOSAL_REJECTED', 'PROPOSAL_MODIFIED', 'PROPOSAL_STATUS_CHANGE', 'PROPOSAL_UPDATE'].includes(messageType);
+    }
+    
+    renderSystemMessage(messageData) {
+        const messageType = messageData.messageType;
+        let iconClass = 'info';
+        let bgClass = 'info';
+        
+        switch (messageType) {
+            case 'PROPOSAL_ACCEPTED':
+                iconClass = 'check_circle';
+                bgClass = 'success';
+                break;
+            case 'PROPOSAL_REJECTED':
+                iconClass = 'cancel';
+                bgClass = 'error';
+                break;
+            case 'PROPOSAL_MODIFIED':
+            case 'PROPOSAL_UPDATE':
+                iconClass = 'edit';
+                bgClass = 'warning';
+                break;
+            default:
+                iconClass = 'info';
+                bgClass = 'info';
+        }
+        
+        return `
+            <div class="system-message ${bgClass}" data-message-type="${messageType}">
+                <div class="system-message-content">
+                    <span class="material-symbols-outlined system-icon">${iconClass}</span>
+                    <span class="system-text">${this.escapeHtml(messageData.message)}</span>
+                    <button class="system-action-btn" onclick="chatInterface.handleSystemMessageClick('${messageType}', '${messageData.messageId}')">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+                <div class="system-time">${this.formatTime(messageData.createdAt)}</div>
+            </div>
+        `;
+    }
+    
+    handleSystemMessageClick(messageType, messageId) {
+        console.log('System message clicked:', messageType, messageId);
+        
+        // Open proposal panel for proposal-related system messages
+        if (this.isSystemMessageType(messageType)) {
+            const proposalPanel = document.getElementById('proposalPanel');
+            if (proposalPanel && !proposalPanel.classList.contains('open')) {
+                this.toggleProposalPanel();
+            }
+            
+            // Refresh proposal data to show latest changes
+            this.loadProposalData();
+        }
+    }
+    
+    handleProposalUpdate(updateData) {
+        console.log('Handling proposal update:', updateData);
+        
+        // If proposal panel is open, refresh its data
+        const proposalPanel = document.getElementById('proposalPanel');
+        if (proposalPanel && proposalPanel.classList.contains('open')) {
+            this.loadProposalData();
+        }
+        
+        // Show a subtle notification about the update
+        this.showProposalUpdateNotification(updateData);
+    }
+    
+    showProposalUpdateNotification(updateData) {
+        // Simple notification - could be enhanced with toast notifications
+        const notification = document.createElement('div');
+        notification.className = 'proposal-update-notification';
+        notification.innerHTML = `
+            <span class="material-symbols-outlined">update</span>
+            <span>${updateData.updatedBy}님이 제안서를 업데이트했습니다.</span>
+        `;
+        
+        // Add to chat body temporarily
+        const chatBody = document.getElementById('chatBody');
+        if (chatBody) {
+            chatBody.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        this.scrollToBottom();
+    }
+    
+    // Proposal Summary Card (shows at the top for first conversation)
+    renderProposalSummaryIfNeeded(messages, chatData) {
+        // Only show if this is the first conversation (no messages or only system messages)
+        const hasRegularMessages = messages && messages.some(msg => 
+            !msg.messageType || msg.messageType === 'TEXT'
+        );
+        
+        if (hasRegularMessages) {
+            return ''; // Don't show proposal summary if there are already regular messages
+        }
+        
+        // Check if we have collaboration proposal data
+        if (!chatData.collaborationId) {
+            return '';
+        }
+        
+        return `
+            <div class="proposal-summary-card" id="proposalSummaryCard">
+                <div class="proposal-summary-header">
+                    <span class="material-symbols-outlined">description</span>
+                    <h4>제안서 요약</h4>
+                    <button class="proposal-summary-close" onclick="chatInterface.hideProposalSummary()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                
+                <div class="proposal-summary-content">
+                    <div class="proposal-summary-photos">
+                        <div class="summary-photo-placeholder">
+                            <span class="material-symbols-outlined">image</span>
+                        </div>
+                        <div class="summary-photo-placeholder">
+                            <span class="material-symbols-outlined">image</span>
+                        </div>
+                    </div>
+                    
+                    <div class="proposal-summary-details">
+                        <div class="summary-field">
+                            <label>협업 유형</label>
+                            <span>음식점 상품 협업</span>
+                        </div>
+                        <div class="summary-field">
+                            <label>상품</label>
+                            <span>a가게 치킨 + b가게 맥주</span>
+                        </div>
+                        <div class="summary-field">
+                            <label>수익 배분</label>
+                            <span>5:5</span>
+                        </div>
+                        <div class="summary-field">
+                            <label>진행 기간</label>
+                            <span>1개월</span>
+                        </div>
+                    </div>
+                    
+                    <div class="proposal-summary-actions">
+                        <button class="btn btn-outline" onclick="chatInterface.toggleProposalPanel()">
+                            상세 보기
+                        </button>
+                        <button class="btn btn-solid" onclick="chatInterface.quickAcceptProposal()">
+                            수락하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    hideProposalSummary() {
+        const summaryCard = document.getElementById('proposalSummaryCard');
+        if (summaryCard) {
+            summaryCard.style.display = 'none';
+        }
+    }
+    
+    async quickAcceptProposal() {
+        try {
+            const response = await fetch('/api/proposals/accept', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ roomId: this.selectedRoomId }) 
+            });
+            
+            if (response.ok) {
+                this.showError('제안서를 수락했습니다!');
+                this.hideProposalSummary();
+                
+                // Trigger proposal update broadcast
+                await fetch(`/chat/room/${this.selectedRoomId}/proposal/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ updateType: 'PROPOSAL_ACCEPTED' })
+                });
+            } else {
+                this.showError('제안서 수락에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error accepting proposal:', error);
+            this.showError('제안서 수락 중 오류가 발생했습니다.');
+        }
     }
 }
 

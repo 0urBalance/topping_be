@@ -66,7 +66,11 @@ public class ChatMessage {
 	public enum MessageType {
 		TEXT("일반 메시지"),
 		PROPOSAL_SHARE("제안서 공유"),
-		PROPOSAL_UPDATE("제안서 업데이트");
+		PROPOSAL_UPDATE("제안서 업데이트"),
+		PROPOSAL_ACCEPTED("제안서 수락"),
+		PROPOSAL_REJECTED("제안서 거절"),
+		PROPOSAL_MODIFIED("제안서 수정"),
+		PROPOSAL_STATUS_CHANGE("제안서 상태 변경");
 
 		private final String displayName;
 

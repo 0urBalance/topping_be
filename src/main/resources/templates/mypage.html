@@ -261,7 +261,7 @@
             <div th:each="pendingApp : ${#lists.size(pendingApplications) > 3 ? #lists.subList(pendingApplications, 0, 3) : pendingApplications}" class="activity-item">
                 <div class="activity-icon pending">⏳</div>
                 <div class="activity-content">
-                    <div class="activity-title" th:text="'콜라보 신청: ' + ${pendingApp.product.name}">콜라보 신청</div>
+                    <div class="activity-title" th:text="'콜라보 신청: ' + ${pendingApp.partnerProduct != null ? pendingApp.partnerProduct.name : (pendingApp.initiatorProduct != null ? pendingApp.initiatorProduct.name : '상품명 없음')}">콜라보 신청</div>
                     <div class="activity-description">대기 중인 신청</div>
                 </div>
                 <div class="activity-time" th:text="${#temporals.format(pendingApp.createdAt, 'MM-dd')}">날짜</div>
@@ -271,7 +271,7 @@
             <div th:each="collaboration : ${#lists.size(ongoingCollaborations) > 2 ? #lists.subList(ongoingCollaborations, 0, 2) : ongoingCollaborations}" class="activity-item">
                 <div class="activity-icon accepted">🤝</div>
                 <div class="activity-content">
-                    <div class="activity-title" th:text="'진행중: ' + ${collaboration.product.name}">진행중 콜라보</div>
+                    <div class="activity-title" th:text="'진행중: ' + ${collaboration.partnerProduct != null ? collaboration.partnerProduct.name : (collaboration.initiatorProduct != null ? collaboration.initiatorProduct.name : '상품명 없음')}">진행중 콜라보</div>
                     <div class="activity-description">활성 콜라보레이션</div>
                 </div>
                 <div class="activity-time" th:text="${#temporals.format(collaboration.createdAt, 'MM-dd')}">날짜</div>
