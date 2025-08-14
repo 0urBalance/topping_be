@@ -22,6 +22,10 @@ public interface ChatRoomRepository {
 	List<ChatRoom> findByIsActiveTrue();
 	
 	List<ChatRoom> findByParticipant(User user);
+	
+	List<ChatRoom> findByCollaborationProposalParticipant(User user);
+	
+	List<ChatRoom> findByCollaborationParticipant(User user);
 
 	void deleteById(UUID uuid);
 }

@@ -517,7 +517,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">상품</label>
+                        <label class="form-label">상대방 상품 (선택사항)</label>
                         <div class="searchable-select">
                             <input type="text" placeholder="상품을 입력하세요" class="product-search-input" disabled>
                             <div class="dropdown" id="productDropdown">
@@ -526,6 +526,36 @@
                         </div>
                         <input type="hidden" name="targetProductId" id="selectedProductId">
                         <small class="form-text text-muted">먼저 가게를 선택하면 해당 가게의 상품을 선택할 수 있습니다.</small>
+                    </div>
+                </div>
+                
+                <!-- Proposer Product Selection -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">내 상품 (선택사항)</label>
+                        <div class="searchable-select">
+                            <input type="text" placeholder="내 상품을 선택하세요" class="proposer-product-search-input" id="proposerProductInput">
+                            <div class="dropdown" id="proposerProductDropdown">
+                                <div th:if="${userProducts != null and !userProducts.isEmpty()}">
+                                    <div th:each="product : ${userProducts}" 
+                                         class="option" 
+                                         th:data-value="${product.uuid}"
+                                         th:data-name="${product.name}"
+                                         th:data-price="${product.price}"
+                                         th:text="${product.name + (product.price != null ? ' - ' + product.price + '원' : ' - 가격 미정')}">
+                                    </div>
+                                </div>
+                                <div th:if="${userProducts == null or userProducts.isEmpty()}" class="option disabled">
+                                    등록된 상품이 없습니다
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="sourceProductId" id="selectedProposerProductId">
+                        <small class="form-text text-muted">콜라보에 참여할 내 상품을 선택해주세요 (선택사항).</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <!-- Empty column for layout balance -->
                     </div>
                 </div>
                 
@@ -981,7 +1011,67 @@
                     });
                 }
             });
+            
+            // Setup proposer product search functionality
+            setupProposerProductSearch();
         });
+        
+        // Proposer product search functionality
+        function setupProposerProductSearch() {
+            const proposerInput = document.querySelector('.proposer-product-search-input');
+            const proposerDropdown = document.getElementById('proposerProductDropdown');
+            
+            if (!proposerInput || !proposerDropdown) {
+                console.log('Proposer product elements not found');
+                return;
+            }
+            
+            const options = proposerDropdown.querySelectorAll('.option:not(.disabled)');
+            
+            // Input event for search
+            proposerInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                let hasVisibleOptions = false;
+                
+                options.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        option.style.display = 'block';
+                        hasVisibleOptions = true;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+                
+                proposerDropdown.classList.toggle('active', hasVisibleOptions && searchTerm.length > 0);
+            });
+            
+            // Focus event
+            proposerInput.addEventListener('focus', function() {
+                if (options.length > 0) {
+                    proposerDropdown.classList.add('active');
+                }
+            });
+            
+            // Blur event
+            proposerInput.addEventListener('blur', function() {
+                setTimeout(() => proposerDropdown.classList.remove('active'), 200);
+            });
+            
+            // Option click events
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.dataset.value;
+                    const name = this.dataset.name;
+                    
+                    console.log('Proposer product selected:', name, value);
+                    
+                    proposerInput.value = name;
+                    document.getElementById('selectedProposerProductId').value = value;
+                    proposerDropdown.classList.remove('active');
+                });
+            });
+        }
         
         // Auto-selection functionality
         function handleStoreSelection(storeUuid, storeName, storeCategory) {
@@ -1132,6 +1222,7 @@
             const description = document.querySelector('textarea[name="description"]').value.trim();
             const targetStoreId = document.querySelector('input[name="targetStoreId"]').value;
             const targetProductId = document.getElementById('selectedProductId').value;
+            const proposerProductId = document.getElementById('selectedProposerProductId').value;
             const startDate = document.getElementById('startDateInput').value;
             const endDate = document.getElementById('endDateInput').value;
             
@@ -1163,6 +1254,26 @@
                         e.preventDefault();
                         return;
                     }
+                }
+            }
+            
+            // Validate proposer product if selected
+            if (proposerProductId) {
+                const proposerInput = document.querySelector('.proposer-product-search-input');
+                const proposerDropdown = document.getElementById('proposerProductDropdown');
+                const validOptions = proposerDropdown.querySelectorAll('.option:not(.disabled)');
+                
+                let isValidProposerProduct = false;
+                validOptions.forEach(option => {
+                    if (option.dataset.value === proposerProductId) {
+                        isValidProposerProduct = true;
+                    }
+                });
+                
+                if (!isValidProposerProduct) {
+                    alert('유효하지 않은 내 상품이 선택되었습니다. 다시 선택해주세요.');
+                    e.preventDefault();
+                    return;
                 }
             }
             

@@ -387,7 +387,7 @@
                             </div>
                             <div class="product-item offered" th:if="${allApp.applicantProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${allApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-name" th:text="${allApp.applicantProduct.name}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
                             <div class="product-item offered" th:if="${allApp.applicantProduct == null}">
@@ -543,7 +543,7 @@
                             </div>
                             <div class="product-item offered" th:if="${acceptedApp.applicantProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${acceptedApp.applicantProduct.title}">파트너 상품</div>
+                                <div class="product-name" th:text="${acceptedApp.applicantProduct.name}">파트너 상품</div>
                                 <div class="product-type">파트너 제공</div>
                             </div>
                             <div class="product-item offered" th:if="${acceptedApp.applicantProduct == null}">
@@ -630,7 +630,7 @@
                             </div>
                             <div class="product-item offered" th:if="${rejectedApp.applicantProduct != null}">
                                 <div class="product-icon">🎁</div>
-                                <div class="product-name" th:text="${rejectedApp.applicantProduct.title}">제안 상품</div>
+                                <div class="product-name" th:text="${rejectedApp.applicantProduct.name}">제안 상품</div>
                                 <div class="product-type">신청자 상품</div>
                             </div>
                             <div class="product-item offered" th:if="${rejectedApp.applicantProduct == null}">

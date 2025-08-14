@@ -76,7 +76,7 @@
                                     <option value="">상품을 선택하세요 (선택사항)</option>
                                     <option th:each="product : ${userProducts}" 
                                             th:value="${product.uuid}" 
-                                            th:text="${product.title}">Product Name</option>
+                                            th:text="${product.name}">Product Name</option>
                                 </select>
                                 <div class="form-text">콜라보에 참여할 내 상품을 선택해주세요 (선택사항).</div>
                             </div>
@@ -142,7 +142,7 @@
                         data.data.forEach(product => {
                             const option = document.createElement('option');
                             option.value = product.uuid;
-                            option.textContent = product.title;
+                            option.textContent = product.name;
                             productSelect.appendChild(option);
                         });
                     } else {

@@ -22,7 +22,9 @@ public interface ChatRoomJpaRepository extends JpaRepository<ChatRoom, UUID> {
 	
 	@Query("SELECT cr FROM ChatRoom cr WHERE " +
 	       "cr.collaborationProposal IS NOT NULL AND " +
-	       "(cr.collaborationProposal.proposerUser = :user OR cr.collaborationProposal.targetStore.user = :user)")
+	       "(cr.collaborationProposal.proposerUser = :user OR " +
+	       "cr.collaborationProposal.proposerStore.user = :user OR " +
+	       "cr.collaborationProposal.targetStore.user = :user)")
 	List<ChatRoom> findByCollaborationProposalParticipant(@Param("user") User user);
 	
 	@Query("SELECT cr FROM ChatRoom cr JOIN cr.collaboration c " +

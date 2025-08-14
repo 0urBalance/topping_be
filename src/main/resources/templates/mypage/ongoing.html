@@ -175,12 +175,12 @@
                             <div class="product-name" th:text="${collaboration.product.title}">대상 상품</div>
                             <div class="product-role">콜라보 대상</div>
                         </div>
-                        <div class="product-item my-product" th:if="${collaboration.applicantProduct != null}">
+                        <div class="product-item my-product" th:if="${collaboration.initiatorProduct != null}">
                             <div class="product-icon">🎁</div>
-                            <div class="product-name" th:text="${collaboration.applicantProduct.title}">내 상품</div>
+                            <div class="product-name" th:text="${collaboration.initiatorProduct.name}">내 상품</div>
                             <div class="product-role">제안 상품</div>
                         </div>
-                        <div class="product-item my-product" th:if="${collaboration.applicantProduct == null}">
+                        <div class="product-item my-product" th:if="${collaboration.initiatorProduct == null}">
                             <div class="product-icon">🤝</div>
                             <div class="product-name">서비스 콜라보</div>
                             <div class="product-role">서비스 제안</div>
@@ -209,8 +209,8 @@
                     <div class="collaboration-actions">
                         <a th:href="@{'/products/' + ${collaboration.product.uuid}}" class="action-btn btn-primary">상품 보기</a>
                         <a href="/chat/rooms" class="action-btn btn-success">채팅하기</a>
-                        <a th:if="${collaboration.applicantProduct != null}" 
-                           th:href="@{'/products/' + ${collaboration.applicantProduct.uuid}}" 
+                        <a th:if="${collaboration.partnerProduct != null}" 
+                           th:href="@{'/products/' + ${collaboration.partnerProduct.uuid}}" 
                            class="action-btn btn-info">내 상품</a>
                         <a href="#" class="action-btn btn-warning">진행상황</a>
                     </div>
@@ -235,9 +235,9 @@
                     </div>
                     
                     <div class="partner-info">
-                        <div class="partner-avatar" th:text="${#strings.substring(collaboration.applicant.username, 0, 1)}">P</div>
+                        <div class="partner-avatar" th:text="${collaboration.initiatorStore != null and collaboration.initiatorStore.user != null ? #strings.substring(collaboration.initiatorStore.user.username, 0, 1) : (collaboration.partnerStore != null and collaboration.partnerStore.user != null ? #strings.substring(collaboration.partnerStore.user.username, 0, 1) : 'P')}">P</div>
                         <div class="partner-details">
-                            <h4 th:text="${collaboration.applicant.username}">신청자명</h4>
+                            <h4 th:text="${collaboration.initiatorStore != null and collaboration.initiatorStore.user != null ? collaboration.initiatorStore.user.username : (collaboration.partnerStore != null and collaboration.partnerStore.user != null ? collaboration.partnerStore.user.username : '알 수 없음')}">파트너명</h4>
                             <p>콜라보 파트너</p>
                         </div>
                     </div>
@@ -248,12 +248,12 @@
                             <div class="product-name" th:text="${collaboration.product.title}">내 상품</div>
                             <div class="product-role">내가 제공</div>
                         </div>
-                        <div class="product-item partner-product" th:if="${collaboration.applicantProduct != null}">
+                        <div class="product-item partner-product" th:if="${collaboration.partnerProduct != null}">
                             <div class="product-icon">🎁</div>
-                            <div class="product-name" th:text="${collaboration.applicantProduct.title}">파트너 상품</div>
+                            <div class="product-name" th:text="${collaboration.partnerProduct.name}">파트너 상품</div>
                             <div class="product-role">파트너 제공</div>
                         </div>
-                        <div class="product-item partner-product" th:if="${collaboration.applicantProduct == null}">
+                        <div class="product-item partner-product" th:if="${collaboration.partnerProduct == null}">
                             <div class="product-icon">🛠️</div>
                             <div class="product-name">서비스 제공</div>
                             <div class="product-role">파트너 서비스</div>
@@ -282,8 +282,8 @@
                     <div class="collaboration-actions">
                         <a th:href="@{'/products/' + ${collaboration.product.uuid}}" class="action-btn btn-primary">내 상품 관리</a>
                         <a href="/chat/rooms" class="action-btn btn-success">채팅하기</a>
-                        <a th:if="${collaboration.applicantProduct != null}" 
-                           th:href="@{'/products/' + ${collaboration.applicantProduct.uuid}}" 
+                        <a th:if="${collaboration.partnerProduct != null}" 
+                           th:href="@{'/products/' + ${collaboration.partnerProduct.uuid}}" 
                            class="action-btn btn-info">파트너 상품</a>
                         <a href="#" class="action-btn btn-warning">수익 확인</a>
                     </div>

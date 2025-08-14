@@ -171,7 +171,7 @@
                         </div>
                         <div class="meta-item" th:if="${myApp.applicantProduct != null}">
                             <span class="meta-icon">🎁</span>
-                            <span th:text="'제안상품: ' + ${myApp.applicantProduct.title}">제안상품</span>
+                            <span th:text="'제안상품: ' + ${myApp.applicantProduct.name}">제안상품</span>
                         </div>
                     </div>
                     
@@ -220,7 +220,7 @@
                         </div>
                         <div class="meta-item" th:if="${pendingApp.applicantProduct != null}">
                             <span class="meta-icon">🎁</span>
-                            <span th:text="'제안상품: ' + ${pendingApp.applicantProduct.title}">제안상품</span>
+                            <span th:text="'제안상품: ' + ${pendingApp.applicantProduct.name}">제안상품</span>
                         </div>
                     </div>
                     
@@ -266,7 +266,7 @@
                         </div>
                         <div class="meta-item" th:if="${acceptedApp.applicantProduct != null}">
                             <span class="meta-icon">🎁</span>
-                            <span th:text="'제안상품: ' + ${acceptedApp.applicantProduct.title}">제안상품</span>
+                            <span th:text="'제안상품: ' + ${acceptedApp.applicantProduct.name}">제안상품</span>
                         </div>
                     </div>
                     
@@ -311,7 +311,7 @@
                         </div>
                         <div class="meta-item" th:if="${rejectedApp.applicantProduct != null}">
                             <span class="meta-icon">🎁</span>
-                            <span th:text="'제안상품: ' + ${rejectedApp.applicantProduct.title}">제안상품</span>
+                            <span th:text="'제안상품: ' + ${rejectedApp.applicantProduct.name}">제안상품</span>
                         </div>
                     </div>
                     

@@ -51,8 +51,8 @@
                 <h3 th:text="${collaboration.product.name}">프로젝트 제목</h3>
                 
                 <p><strong>프로젝트 작성자:</strong> <span th:text="${collaboration.product.creator != null ? collaboration.product.creator.username : '알 수 없음'}">작성자</span></p>
-                <p><strong>콜라보 신청자:</strong> <span th:text="${collaboration.applicant.username}">신청자</span></p>
-                <p th:if="${collaboration.applicantProduct != null}"><strong>신청자 상품:</strong> <span th:text="${collaboration.applicantProduct.name}">신청자 상품</span></p>
+                <p><strong>콜라보 신청자:</strong> <span th:text="${collaboration.initiatorStore != null and collaboration.initiatorStore.user != null ? collaboration.initiatorStore.user.username : '알 수 없음'}">신청자</span></p>
+                <p th:if="${collaboration.initiatorProduct != null}"><strong>신청자 상품:</strong> <span th:text="${collaboration.initiatorProduct.name}">신청자 상품</span></p>
                 
                 <div class="status-badge" 
                      th:classappend="${collaboration.status.name() == 'PENDING'} ? 'status-pending' : (${collaboration.status.name() == 'ACCEPTED'} ? 'status-accepted' : 'status-rejected')">

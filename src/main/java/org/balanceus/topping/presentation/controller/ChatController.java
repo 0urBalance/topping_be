@@ -1,8 +1,11 @@
 package org.balanceus.topping.presentation.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.balanceus.topping.application.service.ChatService;
@@ -91,9 +94,14 @@ public class ChatController {
 		CollaborationProposal proposal = chatRoom.getCollaborationProposal();
 		User otherUser = null;
 		
-		User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
-			(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
-		User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		User proposerUser = null;
+		User targetUser = null;
+		
+		if (proposal != null) {
+			proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
+				(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
+			targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
+		}
 		
 		if (proposerUser != null && proposerUser.equals(currentUser)) {
 			otherUser = targetUser;
@@ -123,7 +131,9 @@ public class ChatController {
 		ChatRoomData data = new ChatRoomData();
 		data.setRoomId(chatRoom.getUuid());
 		data.setRoomName(chatRoom.getRoomName());
-		data.setCollaborationId(proposal.getUuid());
+		UUID collaborationId = proposal != null ? proposal.getUuid() : 
+			(chatRoom.getCollaboration() != null ? chatRoom.getCollaboration().getUuid() : null);
+		data.setCollaborationId(collaborationId);
 		data.setOtherUser(new UserInfo(otherUser.getUuid(), otherUser.getUsername()));
 		data.setMessages(messages.stream()
 			.map(msg -> new MessageInfo(
@@ -201,18 +211,27 @@ public class ChatController {
 		User user = userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
-		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
+		// Get chat rooms where user participates (from both proposals and collaborations)
+		List<ChatRoom> proposalRooms = chatRoomRepository.findByCollaborationProposalParticipant(user);
+		List<ChatRoom> collaborationRooms = chatRoomRepository.findByCollaborationParticipant(user);
 		
-		List<ChatRoom> userChatRooms = activeChatRooms.stream()
-				.filter(room -> {
-					CollaborationProposal proposal = room.getCollaborationProposal();
-					User proposerUser = proposal.getProposerUser() != null ? proposal.getProposerUser() : 
-						(proposal.getProposerStore() != null ? proposal.getProposerStore().getUser() : null);
-					User targetUser = proposal.getTargetStore() != null ? proposal.getTargetStore().getUser() : null;
-					return (proposerUser != null && proposerUser.equals(user)) || 
-						   (targetUser != null && targetUser.equals(user));
-				})
-				.toList();
+		// Combine and deduplicate
+		Set<UUID> seenRoomIds = new HashSet<>();
+		List<ChatRoom> userChatRooms = new ArrayList<>();
+		
+		for (ChatRoom room : proposalRooms) {
+			if (room.getIsActive() && seenRoomIds.add(room.getUuid())) {
+				userChatRooms.add(room);
+			}
+		}
+		for (ChatRoom room : collaborationRooms) {
+			if (room.getIsActive() && seenRoomIds.add(room.getUuid())) {
+				userChatRooms.add(room);
+			}
+		}
+		
+		log.info("Found {} chat rooms for user {} ({} from proposals, {} from collaborations)", 
+			userChatRooms.size(), user.getUsername(), proposalRooms.size(), collaborationRooms.size());
 
 		// Get unread message counts for each room
 		Map<UUID, Long> unreadCounts = chatService.getUnreadCountsByRoomsForUser(userChatRooms, user);
