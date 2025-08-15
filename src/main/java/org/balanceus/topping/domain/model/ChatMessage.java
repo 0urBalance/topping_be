@@ -45,7 +45,7 @@ public class ChatMessage {
 
 	private String message;
 
-	@Column(nullable = true)
+	@Column(nullable = true, name = "message_type")
 	@Enumerated(EnumType.STRING)
 	private MessageType messageType = MessageType.TEXT;
 

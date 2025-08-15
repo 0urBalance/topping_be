@@ -1,5 +1,7 @@
 package org.balanceus.topping.presentation.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -275,7 +277,29 @@ public class CollaborationProposalController {
 			
 			return "redirect:/mypage/received?success=proposal_accepted";
 		} catch (Exception e) {
-			return "redirect:/mypage/received?error=approval_failed&message=" + e.getMessage();
+			// Create a safe error message for URL parameter
+			String safeMessage;
+			try {
+				String rawMessage = e.getMessage() != null ? e.getMessage() : "Unknown error";
+				// Clean message: remove line breaks, quotes, brackets, and other problematic characters
+				String cleanMessage = rawMessage
+					.replaceAll("[\\r\\n\\[\\]\"'<>]", " ")
+					.replaceAll("\\s+", " ")
+					.trim();
+				
+				// Limit message length to avoid very long URLs
+				if (cleanMessage.length() > 50) {
+					cleanMessage = cleanMessage.substring(0, 50) + "...";
+				}
+				
+				// URL encode the message to handle any remaining special characters
+				safeMessage = URLEncoder.encode(cleanMessage, StandardCharsets.UTF_8);
+			} catch (Exception encodingException) {
+				// Ultimate fallback if even encoding fails
+				safeMessage = "encoding_error";
+			}
+			
+			return "redirect:/mypage/received?error=approval_failed&message=" + safeMessage;
 		}
 	}
 
