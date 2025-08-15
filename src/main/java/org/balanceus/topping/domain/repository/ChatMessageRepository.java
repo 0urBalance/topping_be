@@ -1,5 +1,6 @@
 package org.balanceus.topping.domain.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,4 +26,11 @@ public interface ChatMessageRepository {
 	Map<UUID, Long> getUnreadCountsByRoomsForUser(List<ChatRoom> chatRooms, User user);
 	
 	void markMessagesAsRead(ChatRoom chatRoom, User user);
+	
+	// Latest message methods
+	Optional<ChatMessage> findLatestMessageByRoom(ChatRoom chatRoom);
+	
+	Map<UUID, LocalDateTime> getLatestMessageTimesByRooms(List<ChatRoom> chatRooms);
+	
+	Map<UUID, String> getLatestMessagePreviewsByRooms(List<ChatRoom> chatRooms);
 }

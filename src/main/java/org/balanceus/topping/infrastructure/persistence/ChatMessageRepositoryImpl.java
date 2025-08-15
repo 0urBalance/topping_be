@@ -1,10 +1,15 @@
 package org.balanceus.topping.infrastructure.persistence;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import org.balanceus.topping.domain.model.ChatMessage;
 import org.balanceus.topping.domain.model.ChatRoom;
@@ -60,5 +65,59 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepository {
 	@Transactional
 	public void markMessagesAsRead(ChatRoom chatRoom, User user) {
 		jpaRepository.markMessagesAsRead(chatRoom, user);
+	}
+
+	@Override
+	public Optional<ChatMessage> findLatestMessageByRoom(ChatRoom chatRoom) {
+		Pageable pageable = PageRequest.of(0, 1);
+		List<ChatMessage> messages = jpaRepository.findLatestMessageByRoomPaginated(chatRoom, pageable);
+		return messages.isEmpty() ? Optional.empty() : Optional.of(messages.get(0));
+	}
+
+	@Override
+	public Map<UUID, LocalDateTime> getLatestMessageTimesByRooms(List<ChatRoom> chatRooms) {
+		Map<UUID, LocalDateTime> latestTimes = new HashMap<>();
+		
+		if (chatRooms.isEmpty()) {
+			return latestTimes;
+		}
+		
+		List<Object[]> results = jpaRepository.findLatestMessageTimesByRooms(chatRooms);
+		for (Object[] result : results) {
+			UUID roomId = (UUID) result[0];
+			LocalDateTime latestTime = (LocalDateTime) result[1];
+			latestTimes.put(roomId, latestTime);
+		}
+		
+		return latestTimes;
+	}
+
+	@Override
+	public Map<UUID, String> getLatestMessagePreviewsByRooms(List<ChatRoom> chatRooms) {
+		Map<UUID, String> latestPreviews = new HashMap<>();
+		
+		if (chatRooms.isEmpty()) {
+			return latestPreviews;
+		}
+		
+		// Extract room UUIDs for the native query
+		List<UUID> roomIds = chatRooms.stream()
+			.map(ChatRoom::getUuid)
+			.collect(Collectors.toList());
+		
+		List<Object[]> results = jpaRepository.findLatestMessagePreviewsByRooms(roomIds);
+		for (Object[] result : results) {
+			UUID roomId = (UUID) result[0];
+			String content = (String) result[1];
+			
+			// Truncate content for preview (limit to 30 characters)
+			String preview = content != null && content.length() > 30 
+				? content.substring(0, 30) + "..." 
+				: content;
+			
+			latestPreviews.put(roomId, preview);
+		}
+		
+		return latestPreviews;
 	}
 }

@@ -61,10 +61,12 @@
                     </div>
                     <div class="room-info">
                         <div class="room-name" th:text="${chatRoom.roomName != null ? chatRoom.roomName : '채팅방'}">채팅방 이름</div>
-                        <div class="room-preview">메시지 내용</div>
+                        <div class="room-preview" th:text="${chatRoom.displayPreview}">메시지 내용</div>
                     </div>
                     <div class="room-meta">
-                        <div class="room-time">오후 12:31</div>
+                        <div class="room-time" 
+                             th:text="${chatRoom.formattedTime}"
+                             th:title="${chatRoom.displayTime != null ? #temporals.format(chatRoom.displayTime, 'yyyy년 M월 d일 a h:mm', #locale) : ''}">오후 12:31</div>
                         <div class="unread-badge" 
                              th:if="${chatRoom.unreadCount != null and chatRoom.unreadCount > 0}"
                              th:text="${chatRoom.unreadCount}"

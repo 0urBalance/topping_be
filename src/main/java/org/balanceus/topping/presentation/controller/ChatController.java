@@ -1,9 +1,15 @@
 package org.balanceus.topping.presentation.controller;
 
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -327,9 +333,20 @@ public class ChatController {
 		// Get unread message counts for each room
 		Map<UUID, Long> unreadCounts = chatService.getUnreadCountsByRoomsForUser(userChatRooms, user);
 		
-		// Create enhanced chat room data with unread counts
+		// Get latest message times and previews for each room
+		Map<UUID, LocalDateTime> latestMessageTimes = chatMessageRepository.getLatestMessageTimesByRooms(userChatRooms);
+		Map<UUID, String> latestMessagePreviews = chatMessageRepository.getLatestMessagePreviewsByRooms(userChatRooms);
+		
+		// Create enhanced chat room data with unread counts and latest message data
 		List<ChatRoomWithUnreadCount> chatRoomsWithCounts = userChatRooms.stream()
-				.map(room -> new ChatRoomWithUnreadCount(room, unreadCounts.get(room.getUuid())))
+				.map(room -> new ChatRoomWithUnreadCount(
+					room, 
+					unreadCounts.get(room.getUuid()),
+					latestMessageTimes.get(room.getUuid()),
+					latestMessagePreviews.get(room.getUuid())
+				))
+				// Sort by latest activity (most recent first), then by creation time
+				.sorted(Comparator.comparing(ChatRoomWithUnreadCount::getDisplayTime).reversed())
 				.toList();
 
 		model.addAttribute("chatRooms", chatRoomsWithCounts);
@@ -425,14 +442,26 @@ public class ChatController {
 		public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
 	}
 
-	// Wrapper class to add unread count to ChatRoom for template usage
+	// Wrapper class to add unread count and latest message data to ChatRoom for template usage
 	public static class ChatRoomWithUnreadCount {
 		private final ChatRoom chatRoom;
 		private final Long unreadCount;
+		private final java.time.LocalDateTime latestMessageTime;
+		private final String latestMessagePreview;
 
 		public ChatRoomWithUnreadCount(ChatRoom chatRoom, Long unreadCount) {
 			this.chatRoom = chatRoom;
 			this.unreadCount = unreadCount != null ? unreadCount : 0L;
+			this.latestMessageTime = null;
+			this.latestMessagePreview = null;
+		}
+
+		public ChatRoomWithUnreadCount(ChatRoom chatRoom, Long unreadCount, 
+									   java.time.LocalDateTime latestMessageTime, String latestMessagePreview) {
+			this.chatRoom = chatRoom;
+			this.unreadCount = unreadCount != null ? unreadCount : 0L;
+			this.latestMessageTime = latestMessageTime;
+			this.latestMessagePreview = latestMessagePreview;
 		}
 
 		// Delegate ChatRoom methods
@@ -445,6 +474,49 @@ public class ChatController {
 
 		// Unread count
 		public Long getUnreadCount() { return unreadCount; }
+		
+		// Latest message data
+		public java.time.LocalDateTime getLatestMessageTime() { return latestMessageTime; }
+		public String getLatestMessagePreview() { return latestMessagePreview; }
+		
+		// Utility method to get display time or fallback to room creation time
+		public java.time.LocalDateTime getDisplayTime() {
+			return latestMessageTime != null ? latestMessageTime : chatRoom.getCreatedAt();
+		}
+		
+		// Utility method to get display preview or default message
+		public String getDisplayPreview() {
+			return latestMessagePreview != null ? latestMessagePreview : "메시지 내용";
+		}
+		
+		// Utility method for Korean relative time formatting
+		public String getFormattedTime() {
+			LocalDateTime time = getDisplayTime();
+			if (time == null) {
+				return "메시지 없음";
+			}
+			
+			LocalDate now = LocalDate.now();
+			LocalDate timeDate = time.toLocalDate();
+			
+			// Define Korean formatters
+			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("a h:mm", Locale.KOREAN);
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("M월 d일", Locale.KOREAN);
+			
+			if (timeDate.equals(now)) {
+				// Today - show only time
+				return time.format(timeFormatter);
+			} else if (timeDate.equals(now.minusDays(1))) {
+				// Yesterday
+				return "어제";
+			} else if (ChronoUnit.DAYS.between(timeDate, now) <= 7) {
+				// Within a week - show date
+				return time.format(dateFormatter);
+			} else {
+				// Older - show date
+				return time.format(dateFormatter);
+			}
+		}
 	}
 
 	// WebSocket message data class for broadcasting
