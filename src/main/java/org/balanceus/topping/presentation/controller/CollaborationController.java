@@ -356,8 +356,13 @@ public class CollaborationController {
 			return "redirect:/mypage/received?error=collaboration_not_found";
 		}
 		
-		// Verify that the current user is the product owner
-		if (!collaboration.getPartnerProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
+		// Validate collaboration has proper store relationship
+		if (collaboration.getPartnerStore() == null) {
+			return "redirect:/mypage/received?error=missing_store_data";
+		}
+		
+		// Verify that the current user owns the partner store
+		if (!collaboration.getPartnerStore().getUser().getUuid().equals(currentUser.getUuid())) {
 			return "redirect:/mypage/received?error=unauthorized_action";
 		}
 		
@@ -388,8 +393,13 @@ public class CollaborationController {
 			return "redirect:/mypage/received?error=collaboration_not_found";
 		}
 		
-		// Verify that the current user is the product owner
-		if (!collaboration.getPartnerProduct().getCreator().getUuid().equals(currentUser.getUuid())) {
+		// Validate collaboration has proper store relationship
+		if (collaboration.getPartnerStore() == null) {
+			return "redirect:/mypage/received?error=missing_store_data";
+		}
+		
+		// Verify that the current user owns the partner store
+		if (!collaboration.getPartnerStore().getUser().getUuid().equals(currentUser.getUuid())) {
 			return "redirect:/mypage/received?error=unauthorized_action";
 		}
 		

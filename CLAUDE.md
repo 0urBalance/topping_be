@@ -46,16 +46,25 @@ The platform is organized into distinct business domains. Each domain has compre
 
 ### Core Domains
 - **[👤 User Domain](./docs/domains/user/README.md)** - User accounts, profiles, and role-based access control
-- **[🏪 Store Domain](./docs/domains/store/README.md)** - Business store registration and management
+  - **[Claude Guidance](./docs/domains/user/CLAUDE.md)** - User authentication patterns, role management, and integration
+- **[🏪 Store Domain](./docs/domains/store/README.md)** - Business store registration and management  
+  - **[Claude Guidance](./docs/domains/store/CLAUDE.md)** - Three-phase registration, multi-image management, authorization patterns
 - **[📦 Product Domain](./docs/domains/product/README.md)** - Product listings and collaboration features
+  - **[Claude Guidance](./docs/domains/product/CLAUDE.md)** - Product routes, field references, template patterns, collaboration integration
 - **[🤝 Collaboration Domain](./docs/domains/collaboration/README.md)** - Business matching and partnership management
+  - **[Claude Guidance](./docs/domains/collaboration/CLAUDE.md)** - Dual entity architecture, field mappings, chat integration, proposal flows
 
-### Supporting Domains
+### Supporting Domains  
 - **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security and Kakao social login
+  - **[Claude Guidance](./docs/domains/auth/CLAUDE.md)** - Session management, Kakao OAuth, route protection, authorization patterns
 - **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication for collaborations
+  - **[Claude Guidance](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, unread tracking, automatic room creation
 - **[🔔 Notification Domain](./docs/domains/notification/README.md)** - Event-driven notifications
-- **[🎧 Support Domain](./docs/domains/support/README.md)** - Customer support system with FAQ and inquiry management
+  - **[Claude Guidance](./docs/domains/notification/CLAUDE.md)** - Event-driven notifications, UI integration, polling patterns
+- **[🎧 Support Domain](./docs/domains/support/README.md)** - Customer support system with FAQ and inquiry management  
+  - **[Claude Guidance](./docs/domains/support/CLAUDE.md)** - FAQ management, inquiry systems, admin interfaces, public access patterns
 - **[📋 Policy Domain](./docs/domains/policy/README.md)** - Privacy policy and terms of service with modal integration
+  - **[Claude Guidance](./docs/domains/policy/CLAUDE.md)** - Modal integration, agreement validation, footer integration patterns
 
 ## Development Standards
 
@@ -119,89 +128,45 @@ All repositories follow a consistent three-layer pattern:
 - Session authentication with JSESSIONID cookies
 
 ## ⚠️ Common Pitfalls
-- **Product Field**: Use `product.title`, NOT `product.name` in templates
-- **Product Routes**: Use `/products/create`, NOT `/products/register`
-- **Store Access**: Verify user role before store operations
+
+**IMPORTANT**: For domain-specific patterns and pitfalls, see individual domain Claude guidance files:
+- **[User Domain Pitfalls](./docs/domains/user/CLAUDE.md#common-pitfalls)**
+- **[Store Domain Pitfalls](./docs/domains/store/CLAUDE.md#common-pitfalls)**  
+- **[Product Domain Pitfalls](./docs/domains/product/CLAUDE.md#common-pitfalls)**
+- **[Collaboration Domain Pitfalls](./docs/domains/collaboration/CLAUDE.md#common-pitfalls)**
+- **[Auth Domain Pitfalls](./docs/domains/auth/CLAUDE.md#common-pitfalls)**
+- **[Chat Domain Pitfalls](./docs/domains/chat/CLAUDE.md#common-pitfalls)**
+
+### Universal Platform Pitfalls
 - **Session Auth**: Use Principal or UserDetailsImpl, not JWT tokens
 - **Entity Creation**: Never manually set UUID for @GeneratedValue entities
 - **Fragment Syntax**: Use `th:replace="~{fragments/navbar :: navbar}"` (Thymeleaf 3 syntax)
 - **JPA JOIN FETCH**: Avoid multiple JOIN FETCH in single query - causes Cartesian Product and data duplication
-- **DTO Field Binding**: Ensure Thymeleaf field references match actual DTO property names (e.g., `thumbnailPath` not `imageUrl`)
 - **Null-Safety in Templates**: Use proper null checks: `${object != null and !#strings.isEmpty(object.field)}`
 - **Template Parsing**: Avoid complex nested `th:if` and `th:each` within JavaScript inline sections - use JSON injection instead
 - **Entity Persistence**: Ensure POST endpoints create and save entities, not just validate form data
-- **Collaboration Forms**: Use server-side JSON generation with `ObjectMapper` for complex store-product data instead of nested Thymeleaf loops
 - **Entity Method Names**: All entities use `getUuid()` method, NOT `getUserId()`, `getRoomId()`, etc. (Lombok generates getters from field names)
-- **Chat Room Participants**: Always add null checks for collaboration participants - `targetBusinessOwner` can be null
 - **Mobile Navbar**: Use both inline `onclick` and JavaScript event listeners for maximum browser compatibility
-- **WebSocket Libraries**: Include SockJS and STOMP CDN libraries in chat templates before custom JavaScript
 - **API Content-Type**: Check response content-type before parsing JSON to avoid "Unexpected token '<'" errors
-- **ChatMessage Entity**: Use `readAt` and `isRead` fields for message read tracking, auto-set when user views chat room
-- **Unread Badge Styling**: Use `.unread-badge.hidden` class to hide badges when count is 0, not `display: none` directly
-- **⚠️ CRITICAL SpringEL Field References**: Collaboration entity ONLY has `initiatorProduct`, `partnerProduct`, `initiatorStore`, `partnerStore`, `title`, `description` fields. NEVER reference non-existent fields:
-  - ❌ `collaboration.product` → ✅ Use `collaboration.partnerProduct != null ? collaboration.partnerProduct : collaboration.initiatorProduct`
-  - ❌ `collaboration.applicantProduct` → ✅ Use `collaboration.initiatorProduct` 
-  - ❌ `collaboration.message` → ✅ Use `collaboration.description`
-  - ❌ `application.product` → ✅ Use conditional logic with `application.partnerProduct` and `application.initiatorProduct`
-  - **SpringEL Evaluation Exception Prevention**: Always verify entity field existence before template references to avoid runtime `Property or field 'X' cannot be found` errors
 
-## Session Authentication Details
-- **Session Management**: Configured with `SessionCreationPolicy.IF_REQUIRED`
-- **Session Persistence**: JSESSIONID cookie maintains authentication across requests
-- **Route Protection**: All feature routes (`/collabo/**`, `/mypage/**`, `/products/**`, `/stores/**`, `/support/inquiry*`, `/support/my-inquiries`) require authentication
-- **Template Integration**: Thymeleaf security integration with `sec:authorize="isAuthenticated()"`
-- **API Security**: Session-based endpoints (`/api/session/*`) for login/logout/status
-- **Role-based Access**: Store management requires `ROLE_BUSINESS_OWNER` or `ROLE_ADMIN`
-- **CSRF Protection**: CSRF protection disabled for simplified form handling
+## Domain-Specific Implementation Details
 
-## Kakao Social Login Integration
-- **Service Layer**: `KakaoService` handles OAuth flow and user management in application layer
-- **Domain Model**: `KakaoUserInfoDto` in domain layer with validation logic
-- **Session Integration**: Uses `SecurityContextHolder` for session-based authentication (NOT JWT)
-- **User Management**: Automatically creates new users with default settings (Seoul/Gangnam region, ROLE_USER)
-- **Error Handling**: Specific error messages for Kakao login failures in login template
-- **API Flow**: `/api/user/kakao/callback` → KakaoService → Spring Security session
-- **Configuration**: Uses `KAKAO_REST_API_KEY` environment variable
-- **Clean Architecture**: External API integration in application layer, business logic in domain layer
-- **RestTemplate**: Centralized configuration for external API calls
+**For detailed implementation patterns, see individual domain Claude guidance files:**
 
-## Customer Support System
-- **Public Access**: FAQ viewing (`/support/cs`) accessible to all users
-- **Authenticated Access**: Inquiry submission and management require login
-- **Repository Pattern**: Follows three-layer pattern (`SupportInquiryRepository`, `FAQRepository`)
-- **Entity Design**: Uses enums for categories and status tracking
-- **Template Structure**: Modern responsive design with search and pagination
+### Authentication & Authorization
+- **[Auth Domain Guide](./docs/domains/auth/CLAUDE.md)** - Session management, Kakao OAuth, route protection
+- **[User Domain Guide](./docs/domains/user/CLAUDE.md)** - Role-based access control, user management patterns
 
-## Chat System Integration
-- **Automatic Room Creation**: Chat rooms automatically created when collaborations are accepted
-- **Dual Entity Support**: Works with both `Collaboration` and `CollaborationProposal` entities
-- **Service Layer Architecture**: `ChatService` handles room creation with duplicate prevention
-- **WebSocket Integration**: Real-time messaging using STOMP protocol over SockJS with modern client implementation
-- **Modern UI Design**: Unified single-page interface with sidebar chat list and main chat panel
-- **Search & Navigation**: Chat room search functionality and responsive design
-- **Route**: `/chat/rooms` displays complete chat interface with automatic room selection
-- **Repository Pattern**: Three-layer pattern with dual query support for participant lookup
-- **Integration Points**: Automatic chat creation in `CollaborationController` and `CollaborationProposalController`
-- **Immediate Message Display**: Real-time WebSocket broadcasting ensures messages appear instantly for all users
+### Business Logic Domains  
+- **[Store Domain Guide](./docs/domains/store/CLAUDE.md)** - Three-phase registration, multi-image management
+- **[Product Domain Guide](./docs/domains/product/CLAUDE.md)** - Product routes, field references, collaboration integration
+- **[Collaboration Domain Guide](./docs/domains/collaboration/CLAUDE.md)** - Dual entity architecture, proposal flows
 
-### Chat API Endpoints
-- **`GET /chat/room/{roomId}/data`**: Returns complete chat room data as JSON (room info, messages, participants) and auto-marks messages as read
-- **`POST /chat/message/send`**: Accepts JSON message requests, saves to database, and broadcasts via WebSocket for immediate display
-- **`GET /api/session/user`**: Returns current authenticated user information wrapped in `ApiResponseData<SessionUserInfo>`
-- **WebSocket**: `/ws` endpoint with SockJS fallback and STOMP messaging to `/topic/chat/{roomId}`
-- **Real-time Broadcasting**: Uses `SimpMessagingTemplate` to broadcast messages immediately after saving to database
-- **Error Handling**: Comprehensive null-safety for collaboration participants and fallback user creation
-
-### Chat UI & UX Features
-- **Unified Interface**: Single-page chat experience with proper room-based message loading and display
-- **Message Bubble Design**: Right-aligned bubbles for own messages (`.bubble.mine`), left-aligned for others (`.bubble.their`)
-- **Color Scheme**: Dark brown (`#6B3410`) for own messages with white text, light gray (`#f1f1f1`) for received messages with dark text
-- **Timestamp Display**: Korean-formatted time display (오전/오후 HH:mm) with date separators (오늘, 어제, YYYY년 MM월 DD일)
-- **Unread Message Badges**: Red circular badges (`#dc3545`) with count display, hidden when no unread messages
-- **Accessibility**: ARIA labels for screen readers (`aria-label="읽지 않은 메시지 N개"`), high contrast support
-- **Real-time Updates**: Immediate message display with proper "mine" vs "their" alignment and WebSocket broadcasting
-- **Responsive Design**: Mobile-optimized bubble sizing, badge positioning, and CSS framework compliance
-- **Session Integration**: Proper user session handling with `ApiResponseData` wrapper extraction for UUID comparison
+### Communication & Support
+- **[Chat Domain Guide](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, automatic room creation
+- **[Notification Domain Guide](./docs/domains/notification/CLAUDE.md)** - Event-driven notifications, UI integration
+- **[Support Domain Guide](./docs/domains/support/CLAUDE.md)** - FAQ management, inquiry systems
+- **[Policy Domain Guide](./docs/domains/policy/CLAUDE.md)** - Modal integration, agreement validation
 
 ## Recent Status & Improvements
 - ✅ **Authentication System**: Migrated from JWT to session-based, fully stable
@@ -280,15 +245,15 @@ All repositories follow a consistent three-layer pattern:
 - **[Multipart Debug Resolution](./docs/troubleshooting/multipart/COMPLETE_MULTIPART_DEBUG_RESOLUTION.md)** - Comprehensive multipart debugging journey
 
 ### 🏗️ Quick Domain Access
-- [User Management](./docs/domains/user/README.md) - User accounts and roles
-- [Store Management](./docs/domains/store/README.md) - Business store operations
-- [Product Management](./docs/domains/product/README.md) - Product listings and features
-- [Collaboration Platform](./docs/domains/collaboration/README.md) - Business matching and proposals
-- [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management
-- [Chat System](./docs/domains/chat/README.md) - Real-time messaging
-- [Notification System](./docs/domains/notification/README.md) - Event-driven alerts
-- [Customer Support](./docs/domains/support/README.md) - FAQ and inquiry management
-- [Policy Management](./docs/domains/policy/README.md) - Privacy policy and terms of service
+- [User Management](./docs/domains/user/README.md) - User accounts and roles | [Claude Guide](./docs/domains/user/CLAUDE.md)
+- [Store Management](./docs/domains/store/README.md) - Business store operations | [Claude Guide](./docs/domains/store/CLAUDE.md)
+- [Product Management](./docs/domains/product/README.md) - Product listings and features | [Claude Guide](./docs/domains/product/CLAUDE.md)
+- [Collaboration Platform](./docs/domains/collaboration/README.md) - Business matching and proposals | [Claude Guide](./docs/domains/collaboration/CLAUDE.md)
+- [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management | [Claude Guide](./docs/domains/auth/CLAUDE.md)
+- [Chat System](./docs/domains/chat/README.md) - Real-time messaging | [Claude Guide](./docs/domains/chat/CLAUDE.md)
+- [Notification System](./docs/domains/notification/README.md) - Event-driven alerts | [Claude Guide](./docs/domains/notification/CLAUDE.md)
+- [Customer Support](./docs/domains/support/README.md) - FAQ and inquiry management | [Claude Guide](./docs/domains/support/CLAUDE.md)
+- [Policy Management](./docs/domains/policy/README.md) - Privacy policy and terms of service | [Claude Guide](./docs/domains/policy/CLAUDE.md)
 
 ## 🎯 Project Status: Production Ready
 

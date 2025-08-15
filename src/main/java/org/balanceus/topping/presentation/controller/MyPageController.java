@@ -55,14 +55,10 @@ public class MyPageController {
 		Store userStore = storeRepository.findByUser(user).orElse(null);
 		log.debug("User store: {}", userStore != null ? userStore.getUuid() : "null");
 
-		// Get user's proposals (both as user and store owner)
-		List<CollaborationProposal> proposals = proposalRepository.findByProposerUser(user);
-		log.debug("Found {} proposals by proposer user: {}", proposals.size(), user.getUuid());
-		if (userStore != null) {
-			List<CollaborationProposal> storeProposals = proposalRepository.findByProposerStore(userStore);
-			log.debug("Found {} proposals by proposer store: {}", storeProposals.size(), userStore.getUuid());
-			proposals.addAll(storeProposals);
-		}
+		// Get user's proposals (both as user and store owner) - use OR query to prevent duplicates
+		List<CollaborationProposal> proposals = userStore != null ? 
+			proposalRepository.findByProposerUserOrProposerStore(user, userStore) : 
+			proposalRepository.findByProposerUser(user);
 		log.debug("Total proposals for user: {}", proposals.size());
 		
 		// Get user's collaboration applications (submitted via apply form)
@@ -90,12 +86,6 @@ public class MyPageController {
 		List<CollaborationProposal> receivedProposals = userStore != null ? 
 			proposalRepository.findByTargetStore(userStore) : List.of();
 		
-		// Also include proposals with null target store (general proposals for business owners)
-		if (userStore != null) {
-			List<CollaborationProposal> generalProposals = proposalRepository.findByTargetStoreIsNull();
-			log.debug("Found {} general proposals (null target store)", generalProposals.size());
-			receivedProposals.addAll(generalProposals);
-		}
 		log.debug("Total received proposals: {}", receivedProposals.size());
 		
 		// Get user's registered products
@@ -216,11 +206,10 @@ public class MyPageController {
 		// Get user's store if exists
 		Store userStore = storeRepository.findByUser(user).orElse(null);
 		
-		// Get user's proposals (both as user and store owner)
-		List<CollaborationProposal> proposals = proposalRepository.findByProposerUser(user);
-		if (userStore != null) {
-			proposals.addAll(proposalRepository.findByProposerStore(userStore));
-		}
+		// Get user's proposals (both as user and store owner) - use OR query to prevent duplicates
+		List<CollaborationProposal> proposals = userStore != null ? 
+			proposalRepository.findByProposerUserOrProposerStore(user, userStore) : 
+			proposalRepository.findByProposerUser(user);
 		
 		// Get user's collaboration applications (submitted via apply form)
 		List<Collaboration> myApplications = userStore != null ? 
@@ -364,12 +353,6 @@ public class MyPageController {
 		List<CollaborationProposal> receivedProposals = userStore2 != null ? 
 			proposalRepository.findByTargetStore(userStore2) : List.of();
 		
-		// Also include general proposals (null target store) for business owners  
-		if (userStore2 != null) {
-			List<CollaborationProposal> generalProposals = proposalRepository.findByTargetStoreIsNull();
-			log.debug("Found {} general proposals for received page", generalProposals.size());
-			receivedProposals.addAll(generalProposals);
-		}
 		log.debug("Total received proposals for received page: {}", receivedProposals.size());
 		
 		// Sort by creation date (newest first)
