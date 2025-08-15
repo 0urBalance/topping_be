@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,15 +77,106 @@ public class ChatService {
             return existingRoom.get();
         }
 
+        // Find the originating proposal for this collaboration
+        CollaborationProposal originatingProposal = findOriginatingProposal(collaboration);
+        if (originatingProposal == null) {
+            log.warn("No originating proposal found for collaboration: {}", collaborationId);
+        }
+
         ChatRoom chatRoom = ChatRoom.builder()
                 .collaboration(collaboration)
-                .roomName(generateRoomName(collaboration))
+                .collaborationProposal(originatingProposal) // CRITICAL: Link to originating proposal
+                .roomName(generateRoomName(collaboration, originatingProposal))
                 .isActive(true)
                 .build();
 
         ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
-        log.info("Created chat room {} for collaboration: {}", savedRoom.getUuid(), collaborationId);
+        log.info("Created chat room {} for collaboration: {} with proposal link: {}", 
+                savedRoom.getUuid(), collaborationId, 
+                originatingProposal != null ? originatingProposal.getUuid() : "none");
         return savedRoom;
+    }
+
+    /**
+     * Find the originating proposal for a given collaboration.
+     * This method implements the canonical lookup logic to ensure proper proposal-chat linkage.
+     */
+    private CollaborationProposal findOriginatingProposal(Collaboration collaboration) {
+        if (collaboration == null) {
+            return null;
+        }
+        
+        try {
+            // Method 1: Direct lookup by collaboration reference
+            // Look for a proposal that has this collaboration linked to it
+            List<CollaborationProposal> proposalsWithCollaboration = 
+                collaborationProposalRepository.findAll().stream()
+                .filter(proposal -> proposal.getCollaboration() != null && 
+                               proposal.getCollaboration().getUuid().equals(collaboration.getUuid()))
+                .toList();
+                
+            if (!proposalsWithCollaboration.isEmpty()) {
+                if (proposalsWithCollaboration.size() > 1) {
+                    log.warn("Multiple proposals found for collaboration {}, using first one", 
+                             collaboration.getUuid());
+                }
+                return proposalsWithCollaboration.get(0);
+            }
+            
+            // Method 2: Heuristic lookup by matching attributes
+            // If no direct link exists, try to find proposal by matching store and product combinations
+            List<CollaborationProposal> candidateProposals = collaborationProposalRepository
+                .findByStatus(CollaborationProposal.CollaborationStatus.ACCEPTED);
+                
+            for (CollaborationProposal proposal : candidateProposals) {
+                if (isProposalMatchForCollaboration(proposal, collaboration)) {
+                    log.info("Found matching proposal {} for collaboration {} via heuristic lookup", 
+                             proposal.getUuid(), collaboration.getUuid());
+                    return proposal;
+                }
+            }
+            
+            log.warn("No originating proposal found for collaboration: {}", collaboration.getUuid());
+            return null;
+            
+        } catch (Exception e) {
+            log.error("Error finding originating proposal for collaboration {}: {}", 
+                     collaboration.getUuid(), e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Heuristic method to check if a proposal matches a collaboration based on participants and products
+     */
+    private boolean isProposalMatchForCollaboration(CollaborationProposal proposal, Collaboration collaboration) {
+        // Check if stores match
+        boolean storesMatch = false;
+        if (proposal.getTargetStore() != null && collaboration.getPartnerStore() != null) {
+            storesMatch = proposal.getTargetStore().getUuid().equals(collaboration.getPartnerStore().getUuid());
+        }
+        if (proposal.getProposerStore() != null && collaboration.getInitiatorStore() != null) {
+            storesMatch = storesMatch || proposal.getProposerStore().getUuid().equals(collaboration.getInitiatorStore().getUuid());
+        }
+        
+        // Check if products match
+        boolean productsMatch = false;
+        if (proposal.getTargetProduct() != null && collaboration.getPartnerProduct() != null) {
+            productsMatch = proposal.getTargetProduct().getUuid().equals(collaboration.getPartnerProduct().getUuid());
+        }
+        if (proposal.getProposerProduct() != null && collaboration.getInitiatorProduct() != null) {
+            productsMatch = productsMatch || proposal.getProposerProduct().getUuid().equals(collaboration.getInitiatorProduct().getUuid());
+        }
+        
+        // Check if titles match (loose comparison)
+        boolean titlesMatch = false;
+        if (proposal.getTitle() != null && collaboration.getTitle() != null) {
+            titlesMatch = proposal.getTitle().equals(collaboration.getTitle());
+        }
+        
+        // Require at least 2 out of 3 criteria to match
+        int matchCount = (storesMatch ? 1 : 0) + (productsMatch ? 1 : 0) + (titlesMatch ? 1 : 0);
+        return matchCount >= 2;
     }
 
     private String generateRoomName(CollaborationProposal proposal) {
@@ -99,6 +191,16 @@ public class ChatService {
             proposal.getTargetStore().getName() : "Target Store";
             
         return String.format("%s - %s", proposerName, targetName);
+    }
+
+    private String generateRoomName(Collaboration collaboration, CollaborationProposal originatingProposal) {
+        // Prefer proposal information if available (more detailed and original)
+        if (originatingProposal != null) {
+            return generateRoomName(originatingProposal);
+        }
+        
+        // Fallback to collaboration information
+        return generateRoomName(collaboration);
     }
 
     private String generateRoomName(Collaboration collaboration) {
@@ -312,5 +414,371 @@ public class ChatService {
     
     public Optional<ChatRoom> findChatRoomByProposal(CollaborationProposal proposal) {
         return chatRoomRepository.findByCollaborationProposal(proposal);
+    }
+    
+    /**
+     * Backfill missing proposal links for existing chat rooms.
+     * This method repairs chat rooms that have collaboration but missing collaborationProposal reference.
+     * Safe to run multiple times (idempotent).
+     */
+    @Transactional
+    public BackfillResult backfillMissingProposalLinks() {
+        log.info("Starting backfill of missing proposal links for chat rooms");
+        
+        BackfillResult result = new BackfillResult();
+        
+        try {
+            // Find chat rooms that have collaboration but missing collaborationProposal
+            List<ChatRoom> roomsNeedingBackfill = chatRoomRepository.findAll().stream()
+                .filter(room -> room.getCollaboration() != null && room.getCollaborationProposal() == null)
+                .toList();
+                
+            log.info("Found {} chat rooms needing proposal backfill", roomsNeedingBackfill.size());
+            result.setTotalRoomsFound(roomsNeedingBackfill.size());
+            
+            for (ChatRoom room : roomsNeedingBackfill) {
+                try {
+                    CollaborationProposal originatingProposal = findOriginatingProposal(room.getCollaboration());
+                    
+                    if (originatingProposal != null) {
+                        room.setCollaborationProposal(originatingProposal);
+                        chatRoomRepository.save(room);
+                        result.incrementSuccessfullyLinked();
+                        
+                        log.info("Backfilled proposal link for chat room {} -> proposal {}", 
+                                room.getUuid(), originatingProposal.getUuid());
+                    } else {
+                        result.incrementNoProposalFound();
+                        log.warn("No originating proposal found for chat room {} with collaboration {}", 
+                                room.getUuid(), room.getCollaboration().getUuid());
+                    }
+                    
+                } catch (Exception e) {
+                    result.incrementErrors();
+                    log.error("Error backfilling proposal link for chat room {}: {}", 
+                             room.getUuid(), e.getMessage(), e);
+                }
+            }
+            
+            log.info("Backfill completed: {} successful, {} no proposal found, {} errors", 
+                    result.getSuccessfullyLinked(), result.getNoProposalFound(), result.getErrors());
+                    
+        } catch (Exception e) {
+            log.error("Error during backfill operation: {}", e.getMessage(), e);
+            result.setOverallError(e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Get statistics about chat room proposal linkage for monitoring/validation
+     */
+    public LinkageStatistics getProposalLinkageStatistics() {
+        try {
+            List<ChatRoom> allRooms = chatRoomRepository.findAll();
+            
+            LinkageStatistics stats = new LinkageStatistics();
+            stats.setTotalChatRooms(allRooms.size());
+            
+            long roomsWithProposalOnly = allRooms.stream()
+                .filter(room -> room.getCollaborationProposal() != null && room.getCollaboration() == null)
+                .count();
+            stats.setRoomsWithProposalOnly(roomsWithProposalOnly);
+            
+            long roomsWithCollaborationOnly = allRooms.stream()
+                .filter(room -> room.getCollaboration() != null && room.getCollaborationProposal() == null)
+                .count();
+            stats.setRoomsWithCollaborationOnly(roomsWithCollaborationOnly);
+            
+            long roomsWithBothLinks = allRooms.stream()
+                .filter(room -> room.getCollaboration() != null && room.getCollaborationProposal() != null)
+                .count();
+            stats.setRoomsWithBothLinks(roomsWithBothLinks);
+            
+            long roomsWithNeitherLink = allRooms.stream()
+                .filter(room -> room.getCollaboration() == null && room.getCollaborationProposal() == null)
+                .count();
+            stats.setRoomsWithNeitherLink(roomsWithNeitherLink);
+            
+            return stats;
+            
+        } catch (Exception e) {
+            log.error("Error gathering linkage statistics: {}", e.getMessage(), e);
+            LinkageStatistics errorStats = new LinkageStatistics();
+            errorStats.setError(e.getMessage());
+            return errorStats;
+        }
+    }
+    
+    // Result classes for backfill operations
+    public static class BackfillResult {
+        private int totalRoomsFound = 0;
+        private int successfullyLinked = 0;
+        private int noProposalFound = 0;
+        private int errors = 0;
+        private String overallError;
+        
+        public int getTotalRoomsFound() { return totalRoomsFound; }
+        public void setTotalRoomsFound(int totalRoomsFound) { this.totalRoomsFound = totalRoomsFound; }
+        
+        public int getSuccessfullyLinked() { return successfullyLinked; }
+        public void incrementSuccessfullyLinked() { this.successfullyLinked++; }
+        
+        public int getNoProposalFound() { return noProposalFound; }
+        public void incrementNoProposalFound() { this.noProposalFound++; }
+        
+        public int getErrors() { return errors; }
+        public void incrementErrors() { this.errors++; }
+        
+        public String getOverallError() { return overallError; }
+        public void setOverallError(String overallError) { this.overallError = overallError; }
+        
+        public boolean isSuccessful() { return overallError == null && errors == 0; }
+    }
+    
+    public static class LinkageStatistics {
+        private int totalChatRooms;
+        private long roomsWithProposalOnly;
+        private long roomsWithCollaborationOnly;
+        private long roomsWithBothLinks;
+        private long roomsWithNeitherLink;
+        private String error;
+        
+        public int getTotalChatRooms() { return totalChatRooms; }
+        public void setTotalChatRooms(int totalChatRooms) { this.totalChatRooms = totalChatRooms; }
+        
+        public long getRoomsWithProposalOnly() { return roomsWithProposalOnly; }
+        public void setRoomsWithProposalOnly(long roomsWithProposalOnly) { this.roomsWithProposalOnly = roomsWithProposalOnly; }
+        
+        public long getRoomsWithCollaborationOnly() { return roomsWithCollaborationOnly; }
+        public void setRoomsWithCollaborationOnly(long roomsWithCollaborationOnly) { this.roomsWithCollaborationOnly = roomsWithCollaborationOnly; }
+        
+        public long getRoomsWithBothLinks() { return roomsWithBothLinks; }
+        public void setRoomsWithBothLinks(long roomsWithBothLinks) { this.roomsWithBothLinks = roomsWithBothLinks; }
+        
+        public long getRoomsWithNeitherLink() { return roomsWithNeitherLink; }
+        public void setRoomsWithNeitherLink(long roomsWithNeitherLink) { this.roomsWithNeitherLink = roomsWithNeitherLink; }
+        
+        public String getError() { return error; }
+        public void setError(String error) { this.error = error; }
+        
+        public double getHealthPercentage() {
+            if (totalChatRooms == 0) return 100.0;
+            return (double) roomsWithBothLinks / totalChatRooms * 100.0;
+        }
+    }
+    
+    /**
+     * Validate the integrity of chat room proposal linkages.
+     * This method performs comprehensive validation checks and reports any inconsistencies.
+     */
+    public ValidationReport validateProposalLinkageIntegrity() {
+        log.info("Starting comprehensive validation of proposal linkage integrity");
+        
+        ValidationReport report = new ValidationReport();
+        
+        try {
+            List<ChatRoom> allRooms = chatRoomRepository.findAll();
+            report.setTotalRoomsChecked(allRooms.size());
+            
+            for (ChatRoom room : allRooms) {
+                validateSingleRoom(room, report);
+            }
+            
+            // Additional system-wide checks
+            validateSystemWideConsistency(report);
+            
+            log.info("Validation completed: {} rooms checked, {} issues found", 
+                    report.getTotalRoomsChecked(), report.getTotalIssues());
+                    
+        } catch (Exception e) {
+            report.setOverallError("Validation failed: " + e.getMessage());
+            log.error("Error during validation: {}", e.getMessage(), e);
+        }
+        
+        return report;
+    }
+    
+    private void validateSingleRoom(ChatRoom room, ValidationReport report) {
+        try {
+            // Check 1: Room has at least one linkage
+            if (room.getCollaboration() == null && room.getCollaborationProposal() == null) {
+                report.addIssue(ValidationIssue.orphanedRoom(room.getUuid()));
+            }
+            
+            // Check 2: If room has collaboration, verify it exists
+            if (room.getCollaboration() != null) {
+                Optional<Collaboration> collaboration = collaborationRepository.findById(room.getCollaboration().getUuid());
+                if (collaboration.isEmpty()) {
+                    report.addIssue(ValidationIssue.brokenCollaborationLink(room.getUuid(), room.getCollaboration().getUuid()));
+                }
+            }
+            
+            // Check 3: If room has proposal, verify it exists  
+            if (room.getCollaborationProposal() != null) {
+                Optional<CollaborationProposal> proposal = collaborationProposalRepository.findById(room.getCollaborationProposal().getUuid());
+                if (proposal.isEmpty()) {
+                    report.addIssue(ValidationIssue.brokenProposalLink(room.getUuid(), room.getCollaborationProposal().getUuid()));
+                }
+            }
+            
+            // Check 4: If room has both links, verify they match
+            if (room.getCollaboration() != null && room.getCollaborationProposal() != null) {
+                CollaborationProposal proposal = room.getCollaborationProposal();
+                if (proposal.getCollaboration() == null || 
+                    !proposal.getCollaboration().getUuid().equals(room.getCollaboration().getUuid())) {
+                    report.addIssue(ValidationIssue.mismatchedLinks(room.getUuid(), 
+                        room.getCollaboration().getUuid(), room.getCollaborationProposal().getUuid()));
+                }
+            }
+            
+            // Check 5: Room missing proposal link (primary issue we're fixing)
+            if (room.getCollaboration() != null && room.getCollaborationProposal() == null) {
+                report.addIssue(ValidationIssue.missingProposalLink(room.getUuid(), room.getCollaboration().getUuid()));
+            }
+            
+        } catch (Exception e) {
+            report.addIssue(ValidationIssue.validationError(room.getUuid(), e.getMessage()));
+        }
+    }
+    
+    private void validateSystemWideConsistency(ValidationReport report) {
+        try {
+            // Check for duplicate chat rooms for same collaboration
+            Map<UUID, List<ChatRoom>> roomsByCollaboration = chatRoomRepository.findAll().stream()
+                .filter(room -> room.getCollaboration() != null)
+                .collect(java.util.stream.Collectors.groupingBy(room -> room.getCollaboration().getUuid()));
+                
+            roomsByCollaboration.entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1)
+                .forEach(entry -> report.addIssue(ValidationIssue.duplicateRoomsForCollaboration(
+                    entry.getKey(), entry.getValue().stream().map(ChatRoom::getUuid).toList())));
+                    
+            // Check for duplicate chat rooms for same proposal
+            Map<UUID, List<ChatRoom>> roomsByProposal = chatRoomRepository.findAll().stream()
+                .filter(room -> room.getCollaborationProposal() != null)
+                .collect(java.util.stream.Collectors.groupingBy(room -> room.getCollaborationProposal().getUuid()));
+                
+            roomsByProposal.entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1)
+                .forEach(entry -> report.addIssue(ValidationIssue.duplicateRoomsForProposal(
+                    entry.getKey(), entry.getValue().stream().map(ChatRoom::getUuid).toList())));
+                    
+        } catch (Exception e) {
+            log.error("Error in system-wide validation: {}", e.getMessage(), e);
+        }
+    }
+    
+    // Validation result classes
+    public static class ValidationReport {
+        private int totalRoomsChecked = 0;
+        private final List<ValidationIssue> issues = new ArrayList<>();
+        private String overallError;
+        
+        public int getTotalRoomsChecked() { return totalRoomsChecked; }
+        public void setTotalRoomsChecked(int totalRoomsChecked) { this.totalRoomsChecked = totalRoomsChecked; }
+        
+        public List<ValidationIssue> getIssues() { return issues; }
+        public void addIssue(ValidationIssue issue) { this.issues.add(issue); }
+        
+        public int getTotalIssues() { return issues.size(); }
+        
+        public String getOverallError() { return overallError; }
+        public void setOverallError(String overallError) { this.overallError = overallError; }
+        
+        public boolean isHealthy() { return overallError == null && issues.isEmpty(); }
+        
+        public long getIssueCountByType(String issueType) {
+            return issues.stream().filter(issue -> issue.getType().equals(issueType)).count();
+        }
+    }
+    
+    public static class ValidationIssue {
+        private String type;
+        private String description;
+        private UUID roomId;
+        private UUID collaborationId;
+        private UUID proposalId;
+        private List<UUID> relatedRoomIds;
+        
+        public static ValidationIssue orphanedRoom(UUID roomId) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "ORPHANED_ROOM";
+            issue.description = "Chat room has no collaboration or proposal linkage";
+            issue.roomId = roomId;
+            return issue;
+        }
+        
+        public static ValidationIssue brokenCollaborationLink(UUID roomId, UUID collaborationId) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "BROKEN_COLLABORATION_LINK";
+            issue.description = "Chat room references non-existent collaboration";
+            issue.roomId = roomId;
+            issue.collaborationId = collaborationId;
+            return issue;
+        }
+        
+        public static ValidationIssue brokenProposalLink(UUID roomId, UUID proposalId) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "BROKEN_PROPOSAL_LINK";
+            issue.description = "Chat room references non-existent proposal";
+            issue.roomId = roomId;
+            issue.proposalId = proposalId;
+            return issue;
+        }
+        
+        public static ValidationIssue mismatchedLinks(UUID roomId, UUID collaborationId, UUID proposalId) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "MISMATCHED_LINKS";
+            issue.description = "Chat room's collaboration and proposal links don't match";
+            issue.roomId = roomId;
+            issue.collaborationId = collaborationId;
+            issue.proposalId = proposalId;
+            return issue;
+        }
+        
+        public static ValidationIssue missingProposalLink(UUID roomId, UUID collaborationId) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "MISSING_PROPOSAL_LINK";
+            issue.description = "Chat room has collaboration but missing proposal link";
+            issue.roomId = roomId;
+            issue.collaborationId = collaborationId;
+            return issue;
+        }
+        
+        public static ValidationIssue duplicateRoomsForCollaboration(UUID collaborationId, List<UUID> roomIds) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "DUPLICATE_ROOMS_FOR_COLLABORATION";
+            issue.description = "Multiple chat rooms exist for same collaboration";
+            issue.collaborationId = collaborationId;
+            issue.relatedRoomIds = roomIds;
+            return issue;
+        }
+        
+        public static ValidationIssue duplicateRoomsForProposal(UUID proposalId, List<UUID> roomIds) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "DUPLICATE_ROOMS_FOR_PROPOSAL";
+            issue.description = "Multiple chat rooms exist for same proposal";
+            issue.proposalId = proposalId;
+            issue.relatedRoomIds = roomIds;
+            return issue;
+        }
+        
+        public static ValidationIssue validationError(UUID roomId, String errorMessage) {
+            ValidationIssue issue = new ValidationIssue();
+            issue.type = "VALIDATION_ERROR";
+            issue.description = "Error during validation: " + errorMessage;
+            issue.roomId = roomId;
+            return issue;
+        }
+        
+        // Getters
+        public String getType() { return type; }
+        public String getDescription() { return description; }
+        public UUID getRoomId() { return roomId; }
+        public UUID getCollaborationId() { return collaborationId; }
+        public UUID getProposalId() { return proposalId; }
+        public List<UUID> getRelatedRoomIds() { return relatedRoomIds; }
     }
 }

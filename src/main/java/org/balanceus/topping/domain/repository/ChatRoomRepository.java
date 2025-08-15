@@ -26,6 +26,8 @@ public interface ChatRoomRepository {
 	List<ChatRoom> findByCollaborationProposalParticipant(User user);
 	
 	List<ChatRoom> findByCollaborationParticipant(User user);
+	
+	List<ChatRoom> findAll();
 
 	void deleteById(UUID uuid);
 }

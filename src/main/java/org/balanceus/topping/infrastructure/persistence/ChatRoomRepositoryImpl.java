@@ -69,6 +69,11 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
 	public List<ChatRoom> findByCollaborationParticipant(User user) {
 		return jpaRepository.findByCollaborationParticipant(user);
 	}
+	
+	@Override
+	public List<ChatRoom> findAll() {
+		return jpaRepository.findAll();
+	}
 
 	@Override
 	public void deleteById(UUID uuid) {

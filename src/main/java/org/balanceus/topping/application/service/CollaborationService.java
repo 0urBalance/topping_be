@@ -14,10 +14,14 @@ import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.infrastructure.service.NotificationService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +36,7 @@ public class CollaborationService {
     private final StoreRepository storeRepository;
     private final ChatService chatService;
     private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * Create a new collaboration proposal
@@ -145,6 +150,10 @@ public class CollaborationService {
                 proposal,
                 actionUser
             );
+            
+            // Broadcast real-time proposal status update
+            broadcastProposalStatusUpdate(chatRoom.getUuid(), "PROPOSAL_ACCEPTED", actionUser.getUsername());
+            
         } catch (Exception e) {
             log.error("Failed to create chat room for collaboration: {}", savedCollaboration.getUuid(), e);
         }
@@ -180,6 +189,9 @@ public class CollaborationService {
                     proposal,
                     actionUser
                 );
+                
+                // Broadcast real-time proposal status update
+                broadcastProposalStatusUpdate(chatRoomOpt.get().getUuid(), "PROPOSAL_REJECTED", actionUser.getUsername());
             }
         } catch (Exception e) {
             log.warn("Failed to send rejection message for proposal: {}", proposalId, e);
@@ -248,5 +260,25 @@ public class CollaborationService {
         
         // This should not happen in a well-formed proposal
         throw new IllegalStateException("Cannot determine action user for proposal: " + proposal.getUuid());
+    }
+    
+    /**
+     * Broadcast real-time proposal status updates via WebSocket
+     */
+    private void broadcastProposalStatusUpdate(UUID roomId, String updateType, String updatedBy) {
+        try {
+            Map<String, Object> updateData = new HashMap<>();
+            updateData.put("roomId", roomId);
+            updateData.put("updateType", updateType);
+            updateData.put("updatedBy", updatedBy);
+            updateData.put("timestamp", LocalDateTime.now());
+            
+            // Broadcast to the specific room's proposal update channel
+            messagingTemplate.convertAndSend("/topic/proposal/" + roomId, updateData);
+            log.info("Broadcasted proposal status update {} for room {} by {}", updateType, roomId, updatedBy);
+            
+        } catch (Exception e) {
+            log.error("Failed to broadcast proposal status update for room {}: {}", roomId, e.getMessage(), e);
+        }
     }
 }

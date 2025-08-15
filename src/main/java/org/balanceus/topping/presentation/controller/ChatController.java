@@ -144,8 +144,99 @@ public class ChatController {
 				msg.getCreatedAt()
 			))
 			.toList());
+		
+		// CRITICAL: Add comprehensive proposal details
+		if (proposal != null) {
+			data.setProposalDetails(buildProposalDetails(proposal));
+		} else {
+			log.warn("Chat room {} has no linked proposal - proposal panel will be empty", chatRoom.getUuid());
+		}
 
 		return ApiResponseData.success(data);
+	}
+	
+	/**
+	 * Build comprehensive proposal details for the chat room UI.
+	 * This method creates the complete proposal information that will be displayed in the proposal panel.
+	 */
+	private ProposalDetails buildProposalDetails(CollaborationProposal proposal) {
+		try {
+			ProposalDetails details = new ProposalDetails();
+			
+			// Basic proposal information
+			details.setProposalId(proposal.getUuid());
+			details.setTitle(proposal.getTitle() != null ? proposal.getTitle() : "Untitled Proposal");
+			details.setDescription(proposal.getDescription());
+			details.setStatus(proposal.getStatus() != null ? proposal.getStatus().name() : "UNKNOWN");
+			details.setSource(proposal.getSource() != null ? proposal.getSource().name() : "UNKNOWN");
+			
+			// Timeline information
+			details.setProposedStart(proposal.getProposedStart());
+			details.setProposedEnd(proposal.getProposedEnd());
+			details.setCreatedAt(proposal.getCreatedAt());
+			details.setUpdatedAt(proposal.getUpdatedAt());
+			
+			// Build proposer information
+			ProposalParticipant proposer = new ProposalParticipant();
+			if (proposal.getProposerUser() != null) {
+				proposer.setUserId(proposal.getProposerUser().getUuid());
+				proposer.setUsername(proposal.getProposerUser().getUsername());
+			}
+			if (proposal.getProposerStore() != null) {
+				proposer.setStoreId(proposal.getProposerStore().getUuid());
+				proposer.setStoreName(proposal.getProposerStore().getName());
+			}
+			details.setProposer(proposer);
+			
+			// Build target information
+			ProposalParticipant target = new ProposalParticipant();
+			if (proposal.getTargetStore() != null) {
+				target.setStoreId(proposal.getTargetStore().getUuid());
+				target.setStoreName(proposal.getTargetStore().getName());
+				
+				// Get target store's user
+				if (proposal.getTargetStore().getUser() != null) {
+					target.setUserId(proposal.getTargetStore().getUser().getUuid());
+					target.setUsername(proposal.getTargetStore().getUser().getUsername());
+				}
+			}
+			details.setTarget(target);
+			
+			// Build proposer product information
+			if (proposal.getProposerProduct() != null) {
+				ProductInfo proposerProduct = new ProductInfo();
+				proposerProduct.setProductId(proposal.getProposerProduct().getUuid());
+				proposerProduct.setName(proposal.getProposerProduct().getName());
+				proposerProduct.setDescription(proposal.getProposerProduct().getDescription());
+				proposerProduct.setProductType(proposal.getProposerProduct().getProductType() != null ? 
+					proposal.getProposerProduct().getProductType().name() : "UNKNOWN");
+				details.setProposerProduct(proposerProduct);
+			}
+			
+			// Build target product information
+			if (proposal.getTargetProduct() != null) {
+				ProductInfo targetProduct = new ProductInfo();
+				targetProduct.setProductId(proposal.getTargetProduct().getUuid());
+				targetProduct.setName(proposal.getTargetProduct().getName());
+				targetProduct.setDescription(proposal.getTargetProduct().getDescription());
+				targetProduct.setProductType(proposal.getTargetProduct().getProductType() != null ? 
+					proposal.getTargetProduct().getProductType().name() : "UNKNOWN");
+				details.setTargetProduct(targetProduct);
+			}
+			
+			return details;
+			
+		} catch (Exception e) {
+			log.error("Error building proposal details for proposal {}: {}", 
+					 proposal.getUuid(), e.getMessage(), e);
+			
+			// Return minimal details on error
+			ProposalDetails fallback = new ProposalDetails();
+			fallback.setProposalId(proposal.getUuid());
+			fallback.setTitle("Error loading proposal details");
+			fallback.setStatus("ERROR");
+			return fallback;
+		}
 	}
 
 	@PostMapping("/message/send")
@@ -263,6 +354,9 @@ public class ChatController {
 		private UUID collaborationId;
 		private UserInfo otherUser;
 		private List<MessageInfo> messages;
+		
+		// Enhanced proposal information
+		private ProposalDetails proposalDetails;
 
 		// Getters and setters
 		public UUID getRoomId() { return roomId; }
@@ -279,6 +373,9 @@ public class ChatController {
 		
 		public List<MessageInfo> getMessages() { return messages; }
 		public void setMessages(List<MessageInfo> messages) { this.messages = messages; }
+		
+		public ProposalDetails getProposalDetails() { return proposalDetails; }
+		public void setProposalDetails(ProposalDetails proposalDetails) { this.proposalDetails = proposalDetails; }
 	}
 
 	public static class UserInfo {
@@ -485,6 +582,78 @@ public class ChatController {
 		}
 	}
 	
+	// Administrative endpoints for proposal linkage management
+	@PostMapping("/admin/backfill-proposal-links")
+	@ResponseBody 
+	public ApiResponseData<ChatService.BackfillResult> backfillProposalLinks(Principal principal) {
+		try {
+			// TODO: Add proper admin authorization check
+			User currentUser = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			
+			log.info("Starting proposal backfill requested by user: {}", currentUser.getEmail());
+			ChatService.BackfillResult result = chatService.backfillMissingProposalLinks();
+			
+			if (result.isSuccessful()) {
+				return ApiResponseData.success(result);
+			} else {
+				return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), 
+					"Backfill completed with errors: " + result.getOverallError());
+			}
+		} catch (Exception e) {
+			log.error("Failed to execute proposal backfill: {}", e.getMessage(), e);
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), 
+				"Backfill operation failed: " + e.getMessage());
+		}
+	}
+	
+	@GetMapping("/admin/linkage-statistics")
+	@ResponseBody
+	public ApiResponseData<ChatService.LinkageStatistics> getLinkageStatistics(Principal principal) {
+		try {
+			// TODO: Add proper admin authorization check
+			User currentUser = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			
+			ChatService.LinkageStatistics stats = chatService.getProposalLinkageStatistics();
+			
+			if (stats.getError() != null) {
+				return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), 
+					"Failed to gather statistics: " + stats.getError());
+			}
+			
+			return ApiResponseData.success(stats);
+		} catch (Exception e) {
+			log.error("Failed to get linkage statistics: {}", e.getMessage(), e);
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), 
+				"Statistics operation failed: " + e.getMessage());
+		}
+	}
+	
+	@GetMapping("/admin/validate-linkages")
+	@ResponseBody
+	public ApiResponseData<ChatService.ValidationReport> validateProposalLinkages(Principal principal) {
+		try {
+			// TODO: Add proper admin authorization check
+			User currentUser = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			
+			log.info("Starting proposal linkage validation requested by user: {}", currentUser.getEmail());
+			ChatService.ValidationReport report = chatService.validateProposalLinkageIntegrity();
+			
+			if (report.getOverallError() != null) {
+				return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), 
+					"Validation failed: " + report.getOverallError());
+			}
+			
+			return ApiResponseData.success(report);
+		} catch (Exception e) {
+			log.error("Failed to execute proposal linkage validation: {}", e.getMessage(), e);
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), 
+				"Validation operation failed: " + e.getMessage());
+		}
+	}
+	
 	public static class ProposalInfo {
 		private UUID proposalId;
 		private String title;
@@ -498,5 +667,107 @@ public class ChatController {
 		
 		public String getStatus() { return status; }
 		public void setStatus(String status) { this.status = status; }
+	}
+	
+	public static class ProposalDetails {
+		private UUID proposalId;
+		private String title;
+		private String description;
+		private String status;
+		private String source; // BUSINESS_OWNER or CUSTOMER
+		
+		// Proposer information
+		private ProposalParticipant proposer;
+		
+		// Target information  
+		private ProposalParticipant target;
+		
+		// Products involved
+		private ProductInfo proposerProduct;
+		private ProductInfo targetProduct;
+		
+		// Timeline
+		private java.time.LocalDate proposedStart;
+		private java.time.LocalDate proposedEnd;
+		private java.time.Instant createdAt;
+		private java.time.Instant updatedAt;
+		
+		// Getters and setters
+		public UUID getProposalId() { return proposalId; }
+		public void setProposalId(UUID proposalId) { this.proposalId = proposalId; }
+		
+		public String getTitle() { return title; }
+		public void setTitle(String title) { this.title = title; }
+		
+		public String getDescription() { return description; }
+		public void setDescription(String description) { this.description = description; }
+		
+		public String getStatus() { return status; }
+		public void setStatus(String status) { this.status = status; }
+		
+		public String getSource() { return source; }
+		public void setSource(String source) { this.source = source; }
+		
+		public ProposalParticipant getProposer() { return proposer; }
+		public void setProposer(ProposalParticipant proposer) { this.proposer = proposer; }
+		
+		public ProposalParticipant getTarget() { return target; }
+		public void setTarget(ProposalParticipant target) { this.target = target; }
+		
+		public ProductInfo getProposerProduct() { return proposerProduct; }
+		public void setProposerProduct(ProductInfo proposerProduct) { this.proposerProduct = proposerProduct; }
+		
+		public ProductInfo getTargetProduct() { return targetProduct; }
+		public void setTargetProduct(ProductInfo targetProduct) { this.targetProduct = targetProduct; }
+		
+		public java.time.LocalDate getProposedStart() { return proposedStart; }
+		public void setProposedStart(java.time.LocalDate proposedStart) { this.proposedStart = proposedStart; }
+		
+		public java.time.LocalDate getProposedEnd() { return proposedEnd; }
+		public void setProposedEnd(java.time.LocalDate proposedEnd) { this.proposedEnd = proposedEnd; }
+		
+		public java.time.Instant getCreatedAt() { return createdAt; }
+		public void setCreatedAt(java.time.Instant createdAt) { this.createdAt = createdAt; }
+		
+		public java.time.Instant getUpdatedAt() { return updatedAt; }
+		public void setUpdatedAt(java.time.Instant updatedAt) { this.updatedAt = updatedAt; }
+	}
+	
+	public static class ProposalParticipant {
+		private UUID userId;
+		private String username;
+		private UUID storeId;
+		private String storeName;
+		
+		public UUID getUserId() { return userId; }
+		public void setUserId(UUID userId) { this.userId = userId; }
+		
+		public String getUsername() { return username; }
+		public void setUsername(String username) { this.username = username; }
+		
+		public UUID getStoreId() { return storeId; }
+		public void setStoreId(UUID storeId) { this.storeId = storeId; }
+		
+		public String getStoreName() { return storeName; }
+		public void setStoreName(String storeName) { this.storeName = storeName; }
+	}
+	
+	public static class ProductInfo {
+		private UUID productId;
+		private String name;
+		private String description;
+		private String productType;
+		
+		public UUID getProductId() { return productId; }
+		public void setProductId(UUID productId) { this.productId = productId; }
+		
+		public String getName() { return name; }
+		public void setName(String name) { this.name = name; }
+		
+		public String getDescription() { return description; }
+		public void setDescription(String description) { this.description = description; }
+		
+		public String getProductType() { return productType; }
+		public void setProductType(String productType) { this.productType = productType; }
 	}
 }

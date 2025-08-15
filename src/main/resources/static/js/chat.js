@@ -235,8 +235,212 @@ b가게 맥주</textarea>
         `;
         
         chatMain.innerHTML = chatHTML;
+        
+        // CRITICAL: Populate proposal panel with actual data
+        this.populateProposalPanel(chatData.proposalDetails);
+        
         this.setupMessageInput();
         this.scrollToBottom();
+    }
+    
+    /**
+     * Populate the proposal panel with actual proposal data from the API.
+     * This method updates the proposal form fields with the originating proposal information.
+     */
+    populateProposalPanel(proposalDetails) {
+        try {
+            if (!proposalDetails) {
+                console.warn('No proposal details available - showing empty proposal panel');
+                this.showEmptyProposalPanel();
+                return;
+            }
+            
+            console.log('Populating proposal panel with:', proposalDetails);
+            
+            // Update proposal header
+            const proposalTitle = document.querySelector('.proposal-title');
+            if (proposalTitle && proposalDetails.title) {
+                proposalTitle.textContent = proposalDetails.title;
+            }
+            
+            // Update basic proposal information
+            this.updateProposalField('p-industry', this.getDisplayIndustry(proposalDetails));
+            this.updateProposalField('p-products', this.getDisplayProducts(proposalDetails));
+            this.updateProposalField('p-share', this.getDisplayProfitShare(proposalDetails));
+            this.updateProposalField('p-duration', this.getDisplayDuration(proposalDetails));
+            this.updateProposalField('p-place', this.getDisplayLocation(proposalDetails));
+            
+            // Update proposal status and actions
+            this.updateProposalActions(proposalDetails);
+            
+            // Show status information
+            this.showProposalStatusInfo(proposalDetails);
+            
+        } catch (error) {
+            console.error('Error populating proposal panel:', error);
+            this.showEmptyProposalPanel();
+        }
+    }
+    
+    /**
+     * Update a specific proposal form field with safe value handling
+     */
+    updateProposalField(fieldId, value) {
+        const field = document.getElementById(fieldId);
+        if (field && value !== null && value !== undefined) {
+            field.value = value;
+            field.disabled = true; // Make fields read-only (snapshot approach)
+        }
+    }
+    
+    /**
+     * Generate display text for industry based on proposal data
+     */
+    getDisplayIndustry(proposal) {
+        // Use store information to infer industry
+        if (proposal.proposer && proposal.proposer.storeName) {
+            return '업종: ' + proposal.proposer.storeName;
+        }
+        if (proposal.target && proposal.target.storeName) {
+            return '대상: ' + proposal.target.storeName;
+        }
+        return '업종 정보 없음';
+    }
+    
+    /**
+     * Generate display text for products involved in the proposal
+     */
+    getDisplayProducts(proposal) {
+        const products = [];
+        
+        if (proposal.proposerProduct && proposal.proposerProduct.name) {
+            const proposerName = proposal.proposer && proposal.proposer.storeName ? 
+                proposal.proposer.storeName : '제안자';
+            products.push(`${proposerName}: ${proposal.proposerProduct.name}`);
+        }
+        
+        if (proposal.targetProduct && proposal.targetProduct.name) {
+            const targetName = proposal.target && proposal.target.storeName ? 
+                proposal.target.storeName : '대상';
+            products.push(`${targetName}: ${proposal.targetProduct.name}`);
+        }
+        
+        return products.length > 0 ? products.join('\n') : '상품 정보 없음';
+    }
+    
+    /**
+     * Generate display text for profit sharing (currently not in proposal model)
+     */
+    getDisplayProfitShare(proposal) {
+        // This field is not in the current proposal model
+        // Could be added later or derived from description
+        return '수익 배분: 협의 필요';
+    }
+    
+    /**
+     * Generate display text for collaboration duration
+     */
+    getDisplayDuration(proposal) {
+        if (proposal.proposedStart && proposal.proposedEnd) {
+            const start = new Date(proposal.proposedStart).toLocaleDateString('ko-KR');
+            const end = new Date(proposal.proposedEnd).toLocaleDateString('ko-KR');
+            return `${start} ~ ${end}`;
+        }
+        return '기간: 협의 필요';
+    }
+    
+    /**
+     * Generate display text for collaboration location (currently not in proposal model)
+     */
+    getDisplayLocation(proposal) {
+        // This field is not in the current proposal model
+        // Could be derived from store locations
+        return '장소: 협의 필요';
+    }
+    
+    /**
+     * Update proposal action buttons based on proposal status
+     */
+    updateProposalActions(proposal) {
+        const submitBtn = document.getElementById('btn-proposal-submit');
+        const acceptBtn = document.getElementById('btn-proposal-accept');
+        
+        if (submitBtn && acceptBtn) {
+            switch (proposal.status) {
+                case 'PENDING':
+                    submitBtn.style.display = 'none';
+                    acceptBtn.textContent = '수락 대기중';
+                    acceptBtn.disabled = true;
+                    break;
+                case 'ACCEPTED':
+                    submitBtn.style.display = 'none';
+                    acceptBtn.textContent = '수락됨';
+                    acceptBtn.disabled = true;
+                    acceptBtn.classList.add('btn-success');
+                    break;
+                case 'REJECTED':
+                    submitBtn.style.display = 'none';
+                    acceptBtn.textContent = '거절됨';
+                    acceptBtn.disabled = true;
+                    acceptBtn.classList.add('btn-danger');
+                    break;
+                default:
+                    submitBtn.style.display = 'none';
+                    acceptBtn.style.display = 'none';
+            }
+        }
+    }
+    
+    /**
+     * Show proposal status information at the top of the panel
+     */
+    showProposalStatusInfo(proposal) {
+        const proposalContent = document.querySelector('.proposal-panel-content');
+        if (proposalContent) {
+            const statusInfo = document.createElement('div');
+            statusInfo.className = 'proposal-status-info';
+            statusInfo.innerHTML = `
+                <div class="status-badge status-${proposal.status.toLowerCase()}">
+                    ${this.getStatusDisplayText(proposal.status)}
+                </div>
+                <div class="proposal-meta">
+                    <small>제안일: ${new Date(proposal.createdAt).toLocaleDateString('ko-KR')}</small>
+                    ${proposal.updatedAt && proposal.updatedAt !== proposal.createdAt ? 
+                        `<small>수정일: ${new Date(proposal.updatedAt).toLocaleDateString('ko-KR')}</small>` : ''}
+                </div>
+            `;
+            proposalContent.insertBefore(statusInfo, proposalContent.firstChild);
+        }
+    }
+    
+    /**
+     * Get display text for proposal status
+     */
+    getStatusDisplayText(status) {
+        const statusMap = {
+            'PENDING': '대기중',
+            'ACCEPTED': '수락됨',
+            'REJECTED': '거절됨',
+            'CANCELLED': '취소됨',
+            'ENDED': '완료됨'
+        };
+        return statusMap[status] || status;
+    }
+    
+    /**
+     * Show empty proposal panel when no proposal data is available
+     */
+    showEmptyProposalPanel() {
+        const proposalContent = document.querySelector('.proposal-panel-content');
+        if (proposalContent) {
+            proposalContent.innerHTML = `
+                <div class="empty-proposal">
+                    <div class="empty-icon">📋</div>
+                    <h4>제안서 정보 없음</h4>
+                    <p>이 채팅방에 연결된 제안서가 없습니다.</p>
+                </div>
+            `;
+        }
     }
     
     renderMessages(messages) {
@@ -861,14 +1065,105 @@ b가게 맥주</textarea>
     handleProposalUpdate(updateData) {
         console.log('Handling proposal update:', updateData);
         
-        // If proposal panel is open, refresh its data
-        const proposalPanel = document.getElementById('proposalPanel');
-        if (proposalPanel && proposalPanel.classList.contains('open')) {
-            this.loadProposalData();
-        }
+        // Refresh proposal data immediately to get latest changes
+        this.refreshProposalData();
         
         // Show a subtle notification about the update
         this.showProposalUpdateNotification(updateData);
+        
+        // If this is a status change, handle it specifically
+        if (updateData.updateType === 'PROPOSAL_ACCEPTED' || 
+            updateData.updateType === 'PROPOSAL_REJECTED' ||
+            updateData.updateType === 'PROPOSAL_STATUS_CHANGE') {
+            this.handleProposalStatusChange(updateData);
+        }
+    }
+    
+    /**
+     * Handle specific proposal status changes with immediate UI updates
+     */
+    async handleProposalStatusChange(updateData) {
+        try {
+            // Reload the entire chat room data to get updated proposal details
+            if (this.selectedRoomId) {
+                const response = await fetch(`/chat/room/${this.selectedRoomId}/data`);
+                if (response.ok) {
+                    const responseData = await response.json();
+                    const chatData = responseData.data || responseData;
+                    
+                    // Update proposal panel with latest data
+                    if (chatData.proposalDetails) {
+                        this.populateProposalPanel(chatData.proposalDetails);
+                        
+                        // Show status change notification
+                        this.showStatusChangeNotification(chatData.proposalDetails.status, updateData.updatedBy);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error handling proposal status change:', error);
+        }
+    }
+    
+    /**
+     * Show a notification for proposal status changes
+     */
+    showStatusChangeNotification(newStatus, updatedBy) {
+        const statusMessages = {
+            'ACCEPTED': `✅ ${updatedBy}님이 제안서를 수락했습니다!`,
+            'REJECTED': `❌ ${updatedBy}님이 제안서를 거절했습니다.`,
+            'PENDING': `📝 ${updatedBy}님이 제안서를 수정했습니다.`,
+            'CANCELLED': `🚫 ${updatedBy}님이 제안서를 취소했습니다.`
+        };
+        
+        const message = statusMessages[newStatus] || `🔄 ${updatedBy}님이 제안서 상태를 변경했습니다.`;
+        
+        // Create and show notification
+        const notification = document.createElement('div');
+        notification.className = 'proposal-status-notification';
+        notification.setAttribute('data-status', newStatus);
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">${newStatus === 'ACCEPTED' ? '✅' : newStatus === 'REJECTED' ? '❌' : '📝'}</span>
+                <span class="notification-message">${message}</span>
+            </div>
+        `;
+        
+        // Add to chat container
+        const chatMain = document.getElementById('chatMain');
+        if (chatMain) {
+            chatMain.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+    }
+    
+    /**
+     * Refresh proposal data by reloading from API
+     */
+    async refreshProposalData() {
+        if (!this.selectedRoomId) return;
+        
+        try {
+            const response = await fetch(`/chat/room/${this.selectedRoomId}/data`);
+            if (response.ok) {
+                const responseData = await response.json();
+                const chatData = responseData.data || responseData;
+                
+                // Update proposal panel if it exists and is visible
+                const proposalPanel = document.getElementById('proposalPanel');
+                if (proposalPanel && chatData.proposalDetails) {
+                    this.populateProposalPanel(chatData.proposalDetails);
+                }
+            }
+        } catch (error) {
+            console.error('Error refreshing proposal data:', error);
+        }
     }
     
     showProposalUpdateNotification(updateData) {
