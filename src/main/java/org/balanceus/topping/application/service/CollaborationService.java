@@ -243,6 +243,87 @@ public class CollaborationService {
     /**
      * Helper method to determine who is taking the action on a proposal
      */
+    /**
+     * Update an existing collaboration proposal
+     */
+    public CollaborationProposal updateProposal(UUID proposalId, User currentUser, String title, 
+                                               String description, String duration, String profitShare, String location) {
+        
+        // Find the proposal
+        Optional<CollaborationProposal> proposalOpt = collaborationProposalRepository.findById(proposalId);
+        if (proposalOpt.isEmpty()) {
+            throw new RuntimeException("Proposal not found with id: " + proposalId);
+        }
+        
+        CollaborationProposal proposal = proposalOpt.get();
+        
+        // Authorization check - only the proposal creator can modify
+        if (!isProposalCreator(proposal, currentUser)) {
+            throw new RuntimeException("You are not authorized to modify this proposal");
+        }
+        
+        // Validation check - only allow updates for PENDING proposals
+        if (proposal.getStatus() != CollaborationProposal.CollaborationStatus.PENDING) {
+            throw new RuntimeException("Cannot modify proposal with status: " + proposal.getStatus());
+        }
+        
+        // Update proposal fields
+        if (title != null && !title.trim().isEmpty()) {
+            proposal.setTitle(title.trim());
+        }
+        if (description != null && !description.trim().isEmpty()) {
+            proposal.setDescription(description.trim());
+        }
+        
+        // Update duration field with the formatted string from frontend
+        if (duration != null && !duration.trim().isEmpty()) {
+            proposal.setDuration(duration.trim());
+        }
+        
+        // Update profit share field
+        if (profitShare != null && !profitShare.trim().isEmpty()) {
+            proposal.setProfitShare(profitShare.trim());
+        }
+        
+        // Update location field  
+        if (location != null && !location.trim().isEmpty()) {
+            proposal.setLocation(location.trim());
+        }
+        
+        // Save updated proposal
+        CollaborationProposal updatedProposal = collaborationProposalRepository.save(proposal);
+        
+        // Find associated chat room and broadcast update
+        try {
+            Optional<ChatRoom> chatRoomOpt = chatService.findChatRoomByProposal(proposal);
+            if (chatRoomOpt.isPresent()) {
+                broadcastProposalStatusUpdate(chatRoomOpt.get().getUuid(), "PROPOSAL_MODIFIED", currentUser.getUsername());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to broadcast proposal modification for proposal: {}", proposalId, e);
+        }
+        
+        log.info("Collaboration proposal updated: {} by user: {}", proposalId, currentUser.getUsername());
+        return updatedProposal;
+    }
+    
+    /**
+     * Check if the current user is the creator of the proposal
+     */
+    private boolean isProposalCreator(CollaborationProposal proposal, User currentUser) {
+        // Check if user is the proposer user
+        if (proposal.getProposerUser() != null && proposal.getProposerUser().getUuid().equals(currentUser.getUuid())) {
+            return true;
+        }
+        
+        // Check if user owns the proposer store
+        if (proposal.getProposerStore() != null && proposal.getProposerStore().getUser() != null) {
+            return proposal.getProposerStore().getUser().getUuid().equals(currentUser.getUuid());
+        }
+        
+        return false;
+    }
+
     private User determineActionUser(CollaborationProposal proposal) {
         // For acceptance/rejection, the target store owner is typically the one taking action
         if (proposal.getTargetStore() != null && proposal.getTargetStore().getUser() != null) {

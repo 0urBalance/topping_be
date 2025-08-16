@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.balanceus.topping.application.service.ChatService;
+import org.balanceus.topping.application.service.CollaborationService;
 import org.balanceus.topping.domain.model.ChatMessage;
 import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
@@ -32,6 +33,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +54,7 @@ public class ChatController {
 	private final CollaborationProposalRepository proposalRepository;
 	private final UserRepository userRepository;
 	private final ChatService chatService;
+	private final CollaborationService collaborationService;
 	private final SimpMessagingTemplate messagingTemplate;
 
 	@PostMapping("/room/create/{proposalId}")
@@ -167,6 +170,12 @@ public class ChatController {
 	 */
 	private ProposalDetails buildProposalDetails(CollaborationProposal proposal) {
 		try {
+			log.info("=== BUILDING PROPOSAL DETAILS FOR: {} ===", proposal.getUuid());
+			log.info("Proposal basic info - Title: {}, Description: {}, Status: {}", 
+					proposal.getTitle(), proposal.getDescription(), proposal.getStatus());
+			log.info("Proposal additional fields - Duration: {}, ProfitShare: {}, Location: {}", 
+					proposal.getDuration(), proposal.getProfitShare(), proposal.getLocation());
+					
 			ProposalDetails details = new ProposalDetails();
 			
 			// Basic proposal information
@@ -181,6 +190,11 @@ public class ChatController {
 			details.setProposedEnd(proposal.getProposedEnd());
 			details.setCreatedAt(proposal.getCreatedAt());
 			details.setUpdatedAt(proposal.getUpdatedAt());
+			
+			// Additional proposal fields
+			details.setDuration(proposal.getDuration());
+			details.setProfitShare(proposal.getProfitShare());
+			details.setLocation(proposal.getLocation());
 			
 			// Build proposer information
 			ProposalParticipant proposer = new ProposalParticipant();
@@ -210,25 +224,43 @@ public class ChatController {
 			
 			// Build proposer product information
 			if (proposal.getProposerProduct() != null) {
+				log.info("Proposer Product - ID: {}, Name: {}, ThumbnailPath: {}", 
+						proposal.getProposerProduct().getUuid(), 
+						proposal.getProposerProduct().getName(), 
+						proposal.getProposerProduct().getThumbnailPath());
+						
 				ProductInfo proposerProduct = new ProductInfo();
 				proposerProduct.setProductId(proposal.getProposerProduct().getUuid());
 				proposerProduct.setName(proposal.getProposerProduct().getName());
 				proposerProduct.setDescription(proposal.getProposerProduct().getDescription());
 				proposerProduct.setProductType(proposal.getProposerProduct().getProductType() != null ? 
 					proposal.getProposerProduct().getProductType().name() : "UNKNOWN");
+				proposerProduct.setThumbnailPath(proposal.getProposerProduct().getThumbnailPath());
 				details.setProposerProduct(proposerProduct);
+			} else {
+				log.warn("Proposer Product is NULL");
 			}
 			
 			// Build target product information
 			if (proposal.getTargetProduct() != null) {
+				log.info("Target Product - ID: {}, Name: {}, ThumbnailPath: {}", 
+						proposal.getTargetProduct().getUuid(), 
+						proposal.getTargetProduct().getName(), 
+						proposal.getTargetProduct().getThumbnailPath());
+						
 				ProductInfo targetProduct = new ProductInfo();
 				targetProduct.setProductId(proposal.getTargetProduct().getUuid());
 				targetProduct.setName(proposal.getTargetProduct().getName());
 				targetProduct.setDescription(proposal.getTargetProduct().getDescription());
 				targetProduct.setProductType(proposal.getTargetProduct().getProductType() != null ? 
 					proposal.getTargetProduct().getProductType().name() : "UNKNOWN");
+				targetProduct.setThumbnailPath(proposal.getTargetProduct().getThumbnailPath());
 				details.setTargetProduct(targetProduct);
+			} else {
+				log.warn("Target Product is NULL");
 			}
+			
+			log.info("=== PROPOSAL DETAILS BUILD COMPLETE ===");
 			
 			return details;
 			
@@ -629,6 +661,61 @@ public class ChatController {
 		public void setTimestamp(java.time.LocalDateTime timestamp) { this.timestamp = timestamp; }
 	}
 	
+	// Update proposal content
+	@PatchMapping("/proposal/{proposalId}")
+	@ResponseBody
+	public ApiResponseData<ProposalDetails> updateProposal(
+			@PathVariable UUID proposalId,
+			@org.springframework.web.bind.annotation.RequestBody ProposalUpdateContentRequest request,
+			Principal principal) {
+		
+		try {
+			User currentUser = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found"));
+			
+			// Update the proposal
+			CollaborationProposal updatedProposal = collaborationService.updateProposal(
+				proposalId, currentUser, request.getTitle(), request.getDescription(),
+				request.getDuration(), request.getProfitShare(), request.getLocation());
+			
+			// Build response with updated proposal details
+			ProposalDetails proposalDetails = buildProposalDetails(updatedProposal);
+			
+			return ApiResponseData.success(proposalDetails);
+			
+		} catch (RuntimeException e) {
+			log.error("Failed to update proposal: {}", proposalId, e);
+			return ApiResponseData.failure(Code.SIGN005.getCode(), e.getMessage());
+		} catch (Exception e) {
+			log.error("Unexpected error updating proposal: {}", proposalId, e);
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), "Failed to update proposal");
+		}
+	}
+	
+	// Request class for proposal content updates
+	public static class ProposalUpdateContentRequest {
+		private String title;
+		private String description;
+		private String duration;
+		private String profitShare;
+		private String location;
+		
+		public String getTitle() { return title; }
+		public void setTitle(String title) { this.title = title; }
+		
+		public String getDescription() { return description; }
+		public void setDescription(String description) { this.description = description; }
+		
+		public String getDuration() { return duration; }
+		public void setDuration(String duration) { this.duration = duration; }
+		
+		public String getProfitShare() { return profitShare; }
+		public void setProfitShare(String profitShare) { this.profitShare = profitShare; }
+		
+		public String getLocation() { return location; }
+		public void setLocation(String location) { this.location = location; }
+	}
+	
 	// Get proposal ID for a chat room
 	@GetMapping("/room/{roomId}/proposal")
 	@ResponseBody
@@ -764,6 +851,11 @@ public class ChatController {
 		private java.time.Instant createdAt;
 		private java.time.Instant updatedAt;
 		
+		// Additional proposal fields
+		private String duration;
+		private String profitShare;
+		private String location;
+		
 		// Getters and setters
 		public UUID getProposalId() { return proposalId; }
 		public void setProposalId(UUID proposalId) { this.proposalId = proposalId; }
@@ -803,6 +895,15 @@ public class ChatController {
 		
 		public java.time.Instant getUpdatedAt() { return updatedAt; }
 		public void setUpdatedAt(java.time.Instant updatedAt) { this.updatedAt = updatedAt; }
+		
+		public String getDuration() { return duration; }
+		public void setDuration(String duration) { this.duration = duration; }
+		
+		public String getProfitShare() { return profitShare; }
+		public void setProfitShare(String profitShare) { this.profitShare = profitShare; }
+		
+		public String getLocation() { return location; }
+		public void setLocation(String location) { this.location = location; }
 	}
 	
 	public static class ProposalParticipant {
@@ -829,6 +930,7 @@ public class ChatController {
 		private String name;
 		private String description;
 		private String productType;
+		private String thumbnailPath;
 		
 		public UUID getProductId() { return productId; }
 		public void setProductId(UUID productId) { this.productId = productId; }
@@ -841,5 +943,8 @@ public class ChatController {
 		
 		public String getProductType() { return productType; }
 		public void setProductType(String productType) { this.productType = productType; }
+		
+		public String getThumbnailPath() { return thumbnailPath; }
+		public void setThumbnailPath(String thumbnailPath) { this.thumbnailPath = thumbnailPath; }
 	}
 }

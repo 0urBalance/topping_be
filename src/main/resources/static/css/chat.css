@@ -1272,3 +1272,70 @@
         max-width: calc(100% - 20px);
     }
 }
+
+/* Proposal Edit Mode Styles */
+.proposal-panel.edit-mode .field-input.editable {
+    background: #ffffff;
+    border: 2px solid #6B3410;
+    cursor: text;
+    transition: all 0.2s ease;
+}
+
+.proposal-panel.edit-mode .field-input.editable:focus {
+    border-color: #4a2309;
+    box-shadow: 0 0 0 3px rgba(107, 52, 16, 0.1);
+    outline: none;
+}
+
+.proposal-panel.edit-mode .field-input.editable:hover {
+    border-color: #5a2d0d;
+}
+
+/* Edit mode indicator */
+.proposal-panel.edit-mode .proposal-title::after {
+    content: " (편집 중)";
+    font-size: 12px;
+    color: #6B3410;
+    font-weight: normal;
+}
+
+/* Save/Cancel button styling */
+#btn-proposal-save {
+    background: #6B3410;
+    border-color: #6B3410;
+}
+
+#btn-proposal-save:hover {
+    background: #5a2d0d;
+    border-color: #5a2d0d;
+}
+
+#btn-proposal-cancel {
+    background: transparent;
+    border-color: #ccc;
+    color: #666;
+}
+
+#btn-proposal-cancel:hover {
+    background: #f5f5f5;
+    border-color: #999;
+    color: #333;
+}
+
+/* Success message styling */
+.error-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Field validation states */
+.field-input.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.field-input.error:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}

@@ -49,6 +49,15 @@ class ChatInterface {
             if (e.target.id === 'btn-proposal-accept') {
                 await this.handleProposalAccept();
             }
+            if (e.target.id === 'proposalEditBtn') {
+                this.toggleProposalEditMode();
+            }
+            if (e.target.id === 'btn-proposal-save') {
+                await this.handleProposalSave();
+            }
+            if (e.target.id === 'btn-proposal-cancel') {
+                this.handleProposalCancel();
+            }
         });
     }
     
@@ -270,6 +279,9 @@ b가게 맥주</textarea>
             this.updateProposalField('p-duration', this.getDisplayDuration(proposalDetails));
             this.updateProposalField('p-place', this.getDisplayLocation(proposalDetails));
             
+            // Update proposal images using product thumbnails
+            this.updateProposalImages(proposalDetails);
+            
             // Update proposal status and actions
             this.updateProposalActions(proposalDetails);
             
@@ -329,11 +341,12 @@ b가게 맥주</textarea>
     }
     
     /**
-     * Generate display text for profit sharing (currently not in proposal model)
+     * Generate display text for profit sharing
      */
     getDisplayProfitShare(proposal) {
-        // This field is not in the current proposal model
-        // Could be added later or derived from description
+        if (proposal.profitShare && proposal.profitShare.trim()) {
+            return proposal.profitShare.trim();
+        }
         return '수익 배분: 협의 필요';
     }
     
@@ -350,11 +363,12 @@ b가게 맥주</textarea>
     }
     
     /**
-     * Generate display text for collaboration location (currently not in proposal model)
+     * Generate display text for collaboration location
      */
     getDisplayLocation(proposal) {
-        // This field is not in the current proposal model
-        // Could be derived from store locations
+        if (proposal.location && proposal.location.trim()) {
+            return proposal.location.trim();
+        }
         return '장소: 협의 필요';
     }
     
@@ -441,6 +455,9 @@ b가게 맥주</textarea>
                 </div>
             `;
         }
+        
+        // Also show default placeholder images
+        this.showDefaultImages();
     }
     
     renderMessages(messages) {
@@ -863,22 +880,12 @@ b가게 맥주</textarea>
         if (!this.selectedRoomId) return;
         
         try {
-            // First, try to get proposal ID from chat room data
-            const proposalId = await this.getProposalIdFromRoom(this.selectedRoomId);
-            if (!proposalId) {
-                console.warn('No proposal found for this chat room');
-                this.showDefaultProposalData();
-                return;
-            }
-            
-            // Load proposal images
-            await this.loadProposalImages(proposalId);
-            
-            // Load proposal details (if needed)
-            await this.loadProposalDetails(proposalId);
+            // Proposal data is now loaded via populateProposalPanel() from chat room data
+            // which includes product thumbnails in the proposalDetails object
+            console.log('Proposal data loading is handled by populateProposalPanel()');
             
         } catch (error) {
-            console.error('Error loading proposal data:', error);
+            console.error('Error in loadProposalData:', error);
             this.showDefaultProposalData();
         }
     }
@@ -970,16 +977,113 @@ b가게 맥주</textarea>
         `;
     }
     
-    populateProposalForm(proposal) {
-        // Populate form fields with proposal data
-        if (proposal.industry) {
-            const industryField = document.getElementById('p-industry');
-            if (industryField) industryField.value = proposal.industry;
+    /**
+     * Update proposal images using product thumbnails from proposal details
+     */
+    updateProposalImages(proposalDetails) {
+        const photosContainer = document.getElementById('proposalPhotos');
+        if (!photosContainer) return;
+        
+        // DEBUG: Log proposal details to understand data structure
+        console.log('=== PROPOSAL IMAGE DEBUG ===');
+        console.log('Full proposalDetails:', proposalDetails);
+        console.log('proposerProduct:', proposalDetails.proposerProduct);
+        console.log('targetProduct:', proposalDetails.targetProduct);
+        
+        const images = [];
+        
+        // Collect product thumbnails from proposal details
+        if (proposalDetails.proposerProduct) {
+            console.log('proposerProduct exists:', proposalDetails.proposerProduct);
+            console.log('proposerProduct.thumbnailPath:', proposalDetails.proposerProduct.thumbnailPath);
+            
+            if (proposalDetails.proposerProduct.thumbnailPath) {
+                images.push({
+                    src: proposalDetails.proposerProduct.thumbnailPath,
+                    alt: proposalDetails.proposerProduct.name || '제안자 상품',
+                    productName: proposalDetails.proposerProduct.name
+                });
+                console.log('Added proposer product image:', proposalDetails.proposerProduct.thumbnailPath);
+            } else {
+                console.log('proposerProduct has no thumbnailPath');
+            }
+        } else {
+            console.log('proposerProduct is null/undefined');
         }
         
-        if (proposal.products) {
+        if (proposalDetails.targetProduct) {
+            console.log('targetProduct exists:', proposalDetails.targetProduct);
+            console.log('targetProduct.thumbnailPath:', proposalDetails.targetProduct.thumbnailPath);
+            
+            if (proposalDetails.targetProduct.thumbnailPath) {
+                images.push({
+                    src: proposalDetails.targetProduct.thumbnailPath,
+                    alt: proposalDetails.targetProduct.name || '대상 상품',
+                    productName: proposalDetails.targetProduct.name
+                });
+                console.log('Added target product image:', proposalDetails.targetProduct.thumbnailPath);
+            } else {
+                console.log('targetProduct has no thumbnailPath');
+            }
+        } else {
+            console.log('targetProduct is null/undefined');
+        }
+        
+        console.log('Total images collected:', images.length, images);
+        
+        // Clear container and render images
+        photosContainer.innerHTML = '';
+        
+        // Show up to 2 images (as per design)
+        for (let i = 0; i < 2; i++) {
+            const img = document.createElement('img');
+            img.className = 'proposal-photo';
+            
+            if (i < images.length) {
+                // Use actual product thumbnail
+                img.src = images[i].src;
+                img.alt = images[i].alt;
+                img.title = images[i].productName; // Tooltip with product name
+                
+                console.log(`Rendering image ${i + 1}: ${images[i].src} (${images[i].productName})`);
+                
+                // Fallback to placeholder if thumbnail fails to load
+                img.onerror = () => {
+                    console.log(`Image failed to load: ${images[i].src}, using placeholder`);
+                    img.src = '/image/placeholder-food.jpg';
+                    img.alt = `상품 이미지 ${i + 1}`;
+                };
+            } else {
+                // Use placeholder for missing images
+                img.src = '/image/placeholder-food.jpg';
+                img.alt = `상품 이미지 ${i + 1}`;
+                console.log(`Using placeholder for image ${i + 1} (no product data)`);
+            }
+            
+            photosContainer.appendChild(img);
+        }
+        
+        // Provide summary of what was rendered
+        if (images.length === 0) {
+            console.log('No product images available - showing 2 placeholders');
+        } else if (images.length === 1) {
+            console.log('Only 1 product image available - showing 1 product + 1 placeholder');
+        } else {
+            console.log('2 product images available - showing both products');
+        }
+        console.log('=== PROPOSAL IMAGE UPDATE COMPLETE ===');
+    }
+    
+    populateProposalForm(proposal) {
+        // Populate form fields with proposal data
+        if (proposal.title) {
+            const industryField = document.getElementById('p-industry');
+            if (industryField) industryField.value = proposal.title;
+        }
+        
+        if (proposal.description) {
             const productsField = document.getElementById('p-products');
-            if (productsField) productsField.value = proposal.products;
+            if (productsField) productsField.value = proposal.description;
         }
         
         if (proposal.profitShare) {
@@ -1164,6 +1268,257 @@ b가게 맥주</textarea>
         } catch (error) {
             console.error('Error refreshing proposal data:', error);
         }
+    }
+    
+    /**
+     * Toggle between edit and view mode for proposal
+     */
+    toggleProposalEditMode() {
+        const proposalPanel = document.getElementById('proposalPanel');
+        const editBtn = document.getElementById('proposalEditBtn');
+        const formFields = document.querySelectorAll('.field-input');
+        const footer = document.querySelector('.proposal-sheet-footer');
+        
+        if (!proposalPanel || !editBtn) return;
+        
+        const isEditMode = proposalPanel.classList.contains('edit-mode');
+        
+        if (isEditMode) {
+            // Switch to view mode
+            this.setProposalViewMode();
+        } else {
+            // Switch to edit mode
+            this.setProposalEditMode();
+        }
+    }
+    
+    /**
+     * Set proposal panel to edit mode
+     */
+    setProposalEditMode() {
+        const proposalPanel = document.getElementById('proposalPanel');
+        const editBtn = document.getElementById('proposalEditBtn');
+        const formFields = document.querySelectorAll('.field-input');
+        const footer = document.querySelector('.proposal-sheet-footer');
+        
+        // Add edit mode class
+        proposalPanel.classList.add('edit-mode');
+        
+        // Change edit button to indicate edit mode
+        editBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+        editBtn.setAttribute('aria-label', '편집 취소');
+        editBtn.title = '편집 취소';
+        
+        // Enable form fields
+        formFields.forEach(field => {
+            field.disabled = false;
+            field.classList.add('editable');
+        });
+        
+        // Store original values for cancel functionality
+        this.originalValues = {};
+        formFields.forEach(field => {
+            this.originalValues[field.id] = field.value;
+        });
+        
+        // Update footer with save/cancel buttons
+        if (footer) {
+            footer.innerHTML = `
+                <button class="btn btn-outline" id="btn-proposal-cancel">취소</button>
+                <button class="btn btn-solid" id="btn-proposal-save">저장</button>
+            `;
+        }
+        
+        // Focus on first editable field
+        const firstField = document.querySelector('.field-input:not([disabled])');
+        if (firstField) {
+            firstField.focus();
+        }
+    }
+    
+    /**
+     * Set proposal panel to view mode
+     */
+    setProposalViewMode() {
+        const proposalPanel = document.getElementById('proposalPanel');
+        const editBtn = document.getElementById('proposalEditBtn');
+        const formFields = document.querySelectorAll('.field-input');
+        const footer = document.querySelector('.proposal-sheet-footer');
+        
+        // Remove edit mode class
+        proposalPanel.classList.remove('edit-mode');
+        
+        // Change edit button back to edit icon
+        editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+        editBtn.setAttribute('aria-label', '편집');
+        editBtn.title = '편집';
+        
+        // Disable form fields
+        formFields.forEach(field => {
+            field.disabled = true;
+            field.classList.remove('editable');
+        });
+        
+        // Restore original footer buttons
+        if (footer) {
+            footer.innerHTML = `
+                <button class="btn btn-outline" id="btn-proposal-submit">제안하기</button>
+                <button class="btn btn-solid" id="btn-proposal-accept">수락하기</button>
+            `;
+        }
+        
+        // Clear stored original values
+        this.originalValues = null;
+    }
+    
+    /**
+     * Handle proposal save
+     */
+    async handleProposalSave() {
+        try {
+            // Get form values
+            const formData = this.getProposalFormData();
+            
+            // Validate form data
+            if (!this.validateProposalForm(formData)) {
+                return;
+            }
+            
+            // Get proposal ID from current room data
+            const proposalId = await this.getCurrentProposalId();
+            if (!proposalId) {
+                this.showError('제안서 ID를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // Send update request
+            const response = await fetch(`/chat/proposal/${proposalId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                const responseData = await response.json();
+                
+                // Update proposal panel with new data
+                if (responseData.data) {
+                    this.populateProposalPanel(responseData.data);
+                }
+                
+                // Switch back to view mode
+                this.setProposalViewMode();
+                
+                this.showSuccess('제안서가 성공적으로 수정되었습니다.');
+                
+            } else {
+                const errorData = await response.json();
+                this.showError(errorData.message || '제안서 수정에 실패했습니다.');
+            }
+            
+        } catch (error) {
+            console.error('Error saving proposal:', error);
+            this.showError('제안서 저장 중 오류가 발생했습니다.');
+        }
+    }
+    
+    /**
+     * Handle proposal cancel - restore original values
+     */
+    handleProposalCancel() {
+        if (this.originalValues) {
+            // Restore original values
+            Object.keys(this.originalValues).forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = this.originalValues[fieldId];
+                }
+            });
+        }
+        
+        // Switch back to view mode
+        this.setProposalViewMode();
+    }
+    
+    /**
+     * Get form data for proposal update
+     */
+    getProposalFormData() {
+        return {
+            title: document.getElementById('p-industry')?.value || '',
+            description: document.getElementById('p-products')?.value || '',
+            duration: document.getElementById('p-duration')?.value || '',
+            profitShare: document.getElementById('p-share')?.value || '',
+            location: document.getElementById('p-place')?.value || ''
+        };
+    }
+    
+    /**
+     * Validate proposal form data
+     */
+    validateProposalForm(formData) {
+        if (!formData.title.trim()) {
+            this.showError('업종을 입력해주세요.');
+            document.getElementById('p-industry')?.focus();
+            return false;
+        }
+        
+        if (!formData.description.trim()) {
+            this.showError('상품 정보를 입력해주세요.');
+            document.getElementById('p-products')?.focus();
+            return false;
+        }
+        
+        // Validate duration field if provided
+        if (formData.duration && !formData.duration.trim()) {
+            this.showError('기간을 입력해주세요.');
+            document.getElementById('p-duration')?.focus();
+            return false;
+        }
+        
+        // Validate profit share field if provided
+        if (formData.profitShare && !formData.profitShare.trim()) {
+            this.showError('수익 배분 구조를 입력해주세요.');
+            document.getElementById('p-share')?.focus();
+            return false;
+        }
+        
+        // Validate location field if provided
+        if (formData.location && !formData.location.trim()) {
+            this.showError('콜라보 장소를 입력해주세요.');
+            document.getElementById('p-place')?.focus();
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get current proposal ID from room data
+     */
+    async getCurrentProposalId() {
+        try {
+            if (!this.selectedRoomId) return null;
+            
+            const response = await fetch(`/chat/room/${this.selectedRoomId}/proposal`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.data?.proposalId || null;
+            }
+        } catch (error) {
+            console.error('Error getting proposal ID:', error);
+        }
+        return null;
+    }
+    
+    /**
+     * Show success message
+     */
+    showSuccess(message) {
+        // Use the existing error display method but with success styling
+        this.showError(message, 'success');
     }
     
     showProposalUpdateNotification(updateData) {

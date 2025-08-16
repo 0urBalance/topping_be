@@ -62,6 +62,15 @@ public class CollaborationProposal {
 
 	private LocalDate proposedStart;
 	private LocalDate proposedEnd;
+	
+	@Column(length = 500)
+	private String duration;
+	
+	@Column(length = 100)
+	private String profitShare;
+	
+	@Column(length = 200)
+	private String location;
 
 	private String title;
 
