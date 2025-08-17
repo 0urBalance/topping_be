@@ -187,7 +187,7 @@ public class CollaborationController {
 	public String applyCollaboration(
 			@RequestParam(required = false) UUID sourceStoreId,
 			@RequestParam(required = false) UUID targetStoreId,
-			@RequestParam(required = false) UUID sourceProductId,
+			@RequestParam(required = false) UUID proposerProductId,
 			@RequestParam(required = false) UUID targetProductId,
 			@RequestParam String collaborationTitle,
 			@RequestParam String description,
@@ -258,8 +258,8 @@ public class CollaborationController {
 		
 		// Get source product if provided
 		Product sourceProduct = null;
-		if (sourceProductId != null) {
-			sourceProduct = productRepository.findById(sourceProductId).orElse(null);
+		if (proposerProductId != null) {
+			sourceProduct = productRepository.findById(proposerProductId).orElse(null);
 			if (sourceProduct != null && sourceStore != null && 
 				!sourceProduct.getStore().getUuid().equals(sourceStore.getUuid())) {
 				return "redirect:/collaborations/apply?error=source_product_mismatch";
