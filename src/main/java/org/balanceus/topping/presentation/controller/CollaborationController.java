@@ -23,6 +23,7 @@ import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.CollaborationService;
+import org.balanceus.topping.application.service.ChatService;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,6 +48,7 @@ public class CollaborationController {
 	private final UserRepository userRepository;
 	private final ProductService productService;
 	private final CollaborationService collaborationService;
+	private final ChatService chatService;
 	private final ObjectMapper objectMapper;
 
 	@GetMapping
@@ -292,9 +294,15 @@ public class CollaborationController {
 		// Set product relationships
 		if (sourceProduct != null) {
 			proposal.setProposerProduct(sourceProduct);
+			System.out.println("✅ Set proposer product: " + sourceProduct.getUuid() + " (" + sourceProduct.getName() + ")");
+		} else {
+			System.out.println("⚠️ No proposer product provided");
 		}
 		if (targetProduct != null) {
 			proposal.setTargetProduct(targetProduct);
+			System.out.println("✅ Set target product: " + targetProduct.getUuid() + " (" + targetProduct.getName() + ")");
+		} else {
+			System.out.println("⚠️ No target product provided");
 		}
 		
 		// Set additional form fields
@@ -309,7 +317,17 @@ public class CollaborationController {
 		}
 		
 		// Save the proposal
-		collaborationProposalRepository.save(proposal);
+		CollaborationProposal saved = collaborationProposalRepository.save(proposal);
+		
+		// 🎯 NEW: Create chat room immediately for the proposal (import ChatService at top)
+		try {
+			chatService.createChatRoomForCollaborationProposal(saved.getUuid());
+			// Log successful chat room creation
+			System.out.println("✅ Chat room created for collaboration proposal: " + saved.getUuid());
+		} catch (Exception e) {
+			// Log error but don't fail the proposal submission
+			System.err.println("❌ Failed to create chat room for collaboration proposal " + saved.getUuid() + ": " + e.getMessage());
+		}
 		
 		return "redirect:/mypage/applications?success=proposal_submitted";
 	}

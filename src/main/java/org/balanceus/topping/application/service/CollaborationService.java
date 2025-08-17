@@ -13,6 +13,7 @@ import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
+import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.infrastructure.service.NotificationService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class CollaborationService {
     private final CollaborationRepository collaborationRepository;
     private final CollaborationProposalRepository collaborationProposalRepository;
     private final StoreRepository storeRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final ChatService chatService;
     private final NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -122,6 +124,18 @@ public class CollaborationService {
         
         collaboration.setInitiatorProduct(proposal.getProposerProduct());
         collaboration.setPartnerProduct(proposal.getTargetProduct());
+        
+        // 🎯 VALIDATION: Log product UUID transfers from proposal to collaboration
+        if (proposal.getProposerProduct() != null) {
+            log.info("✅ Copied proposer product {} to collaboration initiator product", proposal.getProposerProduct().getUuid());
+        } else {
+            log.warn("⚠️ No proposer product in proposal {} to copy to collaboration", proposal.getUuid());
+        }
+        if (proposal.getTargetProduct() != null) {
+            log.info("✅ Copied target product {} to collaboration partner product", proposal.getTargetProduct().getUuid());
+        } else {
+            log.warn("⚠️ No target product in proposal {} to copy to collaboration", proposal.getUuid());
+        }
         collaboration.setStartDate(proposal.getProposedStart());
         collaboration.setEndDate(proposal.getProposedEnd());
         collaboration.setTitle(proposal.getTitle());
@@ -136,9 +150,25 @@ public class CollaborationService {
         collaborationProposalRepository.save(proposal);
 
         try {
-            ChatRoom chatRoom = chatService.createChatRoomForCollaboration(savedCollaboration.getUuid());
-            log.info("Created chat room {} for approved collaboration: {}", 
-                    chatRoom.getUuid(), savedCollaboration.getUuid());
+            // 🎯 NEW: First try to find existing chat room for the proposal
+            ChatRoom chatRoom = null;
+            Optional<ChatRoom> existingRoom = chatService.findChatRoomByProposal(proposal);
+            
+            if (existingRoom.isPresent()) {
+                // Reuse existing proposal chat room and link it to the collaboration
+                chatRoom = existingRoom.get();
+                chatRoom.setCollaboration(savedCollaboration);
+                // The collaborationProposal link should already be set
+                // Save the updated chat room with collaboration link
+                chatRoom = chatRoomRepository.save(chatRoom);
+                log.info("Reusing existing proposal chat room {} for approved collaboration: {}", 
+                        chatRoom.getUuid(), savedCollaboration.getUuid());
+            } else {
+                // Fallback: create new chat room (this preserves existing behavior)
+                chatRoom = chatService.createChatRoomForCollaboration(savedCollaboration.getUuid());
+                log.info("Created new chat room {} for approved collaboration: {}", 
+                        chatRoom.getUuid(), savedCollaboration.getUuid());
+            }
                     
             // Send system message about proposal acceptance
             User actionUser = determineActionUser(proposal);
@@ -155,7 +185,7 @@ public class CollaborationService {
             broadcastProposalStatusUpdate(chatRoom.getUuid(), "PROPOSAL_ACCEPTED", actionUser.getUsername());
             
         } catch (Exception e) {
-            log.error("Failed to create chat room for collaboration: {}", savedCollaboration.getUuid(), e);
+            log.error("Failed to handle chat room for collaboration: {}", savedCollaboration.getUuid(), e);
         }
 
         log.info("Collaboration proposal approved and collaboration created: {}", savedCollaboration.getUuid());

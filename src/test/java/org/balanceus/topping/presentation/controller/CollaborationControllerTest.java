@@ -59,6 +59,9 @@ class CollaborationControllerTest {
     
     @MockBean
     private ObjectMapper objectMapper;
+    
+    @MockBean
+    private org.balanceus.topping.application.service.ChatService chatService;
 
     private User testUser;
     private User targetBusinessOwner;

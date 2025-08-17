@@ -157,15 +157,31 @@ public class CollaborationProposalController {
 		}
 		if (proposerProduct != null) {
 			proposal.setProposerProduct(proposerProduct);
+			System.out.println("✅ Set proposer product: " + proposerProduct.getUuid() + " (" + proposerProduct.getName() + ")");
+		} else {
+			System.out.println("⚠️ No proposer product provided in /proposals/suggest");
 		}
 		
 		// Set target store and product
 		proposal.setTargetStore(targetStore);
 		if (targetProduct != null) {
 			proposal.setTargetProduct(targetProduct);
+			System.out.println("✅ Set target product: " + targetProduct.getUuid() + " (" + targetProduct.getName() + ")");
+		} else {
+			System.out.println("⚠️ No target product provided in /proposals/suggest");
 		}
 
 		CollaborationProposal saved = proposalRepository.save(proposal);
+		
+		// 🎯 NEW: Create chat room immediately for the proposal
+		try {
+			chatService.createChatRoomForCollaborationProposal(saved.getUuid());
+			// Log successful chat room creation
+			System.out.println("✅ Chat room created for proposal: " + saved.getUuid());
+		} catch (Exception e) {
+			// Log error but don't fail the proposal submission
+			System.err.println("❌ Failed to create chat room for proposal " + saved.getUuid() + ": " + e.getMessage());
+		}
 		
 		// 사업자들에게 새 제안 알림 전송
 		notificationService.notifyBusinessOwnersOfNewProposal(saved);
