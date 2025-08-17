@@ -43,19 +43,19 @@ class ChatInterface {
         
         // Proposal action buttons
         document.addEventListener('click', async (e) => {
-            if (e.target.id === 'btn-proposal-submit') {
+            if (e.target.id === 'btn-proposal-submit' || e.target.closest('#btn-proposal-submit')) {
                 await this.handleProposalSubmit();
             }
-            if (e.target.id === 'btn-proposal-accept') {
+            if (e.target.id === 'btn-proposal-accept' || e.target.closest('#btn-proposal-accept')) {
                 await this.handleProposalAccept();
             }
-            if (e.target.id === 'proposalEditBtn') {
+            if (e.target.id === 'proposalEditBtn' || e.target.closest('#proposalEditBtn')) {
                 this.toggleProposalEditMode();
             }
-            if (e.target.id === 'btn-proposal-save') {
+            if (e.target.id === 'btn-proposal-save' || e.target.closest('#btn-proposal-save')) {
                 await this.handleProposalSave();
             }
-            if (e.target.id === 'btn-proposal-cancel') {
+            if (e.target.id === 'btn-proposal-cancel' || e.target.closest('#btn-proposal-cancel')) {
                 this.handleProposalCancel();
             }
         });

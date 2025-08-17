@@ -192,6 +192,9 @@ public class CollaborationController {
 			@RequestParam String startDate,
 			@RequestParam String endDate,
 			@RequestParam(required = false) String category,
+			@RequestParam(required = false) String collaborationDuration,
+			@RequestParam(required = false) String collaborationLocation,
+			@RequestParam(required = false) String revenueStructure,
 			Principal principal) {
 		
 		// Check authentication
@@ -292,6 +295,17 @@ public class CollaborationController {
 		}
 		if (targetProduct != null) {
 			proposal.setTargetProduct(targetProduct);
+		}
+		
+		// Set additional form fields
+		if (collaborationDuration != null && !collaborationDuration.trim().isEmpty()) {
+			proposal.setDuration(collaborationDuration.trim());
+		}
+		if (collaborationLocation != null && !collaborationLocation.trim().isEmpty()) {
+			proposal.setLocation(collaborationLocation.trim());
+		}
+		if (revenueStructure != null && !revenueStructure.trim().isEmpty()) {
+			proposal.setProfitShare(revenueStructure.trim());
 		}
 		
 		// Save the proposal
