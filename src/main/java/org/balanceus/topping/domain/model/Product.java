@@ -62,7 +62,7 @@ public class Product {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private ProductCategory category = ProductCategory.COLLABORATION;
+	private ProductCategory category = ProductCategory.CAFE;
 
 	private String ingredients;
 
@@ -142,14 +142,17 @@ public class Product {
 	}
 
 	public enum ProductCategory {
-		COLLABORATION("콜라보 상품"),
-		SIGNATURE("시그니처 상품"),
-		POPULAR("인기 상품"),
-		NEW("신상품"),
-		BEVERAGE("음료"),
+		// COLLABORATION("콜라보 상품"),
+		// SIGNATURE("시그니처 상품"),
+		// POPULAR("인기 상품"),
+		// NEW("신상품"),
+		// BEVERAGE("음료"),
 		FOOD("음식"),
-		DESSERT("디저트"),
-		BAKERY("베이커리"),
+		CAFE("카페"),
+		BOOK("책방"),
+		GYM("헬스장"),
+		// DESSERT("디저트"),
+		// BAKERY("베이커리"),
 		OTHER("기타");
 
 		private final String displayName;
