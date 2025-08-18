@@ -42,9 +42,13 @@ public class ProductRequestDto {
     // Helper method to get product type from category
     public String getProductType() {
         if ("signature".equalsIgnoreCase(category)) {
-            return "SIGNATURE";
+            return "SIGNATURE";  // SIGNATURE exists in ProductType enum
         } else if ("popular".equalsIgnoreCase(category)) {
             return "COLLABORATION";
+        } else if ("collaboration".equalsIgnoreCase(category)) {
+            return "COLLABORATION";
+        } else if ("seasonal".equalsIgnoreCase(category)) {
+            return "SEASONAL";
         } else {
             return "REGULAR";
         }
@@ -53,11 +57,19 @@ public class ProductRequestDto {
     // Helper method to get product category enum
     public String getProductCategory() {
         if ("signature".equalsIgnoreCase(category)) {
-            return "SIGNATURE";
+            return "SIGNATURE";  // Now SIGNATURE exists in ProductCategory enum
         } else if ("popular".equalsIgnoreCase(category)) {
-            return "POPULAR";
+            return "OTHER";  // Map popular to OTHER since POPULAR doesn't exist
+        } else if ("food".equalsIgnoreCase(category)) {
+            return "FOOD";
+        } else if ("cafe".equalsIgnoreCase(category)) {
+            return "CAFE";
+        } else if ("book".equalsIgnoreCase(category)) {
+            return "BOOK";
+        } else if ("gym".equalsIgnoreCase(category)) {
+            return "GYM";
         } else {
-            return "COLLABORATION";
+            return "OTHER";  // Default to OTHER for any unmapped categories
         }
     }
 }

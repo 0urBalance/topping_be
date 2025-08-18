@@ -143,7 +143,7 @@ public class Product {
 
 	public enum ProductCategory {
 		// COLLABORATION("콜라보 상품"),
-		// SIGNATURE("시그니처 상품"),
+		SIGNATURE("시그니처 상품"),
 		// POPULAR("인기 상품"),
 		// NEW("신상품"),
 		// BEVERAGE("음료"),
