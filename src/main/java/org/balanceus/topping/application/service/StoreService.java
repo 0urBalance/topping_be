@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
@@ -49,7 +50,7 @@ public class StoreService {
         store.setAddress(request.getAddress());
         store.setContactNumber(request.getContactNumber());
         store.setBusinessHours(request.getBusinessHours());
-        store.setCategory(request.getCategory());
+        store.setCategory(StoreCategory.fromString(request.getCategory()));
         store.setMainImageUrl(request.getMainImageUrl());
         store.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
         store.setUser(user);
@@ -101,7 +102,7 @@ public class StoreService {
         store.setAddress(request.getAddress());
         store.setContactNumber(request.getContactNumber());
         store.setBusinessHours(request.getBusinessHours());
-        store.setCategory(request.getCategory());
+        store.setCategory(StoreCategory.fromString(request.getCategory()));
         store.setMainImageUrl(request.getMainImageUrl());
         store.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
 
@@ -110,6 +111,25 @@ public class StoreService {
 
     public Store updateStoreEntity(Store store) {
         return storeRepository.save(store);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Store> getAllStores() {
+        return storeRepository.findAllByOrderByNameAsc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Store> getStoresByCategory(StoreCategory category) {
+        return storeRepository.findByCategoryOrderByNameAsc(category);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Store> getStoresByCategory(String categoryString) {
+        if (categoryString == null || categoryString.trim().isEmpty()) {
+            return getAllStores();
+        }
+        StoreCategory category = StoreCategory.fromString(categoryString);
+        return getStoresByCategory(category);
     }
     
 }

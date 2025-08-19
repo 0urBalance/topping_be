@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.springframework.data.domain.Pageable;
@@ -88,6 +89,21 @@ public class StoreRepositoryImpl implements StoreRepository {
     @Override
     public List<Store> findAll(Pageable pageable) {
         return storeJpaRepository.findAll();
+    }
+
+    @Override
+    public List<Store> findByCategory(StoreCategory category) {
+        return storeJpaRepository.findByCategory(category);
+    }
+
+    @Override
+    public List<Store> findAllByOrderByNameAsc() {
+        return storeJpaRepository.findAllByOrderByNameAsc();
+    }
+
+    @Override
+    public List<Store> findByCategoryOrderByNameAsc(StoreCategory category) {
+        return storeJpaRepository.findByCategoryOrderByNameAsc(category);
     }
 
     @Override

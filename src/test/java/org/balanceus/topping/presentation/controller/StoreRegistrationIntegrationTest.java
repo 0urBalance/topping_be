@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.balanceus.topping.application.dto.StoreForm;
 import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
@@ -92,7 +93,7 @@ class StoreRegistrationIntegrationTest {
         
         // Verify basic fields
         assertEquals("Test Café Integration", finalStore.getName());
-        assertEquals("Cafe", finalStore.getCategory());
+        assertEquals(StoreCategory.CAFE, finalStore.getCategory());
         assertEquals("서울시 강남구 테스트로 123", finalStore.getAddress());
         assertEquals("010-1234-5678", finalStore.getContactNumber());
         assertEquals("평일 09:00-22:00, 주말 10:00-23:00", finalStore.getBusinessHours());
@@ -147,7 +148,7 @@ class StoreRegistrationIntegrationTest {
 
         Store finalStore = finalStoreOpt.get();
         assertEquals("Minimal Store", finalStore.getName());
-        assertEquals("Restaurant", finalStore.getCategory());
+        assertEquals(StoreCategory.RESTAURANT, finalStore.getCategory());
         assertEquals(false, finalStore.getIsCollaborationOpen());
         assertTrue(finalStore.getTags().isEmpty(), "Tags should be empty");
     }

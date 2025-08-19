@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.springframework.data.domain.Pageable;
 
@@ -30,6 +31,12 @@ public interface StoreRepository {
     boolean existsById(UUID id);
     
     List<Store> findAll(Pageable pageable);
+    
+    List<Store> findByCategory(StoreCategory category);
+    
+    List<Store> findAllByOrderByNameAsc();
+    
+    List<Store> findByCategoryOrderByNameAsc(StoreCategory category);
     
     List<Store> findAllById(Iterable<UUID> ids);
     

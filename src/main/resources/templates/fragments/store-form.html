@@ -25,11 +25,10 @@
                     <label class="form-label" for="category">카테고리 <span style="color: var(--error-color);">*</span></label>
                     <select id="category" th:field="*{category}" class="form-control" required>
                         <option value="">카테고리를 선택하세요</option>
-                        <option value="Food">음식점</option>
-                        <option value="Cafe">카페</option>
-                        <option value="Book">책방</option>
-                        <option value="Gym">헬스장</option>
-                        <option value="Other">기타</option>
+                        <option th:each="categoryEnum : ${T(org.balanceus.topping.domain.model.StoreCategory).values()}"
+                                th:value="${categoryEnum.name()}"
+                                th:text="${categoryEnum.displayName}"
+                                th:selected="${categoryEnum.name() == category}">카테고리</option>
                     </select>
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
                 </div>

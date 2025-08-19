@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.infrastructure.security.Role;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
@@ -87,7 +88,7 @@ class CollaborationControllerTest {
         targetStore = new Store();
         targetStore.setUuid(UUID.randomUUID());
         targetStore.setName("Test Store");
-        targetStore.setCategory("카페");
+        targetStore.setCategory(StoreCategory.CAFE);
         targetStore.setUser(targetBusinessOwner);
     }
 

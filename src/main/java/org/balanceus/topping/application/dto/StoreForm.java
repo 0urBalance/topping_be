@@ -2,6 +2,8 @@ package org.balanceus.topping.application.dto;
 
 import java.util.List;
 
+import org.balanceus.topping.domain.model.StoreCategory;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -70,5 +72,22 @@ public class StoreForm {
         this.tags = String.join(", ", tagsList.stream()
                 .map(tag -> tag.startsWith("#") ? tag.substring(1) : tag)
                 .toList());
+    }
+
+    // Helper methods for enum conversion
+    public StoreCategory getCategoryEnum() {
+        return StoreCategory.fromString(this.category);
+    }
+
+    public void setCategoryFromEnum(StoreCategory categoryEnum) {
+        this.category = categoryEnum != null ? categoryEnum.name() : "";
+    }
+
+    // Method to get category display name for templates
+    public String getCategoryDisplayName() {
+        if (category == null || category.trim().isEmpty()) {
+            return "";
+        }
+        return StoreCategory.fromString(category).getDisplayName();
     }
 }

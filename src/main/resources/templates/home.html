@@ -571,10 +571,14 @@
                     <h3 class="category-title">인기 키워드</h3>
 
                     <div class="category-filters">
-                        <button class="category-btn active">커피</button>
-                        <button class="category-btn">음료</button>
-                        <button class="category-btn">간식</button>
-                        <button class="category-btn">정보</button>
+                        <button class="category-btn" 
+                                th:classappend="${selectedCategory == null ? 'active' : ''}"
+                                onclick="filterByCategory('')">전체</button>
+                        <button th:each="category : ${categories}"
+                                class="category-btn"
+                                th:classappend="${category.name() == selectedCategory ? 'active' : ''}"
+                                th:onclick="'filterByCategory(\'' + ${category.name()} + '\')'"
+                                th:text="${category.displayName}">카테고리</button>
                     </div>
 
                     <div class="subcategory-grid">
@@ -597,8 +601,40 @@
                     </div>
                 </div>
 
-                <div class="products-section" id="products-scroll-container">
-                    <th:block th:each="product, iterStat : ${recentProducts}" th:if="${iterStat.index} < 5">
+                <div class="products-section" id="stores-scroll-container">
+                    <!-- Display filtered stores -->
+                    <th:block th:each="store, iterStat : ${stores}" th:if="${iterStat.index} < 5">
+                        <div class="product-card clickable-store-card" th:attr="data-store-uuid=${store.uuid}">
+                            <div class="product-image">
+                                <img th:if="${store.mainImage != null}"
+                                     th:src="${store.mainImage.imagePath}"
+                                     th:alt="${store.name}"
+                                     style="width: 100%; height: 100%; object-fit: cover;"/>
+                                <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
+                                     th:src="${store.mainImageUrl}"
+                                     th:alt="${store.name}"
+                                     style="width: 100%; height: 100%; object-fit: cover;"/>
+                                <div th:if="${store.mainImage == null and store.mainImageUrl == null}"
+                                     style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;">
+                                    🏪
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-title" th:text="${store.name}">스토어 이름</h3>
+                                <p class="product-desc" th:text="${store.category.displayName}">카테고리</p>
+                                <p class="product-desc" th:text="${store.address}">주소</p>
+                                <div class="product-actions">
+                                    <button class="btn-outline" onclick="toggleStoreLike(this)">관심</button>
+                                    <button class="btn-outline btn-primary store-detail-btn"
+                                            th:attr="data-store-uuid=${store.uuid}">매장 보기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
+
+                    <!-- Also show some recent products -->
+                    <th:block th:each="product, iterStat : ${recentProducts}" th:if="${iterStat.index} < 3">
                         <div class="product-card clickable-product-card" th:attr="data-product-uuid=${product.uuid}">
                             <div class="product-image">
                                 <img th:if="${product.mainImage != null}"
@@ -619,7 +655,7 @@
                                 </div>
                             </div>
                             <div class="product-info">
-                                <h3 class="product-title" th:text="${product.name}">상품 타이들</h3>
+                                <h3 class="product-title" th:text="${product.name}">상품 이름</h3>
                                 <p class="product-desc"
                                    th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 상세
                                     설명</p>
@@ -635,19 +671,19 @@
                         </div>
                     </th:block>
 
-                    <!-- Empty state when no products exist -->
-                    <div th:if="${#lists.isEmpty(recentProducts)}" class="product-card" style="opacity: 0.6;">
+                    <!-- Empty state when no stores exist -->
+                    <div th:if="${#lists.isEmpty(stores) and #lists.isEmpty(recentProducts)}" class="product-card" style="opacity: 0.6;">
                         <div class="product-image">
                             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;">
-                                📦
+                                🏪
                             </div>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-title">등록된 상품이 없습니다</h3>
-                            <p class="product-desc">곧 멋진 상품들이 등록될 예정입니다!</p>
+                            <h3 class="product-title">등록된 스토어가 없습니다</h3>
+                            <p class="product-desc">곧 멋진 스토어들이 등록될 예정입니다!</p>
                             <div class="product-actions">
                                 <button class="btn-outline" disabled>관심</button>
-                                <button class="btn-outline btn-primary" onclick="location.href='/products/create'">상품
+                                <button class="btn-outline btn-primary" onclick="location.href='/stores/register'">스토어
                                     등록
                                 </button>
                             </div>
@@ -734,9 +770,20 @@
         // await fetch(`/api/wishlist/${productUuid}`, { method: 'POST' });
     }
 
-    // Drag-scroll functionality for products section
+    // Category filtering function
+    function filterByCategory(category) {
+        const currentUrl = new URL(window.location);
+        if (category && category.trim() !== '') {
+            currentUrl.searchParams.set('category', category);
+        } else {
+            currentUrl.searchParams.delete('category');
+        }
+        window.location.href = currentUrl.toString();
+    }
+
+    // Drag-scroll functionality for stores section
     function initializeProductsScroll() {
-        const scrollContainer = document.getElementById('products-scroll-container');
+        const scrollContainer = document.getElementById('stores-scroll-container');
         if (!scrollContainer) return;
 
         let isDown = false;
@@ -819,6 +866,16 @@
                         }
                     }
                 });
+            } else if (card.classList.contains('clickable-store-card')) {
+                card.addEventListener('click', function (e) {
+                    // Don't trigger if clicking on a button
+                    if (e.target.tagName !== 'BUTTON') {
+                        const storeUuid = this.dataset.storeUuid;
+                        if (storeUuid) {
+                            location.href = '/stores/' + storeUuid;
+                        }
+                    }
+                });
             }
         });
 
@@ -838,6 +895,17 @@
                 const productUuid = this.dataset.productUuid;
                 if (productUuid) {
                     location.href = '/collabo/apply/' + productUuid;
+                }
+            });
+        });
+
+        // Handle store detail button clicks
+        document.querySelectorAll('.store-detail-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation(); // Prevent card click
+                const storeUuid = this.dataset.storeUuid;
+                if (storeUuid) {
+                    location.href = '/stores/' + storeUuid;
                 }
             });
         });

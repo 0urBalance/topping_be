@@ -577,7 +577,7 @@ public class StoreController {
     private StoreForm convertToStoreForm(Store store) {
         StoreForm form = new StoreForm();
         form.setName(store.getName());
-        form.setCategory(store.getCategory());
+        form.setCategoryFromEnum(store.getCategory());
         form.setAddress(store.getAddress());
         form.setDescription(store.getDescription());
         form.setContactNumber(store.getContactNumber());

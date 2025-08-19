@@ -1,9 +1,11 @@
 package org.balanceus.topping.infrastructure.persistence;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Store;
+import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +19,10 @@ public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
     Optional<Store> findByName(String name);
     boolean existsByName(String name);
     boolean existsByUser(User user);
+    
+    List<Store> findByCategory(StoreCategory category);
+    List<Store> findAllByOrderByNameAsc();
+    List<Store> findByCategoryOrderByNameAsc(StoreCategory category);
     
     @Query("SELECT s FROM Store s " +
            "LEFT JOIN FETCH s.products p " +
