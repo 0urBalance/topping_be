@@ -1051,6 +1051,21 @@
     margin-bottom: 16px;
 }
 
+.summary-photo-item {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.summary-photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
 .summary-photo-placeholder {
     width: 60px;
     height: 60px;

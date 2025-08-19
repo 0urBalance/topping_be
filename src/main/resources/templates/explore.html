@@ -355,7 +355,7 @@
                     <h3 class="card-title" th:text="${store.name}">가게 이름</h3>
                     <p class="card-subtitle" th:text="${store.address}">가게 주소</p>
                     <div class="card-tags">
-                        <span class="tag" th:text="${store.category}">카테고리</span>
+                        <span class="tag" th:text="${store.category.displayName}">카테고리</span>
                     </div>
                     <div class="card-subtitle" th:text="${store.businessHours}">영업시간</div>
                 </div>

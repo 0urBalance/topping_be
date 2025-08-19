@@ -1558,9 +1558,26 @@ b가게 맥주</textarea>
         }
         
         // Check if we have collaboration proposal data
-        if (!chatData.collaborationId) {
+        if (!chatData.collaborationId || !chatData.proposalDetails) {
             return '';
         }
+        
+        const proposalDetails = chatData.proposalDetails;
+        
+        // Ensure proposalDetails is valid before proceeding
+        if (!proposalDetails || typeof proposalDetails !== 'object') {
+            console.warn('Invalid proposalDetails:', proposalDetails);
+            return '';
+        }
+        
+        // Generate real proposal data using existing helper methods
+        const industryType = this.getDisplayIndustry(proposalDetails);
+        const products = this.getDisplayProducts(proposalDetails);
+        const profitShare = this.getDisplayProfitShare(proposalDetails);
+        const duration = this.getDisplayDuration(proposalDetails);
+        
+        // Generate product images HTML
+        const proposalPhotosHtml = this.generateProposalPhotosHtml(proposalDetails);
         
         return `
             <div class="proposal-summary-card" id="proposalSummaryCard">
@@ -1574,30 +1591,25 @@ b가게 맥주</textarea>
                 
                 <div class="proposal-summary-content">
                     <div class="proposal-summary-photos">
-                        <div class="summary-photo-placeholder">
-                            <span class="material-symbols-outlined">image</span>
-                        </div>
-                        <div class="summary-photo-placeholder">
-                            <span class="material-symbols-outlined">image</span>
-                        </div>
+                        ${proposalPhotosHtml}
                     </div>
                     
                     <div class="proposal-summary-details">
                         <div class="summary-field">
                             <label>협업 유형</label>
-                            <span>음식점 상품 협업</span>
+                            <span>${this.escapeHtml(industryType)}</span>
                         </div>
                         <div class="summary-field">
                             <label>상품</label>
-                            <span>a가게 치킨 + b가게 맥주</span>
+                            <span style="white-space: pre-line;">${this.escapeHtml(products)}</span>
                         </div>
                         <div class="summary-field">
                             <label>수익 배분</label>
-                            <span>5:5</span>
+                            <span>${this.escapeHtml(profitShare)}</span>
                         </div>
                         <div class="summary-field">
                             <label>진행 기간</label>
-                            <span>1개월</span>
+                            <span>${this.escapeHtml(duration)}</span>
                         </div>
                     </div>
                     
@@ -1614,6 +1626,73 @@ b가게 맥주</textarea>
         `;
     }
     
+    /**
+     * Generate HTML for proposal photos using real product thumbnails
+     */
+    generateProposalPhotosHtml(proposalDetails) {
+        const images = [];
+        
+        // Safety check for proposalDetails
+        if (!proposalDetails || typeof proposalDetails !== 'object') {
+            console.warn('Invalid proposalDetails in generateProposalPhotosHtml:', proposalDetails);
+            return `
+                <div class="summary-photo-placeholder">
+                    <span class="material-symbols-outlined">image</span>
+                </div>
+                <div class="summary-photo-placeholder">
+                    <span class="material-symbols-outlined">image</span>
+                </div>
+            `;
+        }
+        
+        // Collect product thumbnails from proposal details
+        if (proposalDetails.proposerProduct && proposalDetails.proposerProduct.thumbnailPath) {
+            images.push({
+                src: proposalDetails.proposerProduct.thumbnailPath,
+                alt: proposalDetails.proposerProduct.name || '제안자 상품',
+                productName: proposalDetails.proposerProduct.name
+            });
+        }
+        
+        if (proposalDetails.targetProduct && proposalDetails.targetProduct.thumbnailPath) {
+            images.push({
+                src: proposalDetails.targetProduct.thumbnailPath,
+                alt: proposalDetails.targetProduct.name || '대상 상품',
+                productName: proposalDetails.targetProduct.name
+            });
+        }
+        
+        // Generate HTML for images or placeholders
+        let photosHtml = '';
+        
+        for (let i = 0; i < 2; i++) {
+            if (i < images.length) {
+                // Show actual product image
+                const image = images[i];
+                photosHtml += `
+                    <div class="summary-photo-item">
+                        <img src="${this.escapeHtml(image.src)}" 
+                             alt="${this.escapeHtml(image.alt)}" 
+                             title="${this.escapeHtml(image.productName || image.alt)}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="summary-photo-placeholder" style="display: none;">
+                            <span class="material-symbols-outlined">image</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show placeholder when no image available
+                photosHtml += `
+                    <div class="summary-photo-placeholder">
+                        <span class="material-symbols-outlined">image</span>
+                    </div>
+                `;
+            }
+        }
+        
+        return photosHtml;
+    }
+
     hideProposalSummary() {
         const summaryCard = document.getElementById('proposalSummaryCard');
         if (summaryCard) {
