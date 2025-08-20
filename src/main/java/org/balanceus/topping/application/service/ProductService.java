@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.Optional;
 
 import org.balanceus.topping.application.dto.ProductRequestDto;
+import org.balanceus.topping.application.dto.ProductAdjustmentDto;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
@@ -246,5 +247,60 @@ public class ProductService {
 
     public void deleteProduct(UUID productId) {
         productRepository.deleteById(productId);
+    }
+
+    /**
+     * Adjust product properties (price, availability, status, type, category)
+     */
+    public Product adjustProduct(UUID productId, ProductAdjustmentDto adjustmentDto, UUID userUuid) {
+        log.debug("Adjusting product: {} for user: {}", productId, userUuid);
+        
+        // Get the product to adjust
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
+        
+        // Validate ownership
+        validateProductOwnership(product, userUuid);
+        
+        // Validate adjustment data
+        validateProductAdjustment(adjustmentDto);
+        
+        // Apply adjustments
+        product.setPrice(adjustmentDto.getPrice());
+        product.setIsAvailable(adjustmentDto.getIsAvailable());
+        product.setIsActive(adjustmentDto.getIsActive());
+        product.setProductType(adjustmentDto.getProductType());
+        product.setCategory(adjustmentDto.getCategory());
+        
+        Product adjustedProduct = productRepository.save(product);
+        log.info("Product adjusted successfully: {} by user: {}. Reason: {}", 
+                adjustedProduct.getUuid(), userUuid, adjustmentDto.getAdjustmentReason());
+        
+        return adjustedProduct;
+    }
+
+    /**
+     * Validate product adjustment data
+     */
+    private void validateProductAdjustment(ProductAdjustmentDto adjustmentDto) {
+        if (adjustmentDto.getPrice() == null || adjustmentDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Product price must be greater than 0");
+        }
+        
+        if (adjustmentDto.getIsAvailable() == null) {
+            throw new IllegalArgumentException("Availability status is required");
+        }
+        
+        if (adjustmentDto.getIsActive() == null) {
+            throw new IllegalArgumentException("Active status is required");
+        }
+        
+        if (adjustmentDto.getProductType() == null) {
+            throw new IllegalArgumentException("Product type is required");
+        }
+        
+        if (adjustmentDto.getCategory() == null) {
+            throw new IllegalArgumentException("Product category is required");
+        }
     }
 }

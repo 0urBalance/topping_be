@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.security.Principal;
 
 import org.balanceus.topping.application.dto.ProductRequestDto;
+import org.balanceus.topping.application.dto.ProductAdjustmentDto;
 import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
@@ -256,5 +257,48 @@ public class ProductController {
 			return ApiResponseData.failure(404, "Product not found");
 		}
 		return ApiResponseData.success(product);
+	}
+
+	@PostMapping("/{id}/adjust")
+	@ResponseBody
+	public ApiResponseData<Product> adjustProduct(
+			@PathVariable UUID id,
+			@Valid @ModelAttribute ProductAdjustmentDto adjustmentDto,
+			BindingResult bindingResult,
+			Principal principal) {
+		
+		log.debug("Product adjustment attempt for product: {} by user: {}", id, principal != null ? principal.getName() : "anonymous");
+		
+		// Validate authentication
+		if (principal == null) {
+			log.warn("Unauthenticated user attempted product adjustment");
+			return ApiResponseData.failure(401, "Authentication required");
+		}
+		
+		// Handle validation errors
+		if (bindingResult.hasErrors()) {
+			log.warn("Product adjustment validation failed for product: {} by user: {}", id, principal.getName());
+			return ApiResponseData.failure(400, "Validation errors: " + bindingResult.getAllErrors());
+		}
+		
+		try {
+			// Get the user UUID
+			User user = userRepository.findByEmail(principal.getName())
+					.orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+			
+			// Adjust product using service
+			Product adjustedProduct = productService.adjustProduct(id, adjustmentDto, user.getUuid());
+			log.info("Product adjusted successfully: {} by user: {}", adjustedProduct.getUuid(), principal.getName());
+			
+			return ApiResponseData.success(adjustedProduct);
+			
+		} catch (IllegalArgumentException e) {
+			log.error("Product adjustment failed due to invalid data or access denied: {}", e.getMessage());
+			return ApiResponseData.failure(400, e.getMessage());
+			
+		} catch (Exception e) {
+			log.error("Product adjustment failed for product: {} by user: {} - {}", id, principal.getName(), e.getMessage());
+			return ApiResponseData.failure(500, "Product adjustment failed");
+		}
 	}
 }

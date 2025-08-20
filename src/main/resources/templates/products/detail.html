@@ -222,12 +222,104 @@
                    class="btn btn-secondary">
                     ✏️ 수정하기
                 </a>
+                <!-- Adjust button for product owner -->
+                <button sec:authorize="isAuthenticated()" 
+                        th:if="${product.creator.uuid == #authentication.principal.user.uuid}"
+                        type="button" 
+                        class="btn btn-warning"
+                        onclick="openAdjustModal()">
+                    ⚙️ 제품 조정
+                </button>
                 <a th:href="@{/products}" class="btn btn-outline">
                     🔙 목록으로
                 </a>
             </div>
         </div>
     </main>
+
+    <!-- Product Adjustment Modal -->
+    <div id="adjustModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>제품 조정</h3>
+                <span class="close" onclick="closeAdjustModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="adjustForm">
+                    <div class="form-group">
+                        <label for="adjustPrice">가격 (원)</label>
+                        <input type="number" 
+                               id="adjustPrice" 
+                               name="price" 
+                               th:value="${product.price}"
+                               min="0" 
+                               step="100" 
+                               required 
+                               class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adjustProductType">제품 타입</label>
+                        <select id="adjustProductType" name="productType" required class="form-control">
+                            <option th:value="'REGULAR'" th:selected="${product.productType == T(org.balanceus.topping.domain.model.Product.ProductType).REGULAR}">일반 상품</option>
+                            <option th:value="'SIGNATURE'" th:selected="${product.productType == T(org.balanceus.topping.domain.model.Product.ProductType).SIGNATURE}">시그니처 상품</option>
+                            <option th:value="'COLLABORATION'" th:selected="${product.productType == T(org.balanceus.topping.domain.model.Product.ProductType).COLLABORATION}">콜라보 상품</option>
+                            <option th:value="'SEASONAL'" th:selected="${product.productType == T(org.balanceus.topping.domain.model.Product.ProductType).SEASONAL}">시즌 상품</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adjustCategory">카테고리</label>
+                        <select id="adjustCategory" name="category" required class="form-control">
+                            <option th:value="'SIGNATURE'" th:selected="${product.category == T(org.balanceus.topping.domain.model.Product.ProductCategory).SIGNATURE}">시그니처 상품</option>
+                            <option th:value="'FOOD'" th:selected="${product.category == T(org.balanceus.topping.domain.model.Product.ProductCategory).FOOD}">음식</option>
+                            <option th:value="'CAFE'" th:selected="${product.category == T(org.balanceus.topping.domain.model.Product.ProductCategory).CAFE}">카페</option>
+                            <option th:value="'BOOK'" th:selected="${product.category == T(org.balanceus.topping.domain.model.Product.ProductCategory).BOOK}">책방</option>
+                            <option th:value="'GYM'" th:selected="${product.category == T(org.balanceus.topping.domain.model.Product.ProductCategory).GYM}">헬스장</option>
+                            <option th:value="'OTHER'" th:selected="${product.category == T(org.balanceus.topping.domain.model.Product.ProductCategory).OTHER}">기타</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" 
+                                   id="adjustAvailable" 
+                                   name="isAvailable" 
+                                   th:checked="${product.isAvailable}"
+                                   value="true">
+                            판매 가능
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" 
+                                   id="adjustActive" 
+                                   name="isActive" 
+                                   th:checked="${product.isActive}"
+                                   value="true">
+                            활성 상태
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adjustReason">조정 사유 (선택사항)</label>
+                        <textarea id="adjustReason" 
+                                  name="adjustmentReason" 
+                                  class="form-control" 
+                                  rows="3" 
+                                  placeholder="조정 사유를 입력하세요..."></textarea>
+                    </div>
+                </form>
+                
+                <div id="adjustMessage" class="alert" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeAdjustModal()">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitAdjustment()">조정 적용</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
@@ -238,5 +330,100 @@
     <!-- Framework JavaScript -->
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/main-common.js}"></script>
+    
+    <!-- Product Adjustment JavaScript -->
+    <script>
+        // Product adjustment modal functionality
+        function openAdjustModal() {
+            document.getElementById('adjustModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeAdjustModal() {
+            document.getElementById('adjustModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Clear any messages
+            const messageDiv = document.getElementById('adjustMessage');
+            messageDiv.style.display = 'none';
+            messageDiv.className = 'alert';
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('adjustModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAdjustModal();
+            }
+        });
+        
+        function submitAdjustment() {
+            const form = document.getElementById('adjustForm');
+            const messageDiv = document.getElementById('adjustMessage');
+            
+            // Get form data
+            const formData = new FormData();
+            formData.append('price', document.getElementById('adjustPrice').value);
+            formData.append('productType', document.getElementById('adjustProductType').value);
+            formData.append('category', document.getElementById('adjustCategory').value);
+            formData.append('isAvailable', document.getElementById('adjustAvailable').checked);
+            formData.append('isActive', document.getElementById('adjustActive').checked);
+            formData.append('adjustmentReason', document.getElementById('adjustReason').value);
+            
+            // Validate required fields
+            const price = parseFloat(document.getElementById('adjustPrice').value);
+            if (!price || price <= 0) {
+                showMessage('가격은 0보다 큰 값이어야 합니다.', 'error');
+                return;
+            }
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = event.target;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '조정 중...';
+            
+            // Submit adjustment
+            const productId = /*[[${product.uuid}]]*/ '';
+            fetch(`/products/${productId}/adjust`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('제품이 성공적으로 조정되었습니다!', 'success');
+                    // Reload page after 1.5 seconds to show updated values
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showMessage(data.message || '조정에 실패했습니다.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '조정 적용';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('조정 중 오류가 발생했습니다.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '조정 적용';
+            });
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('adjustMessage');
+            messageDiv.textContent = message;
+            messageDiv.className = `alert alert-${type}`;
+            messageDiv.style.display = 'block';
+        }
+        
+        // Form validation
+        document.getElementById('adjustPrice').addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (value <= 0) {
+                this.setCustomValidity('가격은 0보다 큰 값이어야 합니다.');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
 </body>
 </html>
