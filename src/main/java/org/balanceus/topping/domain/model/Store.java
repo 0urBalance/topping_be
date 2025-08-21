@@ -11,10 +11,9 @@ import org.hibernate.annotations.UuidGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -60,7 +59,7 @@ public class Store {
     private String businessHours;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = org.balanceus.topping.infrastructure.converter.StoreCategoryConverter.class)
     private StoreCategory category;
 
     private String mainImageUrl;

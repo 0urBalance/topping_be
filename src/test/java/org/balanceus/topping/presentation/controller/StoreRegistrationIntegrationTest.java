@@ -64,7 +64,7 @@ class StoreRegistrationIntegrationTest {
         // Given
         StoreForm storeForm = new StoreForm();
         storeForm.setName("Test Café Integration");
-        storeForm.setCategory("Cafe");
+        storeForm.setCategory("CAFE");
         storeForm.setAddress("서울시 강남구 테스트로 123");
         storeForm.setDescription("테스트를 위한 카페입니다. 맛있는 커피와 디저트를 제공합니다.");
         storeForm.setContactNumber("010-1234-5678");
