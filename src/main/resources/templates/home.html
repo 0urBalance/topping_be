@@ -577,7 +577,8 @@
                         <button th:each="category : ${categories}"
                                 class="category-btn"
                                 th:classappend="${category.name() == selectedCategory ? 'active' : ''}"
-                                th:onclick="'filterByCategory(\'' + ${category.name()} + '\')'"
+                                th:data-category="${category.name()}"
+                                onclick="filterByCategory(this.dataset.category)"
                                 th:text="${category.displayName}">카테고리</button>
                     </div>
 
