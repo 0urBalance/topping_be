@@ -45,20 +45,20 @@ Topping (토핑) is a collaboration matching platform backend built with Spring 
 The platform is organized into distinct business domains. Each domain has comprehensive documentation covering models, APIs, business rules, and integration points:
 
 ### Core Domains
-- **[👤 User Domain](./docs/domains/user/README.md)** - User accounts, profiles, and role-based access control
-  - **[Claude Guidance](./docs/domains/user/CLAUDE.md)** - User authentication patterns, role management, and integration
+- **[👤 User Domain](./docs/domains/user/README.md)** - User accounts, profiles, role-based access control, and phone number validation
+  - **[Claude Guidance](./docs/domains/user/CLAUDE.md)** - User authentication patterns, role management, phone validation, and integration
 - **[🏪 Store Domain](./docs/domains/store/README.md)** - Business store registration and management  
   - **[Claude Guidance](./docs/domains/store/CLAUDE.md)** - Three-phase registration, multi-image management, authorization patterns
-- **[📦 Product Domain](./docs/domains/product/README.md)** - Product listings and collaboration features
-  - **[Claude Guidance](./docs/domains/product/CLAUDE.md)** - Product routes, field references, template patterns, collaboration integration
-- **[🤝 Collaboration Domain](./docs/domains/collaboration/README.md)** - Business matching and partnership management
-  - **[Claude Guidance](./docs/domains/collaboration/CLAUDE.md)** - Dual entity architecture, field mappings, chat integration, proposal flows
+- **[📦 Product Domain](./docs/domains/product/README.md)** - Product listings, editing capabilities, and collaboration features
+  - **[Claude Guidance](./docs/domains/product/CLAUDE.md)** - Product routes, editing forms, field references, template patterns, collaboration integration
+- **[🤝 Collaboration Domain](./docs/domains/collaboration/README.md)** - Business matching, partnership management, and proposal modifications
+  - **[Claude Guidance](./docs/domains/collaboration/CLAUDE.md)** - Enhanced dual entity architecture, field mappings, chat integration, proposal flows and editing
 
 ### Supporting Domains  
 - **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security and Kakao social login
   - **[Claude Guidance](./docs/domains/auth/CLAUDE.md)** - Session management, Kakao OAuth, route protection, authorization patterns
-- **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication for collaborations
-  - **[Claude Guidance](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, unread tracking, automatic room creation
+- **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication and proposal management for collaborations
+  - **[Claude Guidance](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, unread tracking, automatic room creation, proposal modifications
 - **[🔔 Notification Domain](./docs/domains/notification/README.md)** - Event-driven notifications
   - **[Claude Guidance](./docs/domains/notification/CLAUDE.md)** - Event-driven notifications, UI integration, polling patterns
 - **[🎧 Support Domain](./docs/domains/support/README.md)** - Customer support system with FAQ and inquiry management  
@@ -159,11 +159,11 @@ All repositories follow a consistent three-layer pattern:
 
 ### Business Logic Domains  
 - **[Store Domain Guide](./docs/domains/store/CLAUDE.md)** - Three-phase registration, multi-image management
-- **[Product Domain Guide](./docs/domains/product/CLAUDE.md)** - Product routes, field references, collaboration integration
-- **[Collaboration Domain Guide](./docs/domains/collaboration/CLAUDE.md)** - Dual entity architecture, proposal flows
+- **[Product Domain Guide](./docs/domains/product/CLAUDE.md)** - Product routes, editing forms, field references, collaboration integration
+- **[Collaboration Domain Guide](./docs/domains/collaboration/CLAUDE.md)** - Enhanced dual entity architecture, proposal flows, and modification capabilities
 
 ### Communication & Support
-- **[Chat Domain Guide](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, automatic room creation
+- **[Chat Domain Guide](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, automatic room creation, proposal modifications
 - **[Notification Domain Guide](./docs/domains/notification/CLAUDE.md)** - Event-driven notifications, UI integration
 - **[Support Domain Guide](./docs/domains/support/CLAUDE.md)** - FAQ management, inquiry systems
 - **[Policy Domain Guide](./docs/domains/policy/CLAUDE.md)** - Modal integration, agreement validation
@@ -221,6 +221,13 @@ All repositories follow a consistent three-layer pattern:
   - Fixed `receivedApp.product` → conditional product field logic (6 occurrences)
   - Fixed `.message` → `.description` field references (3 occurrences)
   - **Zero Runtime SpringEL Exceptions**: All "Property or field 'X' cannot be found" errors eliminated
+- ✅ **Phone Number Duplicate Validation**: Enhanced user registration with phone number uniqueness checks and validation
+- ✅ **Product Edit System**: Complete product modification functionality with form validation and data persistence
+- ✅ **Home Page Advanced Filtering**: Implemented sophisticated filtering system for store and product discovery
+- ✅ **Collaboration Entity Refactoring**: Major architectural improvements to collaboration system with enhanced data models
+- ✅ **Chat-Proposal Integration**: Advanced integration allowing proposal modifications directly from chat interface
+- ✅ **Social Login Enhancements**: Fixed Kakao OAuth redirect URLs and improved authentication flow reliability
+- ✅ **Store Category Management**: Enhanced store category editing with improved data integrity and user experience
 
 ## Documentation Navigation
 
