@@ -108,6 +108,10 @@ public class SignupController {
             if (userService.existsByEmail(request.getEmail())) {
                 return "email_exists";
             }
+            
+            if (userService.existsByPhoneNumber(request.getPhoneNumber())) {
+                return "phone_exists";
+            }
 
             sessionData.setEmail(request.getEmail());
             sessionData.setPassword(request.getPassword());

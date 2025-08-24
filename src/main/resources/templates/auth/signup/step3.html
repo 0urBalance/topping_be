@@ -281,8 +281,12 @@
 
                 <div class="mb-3">
                     <label class="form-label">전화번호</label>
-                    <input type="tel" class="form-control" id="phoneNumber" placeholder="010-0000-0000" required>
+                    <div class="email-row">
+                        <input type="tel" class="form-control email-input" id="phoneNumber" placeholder="010-0000-0000" required>
+                        <button type="button" class="verify-btn" id="checkPhoneBtn">중복확인</button>
+                    </div>
                     <div class="error-message" id="phoneError"></div>
+                    <div class="success-message" id="phoneSuccess"></div>
                 </div>
 
                 <div class="checkbox-group">
@@ -344,8 +348,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let emailVerified = false;
+        let phoneVerified = false;
         let emailCheckTimeout;
+        let phoneCheckTimeout;
         let isEmailChecking = false;
+        let isPhoneChecking = false;
 
         // 공통 이메일 중복 확인 함수
         function checkEmailDuplicate(email, showLoading = false) {
@@ -460,6 +467,89 @@
             validateForm();
         });
 
+        // 공통 전화번호 중복 확인 함수
+        function checkPhoneDuplicate(phoneNumber, showLoading = false) {
+            const phoneError = document.getElementById('phoneError');
+            const phoneSuccess = document.getElementById('phoneSuccess');
+            
+            if (!phoneNumber) {
+                phoneError.textContent = '전화번호를 입력해주세요.';
+                phoneError.style.display = 'block';
+                phoneSuccess.style.display = 'none';
+                phoneVerified = false;
+                validateForm();
+                return;
+            }
+            
+            // 전화번호 형식 검증 (숫자만 추출)
+            const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+            if (cleanPhone.length < 10 || cleanPhone.length > 11 || !cleanPhone.startsWith('01')) {
+                phoneError.textContent = '올바른 전화번호 형식이 아닙니다.';
+                phoneError.style.display = 'block';
+                phoneSuccess.style.display = 'none';
+                phoneVerified = false;
+                validateForm();
+                return;
+            }
+            
+            if (showLoading) {
+                phoneError.style.display = 'none';
+                phoneSuccess.textContent = '전화번호 확인 중...';
+                phoneSuccess.style.display = 'block';
+            }
+            
+            isPhoneChecking = true;
+            
+            // 서버에 중복 확인 요청
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            fetch('/api/auth/check-phone', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ phoneNumber: phoneNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                isPhoneChecking = false;
+                if (data.success) {
+                    if (data.data.exists) {
+                        phoneError.textContent = '이미 사용중인 전화번호입니다.';
+                        phoneError.style.display = 'block';
+                        phoneSuccess.style.display = 'none';
+                        phoneVerified = false;
+                    } else {
+                        phoneSuccess.textContent = '사용 가능한 전화번호입니다.';
+                        phoneSuccess.style.display = 'block';
+                        phoneError.style.display = 'none';
+                        phoneVerified = true;
+                    }
+                } else {
+                    phoneError.textContent = data.message || '전화번호 확인에 실패했습니다.';
+                    phoneError.style.display = 'block';
+                    phoneSuccess.style.display = 'none';
+                    phoneVerified = false;
+                }
+                validateForm();
+            })
+            .catch(error => {
+                isPhoneChecking = false;
+                console.error('Error:', error);
+                phoneError.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+                phoneError.style.display = 'block';
+                phoneSuccess.style.display = 'none';
+                phoneVerified = false;
+                validateForm();
+            });
+        }
+
+        // 전화번호 중복 확인 버튼 클릭
+        document.getElementById('checkPhoneBtn').addEventListener('click', function() {
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            checkPhoneDuplicate(phoneNumber, true);
+        });
+
         // 비밀번호 검증
         document.getElementById('password').addEventListener('input', function() {
             const password = this.value;
@@ -503,7 +593,7 @@
             validateForm();
         }
 
-        // 전화번호 형식 자동 변경
+        // 전화번호 형식 자동 변경 및 디바운스된 중복 확인
         document.getElementById('phoneNumber').addEventListener('input', function() {
             let value = this.value.replace(/[^0-9]/g, '');
             
@@ -514,6 +604,30 @@
             }
             
             this.value = value;
+            
+            // 전화번호 검증 상태 초기화
+            phoneVerified = false;
+            document.getElementById('phoneError').style.display = 'none';
+            document.getElementById('phoneSuccess').style.display = 'none';
+            
+            // 이전 타이머 취소
+            if (phoneCheckTimeout) {
+                clearTimeout(phoneCheckTimeout);
+            }
+            
+            // 빈 전화번호인 경우 즉시 폼 검증만 실행
+            if (!value) {
+                validateForm();
+                return;
+            }
+            
+            // 500ms 후 자동 중복 확인
+            phoneCheckTimeout = setTimeout(() => {
+                if (!isPhoneChecking && value.length >= 12) { // 010-0000-0000 최소 길이
+                    checkPhoneDuplicate(value);
+                }
+            }, 500);
+            
             validateForm();
         });
 
@@ -529,6 +643,7 @@
             const termsAgreement = document.getElementById('termsAgreement').checked;
             
             const isValid = emailVerified && 
+                           phoneVerified &&
                            password.length >= 6 && 
                            password === confirmPassword && 
                            phoneNumber.length >= 12 && 
@@ -550,6 +665,11 @@
             
             if (!emailVerified) {
                 alert('이메일 중복 확인을 해주세요.');
+                return;
+            }
+            
+            if (!phoneVerified) {
+                alert('전화번호 중복 확인을 해주세요.');
                 return;
             }
             
@@ -587,6 +707,8 @@
                     window.location.href = '/signup/step/4';
                 } else if (data === 'email_exists') {
                     alert('이미 사용중인 이메일입니다.');
+                } else if (data === 'phone_exists') {
+                    alert('이미 사용중인 전화번호입니다.');
                 } else {
                     alert('오류가 발생했습니다. 다시 시도해주세요.');
                 }

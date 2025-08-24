@@ -11,6 +11,10 @@ public interface UserRepository {
 	User findByUsername(String username);
 
 	Optional<User> findByEmail(String email);
+	
+	Optional<User> findByPhoneNumber(String phoneNumber);
+	
+	boolean existsByPhoneNumber(String phoneNumber);
 
 	List<User> findByRole(Role role);
 

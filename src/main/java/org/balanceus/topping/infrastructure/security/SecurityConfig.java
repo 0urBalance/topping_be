@@ -45,6 +45,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/member/signup").permitAll()
 				.requestMatchers("/api/session/login", "/api/session/logout", "/api/session/status").permitAll()
 				.requestMatchers("/api/auth/check-email").permitAll()
+				.requestMatchers("/api/auth/check-phone").permitAll()
 				.requestMatchers("/api/sggcode/**").permitAll()
 				// Protected endpoints - must be authenticated
 				.requestMatchers("/mypage/**", "/logout").authenticated()
