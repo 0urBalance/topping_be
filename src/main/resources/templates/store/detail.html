@@ -88,19 +88,22 @@ height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
                          th:alt="${store.name}"
                          class="image-hero gallery-trigger"
                          data-index="0"
-                         loading="eager"/>
+                         loading="eager"
+                         onerror="this.src='/image/topping_M_text.png'"/>
                     <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
                          th:src="${store.mainImageUrl}"
                          th:alt="${store.name}"
                          class="image-hero gallery-trigger"
                          data-index="0"
-                         loading="eager"/>
+                         loading="eager"
+                         onerror="this.src='/image/topping_M_text.png'"/>
                     <img th:if="${store.mainImage == null and store.mainImageUrl == null}"
                          th:src="@{/image/topping_L.png}"
                          th:alt="${store.name}"
                          class="image-hero gallery-trigger"
                          data-index="0"
-                         loading="eager"/>
+                         loading="eager"
+                         onerror="this.src='/image/topping_M_text.png'"/>
                 </div>
             </div>
         </section>
@@ -121,7 +124,8 @@ height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
                             <img th:src="${image.imagePath}"
                                  th:alt="${image.imageType.displayName}"
                                  th:title="${image.imageType.displayName}"
-                                 loading="lazy"/>
+                                 loading="lazy"
+                                 onerror="this.src='/image/topping_M_text.png'"/>
                         </div>
                     </div>
 

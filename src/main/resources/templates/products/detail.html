@@ -180,15 +180,18 @@
                 <img th:if="${product.mainImage != null}" 
                      th:src="${product.mainImage.imagePath}" 
                      th:alt="${product.name}" 
-                     class="product-image">
+                     class="product-image"
+                     onerror="this.src='/image/topping_M_text.png'">
                 <img th:if="${product.mainImage == null and product.thumbnailPath != null}" 
                      th:src="${product.thumbnailPath}" 
                      th:alt="${product.name}" 
-                     class="product-image">
+                     class="product-image"
+                     onerror="this.src='/image/topping_M_text.png'">
                 <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}" 
                      th:src="${product.imageUrl}" 
                      th:alt="${product.name}" 
-                     class="product-image">
+                     class="product-image"
+                     onerror="this.src='/image/topping_M_text.png'">
             </div>
 
             <!-- Store Information -->

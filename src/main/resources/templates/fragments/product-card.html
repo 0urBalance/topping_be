@@ -12,21 +12,25 @@
              th:src="${product.mainImage.imagePath}"
              th:alt="${product.name}"
              class="image-product lazy-load"
-             loading="lazy" />
+             loading="lazy"
+             onerror="this.src='/image/topping_M_text.png'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
              th:src="${product.thumbnailPath}"
              th:alt="${product.name}"
              class="image-product lazy-load"
-             loading="lazy" />
+             loading="lazy"
+             onerror="this.src='/image/topping_M_text.png'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
              th:src="${product.imageUrl}"
              th:alt="${product.name}"
              class="image-product lazy-load"
-             loading="lazy" />
+             loading="lazy"
+             onerror="this.src='/image/topping_M_text.png'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
              th:src="@{/image/topping_M.png}"
              th:alt="${product.name}"
-             class="image-product" />
+             class="image-product"
+             onerror="this.src='/image/topping_M_text.png'" />
     </div>
     <div class="card-content">
         <h3 class="heading-md text-dark" th:text="${product.name}">상품명</h3>
@@ -47,21 +51,25 @@
              th:src="${product.mainImage.imagePath}"
              th:alt="${product.name}"
              style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
-             loading="lazy" />
+             loading="lazy"
+             onerror="this.src='/image/topping_M_text.png'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
              th:src="${product.thumbnailPath}"
              th:alt="${product.name}"
              style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
-             loading="lazy" />
+             loading="lazy"
+             onerror="this.src='/image/topping_M_text.png'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
              th:src="${product.imageUrl}"
              th:alt="${product.name}"
              style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
-             loading="lazy" />
+             loading="lazy"
+             onerror="this.src='/image/topping_M_text.png'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
              th:src="@{/image/topping_M.png}"
              th:alt="${product.name}"
-             style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;" />
+             style="width: 80px; height: 80px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;"
+             onerror="this.src='/image/topping_M_text.png'" />
         <div style="flex: 1;">
             <h4 class="heading-md text-dark" th:text="${product.name}">상품명</h4>
             <p class="text-sm text-medium" th:text="${product.description != null ? product.description : '상품 설명'}" style="margin: 0 0 10px 0;">설명</p>

@@ -342,11 +342,13 @@
                     <img th:if="${store.mainImage != null}"
                          th:src="${store.mainImage.imagePath}"
                          th:alt="${store.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
                          th:src="${store.mainImageUrl}"
                          th:alt="${store.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <div th:if="${store.mainImage == null and store.mainImageUrl == null}"
                          class="placeholder">🏪
                     </div>
@@ -384,15 +386,18 @@
                     <img th:if="${product.mainImage != null}"
                          th:src="${product.mainImage.imagePath}"
                          th:alt="${product.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
                          th:src="${product.thumbnailPath}"
                          th:alt="${product.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
                          th:src="${product.imageUrl}"
                          th:alt="${product.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
                          class="placeholder">🍽️
                     </div>
@@ -435,15 +440,18 @@
                     <img th:if="${product.mainImage != null}"
                          th:src="${product.mainImage.imagePath}"
                          th:alt="${product.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
                          th:src="${product.thumbnailPath}"
                          th:alt="${product.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
                          th:src="${product.imageUrl}"
                          th:alt="${product.name}"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='/image/topping_M_text.png'">
                     <div th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
                          class="placeholder">🤝
                     </div>

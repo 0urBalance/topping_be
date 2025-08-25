@@ -196,7 +196,7 @@
             </div>
 
             <div class="store-image" th:if="${store.mainImageUrl}">
-                <img th:src="${store.mainImageUrl}" th:alt="${store.name} + ' 메인 이미지'" />
+                <img th:src="${store.mainImageUrl}" th:alt="${store.name} + ' 메인 이미지'" onerror="this.src='/image/topping_M_text.png'" />
             </div>
 
             <div class="store-info">

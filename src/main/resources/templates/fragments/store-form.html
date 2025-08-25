@@ -84,7 +84,7 @@
                 <h4>현재 등록된 이미지</h4>
                 <div class="image-grid">
                     <div class="image-item" th:each="image : ${store.images}">
-                        <img th:src="${image.imagePath}" alt="Store Image" class="image-thumbnail">
+                        <img th:src="${image.imagePath}" alt="Store Image" class="image-thumbnail" onerror="this.src='/image/topping_M_text.png'">
                         <div class="image-info">
                             <div class="image-type-badge" th:text="${image.imageType.displayName}">이미지 타입</div>
                             <button type="button" class="delete-btn" 
