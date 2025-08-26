@@ -10,8 +10,10 @@ import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.ProductWishlist;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.repository.ProductWishlistRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
@@ -44,6 +46,7 @@ public class ProductController {
 	private final StoreService storeService;
 	private final ImageUploadService imageUploadService;
 	private final UserRepository userRepository;
+	private final ProductWishlistRepository productWishlistRepository;
 
 	@GetMapping
 	public String listProducts(Model model) {
@@ -299,6 +302,87 @@ public class ProductController {
 		} catch (Exception e) {
 			log.error("Product adjustment failed for product: {} by user: {} - {}", id, principal.getName(), e.getMessage());
 			return ApiResponseData.failure(500, "Product adjustment failed");
+		}
+	}
+
+	@PostMapping("/{id}/wishlist/toggle")
+	@ResponseBody
+	public ApiResponseData<String> toggleProductWishlist(
+			@PathVariable UUID id,
+			@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		log.debug("Product wishlist toggle for product: {} by user: {}", id, userDetails != null ? userDetails.getUser().getEmail() : "anonymous");
+		
+		// Validate authentication
+		if (userDetails == null) {
+			log.warn("Unauthenticated user attempted product wishlist toggle");
+			return ApiResponseData.failure(401, "Authentication required");
+		}
+		
+		try {
+			// Get the product
+			Product product = productService.getProductById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+			
+			User user = userDetails.getUser();
+			
+			// Check if already wishlisted
+			boolean isWishlisted = productWishlistRepository.existsByUserAndProduct(user, product);
+			
+			if (isWishlisted) {
+				// Remove from wishlist
+				ProductWishlist existingWishlist = productWishlistRepository.findByUserAndProduct(user, product);
+				if (existingWishlist != null) {
+					productWishlistRepository.delete(existingWishlist);
+					log.info("Product removed from wishlist: {} by user: {}", id, user.getEmail());
+					return ApiResponseData.success("removed");
+				}
+			} else {
+				// Add to wishlist
+				ProductWishlist newWishlist = new ProductWishlist();
+				newWishlist.setUser(user);
+				newWishlist.setProduct(product);
+				productWishlistRepository.save(newWishlist);
+				log.info("Product added to wishlist: {} by user: {}", id, user.getEmail());
+				return ApiResponseData.success("added");
+			}
+			
+			return ApiResponseData.failure(500, "Failed to update wishlist");
+			
+		} catch (IllegalArgumentException e) {
+			log.error("Product wishlist toggle failed due to invalid data: {}", e.getMessage());
+			return ApiResponseData.failure(404, e.getMessage());
+			
+		} catch (Exception e) {
+			log.error("Product wishlist toggle failed for product: {} by user: {} - {}", id, userDetails.getUser().getEmail(), e.getMessage());
+			return ApiResponseData.failure(500, "Wishlist toggle failed");
+		}
+	}
+
+	@GetMapping("/{id}/wishlist/status")
+	@ResponseBody
+	public ApiResponseData<Boolean> getProductWishlistStatus(
+			@PathVariable UUID id,
+			@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		// If not authenticated, return false
+		if (userDetails == null) {
+			return ApiResponseData.success(false);
+		}
+		
+		try {
+			// Get the product
+			Product product = productService.getProductById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+			
+			User user = userDetails.getUser();
+			boolean isWishlisted = productWishlistRepository.existsByUserAndProduct(user, product);
+			
+			return ApiResponseData.success(isWishlisted);
+			
+		} catch (Exception e) {
+			log.error("Error checking product wishlist status for product: {} - {}", id, e.getMessage());
+			return ApiResponseData.success(false);
 		}
 	}
 }

@@ -602,42 +602,9 @@
                     </div>
                 </div>
 
-                <div class="products-section" id="stores-scroll-container">
-                    <!-- Display filtered stores -->
-                    <th:block th:each="store, iterStat : ${stores}" th:if="${iterStat.index} < 5">
-                        <div class="product-card clickable-store-card" th:attr="data-store-uuid=${store.uuid}">
-                            <div class="product-image">
-                                <img th:if="${store.mainImage != null}"
-                                     th:src="${store.mainImage.imagePath}"
-                                     th:alt="${store.name}"
-                                     style="width: 100%; height: 100%; object-fit: cover;"
-                                     onerror="this.src='/image/topping_M_text.png'"/>
-                                <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
-                                     th:src="${store.mainImageUrl}"
-                                     th:alt="${store.name}"
-                                     style="width: 100%; height: 100%; object-fit: cover;"
-                                     onerror="this.src='/image/topping_M_text.png'"/>
-                                <div th:if="${store.mainImage == null and store.mainImageUrl == null}"
-                                     style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;">
-                                    🏪
-                                </div>
-                            </div>
-                            <div class="product-info">
-                                <h3 class="product-title" th:text="${store.name}">스토어 이름</h3>
-                                <p class="product-desc" th:text="${store.category.displayName}">카테고리</p>
-                                <p class="product-desc" th:text="${store.address}">주소</p>
-                                <div class="product-actions">
-                                    <button class="btn-outline" onclick="toggleStoreLike(this)">관심</button>
-                                    <button class="btn-outline btn-primary store-detail-btn"
-                                            th:attr="data-store-uuid=${store.uuid}">매장 보기
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </th:block>
-
-                    <!-- Also show some recent products -->
-                    <th:block th:each="product, iterStat : ${recentProducts}" th:if="${iterStat.index} < 3">
+                <div class="products-section" id="products-scroll-container">
+                    <!-- Display recent products -->
+                    <th:block th:each="product, iterStat : ${recentProducts}" th:if="${iterStat.index} < 8">
                         <div class="product-card clickable-product-card" th:attr="data-product-uuid=${product.uuid}">
                             <div class="product-image">
                                 <img th:if="${product.mainImage != null}"
@@ -662,11 +629,11 @@
                             </div>
                             <div class="product-info">
                                 <h3 class="product-title" th:text="${product.name}">상품 이름</h3>
+                                <p class="product-desc" th:text="${product.category.displayName}">카테고리</p>
                                 <p class="product-desc"
-                                   th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 상세
-                                    설명</p>
+                                   th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 상세 설명</p>
                                 <div class="product-actions">
-                                    <button class="btn-outline wishlist-btn"
+                                    <button class="btn-outline product-wishlist-btn"
                                             th:attr="data-product-uuid=${product.uuid}">관심
                                     </button>
                                     <button class="btn-outline btn-primary apply-btn"
@@ -677,19 +644,19 @@
                         </div>
                     </th:block>
 
-                    <!-- Empty state when no stores exist -->
-                    <div th:if="${#lists.isEmpty(stores) and #lists.isEmpty(recentProducts)}" class="product-card" style="opacity: 0.6;">
+                    <!-- Empty state when no products exist -->
+                    <div th:if="${#lists.isEmpty(recentProducts)}" class="product-card" style="opacity: 0.6;">
                         <div class="product-image">
                             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #718096;">
-                                🏪
+                                📦
                             </div>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-title">등록된 스토어가 없습니다</h3>
-                            <p class="product-desc">곧 멋진 스토어들이 등록될 예정입니다!</p>
+                            <h3 class="product-title">등록된 상품이 없습니다</h3>
+                            <p class="product-desc">곧 멋진 상품들이 등록될 예정입니다!</p>
                             <div class="product-actions">
                                 <button class="btn-outline" disabled>관심</button>
-                                <button class="btn-outline btn-primary" onclick="location.href='/stores/register'">스토어
+                                <button class="btn-outline btn-primary" onclick="location.href='/products/create'">상품
                                     등록
                                 </button>
                             </div>
@@ -757,23 +724,34 @@
 <script th:src="@{/js/common.js}"></script>
 
 <script>
-    // Handle wishlist toggle
-    function toggleWishlist(button, productUuid) {
-        // Check if user is authenticated
-        // This is a placeholder - implement actual authentication check
-        console.log('Toggle wishlist for product:', productUuid);
-
-        // Toggle button state
-        if (button.textContent === '관심') {
-            button.textContent = '♥ 관심';
-            button.style.color = '#dc2626';
-        } else {
-            button.textContent = '관심';
-            button.style.color = '';
+    // Handle product wishlist toggle
+    async function toggleProductWishlist(button, productUuid) {
+        try {
+            const response = await fetch(`/products/${productUuid}/wishlist/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data === 'added') {
+                    button.textContent = '♥ 관심';
+                    button.style.color = '#dc2626';
+                } else if (result.success && result.data === 'removed') {
+                    button.textContent = '관심';
+                    button.style.color = '';
+                }
+            } else if (response.status === 401) {
+                // Redirect to login if not authenticated
+                window.location.href = '/login';
+            } else {
+                console.error('Failed to toggle product wishlist');
+            }
+        } catch (error) {
+            console.error('Error toggling product wishlist:', error);
         }
-
-        // TODO: Implement actual API call to add/remove from wishlist
-        // await fetch(`/api/wishlist/${productUuid}`, { method: 'POST' });
     }
 
     // Category filtering function
@@ -787,9 +765,9 @@
         window.location.href = currentUrl.toString();
     }
 
-    // Drag-scroll functionality for stores section
+    // Drag-scroll functionality for products section
     function initializeProductsScroll() {
-        const scrollContainer = document.getElementById('stores-scroll-container');
+        const scrollContainer = document.getElementById('products-scroll-container');
         if (!scrollContainer) return;
 
         let isDown = false;
@@ -872,25 +850,14 @@
                         }
                     }
                 });
-            } else if (card.classList.contains('clickable-store-card')) {
-                card.addEventListener('click', function (e) {
-                    // Don't trigger if clicking on a button
-                    if (e.target.tagName !== 'BUTTON') {
-                        const storeUuid = this.dataset.storeUuid;
-                        if (storeUuid) {
-                            location.href = '/stores/' + storeUuid;
-                        }
-                    }
-                });
-            }
         });
 
-        // Handle wishlist button clicks
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+        // Handle product wishlist button clicks
+        document.querySelectorAll('.product-wishlist-btn').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation(); // Prevent card click
                 const productUuid = this.dataset.productUuid;
-                toggleWishlist(this, productUuid);
+                toggleProductWishlist(this, productUuid);
             });
         });
 
@@ -905,16 +872,6 @@
             });
         });
 
-        // Handle store detail button clicks
-        document.querySelectorAll('.store-detail-btn').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.stopPropagation(); // Prevent card click
-                const storeUuid = this.dataset.storeUuid;
-                if (storeUuid) {
-                    location.href = '/stores/' + storeUuid;
-                }
-            });
-        });
 
         // Handle image load errors
         const productImages = document.querySelectorAll('.product-image img');

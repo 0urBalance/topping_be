@@ -24,6 +24,8 @@ public interface ProductRepository {
 	
 	List<Product> findByIsActiveTrue();
 	
+	List<Product> findByCategoryAndIsActiveTrue(Product.ProductCategory category);
+	
 	void deleteById(UUID id);
 	
 	// Menu-related methods

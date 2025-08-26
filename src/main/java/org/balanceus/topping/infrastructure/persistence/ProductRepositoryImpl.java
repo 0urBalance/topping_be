@@ -51,6 +51,11 @@ public class ProductRepositoryImpl implements ProductRepository {
 	}
 
 	@Override
+	public List<Product> findByCategoryAndIsActiveTrue(Product.ProductCategory category) {
+		return productJpaRepository.findByCategoryAndIsActiveTrue(category);
+	}
+
+	@Override
 	public void deleteById(UUID id) {
 		productJpaRepository.deleteById(id);
 	}

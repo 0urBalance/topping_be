@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.Product.ProductCategory;
 import org.balanceus.topping.domain.model.Store;
-import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.springframework.stereotype.Controller;
@@ -25,26 +25,31 @@ public class HomeController {
 
 	@GetMapping("/")
 	public String home(@RequestParam(required = false) String category, Model model) {
-		List<Product> recentProducts = productRepository.findByIsActiveTrue();
-		if (recentProducts.size() > 6) {
-			recentProducts = recentProducts.subList(0, 6);
+		// Get products based on category filter
+		List<Product> recentProducts;
+		if (category != null && !category.trim().isEmpty()) {
+			try {
+				ProductCategory productCategory = ProductCategory.valueOf(category.toUpperCase());
+				recentProducts = productRepository.findByCategoryAndIsActiveTrue(productCategory);
+			} catch (IllegalArgumentException e) {
+				// If invalid category, show all products
+				recentProducts = productRepository.findByIsActiveTrue();
+			}
+		} else {
+			recentProducts = productRepository.findByIsActiveTrue();
 		}
 		
-		// Get stores based on category filter
-		List<Store> stores;
-		if (category != null && !category.trim().isEmpty()) {
-			stores = storeService.getStoresByCategory(category);
-		} else {
-			stores = storeService.getAllStores();
+		// Limit to 8 products for display
+		if (recentProducts.size() > 8) {
+			recentProducts = recentProducts.subList(0, 8);
 		}
 		
 		long storeCount = storeRepository.count();
 		
 		// Add category information for the filter UI
-		model.addAttribute("categories", StoreCategory.values());
+		model.addAttribute("categories", ProductCategory.values());
 		model.addAttribute("selectedCategory", category);
 		model.addAttribute("recentProducts", recentProducts);
-		model.addAttribute("stores", stores);
 		model.addAttribute("storeCount", storeCount);
 		return "home";
 	}

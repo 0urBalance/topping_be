@@ -20,6 +20,8 @@ public interface ProductJpaRepository extends JpaRepository<Product, UUID> {
 	
 	List<Product> findByIsActiveTrue();
 	
+	List<Product> findByCategoryAndIsActiveTrue(Product.ProductCategory category);
+	
 	// Menu-related methods
 	List<Product> findByStore(Store store);
 	List<Product> findByStoreAndProductType(Store store, Product.ProductType productType);
