@@ -1,52 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://yourdomain.com/</loc>
+    <loc>http://www.topping.cloud/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/stores</loc>
+    <loc>http://www.topping.cloud/stores</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/products</loc>
+    <loc>http://www.topping.cloud/products</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/explore</loc>
+    <loc>http://www.topping.cloud/explore</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/collaborations</loc>
+    <loc>http://www.topping.cloud/collaborations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/login</loc>
+    <loc>http://www.topping.cloud/login</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/signup</loc>
+    <loc>http://www.topping.cloud/signup</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/support/cs</loc>
+    <loc>http://www.topping.cloud/support/cs</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/policy/privacy-policy</loc>
+    <loc>http://www.topping.cloud/policy/privacy-policy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/policy/terms-of-service</loc>
+    <loc>http://www.topping.cloud/policy/terms-of-service</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>http://www.topping.cloud/ads.txt</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

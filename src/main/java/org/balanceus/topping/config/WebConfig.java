@@ -13,6 +13,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Static resource mapping for root-level files (ads.txt, robots.txt, sitemap.xml, etc.)
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(3600);
+        
         // Static resource mapping for images - both classpath and external uploads
         registry.addResourceHandler("/image/**")
                 .addResourceLocations("classpath:/static/image/", "file:" + uploadPath + "/image/")
