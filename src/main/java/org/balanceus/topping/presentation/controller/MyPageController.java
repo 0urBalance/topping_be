@@ -7,11 +7,13 @@ import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.domain.model.ProductWishlist;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
+import org.balanceus.topping.domain.repository.ProductWishlistRepository;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
@@ -35,6 +37,7 @@ public class MyPageController {
 	private final ProductService productService;
 	private final ChatRoomRepository chatRoomRepository;
 	private final StoreRepository storeRepository;
+	private final ProductWishlistRepository productWishlistRepository;
 
 	@GetMapping
 	public String myPage(Model model, Principal principal) {
@@ -96,6 +99,9 @@ public class MyPageController {
 			.filter(p -> p.getProductType() == Product.ProductType.COLLABORATION)
 			.toList();
 		
+		// Get user's product wishlist
+		List<ProductWishlist> userWishlist = productWishlistRepository.findByUser(user);
+		
 		// Get active chat rooms
 		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
 
@@ -106,6 +112,7 @@ public class MyPageController {
 		int pendingApplicationCount = pendingApplications.size();
 		int receivedApplicationCount = receivedApplications.size() + receivedProposals.size(); // Include both types
 		int productCount = myProducts.size();
+		int wishlistCount = userWishlist.size();
 		int chatRoomCount = activeChatRooms.size();
 
 		// Calculate pending actions for alerts
@@ -125,6 +132,7 @@ public class MyPageController {
 		model.addAttribute("completedCollaborations", completedCollaborations);
 		model.addAttribute("myProducts", myProducts);
 		model.addAttribute("myCollaborationProducts", myCollaborationProducts);
+		model.addAttribute("userWishlist", userWishlist);
 		model.addAttribute("userStore", userStore);
 		model.addAttribute("activeChatRooms", activeChatRooms);
 		
@@ -135,6 +143,7 @@ public class MyPageController {
 		model.addAttribute("pendingApplicationCount", pendingApplicationCount);
 		model.addAttribute("receivedApplicationCount", receivedApplicationCount);
 		model.addAttribute("productCount", productCount);
+		model.addAttribute("wishlistCount", wishlistCount);
 		model.addAttribute("chatRoomCount", chatRoomCount);
 		model.addAttribute("pendingActionsCount", pendingActionsCount);
 
@@ -396,6 +405,31 @@ public class MyPageController {
 		model.addAttribute("rejectedProposals", rejectedProposals);
 		
 		return "mypage/received";
+	}
+
+	@GetMapping("/wishlist")
+	public String myPageWishlist(Model model, Principal principal) {
+		log.debug("MyPage Wishlist accessed - Principal: {}", principal);
+		
+		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
+			return "redirect:/login";
+		}
+
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Get user's product wishlist
+		List<ProductWishlist> userWishlist = productWishlistRepository.findByUser(user);
+		
+		// Sort by creation date (newest first)
+		userWishlist.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+		
+		log.debug("Found {} wishlist items for user {}", userWishlist.size(), user.getEmail());
+		
+		model.addAttribute("userWishlist", userWishlist);
+		model.addAttribute("wishlistCount", userWishlist.size());
+		return "mypage/wishlist";
 	}
 
 	@GetMapping("/upgrade")

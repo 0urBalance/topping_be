@@ -1,5 +1,6 @@
 package org.balanceus.topping.infrastructure.persistence;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Product;
@@ -34,6 +35,11 @@ public class ProductWishlistRepositoryImpl implements ProductWishlistRepository 
     @Override
     public ProductWishlist findByUserAndProduct(User user, Product product) {
         return productWishlistJpaRepository.findByUserAndProduct(user, product);
+    }
+
+    @Override
+    public List<ProductWishlist> findByUser(User user) {
+        return productWishlistJpaRepository.findByUser(user);
     }
 
     @Override

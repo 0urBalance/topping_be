@@ -71,6 +71,7 @@
         .stat-card.proposals::before { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
         .stat-card.products::before { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
         .stat-card.received::before { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .stat-card.wishlist::before { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e85 100%); }
         .stat-card.store::before { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
         
         .stat-number { font-size: 3rem; font-weight: 700; color: #333; margin-bottom: 5px; }
@@ -206,6 +207,14 @@
                 <a href="/mypage/received" class="stat-action" style="--card-color: #a8edea">처리하기</a>
             </div>
 
+            <!-- Wishlist -->
+            <div class="stat-card wishlist" onclick="location.href='/mypage/wishlist'">
+                <div class="stat-number" th:text="${wishlistCount ?: 0}">0</div>
+                <div class="stat-label">찜한 상품</div>
+                <div class="stat-description">관심있는 상품 모음</div>
+                <a href="/mypage/wishlist" class="stat-action" style="--card-color: #ff6b6b">보기</a>
+            </div>
+
             <!-- Store Management -->
             <div class="stat-card store" 
                  sec:authorize="hasRole('ROLE_BUSINESS_OWNER') or hasRole('ROLE_ADMIN')"
@@ -245,6 +254,10 @@
                 <a href="/explore" class="action-btn success">
                     <span class="action-icon">🔍</span>
                     콜라보 찾기
+                </a>
+                <a href="/mypage/wishlist" class="action-btn" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8e85 100%);">
+                    <span class="action-icon">❤️</span>
+                    찜한 상품
                 </a>
                 <a href="/chat/rooms" class="action-btn warning">
                     <span class="action-icon">💬</span>

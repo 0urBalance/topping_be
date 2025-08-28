@@ -1,5 +1,6 @@
 package org.balanceus.topping.infrastructure.persistence;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.Product;
@@ -14,6 +15,8 @@ public interface ProductWishlistJpaRepository extends JpaRepository<ProductWishl
     boolean existsByUserAndProduct(User user, Product product);
     
     ProductWishlist findByUserAndProduct(User user, Product product);
+    
+    List<ProductWishlist> findByUser(User user);
     
     long countByProduct(Product product);
     
