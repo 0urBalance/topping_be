@@ -656,7 +656,7 @@
                             <p class="product-desc">곧 멋진 상품들이 등록될 예정입니다!</p>
                             <div class="product-actions">
                                 <button class="btn-outline" disabled>관심</button>
-                                <button class="btn-outline btn-primary" onclick="location.href='/products/create'">상품
+                                <button class="btn-outline btn-primary" onclick="handleStoreOwnerAction('/products/create')">상품
                                     등록
                                 </button>
                             </div>
@@ -681,7 +681,7 @@
                 <div class="registry-icon">🎨</div>
             </div>
 
-            <button class="registry-btn" onclick="location.href='/products/create'">상품 등록</button>
+            <button class="registry-btn" onclick="handleStoreOwnerAction('/products/create')">상품 등록</button>
         </div>
     </section>
 
@@ -692,7 +692,7 @@
                 <h2 class="cta-title">나의 매장을 등록하고<br>콜라보 제안 받기!</h2>
                 <p class="cta-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|">2346개의 등록된 매장과 함께 친구들과
                     함께하세요</p>
-                <button class="cta-btn" onclick="location.href='/stores/register'">매장 등록하기</button>
+                <button class="cta-btn" onclick="handleStoreOwnerAction('/stores/register')">매장 등록하기</button>
             </div>
             <div class="cta-illustration">
                 <div class="illustration-placeholder">👥</div>
@@ -885,6 +885,56 @@
             });
         });
     });
+
+    // Store owner protection functionality
+    let currentUserRole = null;
+    let userRoleChecked = false;
+
+    async function getCurrentUserRole() {
+        if (userRoleChecked) {
+            return currentUserRole;
+        }
+
+        try {
+            const response = await fetch('/api/session/user');
+            if (response.ok) {
+                const responseData = await response.json();
+                // Extract user data from ApiResponseData wrapper
+                const userData = responseData.data || responseData;
+                currentUserRole = userData.role;
+            } else if (response.status === 401) {
+                // User not authenticated
+                currentUserRole = null;
+            } else {
+                console.error('Failed to get user role, status:', response.status);
+                currentUserRole = null;
+            }
+        } catch (error) {
+            console.error('Error getting user role:', error);
+            currentUserRole = null;
+        }
+
+        userRoleChecked = true;
+        return currentUserRole;
+    }
+
+    async function handleStoreOwnerAction(targetUrl) {
+        const userRole = await getCurrentUserRole();
+        
+        // Allow access for business owners and admins
+        if (userRole === 'ROLE_BUSINESS_OWNER' || userRole === 'ROLE_ADMIN') {
+            location.href = targetUrl;
+            return;
+        }
+
+        // For non-business users or unauthenticated users, show message
+        if (window.Topping && window.Topping.showError) {
+            window.Topping.showError('점주님을 위한 기능입니다.');
+        } else {
+            // Fallback to alert if Topping common functions not available
+            alert('점주님을 위한 기능입니다.');
+        }
+    }
 </script>
 </body>
 </html>
