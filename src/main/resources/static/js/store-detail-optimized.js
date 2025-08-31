@@ -69,8 +69,13 @@ class StoreDetailManager {
                 this.handleCollaborationRequest(target.closest('.collaboration-btn'));
             }
             
-            // Collaboration list toggle
-            else if (target.closest('.collab-badge')) {
+            // Collaboration badge click - handle clickable collaboration badge
+            else if (target.closest('.collaboration-badge-clickable')) {
+                e.preventDefault();
+                this.handleCollaborationRequest(target.closest('.collaboration-badge-clickable'));
+            }
+            // Collaboration list toggle (for non-clickable collaboration badges)
+            else if (target.closest('.collab-badge:not(.collaboration-badge-clickable)')) {
                 this.toggleCollaborationList();
             }
             else if (target.closest('.toggle-btn')) {

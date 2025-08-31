@@ -179,7 +179,9 @@ height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
 
                     <!-- Collaboration Info -->
                     <div class="collab-info">
-                        <div class="collab-badge">
+                        <div class="collab-badge collaboration-badge-clickable" 
+                             th:attr="data-store-id=${store.uuid}"
+                             style="cursor: pointer;">
                             <span class="material-symbols-outlined">handshake</span>
                             <span class="collab-text" th:text="${store.name}">에펠루아 본점</span>
                             <span class="material-symbols-outlined toggle-icon"
