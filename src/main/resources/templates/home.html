@@ -723,6 +723,59 @@
 <script th:src="@{/js/sidebar.js}"></script>
 <script th:src="@{/js/common.js}"></script>
 
+<!-- Store Owner Action Functions - Global Scope -->
+<script>
+    // Store owner protection functionality
+    let currentUserRole = null;
+    let userRoleChecked = false;
+
+    async function getCurrentUserRole() {
+        if (userRoleChecked) {
+            return currentUserRole;
+        }
+
+        try {
+            const response = await fetch('/api/session/user');
+            if (response.ok) {
+                const responseData = await response.json();
+                // Extract user data from ApiResponseData wrapper
+                const userData = responseData.data || responseData;
+                currentUserRole = userData.role;
+            } else if (response.status === 401) {
+                // User not authenticated
+                currentUserRole = null;
+            } else {
+                console.error('Failed to get user role, status:', response.status);
+                currentUserRole = null;
+            }
+        } catch (error) {
+            console.error('Error getting user role:', error);
+            currentUserRole = null;
+        }
+
+        userRoleChecked = true;
+        return currentUserRole;
+    }
+
+    async function handleStoreOwnerAction(targetUrl) {
+        const userRole = await getCurrentUserRole();
+        
+        // Allow access for business owners and admins
+        if (userRole === 'ROLE_BUSINESS_OWNER' || userRole === 'ROLE_ADMIN') {
+            location.href = targetUrl;
+            return;
+        }
+
+        // For non-business users or unauthenticated users, show message
+        if (window.Topping && window.Topping.showError) {
+            window.Topping.showError('점주님을 위한 기능입니다.');
+        } else {
+            // Fallback to alert if Topping common functions not available
+            alert('점주님을 위한 기능입니다.');
+        }
+    }
+</script>
+
 <script>
     // Handle product wishlist toggle
     async function toggleProductWishlist(button, productUuid) {
@@ -885,56 +938,6 @@
             });
         });
     });
-
-    // Store owner protection functionality
-    let currentUserRole = null;
-    let userRoleChecked = false;
-
-    async function getCurrentUserRole() {
-        if (userRoleChecked) {
-            return currentUserRole;
-        }
-
-        try {
-            const response = await fetch('/api/session/user');
-            if (response.ok) {
-                const responseData = await response.json();
-                // Extract user data from ApiResponseData wrapper
-                const userData = responseData.data || responseData;
-                currentUserRole = userData.role;
-            } else if (response.status === 401) {
-                // User not authenticated
-                currentUserRole = null;
-            } else {
-                console.error('Failed to get user role, status:', response.status);
-                currentUserRole = null;
-            }
-        } catch (error) {
-            console.error('Error getting user role:', error);
-            currentUserRole = null;
-        }
-
-        userRoleChecked = true;
-        return currentUserRole;
-    }
-
-    async function handleStoreOwnerAction(targetUrl) {
-        const userRole = await getCurrentUserRole();
-        
-        // Allow access for business owners and admins
-        if (userRole === 'ROLE_BUSINESS_OWNER' || userRole === 'ROLE_ADMIN') {
-            location.href = targetUrl;
-            return;
-        }
-
-        // For non-business users or unauthenticated users, show message
-        if (window.Topping && window.Topping.showError) {
-            window.Topping.showError('점주님을 위한 기능입니다.');
-        } else {
-            // Fallback to alert if Topping common functions not available
-            alert('점주님을 위한 기능입니다.');
-        }
-    }
 </script>
 </body>
 </html>
