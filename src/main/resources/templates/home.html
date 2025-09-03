@@ -342,6 +342,12 @@
             background: #1a202c;
         }
 
+        .product-wishlist-btn.wishlisted {
+            color: #dc2626 !important;
+            border-color: #dc2626 !important;
+            font-weight: bold;
+        }
+
         /* Registry Section */
         .registry-section {
             background: #f8f9fa;
@@ -792,18 +798,22 @@
                 if (result.success && result.data === 'added') {
                     button.textContent = '♥ 관심';
                     button.style.color = '#dc2626';
+                    button.classList.add('wishlisted');
                 } else if (result.success && result.data === 'removed') {
                     button.textContent = '관심';
                     button.style.color = '';
+                    button.classList.remove('wishlisted');
                 }
             } else if (response.status === 401) {
                 // Redirect to login if not authenticated
                 window.location.href = '/login';
             } else {
                 console.error('Failed to toggle product wishlist');
+                alert('오류가 발생했습니다. 다시 시도해주세요.');
             }
         } catch (error) {
             console.error('Error toggling product wishlist:', error);
+            alert('오류가 발생했습니다. 다시 시도해주세요.');
         }
     }
 
@@ -880,10 +890,37 @@
         });
     }
 
+    // Load wishlist status for products
+    async function loadWishlistStatuses() {
+        const wishlistButtons = document.querySelectorAll('.product-wishlist-btn');
+        
+        for (const button of wishlistButtons) {
+            const productUuid = button.dataset.productUuid;
+            if (!productUuid) continue;
+            
+            try {
+                const response = await fetch(`/products/${productUuid}/wishlist/status`);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.data === true) {
+                        button.textContent = '♥ 관심';
+                        button.style.color = '#dc2626';
+                        button.classList.add('wishlisted');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading wishlist status for product:', productUuid, error);
+            }
+        }
+    }
+
     // Add hover effects and click handlers to product cards
     document.addEventListener('DOMContentLoaded', function () {
         // Initialize drag-scroll functionality
         initializeProductsScroll();
+        
+        // Load initial wishlist statuses
+        loadWishlistStatuses();
 
         const productCards = document.querySelectorAll('.product-card');
 

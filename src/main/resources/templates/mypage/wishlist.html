@@ -144,14 +144,15 @@
             const productId = button.dataset.productId;
             
             if (confirm('이 상품을 찜 목록에서 제거하시겠습니까?')) {
-                fetch(`/api/products/${productId}/wishlist`, {
-                    method: 'DELETE',
+                fetch(`/products/${productId}/wishlist/toggle`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success && result.data === 'removed') {
                         // Remove the card from the page
                         button.closest('.content-card').remove();
                         
@@ -168,13 +169,22 @@
                         }
                         
                         alert('찜 목록에서 제거되었습니다.');
+                    } else if (result.success && result.data === 'added') {
+                        // This shouldn't happen when removing, but handle gracefully
+                        alert('상품이 찜 목록에 추가되었습니다.');
+                        location.reload();
                     } else {
-                        alert('오류가 발생했습니다. 다시 시도해주세요.');
+                        alert(result.message || '오류가 발생했습니다. 다시 시도해주세요.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('오류가 발생했습니다. 다시 시도해주세요.');
+                    // Check if user needs to login
+                    if (error.status === 401) {
+                        window.location.href = '/login';
+                    } else {
+                        alert('오류가 발생했습니다. 다시 시도해주세요.');
+                    }
                 });
             }
         }

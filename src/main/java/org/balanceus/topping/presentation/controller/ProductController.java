@@ -20,6 +20,7 @@ import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -383,6 +384,48 @@ public class ProductController {
 		} catch (Exception e) {
 			log.error("Error checking product wishlist status for product: {} - {}", id, e.getMessage());
 			return ApiResponseData.success(false);
+		}
+	}
+
+	@DeleteMapping("/api/products/{id}/wishlist")
+	@ResponseBody
+	public ApiResponseData<String> removeFromWishlist(
+			@PathVariable UUID id,
+			@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		log.debug("Product wishlist removal for product: {} by user: {}", id, userDetails != null ? userDetails.getUser().getEmail() : "anonymous");
+		
+		// Validate authentication
+		if (userDetails == null) {
+			log.warn("Unauthenticated user attempted product wishlist removal");
+			return ApiResponseData.failure(401, "Authentication required");
+		}
+		
+		try {
+			// Get the product
+			Product product = productService.getProductById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+			
+			User user = userDetails.getUser();
+			
+			// Find and remove from wishlist
+			ProductWishlist existingWishlist = productWishlistRepository.findByUserAndProduct(user, product);
+			if (existingWishlist != null) {
+				productWishlistRepository.delete(existingWishlist);
+				log.info("Product removed from wishlist: {} by user: {}", id, user.getEmail());
+				return ApiResponseData.success("removed");
+			} else {
+				log.warn("Product not found in wishlist: {} for user: {}", id, user.getEmail());
+				return ApiResponseData.failure(404, "Product not found in wishlist");
+			}
+			
+		} catch (IllegalArgumentException e) {
+			log.error("Product wishlist removal failed due to invalid data: {}", e.getMessage());
+			return ApiResponseData.failure(404, e.getMessage());
+			
+		} catch (Exception e) {
+			log.error("Product wishlist removal failed for product: {} by user: {} - {}", id, userDetails.getUser().getEmail(), e.getMessage());
+			return ApiResponseData.failure(500, "Wishlist removal failed");
 		}
 	}
 }
