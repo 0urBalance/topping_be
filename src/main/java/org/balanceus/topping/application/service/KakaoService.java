@@ -49,6 +49,9 @@ public class KakaoService {
 
 	@Value("${KAKAO.REST-API-KEY}")
 	private String kakaoRestApiKey;
+	
+	@Value("${KAKAO.REDIRECT-URI}")
+	private String kakaoRedirectUri;
 
 	/**
 	 * 카카오 로그인 처리 및 세션 인증
@@ -101,7 +104,7 @@ public class KakaoService {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.add("grant_type", "authorization_code");
 		body.add("client_id", kakaoRestApiKey);
-		body.add("redirect_uri", "http://35.231.208.65:8080/api/user/kakao/callback");
+		body.add("redirect_uri", kakaoRedirectUri);
 		body.add("code", code);
 
 		RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity

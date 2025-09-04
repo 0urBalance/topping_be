@@ -41,13 +41,15 @@ public class AuthController {
 
     @Value("${KAKAO.REST-API-KEY}")
     private String kakaoRestApiKey;
+    
+    @Value("${KAKAO.REDIRECT-URI}")
+    private String kakaoRedirectUri;
 
     // Template endpoints
     @GetMapping("/auth/login")
     public String loginPage(Model model) {
-        String redirectUri = "http://topping.cloud/api/user/kakao/callback";
         model.addAttribute("kakaoRestApiKey", kakaoRestApiKey);
-        model.addAttribute("kakaoRedirectUri", redirectUri);
+        model.addAttribute("kakaoRedirectUri", kakaoRedirectUri);
         return "auth/login";
     }
 
