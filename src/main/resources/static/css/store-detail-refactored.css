@@ -2,9 +2,9 @@
 
 /* 🎨 CSS Variables - Centralized Design Tokens */
 :root {
-    --primary-color: #ff6b35;
+    --primary-color: #87604F;
     --brown-color: #87604f;
-    --brown-hover: #75523f;
+    --brown-hover: #6f4f41;
     --success-color: #059669;
     --error-color: #dc2626;
     --warning-color: #856404;
@@ -25,8 +25,8 @@
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
-    --primary-light: #fff5f2;
-    --primary-hover: #e55a2b;
+    --primary-light: #f5eeec;
+    --primary-hover: #6f4f41;
     
     /* Spacing Scale */
     --space-xs: 4px;
@@ -309,7 +309,7 @@
 
 .rating {
     font-weight: 600;
-    color: #ffd700;
+    color: #87604F;
 }
 
 /* 🖼️ Gallery Section */

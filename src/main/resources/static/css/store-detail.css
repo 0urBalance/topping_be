@@ -4,7 +4,7 @@
 }
 
 :root {
-    --primary-color: #ff6b35;
+    --primary-color: #87604F;
     --secondary-color: #87604f;
     --success-color: #059669;
     --error-color: #dc2626;
@@ -534,7 +534,7 @@ body {
 }
 
 .collaboration-request-btn:hover {
-    background-color: #75523f;
+    background-color: #6f4f41;
 }
 
 .wishlist-toggle-btn {

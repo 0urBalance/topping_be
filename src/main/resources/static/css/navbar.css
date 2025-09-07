@@ -8,8 +8,8 @@
     --text-primary: #333333;
     --text-secondary: #666666;
     --hover-bg: #f8f9fa;
-    --active-bg: rgba(255, 107, 53, 0.1);
-    --active-color: #ff6b35;
+    --active-bg: rgba(135, 96, 79, 0.1);
+    --active-color: #87604F;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -246,7 +246,7 @@
 }
 
 .signup-link:hover {
-    background-color: #e55a2b;
+    background-color: #6f4f41;
     color: white !important;
 }
 

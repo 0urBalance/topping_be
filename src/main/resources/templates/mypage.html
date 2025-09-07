@@ -33,7 +33,7 @@
             margin: 0; 
             margin-left: 150px; /* Account for sidebar */
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); 
             min-height: 100vh; 
             transition: margin-left 0.3s ease;
         }
@@ -65,11 +65,11 @@
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); text-align: center; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--card-color, #667eea); }
-        .stat-card.applications::before { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-card.ongoing::before { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .stat-card.proposals::before { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .stat-card.products::before { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--card-color, #87604F); }
+        .stat-card.applications::before { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
+        .stat-card.ongoing::before { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
+        .stat-card.proposals::before { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
+        .stat-card.products::before { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
         .stat-card.received::before { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
         .stat-card.wishlist::before { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e85 100%); }
         .stat-card.store::before { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
@@ -77,18 +77,18 @@
         .stat-number { font-size: 3rem; font-weight: 700; color: #333; margin-bottom: 5px; }
         .stat-label { color: #666; font-size: 1.1rem; font-weight: 500; margin-bottom: 15px; }
         .stat-description { font-size: 0.9rem; color: #888; line-height: 1.4; }
-        .stat-action { display: inline-block; margin-top: 15px; padding: 8px 16px; background: var(--card-color, #667eea); color: white; text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
+        .stat-action { display: inline-block; margin-top: 15px; padding: 8px 16px; background: var(--card-color, #87604F); color: white; text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
         .stat-action:hover { opacity: 0.9; transform: translateY(-1px); }
 
         /* Quick Actions */
         .quick-actions { background: white; border-radius: 15px; padding: 30px; margin-bottom: 40px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
         .quick-actions h3 { margin: 0 0 25px 0; font-size: 1.5rem; color: #333; text-align: center; }
         .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .action-btn { display: flex; align-items: center; justify-content: center; padding: 15px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; transition: all 0.3s; }
+        .action-btn { display: flex; align-items: center; justify-content: center; padding: 15px 20px; background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; transition: all 0.3s; }
         .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.3); }
-        .action-btn.secondary { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .action-btn.success { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .action-btn.warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .action-btn.secondary { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
+        .action-btn.success { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
+        .action-btn.warning { background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%); }
         .action-icon { margin-right: 10px; font-size: 1.2rem; }
 
         /* Recent Activity Section */
@@ -142,7 +142,7 @@
         </div>
 
         <!-- Upgrade Required Info Message -->
-        <div class="alert-banner" th:if="${param.info != null and param.info[0] == 'upgrade_required'}" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <div class="alert-banner" th:if="${param.info != null and param.info[0] == 'upgrade_required'}" style="background: linear-gradient(135deg, #87604F 0%, #6f4f41 100%);">
             <div class="alert-content">
                 <div class="alert-icon">💼</div>
                 <div class="alert-text">
@@ -172,7 +172,7 @@
                 <div class="stat-number" th:text="${applicationCount ?: 0}">0</div>
                 <div class="stat-label">내 신청</div>
                 <div class="stat-description">내가 신청한 콜라보 현황</div>
-                <a href="/mypage/applications" class="stat-action" style="--card-color: #667eea">자세히 보기</a>
+                <a href="/mypage/applications" class="stat-action" style="--card-color: #87604F">자세히 보기</a>
             </div>
 
             <!-- Ongoing Collaborations -->
@@ -180,7 +180,7 @@
                 <div class="stat-number" th:text="${ongoingCollaborationCount ?: 0}">0</div>
                 <div class="stat-label">진행중 콜라보</div>
                 <div class="stat-description">현재 활성 상태인 콜라보</div>
-                <a href="/mypage/ongoing" class="stat-action" style="--card-color: #4facfe">관리하기</a>
+                <a href="/mypage/ongoing" class="stat-action" style="--card-color: #87604F">관리하기</a>
             </div>
 
             <!-- My Proposals -->
@@ -188,7 +188,7 @@
                 <div class="stat-number" th:text="${proposalCount ?: 0}">0</div>
                 <div class="stat-label">내 제안</div>
                 <div class="stat-description">내가 제안한 콜라보</div>
-                <a href="/mypage/collabos" class="stat-action" style="--card-color: #43e97b">보기</a>
+                <a href="/mypage/collabos" class="stat-action" style="--card-color: #87604F">보기</a>
             </div>
 
             <!-- My Products -->
@@ -196,7 +196,7 @@
                 <div class="stat-number" th:text="${productCount ?: 0}">0</div>
                 <div class="stat-label">등록한 상품</div>
                 <div class="stat-description">내가 등록한 상품 관리</div>
-                <a href="/mypage/product" class="stat-action" style="--card-color: #fa709a">관리하기</a>
+                <a href="/mypage/product" class="stat-action" style="--card-color: #87604F">관리하기</a>
             </div>
 
             <!-- Received Applications -->

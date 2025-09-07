@@ -80,7 +80,7 @@
 
 .search-input:focus {
     outline: none;
-    border-color: var(--primary-color, #8B4513);
+    border-color: var(--primary-color, #87604F);
     background: #ffffff;
 }
 
@@ -114,14 +114,14 @@
 }
 
 .chat-room-item.active {
-    background-color: var(--primary-color-light, #f4e6d7);
-    border-right: 3px solid var(--primary-color, #8B4513);
+    background-color: var(--primary-color-light, #f5eeec);
+    border-right: 3px solid var(--primary-color, #87604F);
 }
 
 .room-avatar {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--primary-color, #8B4513), #CD853F);
+    background: linear-gradient(135deg, var(--primary-color, #87604F), #87604F);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -307,7 +307,7 @@
 .chat-user-avatar {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, var(--primary-color, #8B4513), #CD853F);
+    background: linear-gradient(135deg, var(--primary-color, #87604F), #87604F);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -340,7 +340,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: var(--primary-color, #8B4513);
+    background: var(--primary-color, #87604F);
     color: white;
     border: none;
     border-radius: 6px;
@@ -351,7 +351,7 @@
 }
 
 .proposal-btn:hover {
-    background: var(--primary-color-dark, #6B3410);
+    background: var(--primary-color-dark, #6f4f41);
 }
 
 .proposal-btn .material-symbols-outlined {
@@ -421,7 +421,7 @@
 
 /* Message alignment and styling */
 .bubble.mine {
-    background-color: #6B3410;
+    background-color: #87604F;
     color: white;
     margin-left: auto;
     margin-right: 0;
@@ -450,7 +450,7 @@
 /* Ensure sufficient color contrast for accessibility */
 @media (prefers-contrast: high) {
     .bubble.mine {
-        background-color: #4a2107;
+        background-color: #6f4f41;
     }
     
     .bubble.their {
@@ -473,7 +473,7 @@
 
 /* Proposal Card */
 .proposal-card {
-    background: linear-gradient(135deg, var(--primary-color, #8B4513), #CD853F);
+    background: linear-gradient(135deg, var(--primary-color, #87604F), #87604F);
     color: white;
     padding: 20px;
     border-radius: 12px;
@@ -548,13 +548,13 @@
 
 .message-textarea:focus {
     outline: none;
-    border-color: var(--primary-color, #8B4513);
+    border-color: var(--primary-color, #87604F);
 }
 
 .send-btn {
     width: 44px;
     height: 44px;
-    background: var(--primary-color, #8B4513);
+    background: var(--primary-color, #87604F);
     color: white;
     border: none;
     border-radius: 50%;
@@ -567,7 +567,7 @@
 }
 
 .send-btn:hover {
-    background: var(--primary-color-dark, #6B3410);
+    background: var(--primary-color-dark, #6f4f41);
 }
 
 .send-btn:disabled {
@@ -695,7 +695,7 @@
 
 .field-input:focus {
     outline: none;
-    border-color: var(--primary-color, #8B4513);
+    border-color: var(--primary-color, #87604F);
 }
 
 .field-input::placeholder {
@@ -729,24 +729,24 @@
 
 .btn-outline { 
     background: #fff; 
-    border-color: #A07A63; 
-    color: #6C4E3E;
+    border-color: #87604F; 
+    color: #87604F;
 }
 
 .btn-outline:hover {
     background: #f8f9fa;
-    border-color: #8E654D;
+    border-color: #87604F;
 }
 
 .btn-solid { 
-    background: #8E654D; 
+    background: #87604F; 
     color: #fff;
-    border-color: #8E654D;
+    border-color: #87604F;
 }
 
 .btn-solid:hover {
-    background: #6B3410;
-    border-color: #6B3410;
+    background: #87604F;
+    border-color: #87604F;
 }
 
 .btn:disabled { 
@@ -762,12 +762,12 @@
 
 /* Legacy button styles for compatibility */
 .btn-primary {
-    background: var(--primary-color, #8B4513);
+    background: var(--primary-color, #87604F);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--primary-color-dark, #6B3410);
+    background: var(--primary-color-dark, #6f4f41);
     color: white;
 }
 
@@ -994,7 +994,7 @@
 /* Proposal Summary Card */
 .proposal-summary-card {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 2px solid #6B3410;
+    border: 2px solid #87604F;
     border-radius: 12px;
     margin: 16px;
     margin-bottom: 24px;
@@ -1008,7 +1008,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 16px;
-    background: #6B3410;
+    background: #87604F;
     color: white;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -1127,22 +1127,22 @@
 
 .proposal-summary-actions .btn-outline {
     background: transparent;
-    border-color: #6B3410;
-    color: #6B3410;
+    border-color: #87604F;
+    color: #87604F;
 }
 
 .proposal-summary-actions .btn-outline:hover {
-    background: #6B3410;
+    background: #87604F;
     color: white;
 }
 
 .proposal-summary-actions .btn-solid {
-    background: #6B3410;
+    background: #87604F;
     color: white;
 }
 
 .proposal-summary-actions .btn-solid:hover {
-    background: #5a2d0d;
+    background: #6f4f41;
 }
 
 @keyframes slideInDown {
@@ -1163,7 +1163,7 @@
     right: 20px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     border: 1px solid #e9ecef;
-    border-left: 4px solid #6B3410;
+    border-left: 4px solid #87604F;
     border-radius: 8px;
     padding: 16px 20px;
     min-width: 320px;
@@ -1291,38 +1291,38 @@
 /* Proposal Edit Mode Styles */
 .proposal-panel.edit-mode .field-input.editable {
     background: #ffffff;
-    border: 2px solid #6B3410;
+    border: 2px solid #87604F;
     cursor: text;
     transition: all 0.2s ease;
 }
 
 .proposal-panel.edit-mode .field-input.editable:focus {
-    border-color: #4a2309;
+    border-color: #6f4f41;
     box-shadow: 0 0 0 3px rgba(107, 52, 16, 0.1);
     outline: none;
 }
 
 .proposal-panel.edit-mode .field-input.editable:hover {
-    border-color: #5a2d0d;
+    border-color: #6f4f41;
 }
 
 /* Edit mode indicator */
 .proposal-panel.edit-mode .proposal-title::after {
     content: " (편집 중)";
     font-size: 12px;
-    color: #6B3410;
+    color: #87604F;
     font-weight: normal;
 }
 
 /* Save/Cancel button styling */
 #btn-proposal-save {
-    background: #6B3410;
-    border-color: #6B3410;
+    background: #87604F;
+    border-color: #87604F;
 }
 
 #btn-proposal-save:hover {
-    background: #5a2d0d;
-    border-color: #5a2d0d;
+    background: #6f4f41;
+    border-color: #6f4f41;
 }
 
 #btn-proposal-cancel {

@@ -108,7 +108,7 @@
 
 .auth-form .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    box-shadow: 0 0 0 4px rgba(135, 96, 79, 0.1);
     transform: translateY(-1px);
 }
 
