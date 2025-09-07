@@ -551,7 +551,7 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">지금 우리 브랜드에 어울리는 콜라보,<br>지금 바로 찾아보세요!</h1>
-                <p class="hero-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|">
+                <p class="hero-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|"></p>
 
                 <div class="search-container">
                     <input type="text" class="search-input" placeholder="검색어를 입력하세요">
@@ -579,12 +579,11 @@
                     <div class="category-filters">
                         <button class="category-btn" 
                                 th:classappend="${selectedCategory == null ? 'active' : ''}"
-                                onclick="filterByCategory('')">전체</button>
+                                data-category="">전체</button>
                         <button th:each="category : ${categories}"
                                 class="category-btn"
                                 th:classappend="${category.name() == selectedCategory ? 'active' : ''}"
                                 th:data-category="${category.name()}"
-                                onclick="filterByCategory(this.dataset.category)"
                                 th:text="${category.displayName}">카테고리</button>
                     </div>
 
@@ -634,10 +633,10 @@
                                 </div>
                             </div>
                             <div class="product-info">
-                                <h3 class="product-title" th:text="${product.name}">상품 이름</h3>
-                                <p class="product-desc" th:text="${product.category.displayName}">카테고리</p>
+                                <h3 class="product-title" th:text="${product.name != null ? product.name : '상품 이름'}">상품 이름</h3>
+                                <p class="product-desc" th:text="${product.category != null ? product.category.displayName : '카테고리'}">카테고리</p>
                                 <p class="product-desc"
-                                   th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 상세 설명</p>
+                                   th:text="${product.description != null and !#strings.isEmpty(product.description) ? product.description : '상품 설명이 없습니다.'}">상품 상세 설명</p>
                                 <div class="product-actions">
                                     <button class="btn-outline product-wishlist-btn"
                                             th:attr="data-product-uuid=${product.uuid}">관심
@@ -696,8 +695,7 @@
         <div class="cta-container">
             <div class="cta-content">
                 <h2 class="cta-title">나의 매장을 등록하고<br>콜라보 제안 받기!</h2>
-                <p class="cta-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|">2346개의 등록된 매장과 함께 친구들과
-                    함께하세요</p>
+                <p class="cta-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|"></p>
                 <button class="cta-btn" onclick="handleStoreOwnerAction('/stores/register')">매장 등록하기</button>
             </div>
             <div class="cta-illustration">
@@ -923,6 +921,15 @@
         // Load initial wishlist statuses
         loadWishlistStatuses();
 
+        // Add event delegation for category filtering buttons
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const category = this.dataset.category;
+                filterByCategory(category);
+            });
+        });
+
         const productCards = document.querySelectorAll('.product-card');
 
         productCards.forEach(card => {
@@ -941,6 +948,7 @@
                         }
                     }
                 });
+            }
         });
 
         // Handle product wishlist button clicks
@@ -962,7 +970,6 @@
                 }
             });
         });
-
 
         // Handle image load errors
         const productImages = document.querySelectorAll('.product-image img');
