@@ -724,6 +724,7 @@
 
 <!-- Common Modals -->
 <div th:replace="~{fragments/modals :: policy-modals}"></div>
+<div th:replace="~{fragments/modals :: error-modal}"></div>
 
 <!-- Common Scripts -->
 <script th:src="@{/js/sidebar.js}"></script>
@@ -774,10 +775,10 @@
 
         // For non-business users or unauthenticated users, show message
         if (window.Topping && window.Topping.showError) {
-            window.Topping.showError('점주님을 위한 기능입니다.');
+            window.Topping.showError('점주님들을 위한 기능입니다.');
         } else {
             // Fallback to alert if Topping common functions not available
-            alert('점주님을 위한 기능입니다.');
+            alert('점주님들을 위한 기능입니다.');
         }
     }
 </script>
