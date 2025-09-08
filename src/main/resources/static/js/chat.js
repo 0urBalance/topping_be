@@ -4,6 +4,8 @@ class ChatInterface {
         this.selectedRoomId = null;
         this.stompClient = null;
         this.currentUser = null;
+        this.isComposing = false;
+        this.lastSendTime = 0;
         
         this.init();
     }
@@ -33,11 +35,27 @@ class ChatInterface {
             });
         }
         
-        // Enter to send message
+        // Composition event handlers for IME input (Korean, etc.)
+        document.addEventListener('compositionstart', (e) => {
+            if (e.target.classList.contains('message-textarea')) {
+                this.isComposing = true;
+            }
+        });
+        
+        document.addEventListener('compositionend', (e) => {
+            if (e.target.classList.contains('message-textarea')) {
+                this.isComposing = false;
+            }
+        });
+        
+        // Enter to send message (with IME composition handling)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey && e.target.classList.contains('message-textarea')) {
-                e.preventDefault();
-                this.sendMessage();
+                // Don't send message if IME composition is in progress
+                if (!this.isComposing) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
             }
         });
         
@@ -601,6 +619,21 @@ b가게 맥주</textarea>
         if (!message || !this.selectedRoomId) {
             return;
         }
+        
+        // Prevent duplicate sends with debounce logic
+        const now = Date.now();
+        if (now - this.lastSendTime < 500) {
+            console.log('Duplicate message send prevented (debounced)');
+            return;
+        }
+        
+        // Skip if currently composing (additional safety check)
+        if (this.isComposing) {
+            console.log('Message send prevented: IME composition in progress');
+            return;
+        }
+        
+        this.lastSendTime = now;
         
         try {
             const response = await fetch('/chat/message/send', {
