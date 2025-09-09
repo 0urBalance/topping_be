@@ -98,9 +98,9 @@
                 </div>
                 
                 <div class="product-meta">
-                    <p>카테고리: <span th:text="${wishlistItem.product.category}">카테고리</span></p>
-                    <p>등록자: <span th:text="${wishlistItem.product.creator.username}">등록자</span></p>
-                    <p th:if="${wishlistItem.product.creator.store != null}">
+                    <p>카테고리: <span th:text="${wishlistItem.product.category != null ? wishlistItem.product.category.displayName : '미분류'}">카테고리</span></p>
+                    <p>등록자: <span th:text="${wishlistItem.product.creator != null ? wishlistItem.product.creator.username : '알 수 없음'}">등록자</span></p>
+                    <p th:if="${wishlistItem.product.creator != null and wishlistItem.product.creator.store != null}">
                         스토어: <span th:text="${wishlistItem.product.creator.store.name}">스토어명</span>
                     </p>
                 </div>
@@ -152,7 +152,7 @@
                 })
                 .then(response => response.json())
                 .then(result => {
-                    if (result.success && result.data === 'removed') {
+                    if (result.code === 200 && result.data === 'removed') {
                         // Remove the card from the page
                         button.closest('.content-card').remove();
                         
@@ -169,7 +169,7 @@
                         }
                         
                         alert('찜 목록에서 제거되었습니다.');
-                    } else if (result.success && result.data === 'added') {
+                    } else if (result.code === 200 && result.data === 'added') {
                         // This shouldn't happen when removing, but handle gracefully
                         alert('상품이 찜 목록에 추가되었습니다.');
                         location.reload();

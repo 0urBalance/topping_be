@@ -847,14 +847,14 @@
                 const result = await response.json();
                 console.log('API response:', result);
                 
-                if (result.success && result.data === 'added') {
+                if (result.code === 200 && result.data === 'added') {
                     button.textContent = '♥ 관심';
                     button.style.color = '#dc2626';
                     button.classList.add('wishlisted');
                     if (window.Topping && window.Topping.notify) {
                         window.Topping.notify.success('관심 상품에 추가되었습니다');
                     }
-                } else if (result.success && result.data === 'removed') {
+                } else if (result.code === 200 && result.data === 'removed') {
                     button.textContent = '관심';
                     button.style.color = '';
                     button.classList.remove('wishlisted');
@@ -986,7 +986,7 @@
                     const result = await response.json();
                     console.log('Status result for', productUuid, ':', result);
                     
-                    if (result.success && result.data === true) {
+                    if (result.code === 200 && result.data === true) {
                         button.textContent = '♥ 관심';
                         button.style.color = '#dc2626';
                         button.classList.add('wishlisted');
