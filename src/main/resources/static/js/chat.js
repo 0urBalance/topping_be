@@ -666,7 +666,7 @@ b가게 맥주</textarea>
         
         // Check if we need a date separator
         const lastMessage = chatBody.querySelector('.message-group:last-child, .system-message:last-child');
-        const messageDate = this.formatDate(messageData.createdAt);
+//        const messageDate = this.formatDate(messageData.createdAt);
         let needDateSeparator = true;
         
         if (lastMessage) {
