@@ -91,14 +91,14 @@
                     <a href="/" class="home-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined">home</span>-->
-                        <img src="image/sidebar/icon_home_default.png" alt="Home" class="menu-icon">
+                        <img th:src="@{/image/sidebar/icon_home_default.png}" alt="Home" class="menu-icon">
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="/explore" class="menu-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/explore') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined">handshake</span>-->
-                        <img src="image/sidebar/icon_collabo_default.png" alt="collabo" class="menu-icon">
+                        <img th:src="@{/image/sidebar/icon_collabo_default.png}" alt="collabo" class="menu-icon">
                     </a>
                 </li>
                 <li class="menu-item">
@@ -114,14 +114,14 @@
                     <a href="/mypage" class="menu-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/mypage') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined">person</span>-->
-                        <img src="image/sidebar/icon_mypage_default.png" alt="Home" class="menu-icon">
+                        <img th:src="@{/image/sidebar/icon_mypage_default.png}" alt="Home" class="menu-icon">
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="/signup/step/1" class="menu-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/signup') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined">person_add</span>-->
-                        <img src="image/sidebar/icon_join_default.png" alt="Home" signup="menu-icon">
+                        <img th:src="@{/image/sidebar/icon_join_default.png}" alt="Home" class="menu-icon">
                     </a>
                 </li>
             </ul>
