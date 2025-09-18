@@ -664,15 +664,25 @@ b가게 맥주</textarea>
         const chatBody = document.getElementById('chatBody');
         if (!chatBody) return;
         
-        // Check if we need a date separator
-        const lastMessage = chatBody.querySelector('.message-group:last-child, .system-message:last-child');
-//        const messageDate = this.formatDate(messageData.createdAt);
+        // Check if we need a date separator by comparing with the last message's date
+        const messageDate = this.formatDate(messageData.createdAt);
         let needDateSeparator = true;
         
-        if (lastMessage) {
-            const lastDateSeparator = chatBody.querySelector('.date-separator:last-of-type span');
-            if (lastDateSeparator && lastDateSeparator.textContent === messageDate) {
-                needDateSeparator = false;
+        // Check if the last element is a date separator with the same date
+        const lastElement = chatBody.lastElementChild;
+        if (lastElement) {
+            if (lastElement.classList.contains('date-separator')) {
+                // Last element is a date separator, check if it's the same date
+                const lastDateText = lastElement.querySelector('span')?.textContent;
+                if (lastDateText === messageDate) {
+                    needDateSeparator = false;
+                }
+            } else {
+                // Last element is a message, check if there's a recent date separator for today
+                const recentDateSeparator = chatBody.querySelector('.date-separator:last-of-type span');
+                if (recentDateSeparator && recentDateSeparator.textContent === messageDate) {
+                    needDateSeparator = false;
+                }
             }
         }
         
