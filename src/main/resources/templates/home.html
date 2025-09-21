@@ -56,13 +56,14 @@
             }
         }
 
-        /* Hero Section */
+        /* Hero Section - Dark Theme */
         .hero-section {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             padding: 80px 0;
             text-align: center;
             position: relative;
             overflow: hidden;
+            color: white;
         }
 
         .hero-container {
@@ -72,24 +73,26 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
         }
 
         .hero-content {
             flex: 1;
             text-align: left;
+            z-index: 2;
         }
 
         .hero-title {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #2d3748;
+            color: white;
             margin-bottom: 20px;
             line-height: 1.2;
         }
 
         .hero-subtitle {
             font-size: 1.1rem;
-            color: #718096;
+            color: #cbd5e0;
             margin-bottom: 30px;
         }
 
@@ -102,15 +105,12 @@
         .search-input {
             width: 100%;
             padding: 12px 50px 12px 20px;
-            border: 2px solid #e2e8f0;
+            border: none;
             border-radius: 25px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: #4299e1;
+            background: white;
+            color: #333;
         }
 
         .search-btn {
@@ -118,7 +118,7 @@
             right: 5px;
             top: 50%;
             transform: translateY(-50%);
-            background: #2d3748;
+            background: #6b46c1;
             color: white;
             border: none;
             padding: 8px 20px;
@@ -133,29 +133,83 @@
             margin-top: 10px;
         }
 
+        /* 3D Floating Icons */
+        .floating-icons {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 3rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-icon:nth-child(2) {
+            top: 30%;
+            right: 15%;
+            animation-delay: 1s;
+        }
+
+        .floating-icon:nth-child(3) {
+            top: 60%;
+            left: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-icon:nth-child(4) {
+            top: 70%;
+            right: 20%;
+            animation-delay: 3s;
+        }
+
+        .floating-icon:nth-child(5) {
+            top: 10%;
+            right: 35%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
         .hero-image {
             flex: 1;
             text-align: center;
+            z-index: 2;
         }
 
         .hero-circle {
-            width: 300px;
-            height: 300px;
-            background: #cbd5e0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 60px;
-            color: #718096;
+            color: white;
         }
 
         /* Find Collaboration Section */
         .find-section {
-            background: #4a5568;
+            background: white;
             padding: 80px 0;
-            color: white;
+            color: #333;
         }
 
         .find-container {
@@ -169,7 +223,9 @@
             font-size: 2rem;
             font-weight: 600;
             margin-bottom: 50px;
-            color: white;
+            color: #8B4513;
+            text-decoration: underline;
+            text-decoration-color: #8B4513;
         }
 
         .find-content {
@@ -180,13 +236,14 @@
         }
 
         .category-section {
-            color: white;
+            color: #333;
         }
 
         .category-title {
             font-size: 1.2rem;
             margin-bottom: 20px;
             font-weight: 600;
+            color: #333;
         }
 
         .category-filters {
@@ -198,19 +255,19 @@
 
         .category-btn {
             padding: 8px 16px;
-            background: transparent;
-            border: 1px solid #718096;
-            color: #cbd5e0;
+            background: #3b82f6;
+            border: none;
+            color: white;
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .category-btn:hover,
         .category-btn.active {
-            background: #2d3748;
-            border-color: #2d3748;
-            color: white;
+            background: #1d4ed8;
+            transform: translateY(-2px);
         }
 
         .subcategory-grid {
@@ -220,21 +277,25 @@
         }
 
         .subcategory-item {
-            background: #718096;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
             padding: 20px;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .subcategory-item:hover {
-            background: #2d3748;
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .subcategory-icon {
             font-size: 24px;
             margin-bottom: 10px;
+            color: #8B4513;
         }
 
         .products-section {
@@ -371,141 +432,250 @@
             pointer-events: none;
         }
 
-        /* Registry Section */
+        /* Registry Section - Brown Theme */
         .registry-section {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #CD853F 100%);
             padding: 80px 0;
             text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .registry-section::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V60c60,0,120-60,180-60s120,60,180,60,120-60,180-60,120,60,180,60,120-60,180-60,120,60,180,60,120-60,180-60V0Z" fill="%23ffffff"/></svg>') repeat-x;
+            background-size: 1200px 120px;
         }
 
         .registry-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            position: relative;
+            z-index: 2;
         }
 
         .registry-title {
             font-size: 2rem;
             font-weight: 600;
-            color: #2d3748;
+            color: white;
             margin-bottom: 20px;
         }
 
         .registry-subtitle {
             font-size: 1.1rem;
-            color: #718096;
+            color: rgba(255,255,255,0.9);
             margin-bottom: 50px;
         }
 
         .registry-icons {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
             margin-bottom: 40px;
+            flex-wrap: wrap;
         }
 
         .registry-icon {
             width: 80px;
             height: 80px;
-            background: #cbd5e0;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 30px;
-            color: #718096;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
+        .registry-icon:nth-child(1) { background: #a8e6cf; color: #2d8659; }
+        .registry-icon:nth-child(2) { background: #ffd93d; color: #b8860b; }
+        .registry-icon:nth-child(3) { background: #ffb3ba; color: #dc2626; }
+        .registry-icon:nth-child(4) { background: #a8c8ec; color: #1e40af; }
+        .registry-icon:nth-child(5) { background: #c8a8e9; color: #7c3aed; }
+
         .registry-icon:hover {
-            background: #2d3748;
-            color: white;
-            transform: translateY(-5px);
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
         .registry-btn {
-            background: #cbd5e0;
-            color: #718096;
+            background: white;
+            color: #8B4513;
             border: none;
-            padding: 12px 40px;
+            padding: 15px 40px;
             border-radius: 25px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .registry-btn:hover {
-            background: #2d3748;
-            color: white;
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
-        /* CTA Section */
-        .cta-section {
-            background: #4a5568;
+        /* FAQ Section */
+        .faq-section {
+            background: #f8f9fa;
             padding: 80px 0;
-            color: white;
+            color: #333;
         }
 
-        .cta-container {
+        .faq-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 60px;
+            align-items: start;
         }
 
-        .cta-content {
+        .faq-content {
             flex: 1;
         }
 
-        .cta-title {
+        .faq-title {
             font-size: 2rem;
             font-weight: 600;
             margin-bottom: 20px;
-            line-height: 1.3;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .cta-subtitle {
+        .faq-subtitle {
             font-size: 1rem;
-            color: #cbd5e0;
+            color: #666;
             margin-bottom: 30px;
         }
 
-        .cta-btn {
-            background: white;
-            color: #2d3748;
+        .faq-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .faq-category-btn {
+            padding: 8px 16px;
+            background: #6366f1;
+            color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 20px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .cta-btn:hover {
-            background: #f7fafc;
-            transform: translateY(-2px);
+        .faq-category-btn:hover {
+            background: #4f46e5;
         }
 
-        .cta-illustration {
-            flex: 1;
-            text-align: center;
+        .faq-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .illustration-placeholder {
-            width: 200px;
-            height: 200px;
-            background: #718096;
-            border-radius: 20px;
-            margin: 0 auto;
+        .faq-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .faq-question {
+            padding: 20px;
+            background: white;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            color: #cbd5e0;
+            color: #333;
+        }
+
+        .faq-question:hover {
+            background: #f9fafb;
+        }
+
+        .faq-answer {
+            padding: 0 20px 20px;
+            color: #666;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-toggle {
+            font-size: 18px;
+            color: #6366f1;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .faq-illustration {
+            text-align: center;
+            position: relative;
+        }
+
+        .faq-character {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .faq-chat-bubble {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 14px;
+            color: #333;
+            max-width: 200px;
+        }
+
+        .faq-chat-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 30px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
         }
 
         /* Responsive Design */
@@ -518,6 +688,10 @@
             .hero-content {
                 text-align: center;
                 margin-bottom: 40px;
+            }
+            
+            .floating-icons {
+                display: none;
             }
 
             .find-content {
@@ -536,16 +710,33 @@
 
             .registry-icons {
                 flex-wrap: wrap;
-                gap: 20px;
+                gap: 15px;
+            }
+            
+            .registry-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
             }
 
-            .cta-container {
-                flex-direction: column;
-                text-align: center;
+            .faq-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
             }
-
-            .cta-content {
-                margin-bottom: 40px;
+            
+            .faq-categories {
+                gap: 8px;
+            }
+            
+            .faq-category-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            
+            .faq-chat-bubble {
+                position: static;
+                margin: 20px auto;
+                max-width: 280px;
             }
         }
     </style>
@@ -571,6 +762,13 @@
 <main id="main-content" class="main-content">
     <!-- Hero Section -->
     <section class="hero-section">
+        <div class="floating-icons">
+            <div class="floating-icon">✈️</div>
+            <div class="floating-icon">🍩</div>
+            <div class="floating-icon">💵</div>
+            <div class="floating-icon">💌</div>
+            <div class="floating-icon">🎨</div>
+        </div>
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">지금 우리 브랜드에 어울리는 콜라보,<br>지금 바로 찾아보세요!</h1>
@@ -585,7 +783,7 @@
                 </div>
             </div>
             <div class="hero-image">
-                <div class="hero-circle">🍕</div>
+                <div class="hero-circle">🤝</div>
             </div>
         </div>
     </section>
@@ -612,20 +810,20 @@
 
                     <div class="subcategory-grid">
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">△</div>
+                            <div class="subcategory-icon">☕</div>
                             <div>커피 / 아메리카노</div>
                         </div>
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">△</div>
+                            <div class="subcategory-icon">🍃</div>
                             <div>차류 / 차류</div>
                         </div>
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">△</div>
-                            <div>차산 / 음료</div>
+                            <div class="subcategory-icon">🥤</div>
+                            <div>음료 / 음료</div>
                         </div>
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">△</div>
-                            <div>매우스 / 플레치</div>
+                            <div class="subcategory-icon">🧀</div>
+                            <div>무스 / 플레치</div>
                         </div>
                     </div>
                 </div>
@@ -709,20 +907,96 @@
                 <div class="registry-icon">🎨</div>
             </div>
 
-            <button class="registry-btn" onclick="handleStoreOwnerAction('/products/create')">상품 등록</button>
+            <button class="registry-btn" onclick="handleStoreOwnerAction('/products/create')">상품등록</button>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-container">
-            <div class="cta-content">
-                <h2 class="cta-title">나의 매장을 등록하고<br>콜라보 제안 받기!</h2>
-                <p class="cta-subtitle" th:text="|${storeCount}개 매장의 점주님들이 콜라보와 함께 하고 있습니다.|"></p>
-                <button class="cta-btn" onclick="handleStoreOwnerAction('/stores/register')">매장 등록하기</button>
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="faq-content">
+                <h2 class="faq-title">📋 FAQ</h2>
+                <p class="faq-subtitle">토핑을 처음 이용하시는 분들을 위한<br>Q&A를 모아놨어요</p>
+                
+                <div class="faq-categories">
+                    <button class="faq-category-btn">전체 이용문의</button>
+                    <button class="faq-category-btn">협업제안 관련 문의</button>
+                    <button class="faq-category-btn">기타 문의내역 정리 관련 문의</button>
+                    <button class="faq-category-btn">가격 관련문의</button>
+                    <button class="faq-category-btn">개인정보처리</button>
+                    <button class="faq-category-btn">기타</button>
+                </div>
+                
+                <ul class="faq-list">
+                    <li class="faq-item">
+                        <button class="faq-question">
+                            가게의 매뉴가 없어도 콜라보를 등록할 수 있나요?
+                            <span class="faq-toggle">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            네, 가능합니다. 메뉴가 없어도 매장 정보와 콜라보 희망 사항을 등록하실 수 있습니다.
+                        </div>
+                    </li>
+                    <li class="faq-item">
+                        <button class="faq-question">
+                            다른 가게의 메뉴를 대신 신청할 수 없나요?
+                            <span class="faq-toggle">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            죄송하지만 타 매장의 메뉴는 해당 매장 점주님만 등록하실 수 있습니다.
+                        </div>
+                    </li>
+                    <li class="faq-item">
+                        <button class="faq-question">
+                            Topping 가게 등록하는 것은 무엇인가요?
+                            <span class="faq-toggle">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            Topping 플랫폼에 매장을 등록하여 다른 사업자들과 콜라보 기회를 만드는 서비스입니다.
+                        </div>
+                    </li>
+                    <li class="faq-item">
+                        <button class="faq-question">
+                            써버스나 내 가게의 메뉴를 대신 신청할 수는 사람을 이용할 수 있나요?
+                            <span class="faq-toggle">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            매장 운영과 관련된 모든 신청은 점주님께서 직접 진행해주셔야 합니다.
+                        </div>
+                    </li>
+                    <li class="faq-item">
+                        <button class="faq-question">
+                            저의 메뉴를 시헗해보고 선정할, 토핑에서 무엇을 할 수 있나요?
+                            <span class="faq-toggle">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            토핑에서는 메뉴 시식 서비스는 제공하지 않으며, 매장 간 직접 소통을 통해 진행됩니다.
+                        </div>
+                    </li>
+                    <li class="faq-item">
+                        <button class="faq-question">
+                            온라인으로 콜라보에서 받던 옵션 안내는 받을 수 없나요?
+                            <span class="faq-toggle">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            온라인 상담 서비스는 현재 준비 중이며, 채팅 기능을 통해 실시간 소통이 가능합니다.
+                        </div>
+                    </li>
+                </ul>
             </div>
-            <div class="cta-illustration">
-                <div class="illustration-placeholder">👥</div>
+            
+            <div class="faq-illustration">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 120px; margin-bottom: 20px;">🧑‍💼</div>
+                    <div class="faq-chat-bubble">
+                        나의 매장을 등록하고<br>
+                        콜라보 제안 받기!
+                    </div>
+                    <button class="cta-btn" onclick="handleStoreOwnerAction('/stores/register')" style="margin-top: 30px; background: #8B4513; color: white; padding: 15px 30px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer;">매장등록</button>
+                    <p style="margin-top: 15px; font-size: 12px; color: #666;">
+                        <span th:text="|${storeCount}개의|"></span> 매장이 토핑과 함께 콜라보 중이에요!
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -1012,6 +1286,33 @@
         console.log('Finished loading wishlist statuses');
     }
 
+    // FAQ Toggle functionality
+    function initializeFAQ() {
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            
+            question.addEventListener('click', function() {
+                const isActive = item.classList.contains('active');
+                
+                // Close all other FAQ items
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current item
+                if (isActive) {
+                    item.classList.remove('active');
+                } else {
+                    item.classList.add('active');
+                }
+            });
+        });
+    }
+
     // Add hover effects and click handlers to product cards
     document.addEventListener('DOMContentLoaded', function () {
         // Initialize drag-scroll functionality
@@ -1019,6 +1320,9 @@
         
         // Load initial wishlist statuses
         loadWishlistStatuses();
+        
+        // Initialize FAQ functionality
+        initializeFAQ();
 
         // Add event delegation for category filtering buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
