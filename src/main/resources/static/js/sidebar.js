@@ -8,8 +8,11 @@ function initializeSidebar() {
     // Set up event listeners
     setupEventListeners();
     
-    // Handle active menu item highlighting
-    highlightActiveMenuItem();
+    // Handle active menu item highlighting - DISABLED: Let Thymeleaf handle active classes
+    // highlightActiveMenuItem();
+    
+    // Initialize image press effects
+    initializeImagePressEffects();
     
     // Handle responsive behavior
     handleResponsiveLayout();
@@ -49,6 +52,106 @@ function setupEventListeners() {
                 closeSidebar();
             }
         });
+    });
+}
+
+// Image Press Effects Functions
+function initializeImagePressEffects() {
+    const menuIcons = document.querySelectorAll('.menu-icon[data-default][data-pressed]');
+    
+    menuIcons.forEach(icon => {
+        // Add press effect event listeners
+        addImagePressListeners(icon);
+    });
+    
+    // Set initial active state for current page
+    setActiveMenuImage();
+}
+
+function addImagePressListeners(icon) {
+    // Mouse events
+    icon.addEventListener('mousedown', () => setImagePressed(icon, true));
+    icon.addEventListener('mouseup', () => setImagePressed(icon, false));
+    icon.addEventListener('mouseleave', () => setImagePressed(icon, false));
+    
+    // Touch events for mobile
+    icon.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        setImagePressed(icon, true);
+    });
+    icon.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        setImagePressed(icon, false);
+    });
+    icon.addEventListener('touchcancel', () => setImagePressed(icon, false));
+    
+    // Prevent drag
+    icon.addEventListener('dragstart', (e) => e.preventDefault());
+}
+
+function setImagePressed(icon, pressed) {
+    if (pressed) {
+        icon.src = icon.dataset.pressed;
+        icon.classList.add('pressed');
+    } else {
+        // Remove pressed class immediately
+        icon.classList.remove('pressed');
+        
+        // Reset to current page state after a short delay
+        setTimeout(() => {
+            setActiveMenuImage(); // This will set the correct image based on current page
+        }, 100);
+    }
+}
+
+function isActiveMenuItem(icon) {
+    const menuItem = icon.closest('.menu-item');
+    const link = menuItem.querySelector('a');
+    
+    // Standard check for active class - rely on Thymeleaf to set this correctly
+    return link && link.classList.contains('active');
+}
+
+function setActiveMenuImage() {
+    const currentPath = window.location.pathname;
+    const menuIcons = document.querySelectorAll('.menu-icon[data-menu]');
+    
+    menuIcons.forEach(icon => {
+        const menuType = icon.dataset.menu;
+        let isActive = false;
+        
+        // Determine if this menu should be active based on current path
+        switch (menuType) {
+            case 'home':
+                isActive = currentPath === '/' || currentPath === '/home';
+                break;
+            case 'explore':
+                isActive = currentPath.startsWith('/explore');
+                break;
+            case 'mypage':
+                isActive = currentPath.startsWith('/mypage');
+                break;
+            case 'signup':
+                isActive = currentPath.startsWith('/signup');
+                break;
+        }
+        
+        // Set image state
+        if (isActive) {
+            icon.src = icon.dataset.pressed;
+            icon.classList.add('active-menu');
+        } else {
+            icon.src = icon.dataset.default;
+            icon.classList.remove('active-menu');
+        }
+    });
+}
+
+function resetAllMenuImages() {
+    const menuIcons = document.querySelectorAll('.menu-icon[data-default]');
+    menuIcons.forEach(icon => {
+        icon.src = icon.dataset.default;
+        icon.classList.remove('pressed', 'active-menu');
     });
 }
 
@@ -167,6 +270,9 @@ function highlightActiveMenuItem() {
             logoLink.classList.add('active');
         }
     }
+    
+    // Update menu images after highlighting active items - DISABLED
+    // setActiveMenuImage();
 }
 
 function handleResponsiveLayout() {
@@ -217,6 +323,8 @@ window.sidebarUtils = {
                 link.classList.add('active');
             }
         });
+        // Update images after setting active menu item - Let Thymeleaf handle active classes
+        // setActiveMenuImage();
     },
     
     // Method to add loading state to menu item
@@ -231,6 +339,16 @@ window.sidebarUtils = {
                 menuLink.style.pointerEvents = '';
             }
         }
+    },
+    
+    // Method to manually refresh menu image states
+    refreshMenuImages: function() {
+        setActiveMenuImage();
+    },
+    
+    // Method to reset all menu images to default state
+    resetMenuImages: function() {
+        resetAllMenuImages();
     }
 };
 
