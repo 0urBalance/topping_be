@@ -116,6 +116,13 @@ function setActiveMenuImage() {
     const currentPath = window.location.pathname;
     const menuIcons = document.querySelectorAll('.menu-icon[data-menu]');
     
+    // First, reset all icons to default state
+    menuIcons.forEach(icon => {
+        icon.src = icon.dataset.default;
+        icon.classList.remove('active-menu');
+    });
+    
+    // Then, find and activate only the correct menu item
     menuIcons.forEach(icon => {
         const menuType = icon.dataset.menu;
         let isActive = false;
@@ -136,13 +143,10 @@ function setActiveMenuImage() {
                 break;
         }
         
-        // Set image state
+        // Set image state only for the active menu
         if (isActive) {
             icon.src = icon.dataset.pressed;
             icon.classList.add('active-menu');
-        } else {
-            icon.src = icon.dataset.default;
-            icon.classList.remove('active-menu');
         }
     });
 }
