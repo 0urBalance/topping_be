@@ -17,6 +17,8 @@ import org.balanceus.topping.domain.repository.ProductWishlistRepository;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
+import org.balanceus.topping.domain.repository.WishlistRepository;
+import org.balanceus.topping.domain.model.Wishlist;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +40,7 @@ public class MyPageController {
 	private final ChatRoomRepository chatRoomRepository;
 	private final StoreRepository storeRepository;
 	private final ProductWishlistRepository productWishlistRepository;
+	private final WishlistRepository wishlistRepository;
 
 	@GetMapping
 	public String myPage(Model model, Principal principal) {
@@ -430,6 +433,31 @@ public class MyPageController {
 		model.addAttribute("userWishlist", userWishlist);
 		model.addAttribute("wishlistCount", userWishlist.size());
 		return "mypage/wishlist";
+	}
+
+	@GetMapping("/liked-stores")
+	public String myPageLikedStores(Model model, Principal principal) {
+		log.debug("MyPage Liked Stores accessed - Principal: {}", principal);
+		
+		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
+			return "redirect:/login";
+		}
+
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Get user's store wishlist
+		List<Wishlist> userStoreWishlist = wishlistRepository.findByUser(user);
+		
+		// Sort by creation date (newest first)
+		userStoreWishlist.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+		
+		log.debug("Found {} liked stores for user {}", userStoreWishlist.size(), user.getEmail());
+		
+		model.addAttribute("userStoreWishlist", userStoreWishlist);
+		model.addAttribute("likedStoreCount", userStoreWishlist.size());
+		return "mypage/liked-stores";
 	}
 
 	@GetMapping("/upgrade")

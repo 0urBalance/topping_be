@@ -74,7 +74,10 @@ height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
                             <span class="material-symbols-outlined">handshake</span>
                             <span th:text="${collabProductCount}">0</span>
                         </button>
-                        <button class="btn-base btn-hero wishlist-btn">
+                        <button class="btn-base btn-hero wishlist-btn" 
+                                th:attr="data-store-uuid=${store.uuid}"
+                                th:classappend="${isWishlisted ? 'wishlisted' : ''}"
+                                title="관심 가게에 추가/제거">
                             <span class="material-symbols-outlined">favorite</span>
                             <span th:text="${wishlistCount}">1,115</span>
                         </button>

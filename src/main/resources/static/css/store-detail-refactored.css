@@ -168,6 +168,17 @@
     border-color: rgba(255, 255, 255, 0.5);
 }
 
+.btn-hero.wishlist-btn.wishlisted {
+    background: rgba(255, 107, 107, 0.2);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.btn-hero.wishlist-btn.wishlisted:hover {
+    background: rgba(255, 107, 107, 0.3);
+    border-color: #ff6b6b;
+}
+
 .btn-primary {
     background: var(--brown-color);
     color: white;

@@ -17,6 +17,7 @@ import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreImage;
 import org.balanceus.topping.domain.model.StoreLike;
+import org.balanceus.topping.domain.model.Wishlist;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.ReviewRepository;
@@ -504,6 +505,88 @@ public class StoreController {
             log.error("Failed to toggle store like for user: {}, store: {}", 
                      userDetails.getUser().getEmail(), storeId, e);
             return ApiResponseData.failure(500, "Failed to update like status");
+        }
+    }
+
+    @PostMapping("/api/{storeId}/wishlist/toggle")
+    @ResponseBody
+    public ApiResponseData<Map<String, Object>> toggleStoreWishlist(
+            @PathVariable("storeId") UUID storeId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null) {
+            return ApiResponseData.failure(401, "Authentication required");
+        }
+
+        try {
+            Optional<Store> storeOptional = storeService.getStoreById(storeId);
+            if (storeOptional.isEmpty()) {
+                return ApiResponseData.failure(404, "Store not found");
+            }
+
+            Store store = storeOptional.get();
+            
+            // Check if user already wishlisted this store
+            Optional<Wishlist> existingWishlist = wishlistRepository.findByUserAndStore(userDetails.getUser(), store);
+            
+            boolean isWishlisted;
+            if (existingWishlist.isPresent()) {
+                // Remove from wishlist
+                wishlistRepository.delete(existingWishlist.get());
+                isWishlisted = false;
+                log.debug("User {} removed store {} from wishlist", userDetails.getUser().getEmail(), store.getName());
+            } else {
+                // Add to wishlist
+                Wishlist newWishlist = new Wishlist();
+                newWishlist.setUser(userDetails.getUser());
+                newWishlist.setStore(store);
+                wishlistRepository.save(newWishlist);
+                isWishlisted = true;
+                log.debug("User {} added store {} to wishlist", userDetails.getUser().getEmail(), store.getName());
+            }
+            
+            // Get updated wishlist count
+            long wishlistCount = wishlistRepository.countByStore(store);
+            
+            // Return response data
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("isWishlisted", isWishlisted);
+            responseData.put("wishlistCount", wishlistCount);
+            
+            return ApiResponseData.success(responseData);
+            
+        } catch (Exception e) {
+            log.error("Failed to toggle store wishlist for user: {}, store: {}", 
+                     userDetails.getUser().getEmail(), storeId, e);
+            return ApiResponseData.failure(500, "Failed to update wishlist status");
+        }
+    }
+
+    @GetMapping("/api/{storeId}/wishlist/status")
+    @ResponseBody
+    public ApiResponseData<Boolean> getStoreWishlistStatus(
+            @PathVariable("storeId") UUID storeId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        if (userDetails == null) {
+            return ApiResponseData.failure(401, "Authentication required");
+        }
+
+        try {
+            Optional<Store> storeOptional = storeService.getStoreById(storeId);
+            if (storeOptional.isEmpty()) {
+                return ApiResponseData.failure(404, "Store not found");
+            }
+
+            Store store = storeOptional.get();
+            boolean isWishlisted = wishlistRepository.existsByUserAndStore(userDetails.getUser(), store);
+            
+            return ApiResponseData.success(isWishlisted);
+            
+        } catch (Exception e) {
+            log.error("Failed to get store wishlist status for user: {}, store: {}", 
+                     userDetails.getUser().getEmail(), storeId, e);
+            return ApiResponseData.failure(500, "Failed to get wishlist status");
         }
     }
 

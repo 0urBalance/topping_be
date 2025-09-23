@@ -21,6 +21,7 @@ class StoreDetailManager {
         this.setupLazyLoading();
         this.setupBackgroundImage();
         this.addBodyPadding();
+        this.loadWishlistStatus();
     }
 
     // 🖼️ Gallery Management
@@ -58,7 +59,7 @@ class StoreDetailManager {
             // Action buttons
             else if (target.classList.contains('wishlist-btn') || target.closest('.wishlist-btn')) {
                 e.preventDefault();
-                this.toggleStoreLike(target.closest('.wishlist-btn'));
+                this.toggleStoreWishlist(target.closest('.wishlist-btn'));
             }
             else if (target.classList.contains('share-btn') || target.closest('.share-btn')) {
                 e.preventDefault();
@@ -199,18 +200,18 @@ class StoreDetailManager {
     }
 
     // 💝 Social Actions
-    async toggleStoreLike(button) {
+    async toggleStoreWishlist(button) {
         // Check authentication first
         if (!this.isAuthenticated()) {
             const currentUrl = encodeURIComponent(window.location.href);
-            if (confirm('좋아요 기능을 사용하려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+            if (confirm('관심 가게 기능을 사용하려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
                 window.location.href = `/auth/login?redirect=${currentUrl}`;
             }
             return;
         }
 
-        const storeId = button.dataset.storeId;
-        if (!storeId) {
+        const storeUuid = button.dataset.storeUuid;
+        if (!storeUuid) {
             this.showToast('스토어 정보를 찾을 수 없습니다.', 'error');
             return;
         }
@@ -220,7 +221,7 @@ class StoreDetailManager {
         button.disabled = true;
 
         try {
-            const response = await fetch(`/stores/api/${storeId}/like`, {
+            const response = await fetch(`/stores/api/${storeUuid}/wishlist/toggle`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -229,24 +230,24 @@ class StoreDetailManager {
 
             const data = await response.json();
 
-            if (data.success) {
+            if (data.code === 200) {
                 // Update UI based on API response
                 const icon = button.querySelector('.material-symbols-outlined');
-                const likeCountSpan = button.querySelector('.like-count');
+                const wishlistCountSpan = button.querySelector('span:last-child');
                 
-                if (data.data.isLiked) {
-                    button.classList.add('liked');
-                    icon.textContent = 'favorite';
-                    this.showToast('좋아요를 눌렀습니다!', 'success');
+                if (data.data.isWishlisted) {
+                    button.classList.add('wishlisted');
+                    icon.style.color = '#ff6b6b';
+                    this.showToast('관심 가게에 추가되었습니다!', 'success');
                 } else {
-                    button.classList.remove('liked');
-                    icon.textContent = 'favorite_border';
-                    this.showToast('좋아요를 취소했습니다.', 'info');
+                    button.classList.remove('wishlisted');
+                    icon.style.color = '';
+                    this.showToast('관심 가게에서 제거되었습니다.', 'info');
                 }
                 
-                // Update like count
-                if (likeCountSpan) {
-                    likeCountSpan.textContent = data.data.likeCount;
+                // Update wishlist count
+                if (wishlistCountSpan) {
+                    wishlistCountSpan.textContent = data.data.wishlistCount;
                 }
             } else {
                 if (response.status === 401) {
@@ -429,6 +430,41 @@ class StoreDetailManager {
                 }
             }, 300);
         }, 3000);
+    }
+
+    // 💝 Load initial wishlist status
+    async loadWishlistStatus() {
+        // Only check wishlist status if user is authenticated
+        if (!this.isAuthenticated()) {
+            return;
+        }
+
+        const wishlistBtn = document.querySelector('.wishlist-btn[data-store-uuid]');
+        if (!wishlistBtn) {
+            return;
+        }
+
+        const storeUuid = wishlistBtn.dataset.storeUuid;
+        if (!storeUuid) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/stores/api/${storeUuid}/wishlist/status`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.code === 200 && data.data === true) {
+                    wishlistBtn.classList.add('wishlisted');
+                    const icon = wishlistBtn.querySelector('.material-symbols-outlined');
+                    if (icon) {
+                        icon.style.color = '#ff6b6b';
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('Failed to load wishlist status:', error);
+            // Silently fail - not critical
+        }
     }
 }
 
