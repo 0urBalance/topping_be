@@ -1,12 +1,16 @@
 package org.balanceus.topping.infrastructure.persistence;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductRepositoryImpl implements ProductRepository {
 
 	private final ProductJpaRepository productJpaRepository;
+	private final CollaborationRepository collaborationRepository;
 
 	@Override
 	public Product save(Product product) {
@@ -89,5 +94,31 @@ public class ProductRepositoryImpl implements ProductRepository {
 	@Override
 	public long countByStoreAndCollaborationIsNotNull(Store store) {
 		return productJpaRepository.countByStoreAndCollaborationIsNotNull(store);
+	}
+
+	@Override
+	public long countCollaborationProductsByStore(Store store) {
+		Set<UUID> collaborationProductIds = new HashSet<>();
+		
+		// Get all accepted collaborations involving the store
+		List<Collaboration> acceptedCollaborations = collaborationRepository.findByStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
+		
+		// Count unique products from accepted collaborations
+		for (Collaboration collaboration : acceptedCollaborations) {
+			if (collaboration.getInitiatorProduct() != null && collaboration.getInitiatorProduct().getStore().equals(store)) {
+				collaborationProductIds.add(collaboration.getInitiatorProduct().getUuid());
+			}
+			if (collaboration.getPartnerProduct() != null && collaboration.getPartnerProduct().getStore().equals(store)) {
+				collaborationProductIds.add(collaboration.getPartnerProduct().getUuid());
+			}
+		}
+		
+		// Also count products with COLLABORATION product type from this store
+		List<Product> collaborationTypeProducts = productJpaRepository.findByStoreAndProductType(store, Product.ProductType.COLLABORATION);
+		for (Product product : collaborationTypeProducts) {
+			collaborationProductIds.add(product.getUuid());
+		}
+		
+		return collaborationProductIds.size();
 	}
 }

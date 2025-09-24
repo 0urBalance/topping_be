@@ -12,6 +12,7 @@ import org.balanceus.topping.domain.model.ProposalSource;
 import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
+import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.infrastructure.service.NotificationService;
@@ -34,6 +35,7 @@ public class CollaborationService {
 
     private final CollaborationRepository collaborationRepository;
     private final CollaborationProposalRepository collaborationProposalRepository;
+    private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatService chatService;
@@ -391,5 +393,13 @@ public class CollaborationService {
         } catch (Exception e) {
             log.error("Failed to broadcast proposal status update for room {}: {}", roomId, e.getMessage(), e);
         }
+    }
+
+    /**
+     * Get the count of collaboration products for a store
+     * This includes products involved in accepted collaborations and products with COLLABORATION type
+     */
+    public long getCollaborationProductCount(Store store) {
+        return productRepository.countCollaborationProductsByStore(store);
     }
 }

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
 import org.balanceus.topping.application.dto.StoreForm;
+import org.balanceus.topping.application.service.CollaborationService;
 import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
@@ -54,6 +55,7 @@ public class StoreController {
 
     private final StoreService storeService;
     private final ProductService productService;
+    private final CollaborationService collaborationService;
     private final ImageUploadService imageUploadService;
     private final ProductRepository productRepository;
     private final CollaborationRepository collaborationRepository;
@@ -313,8 +315,8 @@ public class StoreController {
         long likeCount = storeLikeRepository.countByStore(store);
         long wishlistCount = wishlistRepository.countByStore(store);
         
-        // Get collaboration product count
-        long collabProductCount = productRepository.countByStoreAndCollaborationIsNotNull(store);
+        // Get collaboration product count using enhanced counting logic
+        long collabProductCount = collaborationService.getCollaborationProductCount(store);
         
         // Get collaborating stores (stores that have accepted collaborations with this store's products)
         List<Collaboration> acceptedCollaborations = collaborationRepository.findByStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);

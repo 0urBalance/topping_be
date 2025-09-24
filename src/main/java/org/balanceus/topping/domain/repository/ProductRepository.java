@@ -37,4 +37,5 @@ public interface ProductRepository {
 	
 	// Collaboration-related methods
 	long countByStoreAndCollaborationIsNotNull(Store store);
+	long countCollaborationProductsByStore(Store store);
 }
