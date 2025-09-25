@@ -8,29 +8,38 @@
 <!-- Reusable Product Card Fragment -->
 <div th:fragment="card(product)" class="card-base card-product clickable-product" th:attr="data-product-uuid=${product.uuid}">
     <div class="card-image-container">
+        <!-- Placeholder background for consistent sizing -->
+        <div class="image-placeholder" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--primary-light); display: flex; align-items: center; justify-content: center; z-index: 1;">
+            <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--primary-color); opacity: 0.3;">restaurant</span>
+        </div>
+        
         <img th:if="${product.mainImage != null}"
              th:src="${product.mainImage.imagePath}"
              th:alt="${product.name}"
              class="image-product lazy-load"
+             style="position: relative; z-index: 2;"
              loading="lazy"
-             onerror="this.src='/image/topping_M_text.png'" />
+             onerror="this.style.display='none'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath != null}"
              th:src="${product.thumbnailPath}"
              th:alt="${product.name}"
              class="image-product lazy-load"
+             style="position: relative; z-index: 2;"
              loading="lazy"
-             onerror="this.src='/image/topping_M_text.png'" />
+             onerror="this.style.display='none'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl != null}"
              th:src="${product.imageUrl}"
              th:alt="${product.name}"
              class="image-product lazy-load"
+             style="position: relative; z-index: 2;"
              loading="lazy"
-             onerror="this.src='/image/topping_M_text.png'" />
+             onerror="this.style.display='none'" />
         <img th:if="${product.mainImage == null and product.thumbnailPath == null and product.imageUrl == null}"
              th:src="@{/image/topping_M.png}"
              th:alt="${product.name}"
              class="image-product"
-             onerror="this.src='/image/topping_M_text.png'" />
+             style="position: relative; z-index: 2;"
+             onerror="this.style.display='none'" />
     </div>
     <div class="card-content">
         <h3 class="heading-md text-dark" th:text="${product.name}">상품명</h3>
