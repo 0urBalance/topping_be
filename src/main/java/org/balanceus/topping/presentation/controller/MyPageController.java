@@ -105,6 +105,9 @@ public class MyPageController {
 		// Get user's product wishlist
 		List<ProductWishlist> userWishlist = productWishlistRepository.findByUser(user);
 		
+		// Get user's store wishlist
+		List<Wishlist> userStoreWishlist = wishlistRepository.findByUser(user);
+		
 		// Get active chat rooms
 		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
 
@@ -116,6 +119,7 @@ public class MyPageController {
 		int receivedApplicationCount = receivedApplications.size() + receivedProposals.size(); // Include both types
 		int productCount = myProducts.size();
 		int wishlistCount = userWishlist.size();
+		int storeWishlistCount = userStoreWishlist.size();
 		int chatRoomCount = activeChatRooms.size();
 
 		// Calculate pending actions for alerts
@@ -147,6 +151,7 @@ public class MyPageController {
 		model.addAttribute("receivedApplicationCount", receivedApplicationCount);
 		model.addAttribute("productCount", productCount);
 		model.addAttribute("wishlistCount", wishlistCount);
+		model.addAttribute("storeWishlistCount", storeWishlistCount);
 		model.addAttribute("chatRoomCount", chatRoomCount);
 		model.addAttribute("pendingActionsCount", pendingActionsCount);
 

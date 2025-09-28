@@ -215,6 +215,14 @@
                 <a href="/mypage/wishlist" class="stat-action" style="--card-color: #ff6b6b">보기</a>
             </div>
 
+            <!-- Store Wishlist -->
+            <div class="stat-card wishlist" onclick="location.href='/mypage/liked-stores'">
+                <div class="stat-number" th:text="${storeWishlistCount ?: 0}">0</div>
+                <div class="stat-label">관심 가게</div>
+                <div class="stat-description">찜한 가게 모음</div>
+                <a href="/mypage/liked-stores" class="stat-action" style="--card-color: #ff8e85">보기</a>
+            </div>
+
             <!-- Store Management -->
             <div class="stat-card store" 
                  sec:authorize="hasRole('ROLE_BUSINESS_OWNER') or hasRole('ROLE_ADMIN')"
@@ -258,6 +266,10 @@
                 <a href="/mypage/wishlist" class="action-btn" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8e85 100%);">
                     <span class="action-icon">❤️</span>
                     찜한 상품
+                </a>
+                <a href="/mypage/liked-stores" class="action-btn" style="background: linear-gradient(135deg, #ff8e85 0%, #ffa07a 100%);">
+                    <span class="action-icon">🏪</span>
+                    관심 가게
                 </a>
                 <a href="/chat/rooms" class="action-btn warning">
                     <span class="action-icon">💬</span>
