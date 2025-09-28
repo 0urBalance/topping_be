@@ -114,7 +114,13 @@
                 <li class="menu-item">
                     <a href="/chat/rooms" class="menu-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/chat/rooms') ? 'active' : ''}">
-                        <span class="material-symbols-outlined"> chat </span>
+<!--                        <span class="material-symbols-outlined"> chat </span>-->
+                        <img th:src="@{/image/sidebar/icon_chat_blank.png}"
+                             alt="chat"
+                             class="menu-icon"
+                             data-default="/image/sidebar/icon_chat_blank.png"
+                             data-pressed="/image/sidebar/icon_chat_filled.png"
+                             data-menu="/chat/rooms">
                         <!--<span class="material-symbols-outlined"> mark_unread_chat_alt</span>-->
 <!--                        <img src="image/sidebar/icon_collabo_default.png" alt="Home" class="menu-icon">-->
                     </a>
