@@ -269,7 +269,11 @@ function handleCollaborationSubmit(e) {
     
     const message = document.getElementById('message').value.trim();
     if (!message) {
-        alert('요청 메시지를 입력해주세요.');
+        if (typeof showError === 'function') {
+            showError('요청 메시지를 입력해주세요.');
+        } else {
+            alert('요청 메시지를 입력해주세요.');
+        }
         return;
     }
     
@@ -281,7 +285,11 @@ function handleCollaborationSubmit(e) {
     
     // Simulate API call
     setTimeout(() => {
-        alert('콜라보 요청이 성공적으로 전송되었습니다!');
+        if (typeof showSuccess === 'function') {
+            showSuccess('콜라보 요청이 성공적으로 전송되었습니다!');
+        } else {
+            alert('콜라보 요청이 성공적으로 전송되었습니다!');
+        }
         
         // Reset form
         document.getElementById('message').value = '';

@@ -46,15 +46,70 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+	public ResponseEntity<ApiResponseData<String>> handleRuntimeException(RuntimeException e) {
+		log.error("Runtime exception occurred", e);
+		String userMessage = getUserFriendlyMessage(e);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-			.body("런타임 오류 발생: " + e.getMessage());
+			.body(ApiResponseData.failure(500, userMessage));
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<String> handleException(Exception e) {
+	public ResponseEntity<ApiResponseData<String>> handleException(Exception e) {
+		log.error("Unexpected exception occurred", e);
+		String userMessage = getUserFriendlyMessage(e);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-			.body("예상치 못한 오류 발생: " + e.getMessage());
+			.body(ApiResponseData.failure(500, userMessage));
+	}
+
+	private String getUserFriendlyMessage(Exception e) {
+		String message = e.getMessage();
+		if (message == null) {
+			return "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+		}
+		
+		// SQL 관련 오류 처리
+		if (message.toLowerCase().contains("sql") || 
+			message.toLowerCase().contains("database") ||
+			message.toLowerCase().contains("connection") ||
+			message.toLowerCase().contains("constraint") ||
+			message.toLowerCase().contains("foreign key") ||
+			message.toLowerCase().contains("duplicate entry") ||
+			message.toLowerCase().contains("table") ||
+			message.toLowerCase().contains("column")) {
+			return "데이터 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+		}
+		
+		// 네트워크 관련 오류 처리
+		if (message.toLowerCase().contains("timeout") ||
+			message.toLowerCase().contains("connection refused") ||
+			message.toLowerCase().contains("network")) {
+			return "네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인한 후 다시 시도해주세요.";
+		}
+		
+		// 인증/권한 관련 오류 처리
+		if (message.toLowerCase().contains("unauthorized") ||
+			message.toLowerCase().contains("access denied") ||
+			message.toLowerCase().contains("permission") ||
+			message.toLowerCase().contains("forbidden")) {
+			return "접근 권한이 없습니다. 로그인 상태를 확인해주세요.";
+		}
+		
+		// 파일 업로드 관련 오류 처리
+		if (message.toLowerCase().contains("multipart") ||
+			message.toLowerCase().contains("file size") ||
+			message.toLowerCase().contains("upload")) {
+			return "파일 업로드 중 오류가 발생했습니다. 파일 크기와 형식을 확인해주세요.";
+		}
+		
+		// 검증 오류 처리
+		if (message.toLowerCase().contains("validation") ||
+			message.toLowerCase().contains("invalid") ||
+			message.toLowerCase().contains("not found")) {
+			return "입력하신 정보를 다시 확인해주세요.";
+		}
+		
+		// 기본 메시지 (기술적 세부사항 숨김)
+		return "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
 	}
 
 	// 커스텀 에러처리 가능

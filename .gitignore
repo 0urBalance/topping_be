@@ -86,3 +86,4 @@ jdk-17.0.12+7/
 design/
 /src/main/resources/static/image/stores/**
 /src/main/resources/static/image/products/**
+error-handling-test.html

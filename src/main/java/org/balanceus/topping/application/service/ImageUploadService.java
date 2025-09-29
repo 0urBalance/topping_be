@@ -73,7 +73,7 @@ public class ImageUploadService {
                 
             } catch (Exception e) {
                 log.error("Failed to upload image for store: {}", store.getUuid(), e);
-                throw new RuntimeException("이미지 업로드에 실패했습니다: " + e.getMessage());
+                throw new RuntimeException("이미지 업로드에 실패했습니다. 파일 크기와 형식을 확인한 후 다시 시도해주세요.");
             }
         }
         
@@ -193,7 +193,7 @@ public class ImageUploadService {
             log.info("Successfully deleted store image: {} (path: {})", imageId, storeImage.getImagePath());
         } catch (Exception e) {
             log.error("Failed to delete store image: {}", imageId, e);
-            throw new RuntimeException("이미지 삭제에 실패했습니다: " + e.getMessage());
+            throw new RuntimeException("이미지 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
         }
     }
 
@@ -285,7 +285,7 @@ public class ImageUploadService {
 
         } catch (IOException e) {
             log.error("Failed to upload product image for product: {}", product.getUuid(), e);
-            throw new RuntimeException("Image upload failed: " + e.getMessage());
+            throw new RuntimeException("이미지 업로드에 실패했습니다. 파일 크기와 형식을 확인한 후 다시 시도해주세요.");
         }
     }
 

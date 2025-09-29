@@ -64,7 +64,7 @@ public class SessionAuthController {
         } catch (Exception e) {
             log.error("Login failed for user: {}", request.getEmail(), e);
             return ResponseEntity.badRequest()
-                .body(ApiResponseData.failure(400, "로그인 실패: " + e.getMessage()));
+                .body(ApiResponseData.failure(400, "로그인에 실패했습니다. 이메일과 비밀번호를 확인한 후 다시 시도해주세요."));
         }
     }
 

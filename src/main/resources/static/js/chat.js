@@ -153,7 +153,12 @@ class ChatInterface {
             }
         } catch (error) {
             console.error('Error loading chat room:', error);
-            this.showError('채팅방을 불러오는 중 오류가 발생했습니다.');
+            // Use enhanced error handling if available
+            if (error.displayUserError) {
+                error.displayUserError();
+            } else {
+                this.showError('채팅방을 불러오는 중 오류가 발생했습니다.');
+            }
         }
     }
     
@@ -656,7 +661,11 @@ b가게 맥주</textarea>
             }
         } catch (error) {
             console.error('Error sending message:', error);
-            this.showError('메시지 전송에 실패했습니다.');
+            if (error.displayUserError) {
+                error.displayUserError();
+            } else {
+                this.showError('메시지 전송에 실패했습니다.');
+            }
         }
     }
     
@@ -764,8 +773,13 @@ b가게 맥주</textarea>
     }
     
     showError(message) {
-        // Simple error display - can be enhanced with toast notifications
-        alert(message);
+        // Use the global showError function from common.js instead of alert
+        if (typeof showError === 'function') {
+            showError(message);
+        } else {
+            // Fallback to alert if common.js is not loaded
+            alert(message);
+        }
     }
     
     getAvatarText(username) {

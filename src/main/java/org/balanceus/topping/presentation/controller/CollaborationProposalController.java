@@ -244,7 +244,7 @@ public class CollaborationProposalController {
 			
 			return ApiResponseData.success("협업 제안이 수락되었습니다.");
 		} catch (Exception e) {
-			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), "제안 수락 중 오류가 발생했습니다: " + e.getMessage());
+			return ApiResponseData.failure(Code.INTERNAL_SERVER_ERROR.getCode(), "제안 수락 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
 		}
 	}
 

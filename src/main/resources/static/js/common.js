@@ -303,9 +303,84 @@ async function copyToClipboard(text) {
     }
 }
 
+/* ===== ERROR HANDLING UTILITY ===== */
+
+// Error message dictionary for user-friendly messages
+const ERROR_MESSAGES = {
+    // Network errors
+    'NetworkError': '네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인한 후 다시 시도해주세요.',
+    'TypeError': '네트워크 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.',
+    'timeout': '요청 시간이 초과되었습니다. 다시 시도해주세요.',
+    
+    // Authentication errors  
+    'unauthorized': '로그인이 필요합니다. 다시 로그인해주세요.',
+    'forbidden': '접근 권한이 없습니다.',
+    'access denied': '접근 권한이 없습니다.',
+    
+    // Validation errors
+    'invalid': '입력하신 정보를 다시 확인해주세요.',
+    'not found': '요청하신 정보를 찾을 수 없습니다.',
+    'validation': '입력 형식이 올바르지 않습니다.',
+    
+    // Server errors
+    'internal server error': '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+    'service unavailable': '서비스가 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.',
+    'bad gateway': '서버 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.',
+    
+    // Default messages by status code
+    400: '잘못된 요청입니다. 입력 정보를 확인해주세요.',
+    401: '로그인이 필요합니다.',
+    403: '접근 권한이 없습니다.',
+    404: '요청하신 페이지를 찾을 수 없습니다.',
+    408: '요청 시간이 초과되었습니다. 다시 시도해주세요.',
+    409: '중복된 요청입니다. 잠시 후 다시 시도해주세요.',
+    429: '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.',
+    500: '서버에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+    502: '서버 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.',
+    503: '서비스가 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.',
+    504: '서버 응답 시간이 초과되었습니다. 다시 시도해주세요.'
+};
+
+// Function to get user-friendly error message
+function getUserFriendlyErrorMessage(error, response = null) {
+    // Log detailed error for developers
+    console.error('Detailed error for debugging:', error);
+    
+    // If it's a network error
+    if (error instanceof TypeError || error.name === 'NetworkError') {
+        return ERROR_MESSAGES['NetworkError'];
+    }
+    
+    // If we have a response status
+    if (response && response.status) {
+        const statusMessage = ERROR_MESSAGES[response.status];
+        if (statusMessage) {
+            return statusMessage;
+        }
+    }
+    
+    // Check error message for keywords
+    const errorMessage = (error.message || '').toLowerCase();
+    
+    for (const [keyword, userMessage] of Object.entries(ERROR_MESSAGES)) {
+        if (typeof keyword === 'string' && errorMessage.includes(keyword)) {
+            return userMessage;
+        }
+    }
+    
+    // Default fallback message
+    return '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+}
+
+// Enhanced error display function
+function displayError(error, response = null) {
+    const userMessage = getUserFriendlyErrorMessage(error, response);
+    showError(userMessage);
+}
+
 /* ===== API HELPER FUNCTIONS ===== */
 
-// Generic API request function
+// Generic API request function with enhanced error handling
 async function apiRequest(url, options = {}) {
     const defaultOptions = {
         headers: {
@@ -332,7 +407,11 @@ async function apiRequest(url, options = {}) {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                // Create enhanced error with response context
+                const error = new Error(data.message || `HTTP error! status: ${response.status}`);
+                error.response = response;
+                error.data = data;
+                throw error;
             }
             
             return data;
@@ -340,13 +419,20 @@ async function apiRequest(url, options = {}) {
             const text = await response.text();
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const error = new Error(`HTTP error! status: ${response.status}`);
+                error.response = response;
+                throw error;
             }
             
             return text;
         }
     } catch (error) {
         console.error('API request failed:', error);
+        
+        // Don't automatically display error here - let calling code decide
+        // But provide a way to easily display user-friendly errors
+        error.displayUserError = () => displayError(error, error.response);
+        
         throw error;
     }
 }
@@ -577,5 +663,8 @@ window.Topping = {
     apiGet,
     apiPost,
     apiPut,
-    apiDelete
+    apiDelete,
+    // Error handling utilities
+    getUserFriendlyErrorMessage,
+    displayError
 };

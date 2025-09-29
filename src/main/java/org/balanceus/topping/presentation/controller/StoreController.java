@@ -135,7 +135,7 @@ public class StoreController {
         } catch (Exception e) {
             log.error("Store registration failed", e);
             model.addAttribute("storeForm", storeForm);
-            model.addAttribute("errorMessage", "스토어 등록 중 오류가 발생했습니다: " + e.getMessage());
+            model.addAttribute("errorMessage", "스토어 등록 중 오류가 발생했습니다. 입력 정보를 확인한 후 다시 시도해주세요.");
             return "store/register";
         }
     }
@@ -160,7 +160,7 @@ public class StoreController {
             return ApiResponseData.success("Store registered successfully");
         } catch (Exception e) {
             log.error("Store registration failed", e);
-            return ApiResponseData.failure(500, e.getMessage());
+            return ApiResponseData.failure(500, "스토어 등록 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }
     }
 
@@ -271,7 +271,7 @@ public class StoreController {
             return "redirect:/stores/my-store";
         } catch (Exception e) {
             log.error("Store update failed", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "스토어 정보 수정 중 오류가 발생했습니다. 입력 정보를 확인한 후 다시 시도해주세요.");
             return "redirect:/stores/edit";
         }
     }
@@ -427,7 +427,7 @@ public class StoreController {
             return ApiResponseData.success(uploadedPaths);
         } catch (Exception e) {
             log.error("Store image upload failed", e);
-            return ApiResponseData.failure(500, e.getMessage());
+            return ApiResponseData.failure(500, "이미지 업로드 중 오류가 발생했습니다. 파일 크기와 형식을 확인한 후 다시 시도해주세요.");
         }
     }
 
@@ -452,7 +452,7 @@ public class StoreController {
             return ApiResponseData.success("Image deleted successfully");
         } catch (Exception e) {
             log.error("Store image deletion failed", e);
-            return ApiResponseData.failure(500, e.getMessage());
+            return ApiResponseData.failure(500, "이미지 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }
     }
 
