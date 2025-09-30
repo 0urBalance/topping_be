@@ -677,21 +677,12 @@ b가게 맥주</textarea>
         const messageDate = this.formatDate(messageData.createdAt);
         let needDateSeparator = true;
         
-        // Check if the last element is a date separator with the same date
-        const lastElement = chatBody.lastElementChild;
-        if (lastElement) {
-            if (lastElement.classList.contains('date-separator')) {
-                // Last element is a date separator, check if it's the same date
-                const lastDateText = lastElement.querySelector('span')?.textContent;
-                if (lastDateText === messageDate) {
-                    needDateSeparator = false;
-                }
-            } else {
-                // Last element is a message, check if there's a recent date separator for today
-                const recentDateSeparator = chatBody.querySelector('.date-separator:last-of-type span');
-                if (recentDateSeparator && recentDateSeparator.textContent === messageDate) {
-                    needDateSeparator = false;
-                }
+        // Simple and reliable approach: find all date separators and check the last one
+        const existingDateSeparators = chatBody.querySelectorAll('.date-separator span');
+        if (existingDateSeparators.length > 0) {
+            const lastDateSeparator = existingDateSeparators[existingDateSeparators.length - 1];
+            if (lastDateSeparator.textContent === messageDate) {
+                needDateSeparator = false;
             }
         }
         
