@@ -31,7 +31,7 @@ templates/
 ### **CSS Variables (USE THESE)**
 ```css
 /* Brand Colors */
---primary-color: #ff6b35;
+--primary-color: #9d6c5c;
 --primary-hover: #e55a2b;
 --primary-light: #fff5f2;
 

@@ -51,7 +51,7 @@
             margin-right: auto;
         }
         .step-indicator {
-            background-color: #ff6b35;
+            background-color: #9d6c5c;
             color: white;
             border-radius: 50%;
             width: 30px;
@@ -82,7 +82,7 @@
             margin-bottom: 1rem;
         }
         .form-control:focus {
-            border-color: #ff6b35;
+            border-color: #9d6c5c;
             box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
         }
         .birth-row {
@@ -114,8 +114,8 @@
             transition: all 0.3s ease;
         }
         .gender-btn.selected {
-            border-color: #ff6b35;
-            background-color: #ff6b35;
+            border-color: #9d6c5c;
+            background-color: #9d6c5c;
             color: white;
         }
         .search-wrapper {
@@ -141,7 +141,7 @@
             cursor: not-allowed;
         }
         .next-btn.active {
-            background-color: #ff6b35;
+            background-color: #9d6c5c;
             color: white;
             cursor: pointer;
         }
@@ -215,7 +215,7 @@
             width: 20px;
             height: 20px;
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #ff6b35;
+            border-top: 3px solid #9d6c5c;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -241,7 +241,7 @@
             <div th:if="${signupData != null and signupData.userType != null}" 
                  style="background-color: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                 <small style="color: #666;">선택한 유형:</small>
-                <strong style="color: #ff6b35;" th:text="${signupData.userType}">사용자</strong>
+                <strong style="color: #9d6c5c;" th:text="${signupData.userType}">사용자</strong>
             </div>
             
             <form id="step2Form">

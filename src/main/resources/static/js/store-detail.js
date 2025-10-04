@@ -501,7 +501,7 @@ const menuDetailStyles = `
     .menu-price {
         font-size: 1.3rem;
         font-weight: 600;
-        color: #ff6b35;
+        color: #9d6c5c;
         margin-bottom: 8px;
     }
     
