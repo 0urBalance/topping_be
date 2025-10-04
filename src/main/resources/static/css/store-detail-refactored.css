@@ -16,7 +16,7 @@
     --border-color: #e0e0e0;
     --white-transparent-20: rgba(255, 255, 255, 0.2);
     --white-transparent-30: rgba(255, 255, 255, 0.3);
-    --black-overlay: rgba(0, 0, 0, 0.5);
+    --black-overlay: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
     
     /* Additional color tokens */
     --white: #ffffff;
@@ -310,6 +310,9 @@
     display: flex;
     align-items: center;
     color: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
 }
 
 .hero-overlay {
@@ -320,6 +323,7 @@
     bottom: 0;
     background: var(--black-overlay);
     z-index: 1;
+    border-radius: var(--radius-lg);
 }
 
 .hero-content {
