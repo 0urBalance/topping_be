@@ -786,7 +786,7 @@
 
 /* 🔧 Body Layout */
 .store-detail-body {
-    margin-left: 240px;
+    margin-left: var(--sidebar-width, 160px);
     padding-bottom: 80px;
     background-color: var(--light-bg);
     transition: margin-left var(--transition-normal);

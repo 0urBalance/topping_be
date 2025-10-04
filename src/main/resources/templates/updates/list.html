@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업데이트 - Topping</title>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T5T3CSLT');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google tag (gtag.js) -->
+    <script async src='https://www.googletagmanager.com/gtag/js?id=G-Y1ZSWHSQD0'></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Y1ZSWHSQD0');
+    </script>
+    
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/updates.css}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+<body class="updates-body">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src='https://www.googletagmanager.com/ns.html?id=GTM-T5T3CSLT'
+    height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <a href="#main-content" class="skip-link">메인 콘텐츠로 건너뛰기</a>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main id="main-content" class="main-content">
+        <div class="updates-container">
+            <!-- 페이지 헤더 -->
+            <section class="page-header">
+                <h1 class="page-title">📢 토핑 업데이트</h1>
+                <p class="page-subtitle">토핑 플랫폼의 최신 소식과 업데이트를 확인하세요</p>
+            </section>
+
+            <!-- 고정된 업데이트 (첫 페이지에서만 표시) -->
+            <section th:if="${pinnedUpdates != null and !pinnedUpdates.empty}" class="pinned-updates">
+                <h2 class="section-title">📌 중요 공지</h2>
+                <div class="pinned-grid">
+                    <div th:each="update : ${pinnedUpdates}" class="update-card pinned">
+                        <div class="update-header">
+                            <span class="update-type" th:text="${update.typeDisplayName}" th:classappend="${'type-' + update.type.name().toLowerCase()}">공지사항</span>
+                            <span class="update-priority" th:text="${update.priorityDisplayName}" th:classappend="${'priority-' + update.priority.name().toLowerCase()}">높음</span>
+                            <span class="pinned-badge">📌</span>
+                        </div>
+                        <h3 class="update-title">
+                            <a th:href="@{/updates/{id}(id=${update.id})}" th:text="${update.title}">업데이트 제목</a>
+                        </h3>
+                        <p class="update-summary" th:text="${update.summary}">업데이트 요약 내용...</p>
+                        <div class="update-meta">
+                            <span class="update-date" th:text="${#temporals.format(update.publishDate, 'yyyy.MM.dd')}">2024.01.15</span>
+                            <span class="update-author" th:text="${'작성자: ' + update.authorName}">작성자: 관리자</span>
+                            <span class="update-views" th:text="${'조회수 ' + update.viewCount}">조회수 123</span>
+                        </div>
+                        <div th:if="${update.tags != null and !update.tags.empty}" class="update-tags">
+                            <span th:each="tag : ${update.tags}" class="tag" th:text="${'#' + tag}">#태그</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 메인 컨텐츠 영역 -->
+            <div class="content-wrapper">
+                <!-- 업데이트 목록 -->
+                <section class="updates-section">
+                    <!-- 필터 및 검색 -->
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <select class="filter-select" onchange="filterByType(this.value)">
+                                <option value="">모든 타입</option>
+                                <option th:each="type : ${updateTypes}" 
+                                        th:value="${type.name()}" 
+                                        th:text="${type.displayName}"
+                                        th:selected="${selectedType != null and selectedType.name() == type.name()}">타입</option>
+                            </select>
+                            <select class="filter-select" onchange="filterByPriority(this.value)">
+                                <option value="">모든 우선순위</option>
+                                <option th:each="priority : ${updatePriorities}" 
+                                        th:value="${priority.name()}" 
+                                        th:text="${priority.displayName}"
+                                        th:selected="${selectedPriority != null and selectedPriority.name() == priority.name()}">우선순위</option>
+                            </select>
+                        </div>
+                        <div class="search-group">
+                            <form method="get" action="/updates" class="search-form">
+                                <input type="text" name="search" class="search-input" 
+                                       placeholder="업데이트 검색..." 
+                                       th:value="${searchKeyword}">
+                                <button type="submit" class="search-button">
+                                    <span class="material-symbols-outlined">search</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 업데이트 그리드 -->
+                    <div class="updates-grid">
+                        <div th:if="${updatePage.content.empty}" class="empty-state">
+                            <span class="material-symbols-outlined">article</span>
+                            <h3>업데이트가 없습니다</h3>
+                            <p>조건에 맞는 업데이트를 찾을 수 없습니다.</p>
+                        </div>
+                        
+                        <div th:each="update : ${updatePage.content}" class="update-card">
+                            <div th:if="${update.imageUrl != null and !update.imageUrl.empty}" class="update-image">
+                                <img th:src="${update.imageUrl}" th:alt="${update.title}" loading="lazy">
+                            </div>
+                            <div class="update-content">
+                                <div class="update-header">
+                                    <span class="update-type" th:text="${update.typeDisplayName}" th:classappend="${'type-' + update.type.name().toLowerCase()}">공지사항</span>
+                                    <span class="update-priority" th:text="${update.priorityDisplayName}" th:classappend="${'priority-' + update.priority.name().toLowerCase()}">보통</span>
+                                </div>
+                                <h3 class="update-title">
+                                    <a th:href="@{/updates/{id}(id=${update.id})}" th:text="${update.title}">업데이트 제목</a>
+                                </h3>
+                                <p class="update-summary" th:text="${update.summary}">업데이트 요약 내용...</p>
+                                <div class="update-meta">
+                                    <span class="update-date" th:text="${#temporals.format(update.publishDate, 'yyyy.MM.dd')}">2024.01.15</span>
+                                    <span class="update-views" th:text="${'조회수 ' + update.viewCount}">조회수 123</span>
+                                </div>
+                                <div th:if="${update.tags != null and !update.tags.empty}" class="update-tags">
+                                    <span th:each="tag : ${update.tags}" class="tag" th:text="${'#' + tag}">#태그</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 페이지네이션 -->
+                    <div th:if="${totalPages > 1}" class="pagination-wrapper">
+                        <nav class="pagination">
+                            <a th:if="${currentPage > 0}" 
+                               th:href="@{/updates(page=${currentPage - 1}, search=${searchKeyword}, type=${selectedType?.name()}, priority=${selectedPriority?.name()}, tag=${selectedTag})}" 
+                               class="pagination-link">
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </a>
+                            
+                            <span th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" th:if="${pageNum >= currentPage - 2 and pageNum <= currentPage + 2}">
+                                <a th:if="${pageNum != currentPage}" 
+                                   th:href="@{/updates(page=${pageNum}, search=${searchKeyword}, type=${selectedType?.name()}, priority=${selectedPriority?.name()}, tag=${selectedTag})}" 
+                                   class="pagination-link" th:text="${pageNum + 1}">1</a>
+                                <span th:if="${pageNum == currentPage}" class="pagination-current" th:text="${pageNum + 1}">1</span>
+                            </span>
+                            
+                            <a th:if="${currentPage < totalPages - 1}" 
+                               th:href="@{/updates(page=${currentPage + 1}, search=${searchKeyword}, type=${selectedType?.name()}, priority=${selectedPriority?.name()}, tag=${selectedTag})}" 
+                               class="pagination-link">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </a>
+                        </nav>
+                    </div>
+                </section>
+
+                <!-- 사이드바 -->
+                <aside class="sidebar">
+                    <!-- 최신 업데이트 -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">🆕 최신 업데이트</h3>
+                        <div class="sidebar-list">
+                            <div th:each="recent : ${recentUpdates}" class="sidebar-item">
+                                <a th:href="@{/updates/{id}(id=${recent.id})}" class="sidebar-link">
+                                    <span class="sidebar-item-type" th:text="${recent.typeDisplayName}">공지사항</span>
+                                    <span class="sidebar-item-title" th:text="${recent.title}">업데이트 제목</span>
+                                    <span class="sidebar-item-date" th:text="${#temporals.format(recent.publishDate, 'MM.dd')}">01.15</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 인기 업데이트 -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">🔥 인기 업데이트</h3>
+                        <div class="sidebar-list">
+                            <div th:each="popular : ${popularUpdates}" class="sidebar-item">
+                                <a th:href="@{/updates/{id}(id=${popular.id})}" class="sidebar-link">
+                                    <span class="sidebar-item-type" th:text="${popular.typeDisplayName}">공지사항</span>
+                                    <span class="sidebar-item-title" th:text="${popular.title}">업데이트 제목</span>
+                                    <span class="sidebar-item-views" th:text="${'조회 ' + popular.viewCount}">조회 123</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        function filterByType(type) {
+            const url = new URL(window.location);
+            if (type) {
+                url.searchParams.set('type', type);
+            } else {
+                url.searchParams.delete('type');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+
+        function filterByPriority(priority) {
+            const url = new URL(window.location);
+            if (priority) {
+                url.searchParams.set('priority', priority);
+            } else {
+                url.searchParams.delete('priority');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+    </script>
+</body>
+</html>

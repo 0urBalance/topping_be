@@ -2,7 +2,7 @@
 
 /* Main content wrapper - consistent with other pages */
 .main-content {
-    margin-left: 150px;
+    margin-left: var(--sidebar-width, 160px);
     padding: 20px 0 0 0;
     transition: margin-left 0.3s ease;
     min-height: calc(100vh - var(--navbar-height, 80px));

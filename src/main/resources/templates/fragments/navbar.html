@@ -119,8 +119,8 @@
                              alt="chat"
                              class="menu-icon"
                              data-default="/image/sidebar/icon_chat_default.png"
-                             data-pressed="/image/sidebar/icon_chat_filled.png"
-                             data-menu="/chat/rooms">
+                             data-pressed="/image/sidebar/icon_chat_pressed.png"
+                             data-menu="chat">
                         <!--<span class="material-symbols-outlined"> mark_unread_chat_alt</span>-->
 <!--                        <img src="image/sidebar/icon_collabo_default.png" alt="Home" class="menu-icon">-->
                     </a>
@@ -138,6 +138,12 @@
                              data-menu="mypage">
                     </a>
                 </li>
+<!--                <li class="menu-item">-->
+<!--                    <a href="/updates" class="menu-link"-->
+<!--                       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/updates') ? 'active' : ''}">-->
+<!--                        <span class="material-symbols-outlined">article</span>-->
+<!--                    </a>-->
+<!--                </li>-->
                 <li class="menu-item">
                     <a href="/signup/step/1" class="menu-link"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/signup') ? 'active' : ''}">

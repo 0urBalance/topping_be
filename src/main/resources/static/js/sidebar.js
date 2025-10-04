@@ -115,6 +115,8 @@ function isActiveMenuItem(icon) {
 function setActiveMenuImage() {
     const currentPath = window.location.pathname;
     const menuIcons = document.querySelectorAll('.menu-icon[data-menu]');
+    console.log('setActiveMenuImage called, currentPath:', currentPath);
+    console.log('Found menu icons:', menuIcons.length);
     
     // First, reset all icons to default state
     menuIcons.forEach(icon => {
@@ -135,6 +137,9 @@ function setActiveMenuImage() {
             case 'explore':
                 isActive = currentPath.startsWith('/explore');
                 break;
+            case 'chat':
+                isActive = currentPath.startsWith('/chat/rooms');
+                break;
             case 'mypage':
                 isActive = currentPath.startsWith('/mypage');
                 break;
@@ -145,6 +150,7 @@ function setActiveMenuImage() {
         
         // Set image state only for the active menu
         if (isActive) {
+            console.log('Setting active icon for menu:', menuType, icon.dataset.pressed);
             icon.src = icon.dataset.pressed;
             icon.classList.add('active-menu');
         }

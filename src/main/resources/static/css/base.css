@@ -74,7 +74,7 @@
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     
     /* Layout */
-    --sidebar-width: 150px;
+    --sidebar-width: 160px;
     --header-height: 60px;
     --footer-height: 200px;
     
@@ -84,7 +84,8 @@
     --transition-slow: 0.5s ease;
     
     /* Z-indexes */
-    --z-dropdown: 1000;
+    --z-sidebar: 1000;
+    --z-dropdown: 1010;
     --z-sticky: 1020;
     --z-fixed: 1030;
     --z-modal-backdrop: 1040;
@@ -136,9 +137,14 @@ body {
     top: 6px;
 }
 
+/* Navbar Fragment Fix - Neutralize empty div wrapper */
+div[th\\:replace*="navbar"] {
+    display: none !important;
+}
+
 /* Main Layout */
 .main-content {
-    /*margin-left: var(--sidebar-width);*/
+    margin-left: var(--sidebar-width);
     min-height: calc(100vh - var(--footer-height));
     padding: var(--spacing-xl);
     transition: margin-left var(--transition-normal);
@@ -146,7 +152,7 @@ body {
 
 /* Content Wrapper for Main Layout */
 .content-wrapper {
-    /*margin-left: var(--sidebar-width);*/
+    margin-left: var(--sidebar-width);
     min-height: calc(100vh - var(--footer-height));
     transition: margin-left var(--transition-normal);
 }

@@ -23,7 +23,7 @@ body {
     background-color: var(--light-bg);
     color: var(--dark-gray);
     line-height: 1.6;
-    margin-left: 150px; /* Account for sidebar width */
+    margin-left: 160px; /* Account for sidebar width */
     transition: margin-left 0.3s ease;
 }
 
