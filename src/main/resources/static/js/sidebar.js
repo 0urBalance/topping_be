@@ -58,17 +58,33 @@ function setupEventListeners() {
 // Image Press Effects Functions
 function initializeImagePressEffects() {
     const menuIcons = document.querySelectorAll('.menu-icon[data-default][data-pressed]');
+    console.log('🎨 Initializing image press effects for', menuIcons.length, 'icons');
     
-    menuIcons.forEach(icon => {
+    menuIcons.forEach((icon, index) => {
+        console.log(`🔧 Setting up icon ${index + 1}:`, icon.dataset.menu, {
+            default: icon.dataset.default,
+            pressed: icon.dataset.pressed,
+            hasDefault: !!icon.dataset.default,
+            hasPressed: !!icon.dataset.pressed
+        });
+        
         // Add press effect event listeners
         addImagePressListeners(icon);
     });
     
     // Set initial active state for current page
+    console.log('🎯 Setting initial active state');
     setActiveMenuImage();
 }
 
 function addImagePressListeners(icon) {
+    if (!icon) {
+        console.error('❌ addImagePressListeners: icon is null or undefined');
+        return;
+    }
+    
+    console.log('🎯 Adding press listeners to menu:', icon.dataset.menu);
+    
     // Mouse events
     icon.addEventListener('mousedown', () => setImagePressed(icon, true));
     icon.addEventListener('mouseup', () => setImagePressed(icon, false));
@@ -90,12 +106,23 @@ function addImagePressListeners(icon) {
 }
 
 function setImagePressed(icon, pressed) {
+    if (!icon) {
+        console.error('❌ setImagePressed: icon is null or undefined');
+        return;
+    }
+    
     if (pressed) {
-        icon.src = icon.dataset.pressed;
-        icon.classList.add('pressed');
+        if (icon.dataset.pressed) {
+            icon.src = icon.dataset.pressed;
+            icon.classList.add('pressed');
+            console.log('👆 Icon pressed:', icon.dataset.menu, icon.src);
+        } else {
+            console.error('❌ Missing pressed image data for icon:', icon.dataset.menu);
+        }
     } else {
         // Remove pressed class immediately
         icon.classList.remove('pressed');
+        console.log('👆 Icon released:', icon.dataset.menu);
         
         // Reset to current page state after a short delay
         setTimeout(() => {
@@ -115,13 +142,15 @@ function isActiveMenuItem(icon) {
 function setActiveMenuImage() {
     const currentPath = window.location.pathname;
     const menuIcons = document.querySelectorAll('.menu-icon[data-menu]');
-    console.log('setActiveMenuImage called, currentPath:', currentPath);
-    console.log('Found menu icons:', menuIcons.length);
+    console.log('🔍 setActiveMenuImage called, currentPath:', currentPath);
+    console.log('📊 Found menu icons:', menuIcons.length);
     
     // First, reset all icons to default state
     menuIcons.forEach(icon => {
-        icon.src = icon.dataset.default;
-        icon.classList.remove('active-menu');
+        if (icon.dataset.default) {
+            icon.src = icon.dataset.default;
+            icon.classList.remove('active-menu');
+        }
     });
     
     // Then, find and activate only the correct menu item
@@ -138,7 +167,7 @@ function setActiveMenuImage() {
                 isActive = currentPath.startsWith('/explore');
                 break;
             case 'chat':
-                isActive = currentPath.startsWith('/chat/rooms');
+                isActive = currentPath.startsWith('/chat');
                 break;
             case 'mypage':
                 isActive = currentPath.startsWith('/mypage');
@@ -146,13 +175,21 @@ function setActiveMenuImage() {
             case 'signup':
                 isActive = currentPath.startsWith('/signup');
                 break;
+            default:
+                console.warn('⚠️ Unknown menu type:', menuType);
         }
+        
+        console.log('🔍 Menu check:', menuType, 'isActive:', isActive, 'path:', currentPath);
         
         // Set image state only for the active menu
         if (isActive) {
-            console.log('Setting active icon for menu:', menuType, icon.dataset.pressed);
-            icon.src = icon.dataset.pressed;
-            icon.classList.add('active-menu');
+            if (icon.dataset.pressed) {
+                console.log('✅ Setting active icon for menu:', menuType, 'pressed image:', icon.dataset.pressed);
+                icon.src = icon.dataset.pressed;
+                icon.classList.add('active-menu');
+            } else {
+                console.error('❌ Missing pressed image data for menu:', menuType);
+            }
         }
     });
 }

@@ -113,7 +113,7 @@
                 </li>
                 <li class="menu-item">
                     <a href="/chat/rooms" class="menu-link"
-                       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/chat/rooms') ? 'active' : ''}">
+                       th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/chat') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined"> chat </span>-->
                         <img th:src="@{/image/sidebar/icon_chat_default.png}"
                              alt="chat"
