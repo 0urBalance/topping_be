@@ -1,0 +1,136 @@
+/* Collaboration Stores Modal Styles */
+
+/* Grid layout for collaboration stores */
+.collaboration-stores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) 0;
+}
+
+/* Individual store card */
+.collaboration-store-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+
+.collaboration-store-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+/* Store card image */
+.store-card-image {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+    background-color: var(--gray-100);
+}
+
+.store-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+}
+
+.collaboration-store-card:hover .store-card-image img {
+    transform: scale(1.05);
+}
+
+/* Store card info */
+.store-card-info {
+    padding: var(--spacing-lg);
+}
+
+.store-card-info h4 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-sm) 0;
+    line-height: 1.4;
+}
+
+.store-category {
+    font-size: var(--font-size-sm);
+    color: var(--primary-color);
+    font-weight: 500;
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.store-address {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Empty and error states */
+.empty-state,
+.error-state {
+    text-align: center;
+    padding: var(--spacing-2xl);
+    color: var(--gray-600);
+}
+
+.empty-state p,
+.error-state p {
+    font-size: var(--font-size-base);
+    margin: 0;
+}
+
+.error-state {
+    color: var(--error-color);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .collaboration-stores-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .store-card-image {
+        height: 140px;
+    }
+    
+    .store-card-info {
+        padding: var(--spacing-md);
+    }
+    
+    .store-card-info h4 {
+        font-size: var(--font-size-base);
+    }
+}
+
+/* Loading state */
+.loading-spinner {
+    text-align: center;
+    padding: var(--spacing-2xl);
+    color: var(--gray-600);
+}
+
+.loading-spinner .spinner {
+    border: 3px solid var(--gray-200);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--spacing-md) auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

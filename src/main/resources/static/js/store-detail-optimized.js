@@ -73,7 +73,7 @@ class StoreDetailManager {
             // Collaboration badge click - handle clickable collaboration badge
             else if (target.closest('.collaboration-badge-clickable')) {
                 e.preventDefault();
-                this.handleCollaborationRequest(target.closest('.collaboration-badge-clickable'));
+                this.openCollaborationStoresModal(target.closest('.collaboration-badge-clickable'));
             }
             // Collaboration list toggle (for non-clickable collaboration badges)
             else if (target.closest('.collab-badge:not(.collaboration-badge-clickable)')) {
@@ -342,6 +342,85 @@ class StoreDetailManager {
         }
     }
 
+    async openCollaborationStoresModal(element) {
+        const storeId = element.dataset.storeId;
+        if (!storeId) {
+            this.showToast('스토어 정보를 찾을 수 없습니다.', 'error');
+            return;
+        }
+
+        const modal = document.getElementById('collaborationStoresModal');
+        if (!modal) {
+            this.showToast('모달을 찾을 수 없습니다.', 'error');
+            return;
+        }
+
+        // Show modal
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+
+        // Load collaboration stores data
+        try {
+            const response = await fetch(`/stores/api/${storeId}/collaborating-stores`);
+            const data = await response.json();
+
+            if (data.code === 200) {
+                this.renderCollaborationStores(data.data);
+            } else {
+                this.renderCollaborationStoresError(data.message || '콜라보 가게 정보를 불러오는데 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Failed to load collaboration stores:', error);
+            this.renderCollaborationStoresError('네트워크 오류가 발생했습니다.');
+        }
+    }
+
+    renderCollaborationStores(stores) {
+        const content = document.getElementById('collaborationStoresContent');
+        if (!content) return;
+
+        if (!stores || stores.length === 0) {
+            content.innerHTML = `
+                <div class="empty-state">
+                    <p>아직 콜라보하고 있는 가게가 없습니다.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const storesHtml = stores.map(store => `
+            <div class="collaboration-store-card" onclick="window.location.href='/stores/${store.uuid}'">
+                <div class="store-card-image">
+                    <img src="${store.mainImagePath || '/image/topping_M_text.png'}" 
+                         alt="${store.name}" 
+                         onerror="this.src='/image/topping_M_text.png'">
+                </div>
+                <div class="store-card-info">
+                    <h4>${store.name}</h4>
+                    <p class="store-category">${store.category || '카테고리 미설정'}</p>
+                    <p class="store-address">${store.address || ''}</p>
+                </div>
+            </div>
+        `).join('');
+
+        content.innerHTML = `
+            <div class="collaboration-stores-grid">
+                ${storesHtml}
+            </div>
+        `;
+    }
+
+    renderCollaborationStoresError(message) {
+        const content = document.getElementById('collaborationStoresContent');
+        if (!content) return;
+
+        content.innerHTML = `
+            <div class="error-state">
+                <p>${message}</p>
+            </div>
+        `;
+    }
+
     toggleCollaborationList() {
         const collabInfo = document.querySelector('.collab-info');
         const collabList = document.getElementById('collab-list');
@@ -477,6 +556,13 @@ window.openCollaborationModal = () => storeDetailManager.openCollaborationModal(
 window.toggleCollaborationList = () => storeDetailManager.toggleCollaborationList();
 window.toggleCollabList = () => storeDetailManager.toggleCollaborationList(); // Alias for template onclick
 window.openProductDetail = (uuid) => storeDetailManager.navigateToProduct(uuid);
+window.closeCollaborationStoresModal = () => {
+    const modal = document.getElementById('collaborationStoresModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+};
 
 // Export for module use
 if (typeof module !== 'undefined' && module.exports) {

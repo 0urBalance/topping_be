@@ -134,5 +134,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Collaboration Stores Modal Fragment -->
+    <div th:fragment="collaboration-stores-modal">
+        <div id="collaborationStoresModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">콜라보하고 있는 가게</h2>
+                    <span class="modal-close" onclick="closeCollaborationStoresModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="collaborationStoresContent">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <span>콜라보 가게 정보를 불러오는 중...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

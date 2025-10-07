@@ -375,6 +375,48 @@ public class StoreController {
         return "store/setup-images";
     }
 
+    @GetMapping("/api/{storeUuid}/collaborating-stores")
+    @ResponseBody
+    public ApiResponseData<List<Map<String, Object>>> getCollaboratingStores(@PathVariable UUID storeUuid) {
+        try {
+            Optional<Store> storeOpt = storeService.getStoreById(storeUuid);
+            if (storeOpt.isEmpty()) {
+                return ApiResponseData.failure(404, "가게를 찾을 수 없습니다.");
+            }
+
+            Store store = storeOpt.get();
+            
+            // Get collaborating stores (same logic as in detail method)
+            List<Collaboration> acceptedCollaborations = collaborationRepository.findByStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
+            List<Store> collaboratingStores = acceptedCollaborations.stream()
+                .map(collaboration -> collaboration.getInitiatorProduct() != null ? collaboration.getInitiatorProduct().getStore() : null)
+                .filter(collaboratingStore -> collaboratingStore != null && !((Store)collaboratingStore).getUuid().equals(store.getUuid()))
+                .map(collaboratingStore -> (Store)collaboratingStore)
+                .distinct()
+                .toList();
+
+            // Convert to API response format
+            List<Map<String, Object>> storeData = collaboratingStores.stream()
+                .map(collaboratingStore -> {
+                    Map<String, Object> storeMap = new HashMap<>();
+                    storeMap.put("uuid", collaboratingStore.getUuid().toString());
+                    storeMap.put("name", collaboratingStore.getName());
+                    storeMap.put("category", collaboratingStore.getCategory() != null ? collaboratingStore.getCategory().getDisplayName() : null);
+                    storeMap.put("address", collaboratingStore.getAddress());
+                    storeMap.put("mainImagePath", collaboratingStore.getMainImage() != null ? 
+                        collaboratingStore.getMainImage().getImagePath() : 
+                        (collaboratingStore.getMainImageUrl() != null ? collaboratingStore.getMainImageUrl() : null));
+                    return storeMap;
+                })
+                .toList();
+
+            return ApiResponseData.success(storeData);
+        } catch (Exception e) {
+            log.error("Failed to get collaborating stores for store {}", storeUuid, e);
+            return ApiResponseData.failure(500, "콜라보 가게 정보를 불러오는데 실패했습니다.");
+        }
+    }
+
     @PostMapping("/setup-images/complete")
     public String completeImageSetup(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                    RedirectAttributes redirectAttributes) {
