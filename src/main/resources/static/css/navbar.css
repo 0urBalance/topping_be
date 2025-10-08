@@ -117,7 +117,6 @@
 }
 
 .menu-link.active {
-    background-color: var(--active-bg);
     color: var(--active-color);
 }
 
@@ -153,7 +152,6 @@
 }
 
 .home-link.active {
-    background-color: var(--active-bg);
     color: var(--active-color);
 }
 
@@ -184,7 +182,6 @@
 }
 
 .signup-link.active {
-    background-color: var(--active-bg);
     color: var(--active-color);
 }
 
@@ -508,6 +505,11 @@ body {
     .hamburger-line {
         transition: none;
     }
+}
+
+/* Menu icons - managed by JavaScript */
+.menu-icon {
+    transition: all 0.2s ease;
 }
 
 /* Print styles */

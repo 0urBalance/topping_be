@@ -11,8 +11,11 @@ function initializeSidebar() {
     // Handle active menu item highlighting - DISABLED: Let Thymeleaf handle active classes
     // highlightActiveMenuItem();
     
-    // Initialize image press effects
-    initializeImagePressEffects();
+    // Press effects disabled to prevent conflicts with updateMenuIcons
+    // initializeImagePressEffects();
+    
+    // Update menu icons based on current page
+    updateMenuIcons();
     
     // Handle responsive behavior
     handleResponsiveLayout();
@@ -72,9 +75,8 @@ function initializeImagePressEffects() {
         addImagePressListeners(icon);
     });
     
-    // Set initial active state for current page
-    console.log('🎯 Setting initial active state');
-    setActiveMenuImage();
+    // Active state is now handled by Thymeleaf server-side
+    console.log('🎯 Active state handled by Thymeleaf');
 }
 
 function addImagePressListeners(icon) {
@@ -124,10 +126,8 @@ function setImagePressed(icon, pressed) {
         icon.classList.remove('pressed');
         console.log('👆 Icon released:', icon.dataset.menu);
         
-        // Reset to current page state after a short delay
-        setTimeout(() => {
-            setActiveMenuImage(); // This will set the correct image based on current page
-        }, 100);
+        // Image state is now managed by Thymeleaf server-side
+        console.log('👆 Image state managed by Thymeleaf');
     }
 }
 
@@ -139,66 +139,23 @@ function isActiveMenuItem(icon) {
     return link && link.classList.contains('active');
 }
 
-function setActiveMenuImage() {
-    const currentPath = window.location.pathname;
-    const menuIcons = document.querySelectorAll('.menu-icon[data-menu]');
-    console.log('🔍 setActiveMenuImage called, currentPath:', currentPath);
-    console.log('📊 Found menu icons:', menuIcons.length);
-    
-    // First, reset all icons to default state
-    menuIcons.forEach(icon => {
-        if (icon.dataset.default) {
-            icon.src = icon.dataset.default;
-            icon.classList.remove('active-menu');
-        }
-    });
-    
-    // Then, find and activate only the correct menu item
-    menuIcons.forEach(icon => {
-        const menuType = icon.dataset.menu;
-        let isActive = false;
-        
-        // Determine if this menu should be active based on current path
-        switch (menuType) {
-            case 'home':
-                isActive = currentPath === '/' || currentPath === '/home';
-                break;
-            case 'explore':
-                isActive = currentPath.startsWith('/explore');
-                break;
-            case 'chat':
-                isActive = currentPath.startsWith('/chat');
-                break;
-            case 'mypage':
-                isActive = currentPath.startsWith('/mypage');
-                break;
-            case 'signup':
-                isActive = currentPath.startsWith('/signup');
-                break;
-            default:
-                console.warn('⚠️ Unknown menu type:', menuType);
-        }
-        
-        console.log('🔍 Menu check:', menuType, 'isActive:', isActive, 'path:', currentPath);
-        
-        // Set image state only for the active menu
-        if (isActive) {
-            if (icon.dataset.pressed) {
-                console.log('✅ Setting active icon for menu:', menuType, 'pressed image:', icon.dataset.pressed);
-                icon.src = icon.dataset.pressed;
-                icon.classList.add('active-menu');
-            } else {
-                console.error('❌ Missing pressed image data for menu:', menuType);
-            }
-        }
-    });
-}
 
 function resetAllMenuImages() {
-    const menuIcons = document.querySelectorAll('.menu-icon[data-default]');
-    menuIcons.forEach(icon => {
-        icon.src = icon.dataset.default;
-        icon.classList.remove('pressed', 'active-menu');
+    console.log('🔄 Resetting all menu images to default state');
+    const menuConfigs = {
+        'menu-home': '/image/sidebar/icon_home_default.png',
+        'menu-explore': '/image/sidebar/icon_collabo_default.png',
+        'menu-chat': '/image/sidebar/icon_chat_default.png',
+        'menu-mypage': '/image/sidebar/icon_mypage_default.png',
+        'menu-signup': '/image/sidebar/icon_join_default.png'
+    };
+    
+    Object.entries(menuConfigs).forEach(([className, defaultSrc]) => {
+        const img = document.querySelector(`.${className} .menu-icon`);
+        if (img) {
+            img.src = defaultSrc;
+            img.classList.remove('pressed', 'active-menu');
+        }
     });
 }
 
@@ -318,8 +275,7 @@ function highlightActiveMenuItem() {
         }
     }
     
-    // Update menu images after highlighting active items - DISABLED
-    // setActiveMenuImage();
+    // Menu image state is now handled by Thymeleaf server-side
 }
 
 function handleResponsiveLayout() {
@@ -370,8 +326,7 @@ window.sidebarUtils = {
                 link.classList.add('active');
             }
         });
-        // Update images after setting active menu item - Let Thymeleaf handle active classes
-        // setActiveMenuImage();
+        // Menu image state is handled by Thymeleaf server-side
     },
     
     // Method to add loading state to menu item
@@ -390,14 +345,113 @@ window.sidebarUtils = {
     
     // Method to manually refresh menu image states
     refreshMenuImages: function() {
-        setActiveMenuImage();
+        updateMenuIcons();
     },
     
     // Method to reset all menu images to default state
     resetMenuImages: function() {
         resetAllMenuImages();
+    },
+    
+    // Method to update menu icons
+    updateMenuIcons: function() {
+        updateMenuIcons();
     }
 };
+
+// Dynamic menu icon switching function
+function updateMenuIcons() {
+    const currentPath = window.location.pathname;
+    console.log('🔄 === UPDATING MENU ICONS ===');
+    console.log('📍 Current path:', currentPath);
+    
+    const menuIcons = {
+        'menu-home': {
+            paths: ['/', '/home'],
+            default: '/image/sidebar/icon_home_default.png',
+            pressed: '/image/sidebar/icon_home_pressed.png'
+        },
+        'menu-explore': {
+            paths: ['/explore'],
+            default: '/image/sidebar/icon_collabo_default.png',
+            pressed: '/image/sidebar/icon_collabo_pressed.png'
+        },
+        'menu-chat': {
+            paths: ['/chat/rooms', '/chat'],
+            default: '/image/sidebar/icon_chat_default.png',
+            pressed: '/image/sidebar/icon_chat_pressed.png'
+        },
+        'menu-mypage': {
+            paths: ['/mypage'],
+            default: '/image/sidebar/icon_mypage_default.png',
+            pressed: '/image/sidebar/icon_mypage_pressed.png'
+        },
+        'menu-signup': {
+            paths: ['/signup'],
+            default: '/image/sidebar/icon_join_default.png',
+            pressed: '/image/sidebar/icon_join_pressed.png'
+        }
+    };
+    
+    // Update each menu icon
+    Object.entries(menuIcons).forEach(([className, config]) => {
+        console.log(`\n🔍 Checking ${className}:`);
+        console.log(`   Configured paths: [${config.paths.join(', ')}]`);
+        
+        const link = document.querySelector(`.${className}`);
+        const img = link?.querySelector('.menu-icon');
+        
+        if (!link) {
+            console.error(`❌ Link not found for ${className}`);
+            return;
+        }
+        
+        if (!img) {
+            console.error(`❌ Image not found for ${className}`);
+            return;
+        }
+        
+        // Check each path for matching
+        let isActive = false;
+        let matchedPath = null;
+        
+        for (const path of config.paths) {
+            let matches = false;
+            if (path === '/') {
+                matches = currentPath === path;
+            } else {
+                matches = currentPath.startsWith(path);
+            }
+            
+            console.log(`   Testing "${path}" -> ${matches ? '✅ MATCH' : '❌ no match'}`);
+            
+            if (matches) {
+                isActive = true;
+                matchedPath = path;
+                break;
+            }
+        }
+        
+        const newSrc = isActive ? config.pressed : config.default;
+        const oldSrc = img.src;
+        
+        console.log(`   Result: ${isActive ? '🟢 ACTIVE' : '⚪ inactive'} (matched: ${matchedPath})`);
+        console.log(`   Image: ${oldSrc} -> ${newSrc}`);
+        
+        img.src = newSrc;
+        
+        // Verify the change
+        setTimeout(() => {
+            if (img.src.includes(isActive ? 'pressed' : 'default')) {
+                console.log(`   ✅ ${className} image updated successfully`);
+            } else {
+                console.error(`   ❌ ${className} image update failed!`);
+            }
+        }, 10);
+    });
+    
+    console.log('🔄 === MENU ICONS UPDATE COMPLETE ===\n');
+}
 
 // Auto-close sidebar when clicking outside on mobile
 document.addEventListener('click', function(e) {

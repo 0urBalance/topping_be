@@ -87,3 +87,5 @@ design/
 /src/main/resources/static/image/stores/**
 /src/main/resources/static/image/products/**
 error-handling-test.html
+AGENTS.md
+docs/domains/layers/
