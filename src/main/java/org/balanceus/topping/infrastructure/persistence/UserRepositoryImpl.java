@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.UserRepository;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;

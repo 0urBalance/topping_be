@@ -6,7 +6,7 @@ import org.balanceus.topping.application.service.UserService;
 import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.SggCodeRepository;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.balanceus.topping.presentation.dto.SignupSessionData;
 import org.balanceus.topping.presentation.dto.SignupStepRequest;
 import org.springframework.beans.factory.annotation.Autowired;

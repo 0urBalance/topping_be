@@ -1,6 +1,7 @@
 package org.balanceus.topping.presentation.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.balanceus.topping.application.dto.UpdateResponse;
 import org.balanceus.topping.application.dto.UpdateSummaryDto;
 import org.balanceus.topping.application.service.UpdateService;
 import org.balanceus.topping.domain.model.Update;
@@ -42,7 +43,7 @@ public class UpdateController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("isPinned").descending()
                 .and(Sort.by("publishDate").descending()));
         
-        Page<Update> updatePage;
+        Page<UpdateSummaryDto> updatePage;
         
         // 검색 조건에 따른 조회
         if (search != null && !search.trim().isEmpty()) {
@@ -71,35 +72,23 @@ public class UpdateController {
             updatePage = updateService.getPublishedUpdates(pageable);
         }
         
-        // Update를 UpdateSummaryDto로 변환
-        Page<UpdateSummaryDto> updateSummaryPage = updatePage.map(UpdateSummaryDto::from);
-        
         // 고정된 업데이트 조회 (첫 페이지에서만)
         List<UpdateSummaryDto> pinnedUpdates = null;
         if (page == 0 && (search == null || search.trim().isEmpty()) && 
             (tag == null || tag.trim().isEmpty()) && 
             (type == null || type.trim().isEmpty()) && 
             (priority == null || priority.trim().isEmpty())) {
-            pinnedUpdates = updateService.getPinnedUpdates()
-                .stream()
-                .map(UpdateSummaryDto::from)
-                .collect(Collectors.toList());
+            pinnedUpdates = updateService.getPinnedUpdates();
         }
         
         // 최신 업데이트 5개 (사이드바용)
-        List<UpdateSummaryDto> recentUpdates = updateService.getRecentUpdates()
-            .stream()
-            .map(UpdateSummaryDto::from)
-            .collect(Collectors.toList());
+        List<UpdateSummaryDto> recentUpdates = updateService.getRecentUpdates();
         
         // 인기 업데이트 10개 (사이드바용)
-        List<UpdateSummaryDto> popularUpdates = updateService.getPopularUpdates()
-            .stream()
-            .map(UpdateSummaryDto::from)
-            .collect(Collectors.toList());
+        List<UpdateSummaryDto> popularUpdates = updateService.getPopularUpdates();
         
         // 모델에 데이터 추가
-        model.addAttribute("updatePage", updateSummaryPage);
+        model.addAttribute("updatePage", updatePage);
         model.addAttribute("pinnedUpdates", pinnedUpdates);
         model.addAttribute("recentUpdates", recentUpdates);
         model.addAttribute("popularUpdates", popularUpdates);
@@ -108,8 +97,8 @@ public class UpdateController {
         
         // 페이징 정보
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", updateSummaryPage.getTotalPages());
-        model.addAttribute("totalElements", updateSummaryPage.getTotalElements());
+        model.addAttribute("totalPages", updatePage.getTotalPages());
+        model.addAttribute("totalElements", updatePage.getTotalElements());
         
         return "updates/list";
     }
@@ -120,7 +109,7 @@ public class UpdateController {
     @GetMapping("/{id}")
     public String updateDetail(@PathVariable UUID id, Model model) {
         
-        Update update = updateService.getUpdateById(id);
+        UpdateResponse update = updateService.viewPublishedUpdate(id);
         
         // 관련 업데이트들 (같은 타입)
         List<UpdateSummaryDto> relatedUpdates = updateService.getUpdatesByType(
@@ -128,14 +117,10 @@ public class UpdateController {
             .getContent()
             .stream()
             .filter(u -> !u.getId().equals(id)) // 현재 업데이트 제외
-            .map(UpdateSummaryDto::from)
             .collect(Collectors.toList());
         
         // 최신 업데이트 5개 (사이드바용)
-        List<UpdateSummaryDto> recentUpdates = updateService.getRecentUpdates()
-            .stream()
-            .map(UpdateSummaryDto::from)
-            .collect(Collectors.toList());
+        List<UpdateSummaryDto> recentUpdates = updateService.getRecentUpdates();
         
         model.addAttribute("update", update);
         model.addAttribute("relatedUpdates", relatedUpdates);

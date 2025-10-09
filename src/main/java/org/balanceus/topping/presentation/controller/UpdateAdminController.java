@@ -21,7 +21,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Controller
@@ -43,10 +42,7 @@ public class UpdateAdminController {
                                   @RequestParam(required = false) String status) {
         
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Update> updatePage = updateService.getAllUpdates(pageable);
-        
-        // Update를 UpdateResponse로 변환
-        Page<UpdateResponse> updateResponsePage = updatePage.map(UpdateResponse::from);
+        Page<UpdateResponse> updateResponsePage = updateService.getAllUpdates(pageable);
         
         // 통계 정보
         long totalCount = updateService.getTotalUpdatesCount();
@@ -92,19 +88,7 @@ public class UpdateAdminController {
         }
         
         try {
-            Update update = Update.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .type(request.getType())
-                .priority(request.getPriority())
-                .isActive(request.isActive())
-                .isPinned(request.isPinned())
-                .publishDate(request.getPublishDate() != null ? request.getPublishDate() : LocalDateTime.now())
-                .imageUrl(request.getImageUrl())
-                .tags(request.getTags())
-                .build();
-            
-            updateService.createUpdate(update, userDetails.getUser().getUuid());
+            updateService.createUpdate(request, userDetails.getUser().getUuid());
             
             return "redirect:/admin/updates?success=created";
         } catch (Exception e) {
@@ -121,7 +105,7 @@ public class UpdateAdminController {
     @GetMapping("/{id}/edit")
     public String editUpdateForm(@PathVariable UUID id, Model model) {
         try {
-            Update update = updateService.getUpdateById(id);
+            UpdateResponse update = updateService.getUpdateForAdmin(id);
             
             UpdateUpdateRequest request = new UpdateUpdateRequest();
             request.setTitle(update.getTitle());
@@ -156,7 +140,7 @@ public class UpdateAdminController {
         
         if (bindingResult.hasErrors()) {
             try {
-                Update update = updateService.getUpdateById(id);
+                UpdateResponse update = updateService.getUpdateForAdmin(id);
                 model.addAttribute("update", update);
                 model.addAttribute("updateTypes", Update.UpdateType.values());
                 model.addAttribute("updatePriorities", Update.UpdatePriority.values());
@@ -167,25 +151,13 @@ public class UpdateAdminController {
         }
         
         try {
-            Update updateData = Update.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .type(request.getType())
-                .priority(request.getPriority())
-                .isActive(request.isActive())
-                .isPinned(request.isPinned())
-                .publishDate(request.getPublishDate())
-                .imageUrl(request.getImageUrl())
-                .tags(request.getTags())
-                .build();
-            
-            updateService.updateUpdate(id, updateData);
+            updateService.updateUpdate(id, request);
             
             return "redirect:/admin/updates?success=updated";
         } catch (Exception e) {
             model.addAttribute("error", "업데이트 수정 중 오류가 발생했습니다: " + e.getMessage());
             try {
-                Update update = updateService.getUpdateById(id);
+                UpdateResponse update = updateService.getUpdateForAdmin(id);
                 model.addAttribute("update", update);
                 model.addAttribute("updateTypes", Update.UpdateType.values());
                 model.addAttribute("updatePriorities", Update.UpdatePriority.values());
@@ -218,8 +190,8 @@ public class UpdateAdminController {
     @ResponseBody
     public ResponseEntity<ApiResponseData<UpdateResponse>> toggleUpdateStatus(@PathVariable UUID id) {
         try {
-            Update update = updateService.toggleUpdateStatus(id);
-            return ResponseEntity.ok(ApiResponseData.success(UpdateResponse.from(update)));
+            UpdateResponse update = updateService.toggleUpdateStatus(id);
+            return ResponseEntity.ok(ApiResponseData.success(update));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                 .body(ApiResponseData.failure(400, "상태 변경에 실패했습니다: " + e.getMessage()));
@@ -233,8 +205,8 @@ public class UpdateAdminController {
     @ResponseBody
     public ResponseEntity<ApiResponseData<UpdateResponse>> toggleUpdatePin(@PathVariable UUID id) {
         try {
-            Update update = updateService.toggleUpdatePin(id);
-            return ResponseEntity.ok(ApiResponseData.success(UpdateResponse.from(update)));
+            UpdateResponse update = updateService.toggleUpdatePin(id);
+            return ResponseEntity.ok(ApiResponseData.success(update));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                 .body(ApiResponseData.failure(400, "고정 상태 변경에 실패했습니다: " + e.getMessage()));
@@ -248,8 +220,8 @@ public class UpdateAdminController {
     @ResponseBody
     public ResponseEntity<ApiResponseData<UpdateResponse>> getUpdateDetails(@PathVariable UUID id) {
         try {
-            Update update = updateService.getUpdateById(id);
-            return ResponseEntity.ok(ApiResponseData.success(UpdateResponse.from(update)));
+            UpdateResponse update = updateService.getUpdateForAdmin(id);
+            return ResponseEntity.ok(ApiResponseData.success(update));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                 .body(ApiResponseData.failure(404, "업데이트를 찾을 수 없습니다: " + e.getMessage()));

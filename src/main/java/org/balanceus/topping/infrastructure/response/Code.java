@@ -38,6 +38,7 @@ public enum Code {
 	 */
 	NOT_FOUND(HttpStatus.NOT_FOUND, 404, "요청한 리소스를 찾을 수 없습니다."),
 	FORBIDDEN(HttpStatus.FORBIDDEN, 403, "접근 권한이 없습니다."),
+	VALIDATION_ERROR(HttpStatus.BAD_REQUEST, 400, "입력하신 정보를 다시 확인해주세요."),
 
 	;
 

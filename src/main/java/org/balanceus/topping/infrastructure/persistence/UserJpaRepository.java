@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.balanceus.topping.domain.model.User;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -8,7 +8,7 @@ import org.balanceus.topping.domain.model.ChatRoom;
 import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;

@@ -59,7 +59,7 @@ public class Store {
     private String businessHours;
 
     @Column(nullable = false)
-    @Convert(converter = org.balanceus.topping.infrastructure.converter.StoreCategoryConverter.class)
+    @Convert(converter = StoreCategoryConverter.class)
     private StoreCategory category;
 
     private String mainImageUrl;

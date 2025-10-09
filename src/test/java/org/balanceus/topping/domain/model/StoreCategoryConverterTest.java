@@ -1,9 +1,8 @@
-package org.balanceus.topping.infrastructure.converter;
+package org.balanceus.topping.domain.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.balanceus.topping.domain.model.StoreCategory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ class StoreCategoryConverterTest {
         assertEquals("BOOKSTORE", converter.convertToDatabaseColumn(StoreCategory.BOOKSTORE));
         assertEquals("GYM", converter.convertToDatabaseColumn(StoreCategory.GYM));
         assertEquals("OTHER", converter.convertToDatabaseColumn(StoreCategory.OTHER));
-        
+
         // Test null
         assertNull(converter.convertToDatabaseColumn(null));
     }

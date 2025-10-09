@@ -4,7 +4,7 @@ import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Notification;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.UserRepository;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;

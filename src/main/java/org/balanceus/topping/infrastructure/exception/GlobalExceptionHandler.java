@@ -2,7 +2,10 @@ package org.balanceus.topping.infrastructure.exception;
 
 import static org.springframework.http.HttpStatus.*;
 
+import org.balanceus.topping.application.exception.ApplicationErrorCode;
+import org.balanceus.topping.application.exception.ApplicationException;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
+import org.balanceus.topping.infrastructure.response.Code;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,6 +117,13 @@ public class GlobalExceptionHandler {
 
 	// 커스텀 에러처리 가능
 
+	@ExceptionHandler(ApplicationException.class)
+	public ResponseEntity<ApiResponseData<String>> handleApplicationException(ApplicationException e) {
+		Code mappedCode = mapToResponseCode(e.getErrorCode());
+		return ResponseEntity.status(mappedCode.getStatus())
+			.body(ApiResponseData.failure(mappedCode.getCode(), e.getMessage()));
+	}
+
 	@ExceptionHandler(BaseException.class)
 	public ResponseEntity<ApiResponseData<String>> handleException(BaseException e) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -135,5 +145,15 @@ public class GlobalExceptionHandler {
 
 		String errorMessages = sb.toString();
 		return ResponseEntity.status(BAD_REQUEST).body(ApiResponseData.failure(0, errorMessages));
+	}
+
+	private Code mapToResponseCode(ApplicationErrorCode errorCode) {
+		return switch (errorCode) {
+			case NOT_FOUND -> Code.NOT_FOUND;
+			case ALREADY_EXISTS -> Code.ALREADY_EXISTS;
+			case FORBIDDEN -> Code.FORBIDDEN;
+			case VALIDATION_ERROR -> Code.VALIDATION_ERROR;
+			case UNEXPECTED_ERROR -> Code.INTERNAL_SERVER_ERROR;
+		};
 	}
 }

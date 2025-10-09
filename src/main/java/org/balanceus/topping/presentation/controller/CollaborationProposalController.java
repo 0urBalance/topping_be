@@ -20,7 +20,7 @@ import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.response.Code;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.balanceus.topping.infrastructure.service.NotificationService;
 import org.balanceus.topping.application.service.ChatService;
 import org.balanceus.topping.application.service.CollaborationService;

@@ -3,7 +3,6 @@ package org.balanceus.topping.domain.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.balanceus.topping.infrastructure.security.Role;
 import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.CascadeType;

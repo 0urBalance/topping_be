@@ -1,6 +1,6 @@
 package org.balanceus.topping.presentation.dto;
 
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

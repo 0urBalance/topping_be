@@ -8,7 +8,7 @@ import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.SggCodeRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
