@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.balanceus.topping.application.dto.StoreForm;
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreCategory;
@@ -26,35 +27,34 @@ public class StoreService {
     private final UserRepository userRepository;
 
     public Store registerStore(StoreRegistrationRequest request, UUID userUuid) {
-        Optional<User> userOptional = userRepository.findById(userUuid);
-        if (userOptional.isEmpty()) {
-            throw new ApplicationException(ApplicationErrorCode.NOT_FOUND, "User not found");
-        }
+        StoreForm form = new StoreForm();
+        form.setName(request.getName());
+        form.setCategory(request.getCategory());
+        form.setAddress(request.getAddress());
+        form.setContactNumber(request.getContactNumber());
+        form.setBusinessHours(request.getBusinessHours());
+        form.setMainImageUrl(request.getMainImageUrl());
+        form.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
+        return registerStore(form, userUuid);
+    }
 
-        User user = userOptional.get();
+    public Store registerStore(StoreForm form, UUID userUuid) {
+        User user = userRepository.findById(userUuid)
+            .orElseThrow(() -> new ApplicationException(ApplicationErrorCode.NOT_FOUND, "User not found"));
 
         if (storeRepository.existsByUser(user)) {
             throw new ApplicationException(ApplicationErrorCode.ALREADY_EXISTS, "User already has a registered store");
         }
 
-        if (storeRepository.existsByName(request.getName())) {
+        if (storeRepository.existsByName(form.getName())) {
             throw new ApplicationException(ApplicationErrorCode.ALREADY_EXISTS, "Store name already exists");
         }
 
         Store store = new Store();
-        store.setName(request.getName());
-        store.setAddress(request.getAddress());
-        store.setContactNumber(request.getContactNumber());
-        store.setBusinessHours(request.getBusinessHours());
-        store.setCategory(StoreCategory.fromString(request.getCategory()));
-        store.setMainImageUrl(request.getMainImageUrl());
-        store.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
         store.setUser(user);
-
-        Store savedStore = storeRepository.save(store);
-        
-        
-        return savedStore;
+        applyBasicFields(store, form);
+        applyAdditionalFields(store, form);
+        return storeRepository.save(store);
     }
 
     @Transactional(readOnly = true)
@@ -78,34 +78,20 @@ public class StoreService {
         return store.map(List::of).orElse(List.of());
     }
 
-    public Store updateStore(UUID storeUuid, StoreRegistrationRequest request, UUID userUuid) {
-        Optional<Store> storeOptional = storeRepository.findById(storeUuid);
-        if (storeOptional.isEmpty()) {
-            throw new ApplicationException(ApplicationErrorCode.NOT_FOUND, "Store not found");
-        }
-
-        Store store = storeOptional.get();
+    public Store updateStore(UUID storeUuid, StoreForm form, UUID userUuid) {
+        Store store = storeRepository.findById(storeUuid)
+            .orElseThrow(() -> new ApplicationException(ApplicationErrorCode.NOT_FOUND, "Store not found"));
 
         if (!store.getUser().getUuid().equals(userUuid)) {
             throw new ApplicationException(ApplicationErrorCode.FORBIDDEN, "You can only update your own store");
         }
 
-        if (!store.getName().equals(request.getName()) && storeRepository.existsByName(request.getName())) {
+        if (!store.getName().equals(form.getName()) && storeRepository.existsByName(form.getName())) {
             throw new ApplicationException(ApplicationErrorCode.ALREADY_EXISTS, "Store name already exists");
         }
 
-        store.setName(request.getName());
-        store.setAddress(request.getAddress());
-        store.setContactNumber(request.getContactNumber());
-        store.setBusinessHours(request.getBusinessHours());
-        store.setCategory(StoreCategory.fromString(request.getCategory()));
-        store.setMainImageUrl(request.getMainImageUrl());
-        store.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
-
-        return storeRepository.save(store);
-    }
-
-    public Store updateStoreEntity(Store store) {
+        applyBasicFields(store, form);
+        applyAdditionalFields(store, form);
         return storeRepository.save(store);
     }
 
@@ -126,6 +112,32 @@ public class StoreService {
         }
         StoreCategory category = StoreCategory.fromString(categoryString);
         return getStoresByCategory(category);
+    }
+
+    private void applyBasicFields(Store store, StoreForm form) {
+        store.setName(form.getName());
+        store.setAddress(form.getAddress());
+        store.setContactNumber(form.getContactNumber());
+        store.setBusinessHours(form.getBusinessHours());
+        store.setCategory(StoreCategory.fromString(form.getCategory()));
+        store.setMainImageUrl(form.getMainImageUrl());
+        store.setSnsOrWebsiteLink(form.getSnsOrWebsiteLink());
+    }
+
+    private void applyAdditionalFields(Store store, StoreForm form) {
+        if (form.getDescription() != null && !form.getDescription().trim().isEmpty()) {
+            store.setDescription(form.getDescription().trim());
+        }
+
+        if (form.getIsCollaborationOpen() != null) {
+            store.setIsCollaborationOpen(form.getIsCollaborationOpen());
+        }
+
+        var tags = form.getTagsList();
+        if (!tags.isEmpty()) {
+            store.getTags().clear();
+            tags.forEach(store::addTag);
+        }
     }
     
 }

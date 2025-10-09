@@ -55,10 +55,7 @@ The user reported persistent "Failed to parse multipart servlet request" errors 
 5. **Form validation working** - proper error handling and redirects
 
 ### Manual Server Test:
-```bash
-curl -X POST -F "name=Test Store" -F "image=@/dev/null" http://localhost:8080/stores/test-multipart
-Response: "Multipart parsing successful"
-```
+> **Note:** The temporary `/stores/test-multipart` probe endpoint used during debugging has been removed. The current three-phase registration flow (basic info → dedicated image upload page → completion) ensures image uploads are handled through the production `/stores/upload-images` API after a store exists, eliminating the need for that diagnostic route.
 
 ## Root Cause Analysis
 

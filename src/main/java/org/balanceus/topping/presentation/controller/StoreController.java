@@ -1,29 +1,23 @@
 package org.balanceus.topping.presentation.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.balanceus.topping.application.dto.StoreRegistrationRequest;
+import org.balanceus.topping.application.dto.StoreDetailView;
+import org.balanceus.topping.application.dto.StoreEngagementResult;
 import org.balanceus.topping.application.dto.StoreForm;
-import org.balanceus.topping.application.service.CollaborationService;
+import org.balanceus.topping.application.dto.StoreRegistrationRequest;
+import org.balanceus.topping.application.exception.ApplicationErrorCode;
+import org.balanceus.topping.application.exception.ApplicationException;
 import org.balanceus.topping.application.service.ImageUploadService;
-import org.balanceus.topping.application.service.ProductService;
+import org.balanceus.topping.application.service.StoreEngagementService;
 import org.balanceus.topping.application.service.StoreService;
-import org.balanceus.topping.domain.model.Collaboration;
-import org.balanceus.topping.domain.model.Product;
+import org.balanceus.topping.application.service.StoreViewService;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreImage;
-import org.balanceus.topping.domain.model.StoreLike;
-import org.balanceus.topping.domain.model.Wishlist;
-import org.balanceus.topping.domain.repository.CollaborationRepository;
-import org.balanceus.topping.domain.repository.ProductRepository;
-import org.balanceus.topping.domain.repository.ReviewRepository;
-import org.balanceus.topping.domain.repository.StoreLikeRepository;
-import org.balanceus.topping.domain.repository.WishlistRepository;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,10 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,14 +45,9 @@ import lombok.extern.slf4j.Slf4j;
 public class StoreController {
 
     private final StoreService storeService;
-    private final ProductService productService;
-    private final CollaborationService collaborationService;
+    private final StoreViewService storeViewService;
+    private final StoreEngagementService storeEngagementService;
     private final ImageUploadService imageUploadService;
-    private final ProductRepository productRepository;
-    private final CollaborationRepository collaborationRepository;
-    private final ReviewRepository reviewRepository;
-    private final StoreLikeRepository storeLikeRepository;
-    private final WishlistRepository wishlistRepository;
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -113,23 +99,9 @@ public class StoreController {
         }
 
         try {
-            // Convert StoreForm to StoreRegistrationRequest
-            StoreRegistrationRequest registrationRequest = convertToRegistrationRequest(storeForm);
-            
-            // Register the store (without image upload)
-            storeService.registerStore(registrationRequest, userDetails.getUser().getUuid());
-            
-            // Get the newly created store for additional updates
-            Optional<Store> newStore = storeService.getStoreByUser(userDetails.getUser().getUuid());
-            if (newStore.isPresent()) {
-                Store store = newStore.get();
-                
-                // Update additional fields (description, tags, collaboration status)
-                updateStoreWithFormData(store, storeForm);
-                
-                log.info("Store registered successfully without image. Store ID: {}", store.getUuid());
-            }
-            
+            Store store = storeService.registerStore(storeForm, userDetails.getUser().getUuid());
+            log.info("Store registered successfully. Store ID: {}", store.getUuid());
+
             redirectAttributes.addFlashAttribute("successMessage", "Store registered successfully!");
             return "redirect:/stores/setup-images";
         } catch (Exception e) {
@@ -156,7 +128,8 @@ public class StoreController {
         }
 
         try {
-            storeService.registerStore(request, userDetails.getUser().getUuid());
+            StoreForm form = convertToStoreForm(request);
+            storeService.registerStore(form, userDetails.getUser().getUuid());
             return ApiResponseData.success("Store registered successfully");
         } catch (Exception e) {
             log.error("Store registration failed", e);
@@ -251,22 +224,9 @@ public class StoreController {
 
         try {
             Store store = storeOptional.get();
-            
-            // Convert StoreForm to StoreRegistrationRequest for basic fields
-            StoreRegistrationRequest updateRequest = convertToRegistrationRequest(storeForm);
-            
-            // Update basic store fields
-            storeService.updateStore(store.getUuid(), updateRequest, userDetails.getUser().getUuid());
-            
-            // Refresh store instance and update additional fields
-            Optional<Store> updatedStoreOptional = storeService.getStoreById(store.getUuid());
-            if (updatedStoreOptional.isPresent()) {
-                Store updatedStore = updatedStoreOptional.get();
-                updateStoreWithFormData(updatedStore, storeForm);
-                
-                log.info("Store updated successfully. Store ID: {}", updatedStore.getUuid());
-            }
-            
+            Store updatedStore = storeService.updateStore(store.getUuid(), storeForm, userDetails.getUser().getUuid());
+            log.info("Store updated successfully. Store ID: {}", updatedStore.getUuid());
+
             redirectAttributes.addFlashAttribute("successMessage", "Store updated successfully!");
             return "redirect:/stores/my-store";
         } catch (Exception e) {
@@ -277,79 +237,30 @@ public class StoreController {
     }
 
     @GetMapping("/{storeId}")
-    public String storeDetail(@PathVariable("storeId") UUID storeId, Model model, 
+    public String storeDetail(@PathVariable("storeId") UUID storeId, Model model,
                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        
-        Optional<Store> storeOptional;
+        UUID requesterUuid = userDetails != null ? userDetails.getUser().getUuid() : null;
         try {
-            storeOptional = storeService.getStoreByIdWithProductsAndTags(storeId);
-        } catch (Exception e) {
-            log.warn("Failed to fetch store with menus and tags, falling back to simple query", e);
-            storeOptional = storeService.getStoreById(storeId);
+            StoreDetailView detail = storeViewService.getStoreDetail(storeId, requesterUuid);
+            model.addAttribute("store", detail.getStore());
+            model.addAttribute("isOwner", detail.isOwner());
+            model.addAttribute("popularMenus", detail.getPopularMenus());
+            model.addAttribute("signatureMenus", detail.getSignatureMenus());
+            model.addAttribute("likeCount", detail.getLikeCount());
+            model.addAttribute("wishlistCount", detail.getWishlistCount());
+            model.addAttribute("collabProductCount", detail.getCollaborationProductCount());
+            model.addAttribute("collaboratingStores", detail.getCollaboratingStores());
+            model.addAttribute("isLiked", detail.isLiked());
+            model.addAttribute("isWishlisted", detail.isWishlisted());
+            model.addAttribute("reviewCount", detail.getReviewCount());
+            model.addAttribute("rating", detail.getRating());
+            return "store/detail";
+        } catch (ApplicationException e) {
+            if (e.getErrorCode() == ApplicationErrorCode.NOT_FOUND) {
+                return "redirect:/explore?error=store_not_found";
+            }
+            throw e;
         }
-        
-        if (storeOptional.isEmpty()) {
-            return "redirect:/explore?error=store_not_found";
-        }
-        
-        Store store = storeOptional.get();
-        model.addAttribute("store", store);
-        
-        // Check if current user owns this store
-        boolean isOwner = false;
-        if (userDetails != null) {
-            isOwner = store.getUser().getUuid().equals(userDetails.getUser().getUuid());
-        }
-        model.addAttribute("isOwner", isOwner);
-        
-        // Use Store entity helper methods for products - with null safety
-        List<Product> popularProducts = store.getPopularProducts();
-        List<Product> signatureProducts = store.getSignatureProducts();
-        
-        
-        // Ensure lists are never null for template
-        model.addAttribute("popularMenus", popularProducts != null ? popularProducts : new ArrayList<>());
-        model.addAttribute("signatureMenus", signatureProducts != null ? signatureProducts : new ArrayList<>());
-        
-        // Get actual like and wishlist data
-        long likeCount = storeLikeRepository.countByStore(store);
-        long wishlistCount = wishlistRepository.countByStore(store);
-        
-        // Get collaboration product count using enhanced counting logic
-        long collabProductCount = collaborationService.getCollaborationProductCount(store);
-        
-        // Get collaborating stores (stores that have accepted collaborations with this store's products)
-        List<Collaboration> acceptedCollaborations = collaborationRepository.findByStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
-        List<Store> collaboratingStores = acceptedCollaborations.stream()
-            .map(collaboration -> collaboration.getInitiatorProduct() != null ? collaboration.getInitiatorProduct().getStore() : null)
-            .filter(collaboratingStore -> collaboratingStore != null && !((Store)collaboratingStore).getUuid().equals(store.getUuid()))
-            .map(collaboratingStore -> (Store)collaboratingStore)
-            .distinct()
-            .toList();
-        
-        boolean isLiked = false;
-        boolean isWishlisted = false;
-        
-        if (userDetails != null) {
-            isLiked = storeLikeRepository.existsByUserAndStore(userDetails.getUser(), store);
-            isWishlisted = wishlistRepository.existsByUserAndStore(userDetails.getUser(), store);
-        }
-        
-        // Get actual review data
-        long reviewCount = reviewRepository.countByStoreAndIsActiveTrue(store);
-        Double averageRating = reviewRepository.findAverageRatingByStoreAndIsActiveTrue(store);
-        double rating = averageRating != null ? Math.round(averageRating * 10.0) / 10.0 : 0.0;
-        
-        model.addAttribute("rating", rating);
-        model.addAttribute("reviewCount", reviewCount);
-        model.addAttribute("likeCount", likeCount);
-        model.addAttribute("wishlistCount", wishlistCount);
-        model.addAttribute("collabProductCount", collabProductCount);
-        model.addAttribute("collaboratingStores", collaboratingStores);
-        model.addAttribute("isLiked", isLiked);
-        model.addAttribute("isWishlisted", isWishlisted);
-        
-        return "store/detail";
     }
 
     @GetMapping("/setup-images")
@@ -379,38 +290,19 @@ public class StoreController {
     @ResponseBody
     public ApiResponseData<List<Map<String, Object>>> getCollaboratingStores(@PathVariable UUID storeUuid) {
         try {
-            Optional<Store> storeOpt = storeService.getStoreById(storeUuid);
-            if (storeOpt.isEmpty()) {
-                return ApiResponseData.failure(404, "가게를 찾을 수 없습니다.");
-            }
-
-            Store store = storeOpt.get();
-            
-            // Get collaborating stores (same logic as in detail method)
-            List<Collaboration> acceptedCollaborations = collaborationRepository.findByStoreAndStatus(store, Collaboration.CollaborationStatus.ACCEPTED);
-            List<Store> collaboratingStores = acceptedCollaborations.stream()
-                .map(collaboration -> collaboration.getInitiatorProduct() != null ? collaboration.getInitiatorProduct().getStore() : null)
-                .filter(collaboratingStore -> collaboratingStore != null && !((Store)collaboratingStore).getUuid().equals(store.getUuid()))
-                .map(collaboratingStore -> (Store)collaboratingStore)
-                .distinct()
-                .toList();
-
-            // Convert to API response format
-            List<Map<String, Object>> storeData = collaboratingStores.stream()
-                .map(collaboratingStore -> {
-                    Map<String, Object> storeMap = new HashMap<>();
-                    storeMap.put("uuid", collaboratingStore.getUuid().toString());
-                    storeMap.put("name", collaboratingStore.getName());
-                    storeMap.put("category", collaboratingStore.getCategory() != null ? collaboratingStore.getCategory().getDisplayName() : null);
-                    storeMap.put("address", collaboratingStore.getAddress());
-                    storeMap.put("mainImagePath", collaboratingStore.getMainImage() != null ? 
-                        collaboratingStore.getMainImage().getImagePath() : 
-                        (collaboratingStore.getMainImageUrl() != null ? collaboratingStore.getMainImageUrl() : null));
-                    return storeMap;
-                })
+            StoreDetailView detail = storeViewService.getStoreDetail(storeUuid, null);
+            List<Map<String, Object>> storeData = detail.getCollaboratingStores()
+                .stream()
+                .map(this::toCollaboratingStoreMap)
                 .toList();
 
             return ApiResponseData.success(storeData);
+        } catch (ApplicationException e) {
+            if (e.getErrorCode() == ApplicationErrorCode.NOT_FOUND) {
+                return ApiResponseData.failure(404, "가게를 찾을 수 없습니다.");
+            }
+            log.error("Failed to get collaborating stores for store {}", storeUuid, e);
+            return ApiResponseData.failure(500, "콜라보 가게 정보를 불러오는데 실패했습니다.");
         } catch (Exception e) {
             log.error("Failed to get collaborating stores for store {}", storeUuid, e);
             return ApiResponseData.failure(500, "콜라보 가게 정보를 불러오는데 실패했습니다.");
@@ -509,40 +401,13 @@ public class StoreController {
         }
 
         try {
-            Optional<Store> storeOptional = storeService.getStoreById(storeId);
-            if (storeOptional.isEmpty()) {
-                return ApiResponseData.failure(404, "Store not found");
-            }
+            StoreEngagementResult result = storeEngagementService.toggleStoreLike(
+                storeId, userDetails.getUser().getUuid());
 
-            Store store = storeOptional.get();
-            
-            // Check if user already liked this store
-            Optional<StoreLike> existingLike = storeLikeRepository.findByUserAndStore(userDetails.getUser(), store);
-            
-            boolean isLiked;
-            if (existingLike.isPresent()) {
-                // Unlike: remove existing like
-                storeLikeRepository.delete(existingLike.get());
-                isLiked = false;
-                log.debug("User {} unliked store {}", userDetails.getUser().getEmail(), store.getName());
-            } else {
-                // Like: create new like
-                StoreLike newLike = new StoreLike();
-                newLike.setUser(userDetails.getUser());
-                newLike.setStore(store);
-                storeLikeRepository.save(newLike);
-                isLiked = true;
-                log.debug("User {} liked store {}", userDetails.getUser().getEmail(), store.getName());
-            }
-            
-            // Get updated like count
-            long likeCount = storeLikeRepository.countByStore(store);
-            
-            // Return response data
             Map<String, Object> responseData = new HashMap<>();
-            responseData.put("isLiked", isLiked);
-            responseData.put("likeCount", likeCount);
-            
+            responseData.put("isLiked", result.active());
+            responseData.put("likeCount", result.count());
+
             return ApiResponseData.success(responseData);
             
         } catch (Exception e) {
@@ -563,40 +428,13 @@ public class StoreController {
         }
 
         try {
-            Optional<Store> storeOptional = storeService.getStoreById(storeId);
-            if (storeOptional.isEmpty()) {
-                return ApiResponseData.failure(404, "Store not found");
-            }
+            StoreEngagementResult result = storeEngagementService.toggleStoreWishlist(
+                storeId, userDetails.getUser().getUuid());
 
-            Store store = storeOptional.get();
-            
-            // Check if user already wishlisted this store
-            Optional<Wishlist> existingWishlist = wishlistRepository.findByUserAndStore(userDetails.getUser(), store);
-            
-            boolean isWishlisted;
-            if (existingWishlist.isPresent()) {
-                // Remove from wishlist
-                wishlistRepository.delete(existingWishlist.get());
-                isWishlisted = false;
-                log.debug("User {} removed store {} from wishlist", userDetails.getUser().getEmail(), store.getName());
-            } else {
-                // Add to wishlist
-                Wishlist newWishlist = new Wishlist();
-                newWishlist.setUser(userDetails.getUser());
-                newWishlist.setStore(store);
-                wishlistRepository.save(newWishlist);
-                isWishlisted = true;
-                log.debug("User {} added store {} to wishlist", userDetails.getUser().getEmail(), store.getName());
-            }
-            
-            // Get updated wishlist count
-            long wishlistCount = wishlistRepository.countByStore(store);
-            
-            // Return response data
             Map<String, Object> responseData = new HashMap<>();
-            responseData.put("isWishlisted", isWishlisted);
-            responseData.put("wishlistCount", wishlistCount);
-            
+            responseData.put("isWishlisted", result.active());
+            responseData.put("wishlistCount", result.count());
+
             return ApiResponseData.success(responseData);
             
         } catch (Exception e) {
@@ -617,14 +455,9 @@ public class StoreController {
         }
 
         try {
-            Optional<Store> storeOptional = storeService.getStoreById(storeId);
-            if (storeOptional.isEmpty()) {
-                return ApiResponseData.failure(404, "Store not found");
-            }
+            boolean isWishlisted = storeEngagementService.isStoreWishlisted(
+                storeId, userDetails.getUser().getUuid());
 
-            Store store = storeOptional.get();
-            boolean isWishlisted = wishlistRepository.existsByUserAndStore(userDetails.getUser(), store);
-            
             return ApiResponseData.success(isWishlisted);
             
         } catch (Exception e) {
@@ -634,70 +467,30 @@ public class StoreController {
         }
     }
 
-    // Test page for debugging multipart issues
-    @GetMapping("/test-multipart")
-    public String showMultipartTest() {
-        return "test-multipart";
+    private Map<String, Object> toCollaboratingStoreMap(Store collaboratingStore) {
+        Map<String, Object> storeMap = new HashMap<>();
+        storeMap.put("uuid", collaboratingStore.getUuid().toString());
+        storeMap.put("name", collaboratingStore.getName());
+        storeMap.put("category", collaboratingStore.getCategory() != null
+            ? collaboratingStore.getCategory().getDisplayName()
+            : null);
+        storeMap.put("address", collaboratingStore.getAddress());
+        storeMap.put("mainImagePath", collaboratingStore.getMainImage() != null
+            ? collaboratingStore.getMainImage().getImagePath()
+            : collaboratingStore.getMainImageUrl());
+        return storeMap;
     }
 
-    // Test endpoint for debugging multipart issues
-    @PostMapping("/test-multipart")
-    @ResponseBody
-    public String testMultipart(HttpServletRequest request) {
-        log.debug("Test multipart endpoint called. Request type: {}", request.getClass().getSimpleName());
-        log.debug("Content type: {}", request.getContentType());
-        log.debug("Content length: {}", request.getContentLength());
-        
-        if (request instanceof MultipartHttpServletRequest) {
-            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-            log.debug("Successfully cast to MultipartHttpServletRequest");
-            log.debug("File names: {}", multipartRequest.getFileNames());
-            return "Multipart parsing successful";
-        } else {
-            log.debug("Request is not a MultipartHttpServletRequest");
-            return "Request is not multipart";
-        }
-    }
-
-    // Helper method to convert StoreForm to StoreRegistrationRequest
-    private StoreRegistrationRequest convertToRegistrationRequest(StoreForm storeForm) {
-        StoreRegistrationRequest request = new StoreRegistrationRequest();
-        request.setName(storeForm.getName());
-        request.setAddress(storeForm.getAddress());
-        request.setContactNumber(storeForm.getContactNumber());
-        request.setBusinessHours(storeForm.getBusinessHours());
-        request.setCategory(storeForm.getCategory());
-        request.setMainImageUrl(storeForm.getMainImageUrl());
-        request.setSnsOrWebsiteLink(storeForm.getSnsOrWebsiteLink());
-        return request;
-    }
-
-    // Helper method to update store with additional form data
-    private void updateStoreWithFormData(Store store, StoreForm storeForm) {
-        try {
-            if (storeForm.getDescription() != null && !storeForm.getDescription().trim().isEmpty()) {
-                store.setDescription(storeForm.getDescription().trim());
-            }
-            
-            if (storeForm.getIsCollaborationOpen() != null) {
-                store.setIsCollaborationOpen(storeForm.getIsCollaborationOpen());
-            }
-            
-            // Handle tags
-            List<String> tagsList = storeForm.getTagsList();
-            if (!tagsList.isEmpty()) {
-                store.getTags().clear();
-                tagsList.forEach(store::addTag);
-            }
-            
-            // Save the updated store
-            storeService.updateStoreEntity(store);
-            log.info("Store updated with additional data: tags={}, description length={}", 
-                    tagsList.size(), 
-                    storeForm.getDescription() != null ? storeForm.getDescription().length() : 0);
-        } catch (Exception e) {
-            log.warn("Failed to update store with additional form data", e);
-        }
+    private StoreForm convertToStoreForm(StoreRegistrationRequest request) {
+        StoreForm form = new StoreForm();
+        form.setName(request.getName());
+        form.setCategory(request.getCategory());
+        form.setAddress(request.getAddress());
+        form.setContactNumber(request.getContactNumber());
+        form.setBusinessHours(request.getBusinessHours());
+        form.setMainImageUrl(request.getMainImageUrl());
+        form.setSnsOrWebsiteLink(request.getSnsOrWebsiteLink());
+        return form;
     }
 
     // Helper method to convert Store to StoreForm for editing
