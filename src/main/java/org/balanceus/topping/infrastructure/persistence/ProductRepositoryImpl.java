@@ -121,4 +121,34 @@ public class ProductRepositoryImpl implements ProductRepository {
 		
 		return collaborationProductIds.size();
 	}
+
+	// Search methods
+	@Override
+	public List<Product> findByNameContainingIgnoreCaseAndIsActiveTrue(String name) {
+		return productJpaRepository.findByNameContainingIgnoreCaseAndIsActiveTrue(name);
+	}
+
+	@Override
+	public List<Product> findByDescriptionContainingIgnoreCaseAndIsActiveTrue(String description) {
+		return productJpaRepository.findByDescriptionContainingIgnoreCaseAndIsActiveTrue(description);
+	}
+
+	@Override
+	public List<Product> findByIngredientsContainingIgnoreCaseAndIsActiveTrue(String ingredients) {
+		return productJpaRepository.findByIngredientsContainingIgnoreCaseAndIsActiveTrue(ingredients);
+	}
+
+	@Override
+	public List<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrIngredientsContainingIgnoreCaseAndIsActiveTrue(
+			String name, String description, String ingredients) {
+		return productJpaRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrIngredientsContainingIgnoreCaseAndIsActiveTrue(
+			name, description, ingredients);
+	}
+
+	@Override
+	public Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrIngredientsContainingIgnoreCaseAndIsActiveTrue(
+			String name, String description, String ingredients, Pageable pageable) {
+		return productJpaRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrIngredientsContainingIgnoreCaseAndIsActiveTrue(
+			name, description, ingredients, pageable);
+	}
 }

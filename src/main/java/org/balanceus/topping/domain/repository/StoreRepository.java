@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface StoreRepository {
@@ -51,4 +52,13 @@ public interface StoreRepository {
     void deleteAll(Iterable<? extends Store> entities);
     
     void deleteAll();
+    
+    // Search methods
+    List<Store> findByNameContainingIgnoreCase(String name);
+    List<Store> findByAddressContainingIgnoreCase(String address);
+    List<Store> findByDescriptionContainingIgnoreCase(String description);
+    List<Store> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+        String name, String address, String description);
+    Page<Store> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+        String name, String address, String description, Pageable pageable);
 }

@@ -8,6 +8,7 @@ import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreCategory;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.StoreRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -139,5 +140,35 @@ public class StoreRepositoryImpl implements StoreRepository {
     @Override
     public void deleteAll() {
         storeJpaRepository.deleteAll();
+    }
+
+    // Search methods
+    @Override
+    public List<Store> findByNameContainingIgnoreCase(String name) {
+        return storeJpaRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public List<Store> findByAddressContainingIgnoreCase(String address) {
+        return storeJpaRepository.findByAddressContainingIgnoreCase(address);
+    }
+
+    @Override
+    public List<Store> findByDescriptionContainingIgnoreCase(String description) {
+        return storeJpaRepository.findByDescriptionContainingIgnoreCase(description);
+    }
+
+    @Override
+    public List<Store> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String name, String address, String description) {
+        return storeJpaRepository.findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            name, address, description);
+    }
+
+    @Override
+    public Page<Store> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String name, String address, String description, Pageable pageable) {
+        return storeJpaRepository.findByNameContainingIgnoreCaseOrAddressContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            name, address, description, pageable);
     }
 }

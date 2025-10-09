@@ -38,4 +38,13 @@ public interface ProductRepository {
 	// Collaboration-related methods
 	long countByStoreAndCollaborationIsNotNull(Store store);
 	long countCollaborationProductsByStore(Store store);
+	
+	// Search methods
+	List<Product> findByNameContainingIgnoreCaseAndIsActiveTrue(String name);
+	List<Product> findByDescriptionContainingIgnoreCaseAndIsActiveTrue(String description);
+	List<Product> findByIngredientsContainingIgnoreCaseAndIsActiveTrue(String ingredients);
+	List<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrIngredientsContainingIgnoreCaseAndIsActiveTrue(
+		String name, String description, String ingredients);
+	Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrIngredientsContainingIgnoreCaseAndIsActiveTrue(
+		String name, String description, String ingredients, Pageable pageable);
 }
