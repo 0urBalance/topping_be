@@ -47,6 +47,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/check-email").permitAll()
 				.requestMatchers("/api/auth/check-phone").permitAll()
 				.requestMatchers("/api/sggcode/**").permitAll()
+				.requestMatchers("/api/user/kakao/**").permitAll()
 				// Protected endpoints - must be authenticated
 				.requestMatchers("/mypage/**", "/logout").authenticated()
 				.requestMatchers("/collabo/**").authenticated()

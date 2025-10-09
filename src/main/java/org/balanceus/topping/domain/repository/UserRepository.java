@@ -11,10 +11,14 @@ public interface UserRepository {
 	User findByUsername(String username);
 
 	Optional<User> findByEmail(String email);
+
+	Optional<User> findByKakaoId(Long kakaoId);
 	
 	Optional<User> findByPhoneNumber(String phoneNumber);
 	
 	boolean existsByPhoneNumber(String phoneNumber);
+
+	boolean existsByKakaoId(Long kakaoId);
 
 	List<User> findByRole(Role role);
 

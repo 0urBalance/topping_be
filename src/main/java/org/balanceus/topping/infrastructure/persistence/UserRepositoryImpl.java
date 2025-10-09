@@ -26,6 +26,11 @@ public class UserRepositoryImpl implements UserRepository {
 	public Optional<User> findByEmail(String email) {
 		return userJpaRepository.findByEmail(email);
 	}
+
+	@Override
+	public Optional<User> findByKakaoId(Long kakaoId) {
+		return userJpaRepository.findByKakaoId(kakaoId);
+	}
 	
 	@Override
 	public Optional<User> findByPhoneNumber(String phoneNumber) {
@@ -35,6 +40,11 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public boolean existsByPhoneNumber(String phoneNumber) {
 		return userJpaRepository.existsByPhoneNumber(phoneNumber);
+	}
+
+	@Override
+	public boolean existsByKakaoId(Long kakaoId) {
+		return userJpaRepository.existsByKakaoId(kakaoId);
 	}
 
 	@Override

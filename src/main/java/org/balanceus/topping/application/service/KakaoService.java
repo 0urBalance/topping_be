@@ -47,6 +47,8 @@ public class KakaoService {
 	private final SggCodeRepository sggCodeRepository;
 	private final PasswordEncoder passwordEncoder;
 
+	private static final String KAKAO_PLACEHOLDER_EMAIL_FORMAT = "kakao_%d@kakao-user.topping";
+
 	@Value("${KAKAO.REST-API-KEY}")
 	private String kakaoRestApiKey;
 	
@@ -56,9 +58,9 @@ public class KakaoService {
 	/**
 	 * 카카오 로그인 처리 및 세션 인증
 	 * @param code 카카오 인가 코드
-	 * @return 로그인 성공 여부
+	 * @return 로그인 처리 결과
 	 */
-	public boolean processKakaoLogin(String code) {
+	public KakaoLoginResult processKakaoLogin(String code) {
 		try {
 			// 1. 인가 코드로 액세스 토큰 획득
 			String accessToken = getAccessToken(code);
@@ -67,23 +69,40 @@ public class KakaoService {
 			KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(accessToken);
 			
 			// 3. 사용자 정보 검증
-			if (!kakaoUserInfo.isValid() || !kakaoUserInfo.hasValidEmail()) {
-				log.warn("유효하지 않은 카카오 사용자 정보: {}", kakaoUserInfo.getEmail());
-				return false;
+			if (!kakaoUserInfo.isValid()) {
+				log.warn("유효하지 않은 카카오 사용자 정보: kakaoId={}, email={}", kakaoUserInfo.getKakaoId(), kakaoUserInfo.getEmail());
+				return KakaoLoginResult.failure("카카오 사용자 정보를 확인할 수 없습니다.");
 			}
 			
 			// 4. 사용자 조회 또는 생성
-			User user = findOrCreateUser(kakaoUserInfo);
+			UserResolution userResolution = findOrCreateUser(kakaoUserInfo);
+			User user = userResolution.user();
 			
 			// 5. Spring Security 세션 인증 처리
 			authenticateUser(user);
 			
+			if (userResolution.placeholderEmailAssigned()) {
+				log.info("카카오 이메일 미제공 계정 - 대체 이메일 생성: {}", user.getEmail());
+				return KakaoLoginResult.success(
+					true,
+					userResolution.linkedExistingAccount(),
+					"카카오 로그인은 완료되었지만 이메일 제공 권한이 없어 임시 이메일이 생성되었습니다. 마이페이지에서 실제 이메일을 등록해주세요.");
+			}
+
+			if (userResolution.linkedExistingAccount()) {
+				log.info("기존 계정과 카카오 계정 연결 완료: {}", user.getEmail());
+				return KakaoLoginResult.success(
+					false,
+					true,
+					"기존 계정과 카카오 계정이 성공적으로 연결되었습니다.");
+			}
+			
 			log.info("카카오 로그인 성공: {}", user.getEmail());
-			return true;
+			return KakaoLoginResult.success(false, false, "카카오 로그인에 성공했습니다.");
 			
 		} catch (Exception e) {
 			log.error("카카오 로그인 처리 중 오류 발생", e);
-			return false;
+			return KakaoLoginResult.failure("카카오 로그인 처리 중 오류가 발생했습니다.");
 		}
 	}
 
@@ -163,12 +182,28 @@ public class KakaoService {
 	/**
 	 * 기존 사용자 조회 또는 신규 사용자 생성
 	 */
-	private User findOrCreateUser(KakaoUserInfoDto kakaoUserInfo) {
-		Optional<User> existingUser = userRepository.findByEmail(kakaoUserInfo.getEmail());
+	private UserResolution findOrCreateUser(KakaoUserInfoDto kakaoUserInfo) {
+		// 1. Kakao ID로 기존 사용자 조회
+		Optional<User> existingByKakaoId = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId());
+		if (existingByKakaoId.isPresent()) {
+			return new UserResolution(existingByKakaoId.get(), false, false);
+		}
+
+		Optional<User> existingUser = kakaoUserInfo.hasEmail()
+			? userRepository.findByEmail(kakaoUserInfo.getEmail())
+			: Optional.empty();
 		
-		if (existingUser.isPresent()) {
+		if (existingUser.isPresent() && existingUser.get().getKakaoId() != null && existingUser.get().getKakaoId().equals(kakaoUserInfo.getKakaoId())) {
 			log.debug("기존 사용자 로그인: {}", kakaoUserInfo.getEmail());
-			return existingUser.get();
+			return new UserResolution(existingUser.get(), false, false);
+		}
+
+		if (existingUser.isPresent()) {
+			User user = existingUser.get();
+			log.debug("기존 이메일 사용자와 카카오 계정을 연결합니다: {}", kakaoUserInfo.getEmail());
+			user.setKakaoId(kakaoUserInfo.getKakaoId());
+			User savedUser = userRepository.save(user);
+			return new UserResolution(savedUser, false, true);
 		}
 
 		// 신규 사용자 생성
@@ -176,7 +211,7 @@ public class KakaoService {
 		User savedUser = userRepository.save(newUser);
 		
 		log.info("카카오 신규 사용자 생성: {}", savedUser.getEmail());
-		return savedUser;
+		return new UserResolution(savedUser, !kakaoUserInfo.hasValidEmail(), false);
 	}
 
 	/**
@@ -185,8 +220,13 @@ public class KakaoService {
 	@Transactional(readOnly = true)
 	public User createNewUserFromKakao(KakaoUserInfoDto kakaoUserInfo) {
 		User user = new User();
-		user.setEmail(kakaoUserInfo.getEmail());
+		if (kakaoUserInfo.hasValidEmail()) {
+			user.setEmail(kakaoUserInfo.getEmail());
+		} else {
+			user.setEmail(generatePlaceholderEmail(kakaoUserInfo.getKakaoId()));
+		}
 		user.setUsername(kakaoUserInfo.getDisplayName());
+		user.setKakaoId(kakaoUserInfo.getKakaoId());
 		user.setPassword(passwordEncoder.encode("KAKAO_USER_" + kakaoUserInfo.getKakaoId())); // 임시 패스워드
 		user.setRole(Role.ROLE_USER); // 기본 역할
 		user.setTermsAgreement(true); // 카카오 로그인 시 약관 동의로 간주
@@ -215,5 +255,49 @@ public class KakaoService {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		
 		log.debug("사용자 세션 인증 완료: {}", user.getEmail());
+	}
+
+	private String generatePlaceholderEmail(Long kakaoId) {
+		return String.format(KAKAO_PLACEHOLDER_EMAIL_FORMAT, kakaoId);
+	}
+
+	private record UserResolution(User user, boolean placeholderEmailAssigned, boolean linkedExistingAccount) {}
+
+	public static class KakaoLoginResult {
+		private final boolean success;
+		private final boolean placeholderEmailAssigned;
+		private final boolean linkedExistingAccount;
+		private final String message;
+
+		private KakaoLoginResult(boolean success, boolean placeholderEmailAssigned, boolean linkedExistingAccount, String message) {
+			this.success = success;
+			this.placeholderEmailAssigned = placeholderEmailAssigned;
+			this.linkedExistingAccount = linkedExistingAccount;
+			this.message = message;
+		}
+
+		public static KakaoLoginResult success(boolean placeholderEmailAssigned, boolean linkedExistingAccount, String message) {
+			return new KakaoLoginResult(true, placeholderEmailAssigned, linkedExistingAccount, message);
+		}
+
+		public static KakaoLoginResult failure(String message) {
+			return new KakaoLoginResult(false, false, false, message);
+		}
+
+		public boolean isSuccess() {
+			return success;
+		}
+
+		public boolean isPlaceholderEmailAssigned() {
+			return placeholderEmailAssigned;
+		}
+
+		public boolean isLinkedExistingAccount() {
+			return linkedExistingAccount;
+		}
+
+		public String getMessage() {
+			return message;
+		}
 	}
 }

@@ -300,6 +300,10 @@
             <span th:if="${param.error[0] != 'kakao_login_failed' and param.error[0] != 'kakao_login_error'}">로그인 정보가 올바르지 않습니다. 이메일과 비밀번호를 확인해주세요.</span>
         </div>
 
+        <div th:if="${kakaoLoginError}" class="error-message">
+            <span th:text="${kakaoLoginError}">카카오 로그인 안내 메시지</span>
+        </div>
+
         <!-- Show logout message -->
         <div th:if="${param.logout}" class="success-message">
             성공적으로 로그아웃되었습니다.

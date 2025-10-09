@@ -21,14 +21,18 @@ public class KakaoUserInfoDto {
 	 * Kakao 사용자 정보가 유효한지 검증
 	 */
 	public boolean isValid() {
-		return kakaoId != null && email != null && !email.trim().isEmpty();
+		return kakaoId != null;
+	}
+
+	public boolean hasEmail() {
+		return email != null && !email.trim().isEmpty();
 	}
 
 	/**
 	 * 이메일이 유효한 형식인지 검증
 	 */
 	public boolean hasValidEmail() {
-		if (email == null || email.trim().isEmpty()) {
+		if (!hasEmail()) {
 			return false;
 		}
 		return email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");

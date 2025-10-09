@@ -37,6 +37,9 @@ public class User {
 
 	private String password;
 
+	@jakarta.persistence.Column(name = "kakao_id", unique = true)
+	private Long kakaoId;
+
 	@Enumerated(EnumType.STRING)
 	private Role role;
 

@@ -61,6 +61,13 @@ public class KakaoServiceConfigurationTest {
 		assertEquals(true, emailOnlyUser.isValid(), "User with email only should be valid");
 		assertEquals("test", emailOnlyUser.getDisplayName(), "Display name should be email prefix when no nickname");
 		
+		org.balanceus.topping.domain.model.KakaoUserInfoDto noEmailUser =
+			new org.balanceus.topping.domain.model.KakaoUserInfoDto(67890L, "anotheruser", null);
+
+		assertEquals(true, noEmailUser.isValid(), "User without email consent should still be valid");
+		assertEquals(false, noEmailUser.hasValidEmail(), "Missing email should not pass email validation");
+		assertEquals("anotheruser", noEmailUser.getDisplayName(), "Display name should fall back to nickname");
+		
 		// 잘못된 이메일 테스트
 		org.balanceus.topping.domain.model.KakaoUserInfoDto invalidEmailUser = 
 			new org.balanceus.topping.domain.model.KakaoUserInfoDto(12345L, "testuser", "invalid-email");
