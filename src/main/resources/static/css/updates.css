@@ -5,17 +5,32 @@
 /* Body Layout */
 .updates-body,
 .update-detail-body {
-    margin-left: var(--sidebar-width, 160px);
     padding-bottom: 80px;
     background-color: var(--gray-50);
-    transition: margin-left var(--transition-normal);
 }
 
-@media (max-width: 768px) {
-    .updates-body,
-    .update-detail-body {
-        margin-left: 0;
-    }
+/* navbar wrapper div를 레이아웃에서 완전 제거 */
+body.updates-body > div:first-of-type,
+body.update-detail-body > div:first-of-type {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    z-index: var(--z-sidebar) !important;
+}
+
+/* Updates page main-content - 강제로 페이지 상단에 배치 */
+.updates-body .main-content,
+.update-detail-body .main-content {
+    padding: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
 }
 
 /* Updates Page Container - extends base container */
@@ -74,8 +89,9 @@
     font-weight: 500;
 }
 
-/* Content Layout */
+/* Content Layout - Override base.css margin-left for updates page */
 .content-wrapper {
+    margin-left: 0; /* Remove base.css margin-left to prevent double margin */
     display: grid;
     grid-template-columns: 1fr 250px;
     gap: 24px;
@@ -84,6 +100,7 @@
 
 @media (max-width: 1024px) {
     .content-wrapper {
+        margin-left: 0; /* Ensure no margin on tablet */
         grid-template-columns: 1fr;
         gap: 16px;
     }
@@ -325,7 +342,7 @@
     margin-bottom: 32px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .updates-grid {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -615,7 +632,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .container {
         padding: 12px;
     }
@@ -704,6 +721,7 @@
     }
     
     .content-wrapper {
+        margin-left: 0; /* Ensure no margin on mobile */
         gap: 12px;
     }
 }

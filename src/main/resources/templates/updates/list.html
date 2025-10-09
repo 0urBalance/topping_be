@@ -199,6 +199,26 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.location.hash) {
+                return;
+            }
+
+            const navigationEntries = (window.performance && performance.getEntriesByType)
+                ? performance.getEntriesByType('navigation')
+                : [];
+            const isBackOrForward = navigationEntries.length > 0 && navigationEntries[0].type === 'back_forward';
+
+            if (isBackOrForward) {
+                return;
+            }
+
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.scrollIntoView({behavior: 'auto', block: 'start'});
+            }
+        });
+
         function filterByType(type) {
             const url = new URL(window.location);
             if (type) {
