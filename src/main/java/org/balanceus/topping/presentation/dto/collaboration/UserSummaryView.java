@@ -1,0 +1,21 @@
+package org.balanceus.topping.presentation.dto.collaboration;
+
+import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserSummaryView {
+    private UUID uuid;
+    private String username;
+    private String email;
+    private String role;
+}

@@ -1,33 +1,20 @@
 package org.balanceus.topping.presentation.controller;
 
+import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.security.Principal;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.balanceus.topping.domain.model.Collaboration;
-import org.balanceus.topping.domain.model.CollaborationProposal;
-import org.balanceus.topping.domain.model.Product;
-import org.balanceus.topping.domain.model.Store;
-import org.balanceus.topping.domain.model.User;
-import org.balanceus.topping.domain.model.ProposalSource;
-import org.balanceus.topping.domain.model.Collaboration.CollaborationStatus;
-import org.balanceus.topping.domain.repository.CollaborationRepository;
-import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
-import org.balanceus.topping.domain.repository.ProductRepository;
-import org.balanceus.topping.domain.repository.StoreRepository;
-import org.balanceus.topping.domain.repository.UserRepository;
-import org.balanceus.topping.application.service.ProductService;
-import org.balanceus.topping.application.service.CollaborationService;
-import org.balanceus.topping.application.service.ChatService;
+import org.balanceus.topping.application.service.CollaborationApplicationException;
+import org.balanceus.topping.application.service.CollaborationApplicationService;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
+import org.balanceus.topping.presentation.dto.collaboration.CollaborationApplyViewModel;
+import org.balanceus.topping.presentation.dto.collaboration.CollaborationCardView;
+import org.balanceus.topping.presentation.dto.collaboration.CollaborationProposalForm;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,435 +22,138 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/collaborations")
 @RequiredArgsConstructor
+@Slf4j
 public class CollaborationController {
 
-	private final CollaborationRepository collaborationRepository;
-	private final CollaborationProposalRepository collaborationProposalRepository;
-	private final ProductRepository productRepository;
-	private final StoreRepository storeRepository;
-	private final UserRepository userRepository;
-	private final ProductService productService;
-	private final CollaborationService collaborationService;
-	private final ChatService chatService;
-	private final ObjectMapper objectMapper;
+    private final CollaborationApplicationService collaborationApplicationService;
 
-	@GetMapping
-	public String listCollaborations(Model model) {
-		List<Collaboration> collaborations = collaborationRepository.findAll();
-		model.addAttribute("collaborations", collaborations);
-		return "collaborations/list";
-	}
+    @GetMapping
+    public String listCollaborations(Model model) {
+        List<CollaborationCardView> collaborations = collaborationApplicationService.getCollaborationCards();
+        model.addAttribute("collaborations", collaborations);
+        return "collaborations/list";
+    }
 
-	@GetMapping("/apply")
-	public String applyForm(@RequestParam(required = false) UUID productId, 
-	                       @RequestParam(required = false) UUID storeId, 
-	                       Model model, Principal principal) {
-		// Check authentication
-		if (principal == null) {
-			return "redirect:/login?error=authentication_required";
-		}
-		
-		// Get the authenticated user
-		User user = userRepository.findByEmail(principal.getName()).orElse(null);
-		if (user == null) {
-			return "redirect:/login?error=user_not_found";
-		}
-		
-		// Add user to model for role-based rendering
-		model.addAttribute("user", user);
-		model.addAttribute("isBusinessOwner", user.getRole().name().equals("ROLE_BUSINESS_OWNER"));
-		
-		// Load data based on user role
-		if (user.getRole().name().equals("ROLE_BUSINESS_OWNER")) {
-			return handleBusinessOwnerForm(model, user);
-		} else {
-			return handleUserForm(productId, storeId, model, user);
-		}
-	}
+    @GetMapping("/apply")
+    public String applyForm(@RequestParam(required = false) UUID productId,
+                            @RequestParam(required = false) UUID storeId,
+                            Model model,
+                            Principal principal) {
+        if (principal == null) {
+            return "redirect:/login?error=authentication_required";
+        }
 
-	private String handleBusinessOwnerForm(Model model, User user) {
-		// Get business owner's store
-		Optional<Store> userStoreOpt = storeRepository.findByUser(user);
-		if (userStoreOpt.isEmpty()) {
-			return "redirect:/stores/register?error=no_store_registered";
-		}
-		
-		Store userStore = userStoreOpt.get();
-		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
-		List<Store> allStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 100))
-			.stream()
-			.filter(store -> !store.getUuid().equals(userStore.getUuid()))
-			.toList();
-		
-		// Generate JSON for store-product mapping
-		String storeDataJson = generateStoreDataJson(allStores);
-		
-		model.addAttribute("userStore", userStore);
-		model.addAttribute("userProducts", userProducts);
-		model.addAttribute("allStores", allStores);
-		model.addAttribute("allProducts", productRepository.findAll());
-		model.addAttribute("storeDataJson", storeDataJson);
-		
-		return "collaborations/apply";
-	}
-	
-	private String handleUserForm(UUID productId, UUID storeId, Model model, User user) {
-		// Load all stores and products for selection
-		List<Store> allStores = storeRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 100));
-		List<Product> allProducts = productRepository.findAll();
-		List<Product> userProducts = productService.getProductsByCreator(user.getUuid());
-		
-		// Generate JSON for store-product mapping
-		String storeDataJson = generateStoreDataJson(allStores);
-		
-		// If specific target provided, set it
-		if (storeId != null) {
-			Store targetStore = storeRepository.findById(storeId).orElse(null);
-			if (targetStore != null) {
-				model.addAttribute("targetStore", targetStore);
-			}
-		}
-		
-		if (productId != null) {
-			Product targetProduct = productRepository.findById(productId).orElse(null);
-			if (targetProduct != null) {
-				model.addAttribute("targetProduct", targetProduct);
-			}
-		}
-		
-		model.addAttribute("allStores", allStores);
-		model.addAttribute("allProducts", allProducts);
-		model.addAttribute("userProducts", userProducts);
-		model.addAttribute("storeDataJson", storeDataJson);
-		
-		return "collaborations/apply";
-	}
-	
-	private String generateStoreDataJson(List<Store> stores) {
-		try {
-			Map<String, Object> storeData = stores.stream()
-				.collect(Collectors.toMap(
-					store -> store.getUuid().toString(),
-					store -> {
-						List<Product> products = productRepository.findByStore(store);
-						return Map.of(
-							"uuid", store.getUuid().toString(),
-							"name", store.getName(),
-							"category", store.getCategory(),
-							"products", products.stream()
-								.filter(Product::getIsAvailable)
-								.map(product -> Map.of(
-									"uuid", product.getUuid().toString(),
-									"name", product.getName(),
-									"category", product.getCategory() != null ? product.getCategory().toString() : "",
-									"productType", product.getProductType() != null ? product.getProductType().toString() : "",
-									"isAvailable", product.getIsAvailable(),
-									"price", product.getPrice() != null ? product.getPrice() : 0
-								))
-								.collect(Collectors.toList())
-						);
-					}
-				));
-			
-			return objectMapper.writeValueAsString(storeData);
-		} catch (JsonProcessingException e) {
-			// Log error and return empty object
-			System.err.println("Error generating store data JSON: " + e.getMessage());
-			return "{}";
-		}
-	}
+        try {
+            CollaborationApplyViewModel viewModel = collaborationApplicationService.prepareApplyForm(
+                    Optional.ofNullable(productId),
+                    Optional.ofNullable(storeId),
+                    principal.getName());
 
-	@GetMapping("/apply/{productId}")
-	public String applyFormLegacy(@PathVariable UUID productId, Model model, Principal principal) {
-		// Legacy support for product-based collaboration requests
-		return applyForm(productId, null, model, principal);
-	}
+            populateApplyModel(model, viewModel);
+            return "collaborations/apply";
+        } catch (CollaborationApplicationException e) {
+            log.debug("Redirecting apply form due to: {}", e.getMessage());
+            return resolveRedirect(e, "redirect:/collaborations/apply");
+        }
+    }
 
-	@PostMapping("/apply")
-	public String applyCollaboration(
-			@RequestParam(required = false) UUID sourceStoreId,
-			@RequestParam(required = false) UUID targetStoreId,
-			@RequestParam(required = false) UUID proposerProductId,
-			@RequestParam(required = false) UUID targetProductId,
-			@RequestParam String collaborationTitle,
-			@RequestParam String description,
-			@RequestParam String startDate,
-			@RequestParam String endDate,
-			@RequestParam(required = false) String category,
-			@RequestParam(required = false) String collaborationDuration,
-			@RequestParam(required = false) String collaborationLocation,
-			@RequestParam(required = false) String revenueStructure,
-			Principal principal) {
-		
-		// Check authentication
-		if (principal == null) {
-			return "redirect:/login?error=authentication_required";
-		}
-		
-		// Get authenticated user
-		User applicant = userRepository.findByEmail(principal.getName()).orElse(null);
-		if (applicant == null) {
-			return "redirect:/login?error=user_not_found";
-		}
-		
-		// Validate required fields
-		if (collaborationTitle == null || collaborationTitle.trim().isEmpty()) {
-			return "redirect:/collaborations/apply?error=title_required";
-		}
-		
-		if (description == null || description.trim().isEmpty()) {
-			return "redirect:/collaborations/apply?error=description_required";
-		}
-		
-		if (targetStoreId == null) {
-			return "redirect:/collaborations/apply?error=target_store_required";
-		}
-		
-		// Validate dates
-		java.time.LocalDateTime startDateTime;
-		java.time.LocalDateTime endDateTime;
-		try {
-			java.time.LocalDate start = java.time.LocalDate.parse(startDate);
-			java.time.LocalDate end = java.time.LocalDate.parse(endDate);
-			
-			if (end.isBefore(start) || end.isEqual(start)) {
-				return "redirect:/collaborations/apply?error=invalid_date_range";
-			}
-			
-			// Convert to LocalDateTime (start of day)
-			startDateTime = start.atStartOfDay();
-			endDateTime = end.atStartOfDay();
-			
-		} catch (Exception e) {
-			return "redirect:/collaborations/apply?error=invalid_date_format";
-		}
-		
-		// Get target store and its owner
-		Store targetStore = storeRepository.findById(targetStoreId).orElse(null);
-		if (targetStore == null) {
-			return "redirect:/collaborations/apply?error=target_store_not_found";
-		}
-		
-		User targetBusinessOwner = targetStore.getUser();
-		if (targetBusinessOwner == null) {
-			return "redirect:/collaborations/apply?error=store_owner_not_found";
-		}
-		
-		// Get source/proposer store if user has one
-		Store sourceStore = storeRepository.findByUser(applicant).orElse(null);
-		
-		// Get source product if provided
-		Product sourceProduct = null;
-		if (proposerProductId != null) {
-			sourceProduct = productRepository.findById(proposerProductId).orElse(null);
-			if (sourceProduct != null && sourceStore != null && 
-				!sourceProduct.getStore().getUuid().equals(sourceStore.getUuid())) {
-				return "redirect:/collaborations/apply?error=source_product_mismatch";
-			}
-		}
-		
-		// Get target product if provided
-		Product targetProduct = null;
-		if (targetProductId != null) {
-			targetProduct = productRepository.findById(targetProductId).orElse(null);
-			if (targetProduct != null && !targetProduct.getStore().getUuid().equals(targetStoreId)) {
-				return "redirect:/collaborations/apply?error=target_product_mismatch";
-			}
-		}
+    @GetMapping("/apply/{productId}")
+    public String applyFormLegacy(@PathVariable UUID productId, Model model, Principal principal) {
+        return applyForm(productId, null, model, principal);
+    }
 
-		// Create CollaborationProposal entity
-		CollaborationProposal proposal = new CollaborationProposal();
-		proposal.setTitle(collaborationTitle);
-		proposal.setDescription(description);
-		proposal.setProposerUser(applicant);
-		proposal.setSource(ProposalSource.CUSTOMER);
-		proposal.setProposedStart(startDateTime.toLocalDate());
-		proposal.setProposedEnd(endDateTime.toLocalDate());
-		proposal.setStatus(CollaborationProposal.CollaborationStatus.PENDING);
-		
-		// Set store relationships
-		if (sourceStore != null) {
-			proposal.setProposerStore(sourceStore);
-		}
-		proposal.setTargetStore(targetStore);
-		
-		// Set product relationships
-		if (sourceProduct != null) {
-			proposal.setProposerProduct(sourceProduct);
-			System.out.println("✅ Set proposer product: " + sourceProduct.getUuid() + " (" + sourceProduct.getName() + ")");
-		} else {
-			System.out.println("⚠️ No proposer product provided");
-		}
-		if (targetProduct != null) {
-			proposal.setTargetProduct(targetProduct);
-			System.out.println("✅ Set target product: " + targetProduct.getUuid() + " (" + targetProduct.getName() + ")");
-		} else {
-			System.out.println("⚠️ No target product provided");
-		}
-		
-		// Set additional form fields
-		if (collaborationDuration != null && !collaborationDuration.trim().isEmpty()) {
-			proposal.setDuration(collaborationDuration.trim());
-		}
-		if (collaborationLocation != null && !collaborationLocation.trim().isEmpty()) {
-			proposal.setLocation(collaborationLocation.trim());
-		}
-		if (revenueStructure != null && !revenueStructure.trim().isEmpty()) {
-			proposal.setProfitShare(revenueStructure.trim());
-		}
-		
-		// Save the proposal
-		CollaborationProposal saved = collaborationProposalRepository.save(proposal);
-		
-		// 🎯 NEW: Create chat room immediately for the proposal (import ChatService at top)
-		try {
-			chatService.createChatRoomForCollaborationProposal(saved.getUuid());
-			// Log successful chat room creation
-			System.out.println("✅ Chat room created for collaboration proposal: " + saved.getUuid());
-		} catch (Exception e) {
-			// Log error but don't fail the proposal submission
-			System.err.println("❌ Failed to create chat room for collaboration proposal " + saved.getUuid() + ": " + e.getMessage());
-		}
-		
-		return "redirect:/mypage/applications?success=proposal_submitted";
-	}
+    @PostMapping("/apply")
+    public String applyCollaboration(@ModelAttribute CollaborationProposalForm form,
+                                     Principal principal) {
+        if (principal == null) {
+            return "redirect:/login?error=authentication_required";
+        }
 
-	private String handleProductCollaborationSubmission(UUID productId, UUID applicantProductId, String message, User applicant) {
-		// Get target product
-		Product product = productRepository.findById(productId).orElse(null);
-		if (product == null) {
-			return "redirect:/products?error=product_not_found";
-		}
-		
-		// Prevent self-application
-		if (product.getCreator().getUuid().equals(applicant.getUuid())) {
-			return "redirect:/products/" + productId + "?error=cannot_apply_own_product";
-		}
-		
-		// Get applicant's product if provided
-		Product applicantProduct = null;
-		if (applicantProductId != null) {
-			applicantProduct = productRepository.findById(applicantProductId).orElse(null);
-			// Validate that the product belongs to the applicant
-			if (applicantProduct == null || !applicantProduct.getCreator().getUuid().equals(applicant.getUuid())) {
-				return "redirect:/collaborations/apply/" + productId + "?error=invalid_applicant_product";
-			}
-		}
-		
-		// Validate message
-		if (message == null || message.trim().isEmpty()) {
-			return "redirect:/collaborations/apply/" + productId + "?error=message_required";
-		}
+        try {
+            collaborationApplicationService.submitProposal(form, principal.getName());
+            return "redirect:/mypage/applications?success=proposal_submitted";
+        } catch (CollaborationApplicationException e) {
+            log.debug("Proposal submission failed: {}", e.getMessage());
+            return resolveRedirect(e, "redirect:/collaborations/apply");
+        }
+    }
 
-		// Create collaboration
-		Collaboration collaboration = new Collaboration();
-		collaboration.setPartnerProduct(product);
-		collaboration.setPartnerStore(product.getStore());
-		collaboration.setInitiatorProduct(applicantProduct);
-		collaboration.setInitiatorStore(applicantProduct.getStore());
-		collaboration.setDescription(message.trim());
-		collaboration.setStatus(Collaboration.CollaborationStatus.PENDING);
+    @PostMapping("/{id}/accept")
+    public String acceptCollaboration(@PathVariable UUID id, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login?error=authentication_required";
+        }
 
-		collaborationRepository.save(collaboration);
-		return "redirect:/collaborations?success=application_submitted";
-	}
+        try {
+            collaborationApplicationService.acceptCollaboration(id, principal.getName());
+            return "redirect:/mypage/received?success=collaboration_accepted";
+        } catch (CollaborationApplicationException e) {
+            log.debug("Accept collaboration redirect: {}", e.getMessage());
+            return resolveRedirect(e, "redirect:/mypage/received");
+        }
+    }
 
-	@PostMapping("/{id}/accept")
-	public String acceptCollaboration(@PathVariable UUID id, Principal principal) {
-		if (principal == null) {
-			return "redirect:/login?error=authentication_required";
-		}
-		
-		User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
-		if (currentUser == null) {
-			return "redirect:/login?error=user_not_found";
-		}
-		
-		Collaboration collaboration = collaborationRepository.findById(id).orElse(null);
-		if (collaboration == null) {
-			return "redirect:/mypage/received?error=collaboration_not_found";
-		}
-		
-		// Validate collaboration has proper store relationship
-		if (collaboration.getPartnerStore() == null) {
-			return "redirect:/mypage/received?error=missing_store_data";
-		}
-		
-		// Verify that the current user owns the partner store
-		if (!collaboration.getPartnerStore().getUser().getUuid().equals(currentUser.getUuid())) {
-			return "redirect:/mypage/received?error=unauthorized_action";
-		}
-		
-		// Check if already processed
-		if (collaboration.getStatus() != CollaborationStatus.PENDING) {
-			return "redirect:/mypage/received?error=already_processed";
-		}
-		
-		// Use service layer for collaboration acceptance with automatic chat room creation
-		collaborationService.acceptCollaboration(id);
-		
-		return "redirect:/mypage/received?success=collaboration_accepted";
-	}
+    @PostMapping("/{id}/reject")
+    public String rejectCollaboration(@PathVariable UUID id, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login?error=authentication_required";
+        }
 
-	@PostMapping("/{id}/reject")
-	public String rejectCollaboration(@PathVariable UUID id, Principal principal) {
-		if (principal == null) {
-			return "redirect:/login?error=authentication_required";
-		}
-		
-		User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
-		if (currentUser == null) {
-			return "redirect:/login?error=user_not_found";
-		}
-		
-		Collaboration collaboration = collaborationRepository.findById(id).orElse(null);
-		if (collaboration == null) {
-			return "redirect:/mypage/received?error=collaboration_not_found";
-		}
-		
-		// Validate collaboration has proper store relationship
-		if (collaboration.getPartnerStore() == null) {
-			return "redirect:/mypage/received?error=missing_store_data";
-		}
-		
-		// Verify that the current user owns the partner store
-		if (!collaboration.getPartnerStore().getUser().getUuid().equals(currentUser.getUuid())) {
-			return "redirect:/mypage/received?error=unauthorized_action";
-		}
-		
-		// Check if already processed
-		if (collaboration.getStatus() != CollaborationStatus.PENDING) {
-			return "redirect:/mypage/received?error=already_processed";
-		}
-		
-		// Use service layer for collaboration rejection
-		collaborationService.rejectCollaboration(id);
-		
-		return "redirect:/mypage/received?success=collaboration_rejected";
-	}
+        try {
+            collaborationApplicationService.rejectCollaboration(id, principal.getName());
+            return "redirect:/mypage/received?success=collaboration_rejected";
+        } catch (CollaborationApplicationException e) {
+            log.debug("Reject collaboration redirect: {}", e.getMessage());
+            return resolveRedirect(e, "redirect:/mypage/received");
+        }
+    }
 
-	@GetMapping("/api")
-	@ResponseBody
-	public ApiResponseData<List<Collaboration>> getCollaborationsApi() {
-		List<Collaboration> collaborations = collaborationRepository.findAll();
-		return ApiResponseData.success(collaborations);
-	}
+    @GetMapping("/api")
+    @ResponseBody
+    public ApiResponseData<List<CollaborationCardView>> getCollaborationsApi() {
+        return ApiResponseData.success(collaborationApplicationService.getCollaborationCards());
+    }
 
-	@GetMapping("/api/user/{userId}")
-	@ResponseBody
-	public ApiResponseData<List<Collaboration>> getUserCollaborationsApi(@PathVariable UUID userId) {
-		User user = userRepository.findById(userId).orElse(null);
-		if (user == null) {
-			return ApiResponseData.failure(404, "User not found");
-		}
-		// Get user's store if exists
-		Store userStore = storeRepository.findByUser(user).orElse(null);
-		List<Collaboration> collaborations = userStore != null ? 
-			collaborationRepository.findByStoreParticipation(userStore) : List.of();
-		return ApiResponseData.success(collaborations);
-	}
+    @GetMapping("/api/user/{userId}")
+    @ResponseBody
+    public ApiResponseData<List<CollaborationCardView>> getUserCollaborationsApi(@PathVariable UUID userId) {
+        try {
+            List<CollaborationCardView> collaborations = collaborationApplicationService.getCollaborationsForUser(userId);
+            return ApiResponseData.success(collaborations);
+        } catch (CollaborationApplicationException e) {
+            log.debug("Failed to fetch user collaborations: {}", e.getMessage());
+            if ("user_not_found".equals(e.getErrorCode())) {
+                return ApiResponseData.failure(404, "User not found");
+            }
+            return ApiResponseData.failure(400, "Cannot load collaborations");
+        }
+    }
+
+    private void populateApplyModel(Model model, CollaborationApplyViewModel viewModel) {
+        model.addAttribute("applyView", viewModel);
+        model.addAttribute("user", viewModel.getUser());
+        model.addAttribute("isBusinessOwner", viewModel.isBusinessOwner());
+        model.addAttribute("userStore", viewModel.getUserStore());
+        model.addAttribute("userProducts", viewModel.getUserProducts());
+        model.addAttribute("allStores", viewModel.getAllStores());
+        model.addAttribute("allProducts", viewModel.getAllProducts());
+        model.addAttribute("targetStore", viewModel.getTargetStore());
+        model.addAttribute("targetProduct", viewModel.getTargetProduct());
+        model.addAttribute("storeDataJson", viewModel.getStoreDataJson());
+    }
+
+    private String resolveRedirect(CollaborationApplicationException exception, String defaultUrl) {
+        if (exception.getRedirectUrl() != null) {
+            return exception.getRedirectUrl();
+        }
+        if (exception.getErrorCode() != null) {
+            return defaultUrl + "?error=" + exception.getErrorCode();
+        }
+        return defaultUrl;
+    }
 }
