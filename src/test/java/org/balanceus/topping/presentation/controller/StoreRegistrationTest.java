@@ -20,7 +20,7 @@ import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductRepository;
 import org.balanceus.topping.domain.repository.ReviewRepository;

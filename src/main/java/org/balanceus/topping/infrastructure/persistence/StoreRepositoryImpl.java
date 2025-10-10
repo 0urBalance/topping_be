@@ -89,7 +89,7 @@ public class StoreRepositoryImpl implements StoreRepository {
 
     @Override
     public List<Store> findAll(Pageable pageable) {
-        return storeJpaRepository.findAll();
+        return storeJpaRepository.findAll(pageable).getContent();
     }
 
     @Override

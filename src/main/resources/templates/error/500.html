@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서버 오류 - Topping</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #9d6c5c;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .error-description {
+            color: #999;
+            margin-bottom: 40px;
+        }
+        .back-button {
+            background-color: #9d6c5c;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #87604f;
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">500</div>
+        <div class="error-message">서버 오류가 발생했습니다</div>
+        <div class="error-description" th:text="${error}">페이지를 불러오는 중 오류가 발생했습니다.</div>
+        <a href="/" class="back-button">홈으로 돌아가기</a>
+    </div>
+</body>
+</html>

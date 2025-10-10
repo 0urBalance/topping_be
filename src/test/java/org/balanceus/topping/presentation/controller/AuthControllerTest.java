@@ -5,7 +5,7 @@ import org.balanceus.topping.domain.model.SggCode;
 import org.balanceus.topping.domain.model.User;
 import org.balanceus.topping.domain.repository.SggCodeRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
-import org.balanceus.topping.infrastructure.security.Role;
+import org.balanceus.topping.domain.model.Role;
 import org.balanceus.topping.presentation.dto.SignupRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
