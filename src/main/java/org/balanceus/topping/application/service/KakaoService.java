@@ -58,9 +58,10 @@ public class KakaoService {
 	/**
 	 * 카카오 로그인 처리 및 세션 인증
 	 * @param code 카카오 인가 코드
+	 * @param request HTTP 요청 객체 (세션 저장용)
 	 * @return 로그인 처리 결과
 	 */
-	public KakaoLoginResult processKakaoLogin(String code) {
+	public KakaoLoginResult processKakaoLogin(String code, jakarta.servlet.http.HttpServletRequest request) {
 		try {
 			// 1. 인가 코드로 액세스 토큰 획득
 			String accessToken = getAccessToken(code);
@@ -79,7 +80,7 @@ public class KakaoService {
 			User user = userResolution.user();
 			
 			// 5. Spring Security 세션 인증 처리
-			authenticateUser(user);
+			authenticateUser(user, request);
 			
 			if (userResolution.placeholderEmailAssigned()) {
 				log.info("카카오 이메일 미제공 계정 - 대체 이메일 생성: {}", user.getEmail());
@@ -217,7 +218,6 @@ public class KakaoService {
 	/**
 	 * 카카오 정보로 신규 사용자 생성
 	 */
-	@Transactional(readOnly = true)
 	public User createNewUserFromKakao(KakaoUserInfoDto kakaoUserInfo) {
 		User user = new User();
 		if (kakaoUserInfo.hasValidEmail()) {
@@ -247,14 +247,21 @@ public class KakaoService {
 	/**
 	 * Spring Security 세션 인증 처리
 	 */
-	private void authenticateUser(User user) {
+	private void authenticateUser(User user, jakarta.servlet.http.HttpServletRequest request) {
 		UserDetailsImpl userDetails = new UserDetailsImpl(user);
 		UsernamePasswordAuthenticationToken authentication = 
 			new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		
+		// SecurityContext에 인증 정보 설정
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		
-		log.debug("사용자 세션 인증 완료: {}", user.getEmail());
+		// 세션에 SecurityContext 저장 (SessionAuthController와 동일한 방식)
+		request.getSession().setAttribute(
+			org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, 
+			SecurityContextHolder.getContext()
+		);
+		
+		log.debug("사용자 세션 인증 완료 - 세션 ID: {}, 사용자: {}", request.getSession().getId(), user.getEmail());
 	}
 
 	private String generatePlaceholderEmail(Long kakaoId) {

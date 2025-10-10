@@ -35,12 +35,12 @@ public class UserController {
 	 * @return 로그인 성공 시 메인 페이지로 리다이렉트, 실패 시 로그인 페이지로 리다이렉트
 	 */
 	@GetMapping("/kakao/callback")
-	public String kakaoCallback(@RequestParam String code, RedirectAttributes redirectAttributes) {
+	public String kakaoCallback(@RequestParam String code, RedirectAttributes redirectAttributes, jakarta.servlet.http.HttpServletRequest request) {
 		try {
 			log.info("카카오 로그인 콜백 요청 - code: {}", code);
 			
 			// 카카오 로그인 처리 (세션 인증 포함)
-			KakaoLoginResult loginResult = kakaoService.processKakaoLogin(code);
+			KakaoLoginResult loginResult = kakaoService.processKakaoLogin(code, request);
 			
 			if (loginResult.isSuccess()) {
 				if (loginResult.isPlaceholderEmailAssigned() || loginResult.isLinkedExistingAccount()) {
@@ -102,9 +102,9 @@ public class UserController {
 	 */
 	@GetMapping("/kakao/login-status")
 	@ResponseBody
-	public ResponseEntity<ApiResponseData<String>> kakaoLoginStatus(@RequestParam String code) {
+	public ResponseEntity<ApiResponseData<String>> kakaoLoginStatus(@RequestParam String code, jakarta.servlet.http.HttpServletRequest request) {
 		try {
-			KakaoLoginResult loginResult = kakaoService.processKakaoLogin(code);
+			KakaoLoginResult loginResult = kakaoService.processKakaoLogin(code, request);
 			
 			if (loginResult.isSuccess()) {
 				return ResponseEntity.ok(ApiResponseData.success(loginResult.getMessage()));
