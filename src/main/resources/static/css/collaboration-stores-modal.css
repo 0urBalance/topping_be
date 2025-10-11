@@ -8,6 +8,232 @@
     padding: var(--spacing-md) 0;
 }
 
+/* Collaboration Products Container */
+.collaboration-products-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md) 0;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Individual collaboration product pair */
+.collaboration-product-pair {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.collaboration-product-pair:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Product pair header */
+.product-pair-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.collaboration-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.collaboration-status {
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.collaboration-status.accepted {
+    background-color: #10b981;
+    color: white;
+}
+
+.collaboration-status.pending {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.collaboration-status.rejected {
+    background-color: #ef4444;
+    color: white;
+}
+
+.collaboration-status.cancelled {
+    background-color: var(--gray-500);
+    color: white;
+}
+
+.collaboration-status.ended {
+    background-color: var(--gray-400);
+    color: white;
+}
+
+/* Horizontal scroll for products */
+.collaboration-products-scroll {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+    overflow-x: auto;
+    padding: var(--spacing-sm) 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.collaboration-products-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.collaboration-products-scroll::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: var(--radius-sm);
+}
+
+.collaboration-products-scroll::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: var(--radius-sm);
+}
+
+.collaboration-products-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-500);
+}
+
+/* Individual product cards */
+.collaboration-product-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    min-width: 200px;
+    max-width: 220px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.collaboration-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.collaboration-product-card.my-product {
+    border-color: var(--primary-color);
+}
+
+.collaboration-product-card.partner-product {
+    border-color: #10b981;
+}
+
+/* Product card image */
+.product-card-image {
+    position: relative;
+    height: 140px;
+    overflow: hidden;
+    background-color: var(--gray-100);
+}
+
+.product-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+}
+
+.collaboration-product-card:hover .product-card-image img {
+    transform: scale(1.05);
+}
+
+/* Product card info */
+.product-card-info {
+    padding: var(--spacing-md);
+}
+
+.product-card-info h5 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-xs) 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-price {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: var(--spacing-xs) 0;
+}
+
+.store-name {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+/* Product labels */
+.product-label {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: white;
+}
+
+.my-label {
+    background-color: var(--primary-color);
+}
+
+.partner-label {
+    background-color: #10b981;
+}
+
+/* Collaboration arrow */
+.collaboration-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.collaboration-arrow .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* Collaboration description */
+.collaboration-description {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--gray-100);
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
 /* Individual store card */
 .collaboration-store-card {
     background: white;
@@ -98,6 +324,59 @@
     .collaboration-stores-grid {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
+    }
+    
+    .collaboration-products-container {
+        max-height: 50vh;
+    }
+    
+    .collaboration-product-pair {
+        padding: var(--spacing-md);
+    }
+    
+    .product-pair-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .collaboration-title {
+        font-size: var(--font-size-base);
+    }
+    
+    .collaboration-products-scroll {
+        gap: var(--spacing-sm);
+        padding: var(--spacing-xs) 0;
+    }
+    
+    .collaboration-product-card {
+        min-width: 160px;
+        max-width: 180px;
+    }
+    
+    .product-card-image {
+        height: 120px;
+    }
+    
+    .product-card-info {
+        padding: var(--spacing-sm);
+    }
+    
+    .product-card-info h5 {
+        font-size: var(--font-size-sm);
+    }
+    
+    .product-price {
+        font-size: var(--font-size-base);
+    }
+    
+    .collaboration-arrow {
+        min-width: 32px;
+        height: 32px;
+    }
+    
+    .collaboration-arrow .material-symbols-outlined {
+        font-size: 16px;
     }
     
     .store-card-image {

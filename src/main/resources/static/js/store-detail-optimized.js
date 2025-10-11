@@ -355,62 +355,105 @@ class StoreDetailManager {
             return;
         }
 
+        // Update modal title for products
+        const modalTitle = modal.querySelector('.modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = '콜라보하고 있는 상품';
+        }
+
         // Show modal
         modal.style.display = 'block';
         document.body.classList.add('modal-open');
 
-        // Load collaboration stores data
+        // Load collaboration products data
         try {
-            const response = await fetch(`/stores/api/${storeId}/collaborating-stores`);
+            const response = await fetch(`/stores/api/${storeId}/collaboration-products`);
             const data = await response.json();
 
             if (data.code === 200) {
-                this.renderCollaborationStores(data.data);
+                this.renderCollaborationProducts(data.data);
             } else {
-                this.renderCollaborationStoresError(data.message || '콜라보 가게 정보를 불러오는데 실패했습니다.');
+                this.renderCollaborationProductsError(data.message || '콜라보 상품 정보를 불러오는데 실패했습니다.');
             }
         } catch (error) {
-            console.error('Failed to load collaboration stores:', error);
-            this.renderCollaborationStoresError('네트워크 오류가 발생했습니다.');
+            console.error('Failed to load collaboration products:', error);
+            this.renderCollaborationProductsError('네트워크 오류가 발생했습니다.');
         }
     }
 
-    renderCollaborationStores(stores) {
+    renderCollaborationProducts(products) {
         const content = document.getElementById('collaborationStoresContent');
         if (!content) return;
 
-        if (!stores || stores.length === 0) {
+        if (!products || products.length === 0) {
             content.innerHTML = `
                 <div class="empty-state">
-                    <p>아직 콜라보하고 있는 가게가 없습니다.</p>
+                    <p>아직 콜라보하고 있는 상품이 없습니다.</p>
                 </div>
             `;
             return;
         }
 
-        const storesHtml = stores.map(store => `
-            <div class="collaboration-store-card" onclick="window.location.href='/stores/${store.uuid}'">
-                <div class="store-card-image">
-                    <img src="${store.mainImagePath || '/image/topping_M_text.png'}" 
-                         alt="${store.name}" 
-                         onerror="this.src='/image/topping_M_text.png'">
+        const productsHtml = products.map(productData => {
+            const myProduct = productData.myProduct;
+            const partnerProduct = productData.partnerProduct;
+            const partnerStore = productData.partnerStore;
+            
+            return `
+                <div class="collaboration-product-pair">
+                    <div class="product-pair-header">
+                        <h4 class="collaboration-title">${productData.collaborationTitle || '콜라보 상품'}</h4>
+                        <span class="collaboration-status ${productData.status.toLowerCase()}">${this.getStatusDisplayName(productData.status)}</span>
+                    </div>
+                    <div class="collaboration-products-scroll">
+                        <!-- My Product -->
+                        <div class="collaboration-product-card my-product" onclick="window.location.href='/products/${myProduct.uuid}'">
+                            <div class="product-card-image">
+                                <img src="${myProduct.imagePath}" 
+                                     alt="${myProduct.name}" 
+                                     onerror="this.src='/image/topping_M_text.png'">
+                            </div>
+                            <div class="product-card-info">
+                                <h5>${myProduct.name}</h5>
+                                <p class="product-price">${this.formatPrice(myProduct.price)}</p>
+                                <p class="store-name">${myProduct.storeName}</p>
+                                <span class="product-label my-label">내 상품</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Collaboration Arrow -->
+                        <div class="collaboration-arrow">
+                            <span class="material-symbols-outlined">handshake</span>
+                        </div>
+                        
+                        <!-- Partner Product -->
+                        <div class="collaboration-product-card partner-product" onclick="window.location.href='/products/${partnerProduct.uuid}'">
+                            <div class="product-card-image">
+                                <img src="${partnerProduct.imagePath}" 
+                                     alt="${partnerProduct.name}" 
+                                     onerror="this.src='/image/topping_M_text.png'">
+                            </div>
+                            <div class="product-card-info">
+                                <h5>${partnerProduct.name}</h5>
+                                <p class="product-price">${this.formatPrice(partnerProduct.price)}</p>
+                                <p class="store-name">${partnerProduct.storeName}</p>
+                                <span class="product-label partner-label">파트너 상품</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${productData.collaborationDescription ? `<p class="collaboration-description">${productData.collaborationDescription}</p>` : ''}
                 </div>
-                <div class="store-card-info">
-                    <h4>${store.name}</h4>
-                    <p class="store-category">${store.category || '카테고리 미설정'}</p>
-                    <p class="store-address">${store.address || ''}</p>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         content.innerHTML = `
-            <div class="collaboration-stores-grid">
-                ${storesHtml}
+            <div class="collaboration-products-container">
+                ${productsHtml}
             </div>
         `;
     }
 
-    renderCollaborationStoresError(message) {
+    renderCollaborationProductsError(message) {
         const content = document.getElementById('collaborationStoresContent');
         if (!content) return;
 
@@ -419,6 +462,22 @@ class StoreDetailManager {
                 <p>${message}</p>
             </div>
         `;
+    }
+
+    getStatusDisplayName(status) {
+        const statusMap = {
+            'PENDING': '진행중',
+            'ACCEPTED': '승인됨',
+            'REJECTED': '거절됨', 
+            'CANCELLED': '취소됨',
+            'ENDED': '종료됨'
+        };
+        return statusMap[status] || status;
+    }
+
+    formatPrice(price) {
+        if (price == null) return '가격 정보 없음';
+        return new Intl.NumberFormat('ko-KR').format(price) + '원';
     }
 
     toggleCollaborationList() {

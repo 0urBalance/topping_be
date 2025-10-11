@@ -12,10 +12,13 @@ import org.balanceus.topping.application.dto.StoreForm;
 import org.balanceus.topping.application.dto.StoreRegistrationRequest;
 import org.balanceus.topping.application.exception.ApplicationErrorCode;
 import org.balanceus.topping.application.exception.ApplicationException;
+import org.balanceus.topping.application.service.CollaborationService;
 import org.balanceus.topping.application.service.ImageUploadService;
 import org.balanceus.topping.application.service.StoreEngagementService;
 import org.balanceus.topping.application.service.StoreService;
 import org.balanceus.topping.application.service.StoreViewService;
+import org.balanceus.topping.domain.model.Collaboration;
+import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.StoreImage;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
@@ -48,6 +51,7 @@ public class StoreController {
     private final StoreViewService storeViewService;
     private final StoreEngagementService storeEngagementService;
     private final ImageUploadService imageUploadService;
+    private final CollaborationService collaborationService;
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -309,6 +313,35 @@ public class StoreController {
         }
     }
 
+    @GetMapping("/api/{storeUuid}/collaboration-products")
+    @ResponseBody
+    public ApiResponseData<List<Map<String, Object>>> getCollaborationProducts(@PathVariable UUID storeUuid) {
+        try {
+            Optional<Store> storeOptional = storeService.getStoreById(storeUuid);
+            if (storeOptional.isEmpty()) {
+                return ApiResponseData.failure(404, "가게를 찾을 수 없습니다.");
+            }
+
+            Store store = storeOptional.get();
+            List<Collaboration> collaborations = collaborationService.findByStoreParticipation(store);
+            List<Map<String, Object>> productData = collaborations.stream()
+                .map(collaboration -> toCollaborationProductMap(collaboration, store))
+                .filter(productMap -> productMap != null) // Filter out null entries
+                .toList();
+
+            return ApiResponseData.success(productData);
+        } catch (ApplicationException e) {
+            if (e.getErrorCode() == ApplicationErrorCode.NOT_FOUND) {
+                return ApiResponseData.failure(404, "가게를 찾을 수 없습니다.");
+            }
+            log.error("Failed to get collaboration products for store {}", storeUuid, e);
+            return ApiResponseData.failure(500, "콜라보 상품 정보를 불러오는데 실패했습니다.");
+        } catch (Exception e) {
+            log.error("Failed to get collaboration products for store {}", storeUuid, e);
+            return ApiResponseData.failure(500, "콜라보 상품 정보를 불러오는데 실패했습니다.");
+        }
+    }
+
     @PostMapping("/setup-images/complete")
     public String completeImageSetup(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                    RedirectAttributes redirectAttributes) {
@@ -479,6 +512,73 @@ public class StoreController {
             ? collaboratingStore.getMainImage().getImagePath()
             : collaboratingStore.getMainImageUrl());
         return storeMap;
+    }
+
+    private Map<String, Object> toCollaborationProductMap(Collaboration collaboration, Store currentStore) {
+        Map<String, Object> productMap = new HashMap<>();
+        
+        // Determine which products to show - both the current store's product and partner's product
+        Product myProduct = null;
+        Product partnerProduct = null;
+        Store partnerStore = null;
+        
+        // Check if current store is the initiator or partner
+        if (collaboration.getInitiatorStore().getUuid().equals(currentStore.getUuid())) {
+            myProduct = collaboration.getInitiatorProduct();
+            partnerProduct = collaboration.getPartnerProduct();
+            partnerStore = collaboration.getPartnerStore();
+        } else if (collaboration.getPartnerStore().getUuid().equals(currentStore.getUuid())) {
+            myProduct = collaboration.getPartnerProduct();
+            partnerProduct = collaboration.getInitiatorProduct();
+            partnerStore = collaboration.getInitiatorStore();
+        }
+        
+        // Skip if we can't determine the relationship or if products are missing
+        if (myProduct == null || partnerProduct == null || partnerStore == null) {
+            return null;
+        }
+        
+        // Build the product map with both products' information
+        productMap.put("collaborationId", collaboration.getUuid().toString());
+        productMap.put("collaborationTitle", collaboration.getTitle());
+        productMap.put("collaborationDescription", collaboration.getDescription());
+        productMap.put("status", collaboration.getStatus().toString());
+        
+        // My store's product
+        Map<String, Object> myProductData = new HashMap<>();
+        myProductData.put("uuid", myProduct.getUuid().toString());
+        myProductData.put("name", myProduct.getName());
+        myProductData.put("description", myProduct.getDescription());
+        myProductData.put("price", myProduct.getPrice());
+        myProductData.put("imagePath", myProduct.getMainImage() != null 
+            ? myProduct.getMainImage().getImagePath() 
+            : "/image/topping_M_text.png");
+        myProductData.put("storeName", currentStore.getName());
+        productMap.put("myProduct", myProductData);
+        
+        // Partner's product
+        Map<String, Object> partnerProductData = new HashMap<>();
+        partnerProductData.put("uuid", partnerProduct.getUuid().toString());
+        partnerProductData.put("name", partnerProduct.getName());
+        partnerProductData.put("description", partnerProduct.getDescription());
+        partnerProductData.put("price", partnerProduct.getPrice());
+        partnerProductData.put("imagePath", partnerProduct.getMainImage() != null 
+            ? partnerProduct.getMainImage().getImagePath() 
+            : "/image/topping_M_text.png");
+        partnerProductData.put("storeName", partnerStore.getName());
+        productMap.put("partnerProduct", partnerProductData);
+        
+        // Partner store info
+        Map<String, Object> partnerStoreData = new HashMap<>();
+        partnerStoreData.put("uuid", partnerStore.getUuid().toString());
+        partnerStoreData.put("name", partnerStore.getName());
+        partnerStoreData.put("category", partnerStore.getCategory() != null 
+            ? partnerStore.getCategory().getDisplayName() 
+            : null);
+        partnerStoreData.put("address", partnerStore.getAddress());
+        productMap.put("partnerStore", partnerStoreData);
+        
+        return productMap;
     }
 
     private StoreForm convertToStoreForm(StoreRegistrationRequest request) {

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -401,5 +402,12 @@ public class CollaborationService {
      */
     public long getCollaborationProductCount(Store store) {
         return productRepository.countCollaborationProductsByStore(store);
+    }
+
+    /**
+     * Find all collaborations where the given store participates (as initiator or partner)
+     */
+    public List<Collaboration> findByStoreParticipation(Store store) {
+        return collaborationRepository.findByStoreParticipation(store);
     }
 }

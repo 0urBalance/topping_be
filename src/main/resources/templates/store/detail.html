@@ -70,7 +70,7 @@ height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
                     <div th:if="${!store.hashtags.empty}"
                          th:replace="~{fragments/tag :: hashtag-group(${store.hashtags})}"></div>
                     <div th:if="${store.hashtags.empty}" th:replace="~{fragments/tag :: default-hashtag}"></div>
-                    <div class="social-stats hero-buttons-container">
+                <div class="social-stats hero-buttons-container">
                         <button class="btn-base btn-hero collab-product-count" title="이 가게와 콜라보된 상품 수">
                             <span class="material-symbols-outlined">handshake</span>
                             <span th:text="${collabProductCount}">0</span>
@@ -179,7 +179,7 @@ height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
             <div class="sidebar-content-column">
                 <!-- SNS & Collaboration Section -->
                 <div class="store-social-collab-box">
-                    <h3 class="sidebar-heading" th:text="|${store.name}과 콜라보하고 있는 가게 보기|">에펠루아 본점과 콜라보하고 있는 가게 보기</h3>
+                    <h3 class="sidebar-heading" th:text="|${store.name}과 콜라보하고 있는 상품 보기|">에펠루아 본점과 콜라보하고 있는 상품 보기</h3>
 
                     <!-- Collaboration Info -->
                     <div class="collab-info">
