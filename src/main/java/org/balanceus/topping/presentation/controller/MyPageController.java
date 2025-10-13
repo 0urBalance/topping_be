@@ -465,6 +465,60 @@ public class MyPageController {
 		return "mypage/liked-stores";
 	}
 
+	@GetMapping("/profile")
+	public String myPageProfile(Model model, Principal principal) {
+		log.debug("MyPage Profile accessed - Principal: {}", principal);
+		
+		if (principal == null) {
+			log.warn("Principal is null - redirecting to login");
+			return "redirect:/login";
+		}
+
+		User user = userRepository.findByEmail(principal.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+		
+		// Get user's store if exists
+		Store userStore = storeRepository.findByUser(user).orElse(null);
+		
+		// Get statistics
+		List<CollaborationProposal> proposals = userStore != null ? 
+			proposalRepository.findByProposerUserOrProposerStore(user, userStore) : 
+			proposalRepository.findByProposerUser(user);
+			
+		List<Collaboration> myApplications = userStore != null ? 
+			collaborationRepository.findByStoreParticipation(userStore) : List.of();
+			
+		List<Product> myProducts = productService.getProductsByCreator(user.getUuid());
+		List<ProductWishlist> userWishlist = productWishlistRepository.findByUser(user);
+		List<Wishlist> userStoreWishlist = wishlistRepository.findByUser(user);
+		
+		// Get received applications for pending count
+		List<Collaboration> receivedApplications = userStore != null ? 
+			collaborationRepository.findByStoreAndStatus(userStore, Collaboration.CollaborationStatus.PENDING) : List.of();
+		List<CollaborationProposal> receivedProposals = userStore != null ? 
+			proposalRepository.findByTargetStore(userStore) : List.of();
+		
+		// Calculate statistics
+		int totalLikes = userWishlist.size() + userStoreWishlist.size();
+		int collaborationCount = proposals.size() + myApplications.size();
+		int shareCount = myProducts.size(); // Products shared
+		double averageRating = 4.5; // Mock rating - can be calculated from reviews later
+		int pendingCount = receivedApplications.size() + 
+			(int) receivedProposals.stream()
+				.filter(p -> p.getStatus() == CollaborationProposal.CollaborationStatus.PENDING)
+				.count();
+
+		model.addAttribute("user", user);
+		model.addAttribute("userStore", userStore);
+		model.addAttribute("totalLikes", totalLikes);
+		model.addAttribute("collaborationCount", collaborationCount);
+		model.addAttribute("shareCount", shareCount);
+		model.addAttribute("averageRating", averageRating);
+		model.addAttribute("pendingCount", pendingCount);
+		
+		return "mypage/profile";
+	}
+
 	@GetMapping("/upgrade")
 	public String upgradeToBusinessOwner(Principal principal) {
 		// TODO: Implement actual user role upgrade functionality

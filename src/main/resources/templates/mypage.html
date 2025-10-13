@@ -49,7 +49,10 @@
         .edit-profile-btn { background: #f8f9fa; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; text-decoration: none; color: #666; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
         .edit-profile-btn:hover { background: #e9ecef; }
         .user-profile { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
-        .user-avatar { width: 60px; height: 60px; border-radius: 50%; background: #87604F; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold; }
+        .user-avatar { width: 60px; height: 60px; border-radius: 50%; background: #87604F; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .user-avatar:hover { background: #6f4f41; transform: scale(1.05); box-shadow: 0 4px 15px rgba(135,96,79,0.3); }
+        .user-info { cursor: pointer; transition: all 0.3s; }
+        .user-info:hover { transform: translateX(5px); }
         .user-info h2 { margin: 0 0 5px 0; font-size: 1.5rem; color: #333; }
         .user-info p { margin: 0; color: #666; font-size: 0.9rem; }
 
@@ -139,11 +142,11 @@
         
         <!-- User Profile Section -->
         <div class="user-profile">
-            <div class="user-avatar" th:text="${#strings.substring(user.username, 0, 1)}">김</div>
-            <div class="user-info">
+            <a href="/mypage/profile" class="user-avatar" th:text="${#strings.substring(user.username, 0, 1)}" style="text-decoration: none; color: white;">김</a>
+            <a href="/mypage/profile" class="user-info" style="text-decoration: none; color: inherit;">
                 <h2>안녕하세요, <span th:text="${user.username}">김우정</span> 님!</h2>
                 <p>오늘도 성공적인 콜라보레이션을 위해 함께해요!</p>
-            </div>
+            </a>
         </div>
 
         <!-- Access Denied Error Message -->
