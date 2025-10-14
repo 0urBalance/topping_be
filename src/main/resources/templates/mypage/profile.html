@@ -352,7 +352,7 @@
         <div class="profile-section">
             <div class="profile-avatar" th:text="${#strings.substring(user.username, 0, 1)}">김</div>
             <div class="profile-name" th:text="${user.username}">김유정</div>
-            <div class="profile-role" th:text="${user.role.name() == 'ROLE_BUSINESS_OWNER' ? '업종 : 자린집' : '일반 사용자'}">업종 : 자린집</div>
+            <div class="profile-role" th:text="${user.role.name() == 'ROLE_BUSINESS_OWNER' ? '업종 : 기타' : '일반 사용자'}">업종 : 기타</div>
             
             <div class="profile-details">
                 <div class="detail-item">
@@ -360,8 +360,8 @@
                     <span class="detail-value" th:text="${userStore != null ? userStore.address : '서울시 여러분구 토핑몰이설맨동 콜라보아이씨멘바지 77-가지-2'}">서울시 여러분구 토핑몰이설맨동 콜라보아이씨멘바지 77-가지-2</span>
                 </div>
                 <div class="detail-item">
-                    <span class="detail-label">연락 가게</span>
-                    <span class="detail-value" th:text="${user.phone != null ? user.phone : '1개'}">1개</span>
+                    <span class="detail-label">연락처</span>
+                    <span class="detail-value" th:text="${user.phoneNumber != null ? user.phoneNumber : '연락처 미등록'}">연락처 미등록</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">링크</span>
