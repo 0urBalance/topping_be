@@ -366,8 +366,8 @@
                 <div class="detail-item">
                     <span class="detail-label">링크</span>
                     <span class="detail-value">
-                        <span th:if="${userStore != null and userStore.websiteUrl != null}" th:text="${userStore.websiteUrl}">구글 아이디</span>
-                        <span th:unless="${userStore != null and userStore.websiteUrl != null}">구글 아이디 https://www.google.com/search?sca_esv=465159d7bf2b0b64&sxsr...</span>
+                        <span th:if="${userStore != null and userStore.snsOrWebsiteLink != null}" th:text="${userStore.snsOrWebsiteLink}">구글 아이디</span>
+                        <span th:unless="${userStore != null and userStore.snsOrWebsiteLink != null}">구글 아이디 https://www.google.com/search?sca_esv=465159d7bf2b0b64&sxsr...</span>
                     </span>
                 </div>
             </div>
