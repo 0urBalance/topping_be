@@ -1,6 +1,5 @@
 // Sidebar Navigation JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing sidebar');
     initializeSidebar();
 });
 
@@ -24,11 +23,8 @@ function initializeSidebar() {
 function setupEventListeners() {
     // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    console.log('Mobile menu toggle element:', mobileMenuToggle);
     if (mobileMenuToggle) {
-        console.log('Adding click event listener to mobile menu toggle');
         mobileMenuToggle.addEventListener('click', function(e) {
-            console.log('Mobile menu toggle clicked!', e);
             toggleSidebar();
         });
     } else {
@@ -61,22 +57,14 @@ function setupEventListeners() {
 // Image Press Effects Functions
 function initializeImagePressEffects() {
     const menuIcons = document.querySelectorAll('.menu-icon[data-default][data-pressed]');
-    console.log('🎨 Initializing image press effects for', menuIcons.length, 'icons');
     
     menuIcons.forEach((icon, index) => {
-        console.log(`🔧 Setting up icon ${index + 1}:`, icon.dataset.menu, {
-            default: icon.dataset.default,
-            pressed: icon.dataset.pressed,
-            hasDefault: !!icon.dataset.default,
-            hasPressed: !!icon.dataset.pressed
-        });
         
         // Add press effect event listeners
         addImagePressListeners(icon);
     });
     
     // Active state is now handled by Thymeleaf server-side
-    console.log('🎯 Active state handled by Thymeleaf');
 }
 
 function addImagePressListeners(icon) {
@@ -85,7 +73,6 @@ function addImagePressListeners(icon) {
         return;
     }
     
-    console.log('🎯 Adding press listeners to menu:', icon.dataset.menu);
     
     // Mouse events
     icon.addEventListener('mousedown', () => setImagePressed(icon, true));
@@ -117,17 +104,14 @@ function setImagePressed(icon, pressed) {
         if (icon.dataset.pressed) {
             icon.src = icon.dataset.pressed;
             icon.classList.add('pressed');
-            console.log('👆 Icon pressed:', icon.dataset.menu, icon.src);
         } else {
             console.error('❌ Missing pressed image data for icon:', icon.dataset.menu);
         }
     } else {
         // Remove pressed class immediately
         icon.classList.remove('pressed');
-        console.log('👆 Icon released:', icon.dataset.menu);
         
         // Image state is now managed by Thymeleaf server-side
-        console.log('👆 Image state managed by Thymeleaf');
     }
 }
 
@@ -141,7 +125,6 @@ function isActiveMenuItem(icon) {
 
 
 function resetAllMenuImages() {
-    console.log('🔄 Resetting all menu images to default state');
     const menuConfigs = {
         'menu-home': '/image/sidebar/icon_home_default.png',
         'menu-explore': '/image/sidebar/icon_collabo_default.png',
@@ -160,30 +143,23 @@ function resetAllMenuImages() {
 }
 
 function toggleSidebar() {
-    console.log('toggleSidebar function called');
     const sidebar = document.getElementById('sidebar');
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     
-    console.log('Sidebar element:', sidebar);
-    console.log('Sidebar has active class:', sidebar?.classList.contains('active'));
     
     if (sidebar && sidebar.classList.contains('active')) {
-        console.log('Closing sidebar');
         closeSidebar();
     } else {
-        console.log('Opening sidebar');
         openSidebar();
     }
 }
 
 function openSidebar() {
-    console.log('openSidebar function called');
     const sidebar = document.getElementById('sidebar');
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     
-    console.log('Elements found - sidebar:', !!sidebar, 'toggle:', !!mobileMenuToggle, 'overlay:', !!sidebarOverlay);
     
     if (sidebar) sidebar.classList.add('active');
     if (mobileMenuToggle) mobileMenuToggle.classList.add('active');
@@ -362,8 +338,6 @@ window.sidebarUtils = {
 // Dynamic menu icon switching function
 function updateMenuIcons() {
     const currentPath = window.location.pathname;
-    console.log('🔄 === UPDATING MENU ICONS ===');
-    console.log('📍 Current path:', currentPath);
     
     const menuIcons = {
         'menu-home': {
@@ -395,8 +369,6 @@ function updateMenuIcons() {
     
     // Update each menu icon
     Object.entries(menuIcons).forEach(([className, config]) => {
-        console.log(`\n🔍 Checking ${className}:`);
-        console.log(`   Configured paths: [${config.paths.join(', ')}]`);
         
         const link = document.querySelector(`.${className}`);
         const img = link?.querySelector('.menu-icon');
@@ -423,7 +395,6 @@ function updateMenuIcons() {
                 matches = currentPath.startsWith(path);
             }
             
-            console.log(`   Testing "${path}" -> ${matches ? '✅ MATCH' : '❌ no match'}`);
             
             if (matches) {
                 isActive = true;
@@ -435,22 +406,18 @@ function updateMenuIcons() {
         const newSrc = isActive ? config.pressed : config.default;
         const oldSrc = img.src;
         
-        console.log(`   Result: ${isActive ? '🟢 ACTIVE' : '⚪ inactive'} (matched: ${matchedPath})`);
-        console.log(`   Image: ${oldSrc} -> ${newSrc}`);
         
         img.src = newSrc;
         
         // Verify the change
         setTimeout(() => {
             if (img.src.includes(isActive ? 'pressed' : 'default')) {
-                console.log(`   ✅ ${className} image updated successfully`);
             } else {
                 console.error(`   ❌ ${className} image update failed!`);
             }
         }, 10);
     });
     
-    console.log('🔄 === MENU ICONS UPDATE COMPLETE ===\n');
 }
 
 // Auto-close sidebar when clicking outside on mobile
@@ -541,11 +508,9 @@ window.closeSidebar = closeSidebar;
 // Enhanced sidebar functionality - work with inline function
 if (!window.toggleSidebar) {
     window.toggleSidebar = function() {
-        console.log('Sidebar.js toggleSidebar called');
         if (typeof smoothToggleSidebar === 'function') {
             smoothToggleSidebar();
         } else {
-            console.log('Using basic toggle sidebar');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const toggle = document.getElementById('mobileMenuToggle');

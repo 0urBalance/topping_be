@@ -14,7 +14,7 @@ class ChatInterface {
         this.bindEvents();
         this.setupSearch();
         this.loadUserInfo().then(() => {
-            console.log('Chat interface initialized with user:', this.currentUser);
+            // Chat interface initialized
         });
     }
     
@@ -133,7 +133,7 @@ class ChatInterface {
             const response = await fetch(`/chat/room/${roomId}/data`);
             if (response.ok) {
                 const responseData = await response.json();
-                console.log('Chat room API response:', responseData);
+                // Chat room data loaded
                 
                 // Extract the actual data from ApiResponseData wrapper
                 const chatData = responseData.data || responseData;
@@ -170,7 +170,7 @@ class ChatInterface {
         const roomName = chatData.roomName || '채팅방';
         const messages = chatData.messages || [];
         
-        console.log('Rendering chat interface with:', { otherUser, roomName, messagesCount: messages.length });
+        // Rendering chat interface
         
         const chatHTML = `
             <div class="chat-header">
@@ -287,7 +287,7 @@ b가게 맥주</textarea>
                 return;
             }
             
-            console.log('Populating proposal panel with:', proposalDetails);
+            // Populating proposal panel
             
             // Update proposal header
             const proposalTitle = document.querySelector('.proposal-title');
@@ -526,15 +526,7 @@ b가게 맥주</textarea>
                 const isOwn = message.senderId === this.currentUser?.uuid;
                 const bubbleClass = isOwn ? 'mine' : 'their';
                 
-                // Debug logging for message alignment
-                console.log('Message bubble alignment:', {
-                    messageId: message.messageId,
-                    senderId: message.senderId,
-                    currentUserId: this.currentUser?.uuid,
-                    isOwn: isOwn,
-                    bubbleClass: bubbleClass,
-                    createdAt: message.createdAt
-                });
+                // Message bubble alignment determined
                 
                 messagesHTML += `
                     <div class="message-group ${bubbleClass}">
@@ -577,16 +569,13 @@ b가게 맥주</textarea>
             brokerURL: null, // We'll use SockJS instead
             webSocketFactory: () => new SockJS('/ws'),
             debug: (str) => {
-                console.log('STOMP Debug:', str);
             },
             onConnect: (frame) => {
-                console.log('Connected to WebSocket:', frame);
                 
                 // Subscribe to chat room messages
                 this.stompClient.subscribe(`/topic/chat/${roomId}`, (message) => {
                     try {
                         const messageData = JSON.parse(message.body);
-                        console.log('Received WebSocket message:', messageData);
                         this.appendMessage(messageData);
                     } catch (error) {
                         console.error('Error parsing WebSocket message:', error, message.body);
@@ -597,7 +586,6 @@ b가게 맥주</textarea>
                 this.stompClient.subscribe(`/topic/proposal/${roomId}`, (message) => {
                     try {
                         const proposalUpdateData = JSON.parse(message.body);
-                        console.log('Received proposal update:', proposalUpdateData);
                         this.handleProposalUpdate(proposalUpdateData);
                     } catch (error) {
                         console.error('Error parsing proposal update:', error, message.body);
@@ -628,13 +616,11 @@ b가게 맥주</textarea>
         // Prevent duplicate sends with debounce logic
         const now = Date.now();
         if (now - this.lastSendTime < 500) {
-            console.log('Duplicate message send prevented (debounced)');
             return;
         }
         
         // Skip if currently composing (additional safety check)
         if (this.isComposing) {
-            console.log('Message send prevented: IME composition in progress');
             return;
         }
         
@@ -705,13 +691,6 @@ b가게 맥주</textarea>
             const bubbleClass = isOwn ? 'mine' : 'their';
             
             // Debug logging for real-time message alignment
-            console.log('Real-time message bubble alignment:', {
-                senderUuid: messageData.sender?.uuid,
-                currentUserId: this.currentUser?.uuid,
-                isOwn: isOwn,
-                bubbleClass: bubbleClass,
-                messageData: messageData
-            });
             
             messageHTML += `
                 <div class="message-group ${bubbleClass}">
@@ -750,11 +729,9 @@ b가게 맥주</textarea>
             const response = await fetch('/api/session/user');
             if (response.ok) {
                 const responseData = await response.json();
-                console.log('User session API response:', responseData);
                 
                 // Extract user data from ApiResponseData wrapper
                 this.currentUser = responseData.data || responseData;
-                console.log('Current user loaded:', this.currentUser);
             } else {
                 console.error('Failed to load user info, status:', response.status);
             }
@@ -831,7 +808,6 @@ b가게 맥주</textarea>
             const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
             
             const formattedTime = `${period} ${displayHours}:${minutes}`;
-            console.log('Formatted time:', { timestamp, date, formattedTime });
             return formattedTime;
         } catch (error) {
             console.error('Error formatting time:', error, timestamp);
@@ -930,7 +906,6 @@ b가게 맥주</textarea>
         try {
             // Proposal data is now loaded via populateProposalPanel() from chat room data
             // which includes product thumbnails in the proposalDetails object
-            console.log('Proposal data loading is handled by populateProposalPanel()');
             
         } catch (error) {
             console.error('Error in loadProposalData:', error);
@@ -1032,18 +1007,12 @@ b가게 맥주</textarea>
         const photosContainer = document.getElementById('proposalPhotos');
         if (!photosContainer) return;
         
-        // DEBUG: Log proposal details to understand data structure
-        console.log('=== PROPOSAL IMAGE DEBUG ===');
-        console.log('Full proposalDetails:', proposalDetails);
-        console.log('proposerProduct:', proposalDetails.proposerProduct);
-        console.log('targetProduct:', proposalDetails.targetProduct);
+        // Collect product images from proposal details
         
         const images = [];
         
         // Collect product thumbnails from proposal details
         if (proposalDetails.proposerProduct) {
-            console.log('proposerProduct exists:', proposalDetails.proposerProduct);
-            console.log('proposerProduct.thumbnailPath:', proposalDetails.proposerProduct.thumbnailPath);
             
             if (proposalDetails.proposerProduct.thumbnailPath) {
                 images.push({
@@ -1051,17 +1020,12 @@ b가게 맥주</textarea>
                     alt: proposalDetails.proposerProduct.name || '제안자 상품',
                     productName: proposalDetails.proposerProduct.name
                 });
-                console.log('Added proposer product image:', proposalDetails.proposerProduct.thumbnailPath);
             } else {
-                console.log('proposerProduct has no thumbnailPath');
             }
         } else {
-            console.log('proposerProduct is null/undefined');
         }
         
         if (proposalDetails.targetProduct) {
-            console.log('targetProduct exists:', proposalDetails.targetProduct);
-            console.log('targetProduct.thumbnailPath:', proposalDetails.targetProduct.thumbnailPath);
             
             if (proposalDetails.targetProduct.thumbnailPath) {
                 images.push({
@@ -1069,15 +1033,11 @@ b가게 맥주</textarea>
                     alt: proposalDetails.targetProduct.name || '대상 상품',
                     productName: proposalDetails.targetProduct.name
                 });
-                console.log('Added target product image:', proposalDetails.targetProduct.thumbnailPath);
             } else {
-                console.log('targetProduct has no thumbnailPath');
             }
         } else {
-            console.log('targetProduct is null/undefined');
         }
         
-        console.log('Total images collected:', images.length, images);
         
         // Clear container and render images
         photosContainer.innerHTML = '';
@@ -1093,11 +1053,9 @@ b가게 맥주</textarea>
                 img.alt = images[i].alt;
                 img.title = images[i].productName; // Tooltip with product name
                 
-                console.log(`Rendering image ${i + 1}: ${images[i].src} (${images[i].productName})`);
                 
                 // Fallback to placeholder if thumbnail fails to load
                 img.onerror = () => {
-                    console.log(`Image failed to load: ${images[i].src}, using placeholder`);
                     img.src = '/image/placeholder-food.jpg';
                     img.alt = `상품 이미지 ${i + 1}`;
                 };
@@ -1105,7 +1063,6 @@ b가게 맥주</textarea>
                 // Use placeholder for missing images
                 img.src = '/image/placeholder-food.jpg';
                 img.alt = `상품 이미지 ${i + 1}`;
-                console.log(`Using placeholder for image ${i + 1} (no product data)`);
             }
             
             photosContainer.appendChild(img);
@@ -1113,13 +1070,9 @@ b가게 맥주</textarea>
         
         // Provide summary of what was rendered
         if (images.length === 0) {
-            console.log('No product images available - showing 2 placeholders');
         } else if (images.length === 1) {
-            console.log('Only 1 product image available - showing 1 product + 1 placeholder');
         } else {
-            console.log('2 product images available - showing both products');
         }
-        console.log('=== PROPOSAL IMAGE UPDATE COMPLETE ===');
     }
     
     populateProposalForm(proposal) {
@@ -1200,7 +1153,6 @@ b가게 맥주</textarea>
     }
     
     handleSystemMessageClick(messageType, messageId) {
-        console.log('System message clicked:', messageType, messageId);
         
         // Open proposal panel for proposal-related system messages
         if (this.isSystemMessageType(messageType)) {
@@ -1215,7 +1167,6 @@ b가게 맥주</textarea>
     }
     
     handleProposalUpdate(updateData) {
-        console.log('Handling proposal update:', updateData);
         
         // Refresh proposal data immediately to get latest changes
         this.refreshProposalData();

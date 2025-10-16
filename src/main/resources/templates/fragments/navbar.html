@@ -33,30 +33,30 @@
     <script>
         // Immediate function definition to prevent timing issues
         window.toggleMobileSidebar = function() {
-            console.log('toggleMobileSidebar called');
+            // Toggle mobile sidebar function called
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const toggle = document.getElementById('mobileMenuToggle');
             
             if (sidebar) {
                 const isActive = sidebar.classList.contains('active');
-                console.log('Sidebar is currently active:', isActive);
+                // Check sidebar state
                 
                 if (isActive) {
                     sidebar.classList.remove('active');
                     if (overlay) overlay.classList.remove('active');
                     if (toggle) toggle.classList.remove('active');
                     document.body.style.overflow = '';
-                    console.log('Sidebar closed');
+                    // Sidebar closed
                 } else {
                     sidebar.classList.add('active');
                     if (overlay) overlay.classList.add('active');
                     if (toggle) toggle.classList.add('active');
                     document.body.style.overflow = 'hidden';
-                    console.log('Sidebar opened');
+                    // Sidebar opened
                 }
             } else {
-                console.error('Sidebar element not found');
+                // Sidebar element not found
             }
         };
         

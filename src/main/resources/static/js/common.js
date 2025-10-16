@@ -344,7 +344,7 @@ const ERROR_MESSAGES = {
 // Function to get user-friendly error message
 function getUserFriendlyErrorMessage(error, response = null) {
     // Log detailed error for developers
-    console.error('Detailed error for debugging:', error);
+    // Log error for debugging only in development
     
     // If it's a network error
     if (error instanceof TypeError || error.name === 'NetworkError') {
@@ -636,7 +636,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize any page-specific functionality
-    console.log('Topping Common JS loaded successfully');
 });
 
 /* ===== EXPORTS (for module use) ===== */

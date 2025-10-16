@@ -676,7 +676,7 @@
         let storeData = {};
         try {
             const storeDataRaw = /*[[${storeDataJson}]]*/ '{}';
-            console.log('Raw store data JSON:', storeDataRaw);
+            // Store data loaded from server
             
             if (typeof storeDataRaw === 'string') {
                 storeData = JSON.parse(storeDataRaw);
@@ -684,13 +684,12 @@
                 storeData = storeDataRaw;
             }
             
-            console.log('Parsed store data:', storeData);
-            console.log('Store data keys:', Object.keys(storeData));
+            // Store data parsed successfully
             
             // Log sample store data
             const firstStoreKey = Object.keys(storeData)[0];
             if (firstStoreKey) {
-                console.log('Sample store data:', storeData[firstStoreKey]);
+                // Sample store data available
             }
         } catch (error) {
             console.error('Error parsing store data JSON:', error);

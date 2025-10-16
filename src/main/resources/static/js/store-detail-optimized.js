@@ -600,7 +600,7 @@ class StoreDetailManager {
                 }
             }
         } catch (error) {
-            console.log('Failed to load wishlist status:', error);
+            // Failed to load wishlist status - silently fail
             // Silently fail - not critical
         }
     }

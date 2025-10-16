@@ -32,7 +32,6 @@ class UserSessionManager {
                     this.user = null;
                 }
             } else if (response.status === 401) {
-                console.log('User not authenticated');
                 this.user = null;
             } else {
                 console.warn('Failed to load user info, status:', response.status);
@@ -70,12 +69,10 @@ class UserSessionManager {
         try {
             const response = await fetch('/api/session/check');
             if (!response.ok) {
-                console.log('Session check failed, status:', response.status);
                 this.handleSessionExpiry();
             } else {
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
-                    console.log('Session is valid');
                 } else {
                     console.warn('Session check returned non-JSON response');
                     this.handleSessionExpiry();
@@ -600,7 +597,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(style);
     }
 
-    console.log('Main Common JS loaded successfully');
 });
 
 /* ===== EXPORTS ===== */

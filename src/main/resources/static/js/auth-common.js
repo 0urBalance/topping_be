@@ -581,7 +581,6 @@ document.addEventListener('DOMContentLoaded', function() {
         step2Form.addEventListener('submit', handleStep2Submit);
     }
 
-    console.log('Auth Common JS loaded successfully');
 });
 
 /* ===== MAKE FUNCTIONS GLOBALLY AVAILABLE ===== */
