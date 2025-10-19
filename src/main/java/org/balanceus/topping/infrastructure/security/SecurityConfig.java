@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final UserDetailsService userDetailsService;
+	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -66,7 +67,7 @@ public class SecurityConfig {
 			.formLogin(form -> form
 				.loginPage("/auth/login")
 				.loginProcessingUrl("/login")
-				.defaultSuccessUrl("/", true)
+				.successHandler(customAuthenticationSuccessHandler)
 				.failureUrl("/auth/login?error=true")
 				.permitAll()
 			)

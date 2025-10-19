@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +32,7 @@ public class SessionAuthController {
 
     @PostMapping("/api/session/login")
     @ResponseBody
-    public ResponseEntity<ApiResponseData<String>> sessionLogin(
+    public ResponseEntity<ApiResponseData<SessionLoginResponse>> sessionLogin(
             @RequestBody LoginRequest request, 
             HttpServletRequest httpRequest, 
             HttpServletResponse httpResponse) {
@@ -59,13 +61,34 @@ public class SessionAuthController {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             log.debug("Login successful for user: {}", userDetails.getUser().getUsername());
             
-            return ResponseEntity.ok(ApiResponseData.success("로그인 성공: " + userDetails.getUser().getUsername()));
+            // Check for saved request (redirect URL)
+            String redirectUrl = getRedirectUrl(httpRequest);
+            
+            SessionLoginResponse response = new SessionLoginResponse();
+            response.setMessage("로그인 성공: " + userDetails.getUser().getUsername());
+            response.setRedirectUrl(redirectUrl);
+            
+            return ResponseEntity.ok(ApiResponseData.success(response));
 
         } catch (Exception e) {
             log.error("Login failed for user: {}", request.getEmail(), e);
             return ResponseEntity.badRequest()
                 .body(ApiResponseData.failure(400, "로그인에 실패했습니다. 이메일과 비밀번호를 확인한 후 다시 시도해주세요."));
         }
+    }
+    
+    private String getRedirectUrl(HttpServletRequest request) {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        SavedRequest savedRequest = requestCache.getRequest(request, null);
+        
+        if (savedRequest != null) {
+            String redirectUrl = savedRequest.getRedirectUrl();
+            log.debug("Found saved request, redirect URL: {}", redirectUrl);
+            return redirectUrl;
+        }
+        
+        // Default to home page if no saved request
+        return "/";
     }
 
     @PostMapping("/api/session/logout")
@@ -157,5 +180,19 @@ public class SessionAuthController {
         
         public String getRole() { return role; }
         public void setRole(String role) { this.role = role; }
+    }
+    
+    /**
+     * Session login response DTO
+     */
+    public static class SessionLoginResponse {
+        private String message;
+        private String redirectUrl;
+        
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        
+        public String getRedirectUrl() { return redirectUrl; }
+        public void setRedirectUrl(String redirectUrl) { this.redirectUrl = redirectUrl; }
     }
 }
