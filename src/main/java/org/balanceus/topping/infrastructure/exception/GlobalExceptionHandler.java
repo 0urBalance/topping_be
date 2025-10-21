@@ -121,6 +121,34 @@ public class GlobalExceptionHandler {
 
 	// 커스텀 에러처리 가능
 
+	@ExceptionHandler(AuthenticationFailedException.class)
+	public ResponseEntity<ApiResponseData<String>> handleAuthenticationFailedException(AuthenticationFailedException e) {
+		log.warn("Authentication failed: {}", e.getMessage());
+		return ResponseEntity.status(e.getErrorCode().getStatus())
+			.body(ApiResponseData.failure(e.getErrorCode().getCode(), e.getMessage()));
+	}
+
+	@ExceptionHandler(UserAlreadyExistsException.class)
+	public ResponseEntity<ApiResponseData<String>> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+		log.warn("User already exists: {}", e.getMessage());
+		return ResponseEntity.status(e.getErrorCode().getStatus())
+			.body(ApiResponseData.failure(e.getErrorCode().getCode(), e.getMessage()));
+	}
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<ApiResponseData<String>> handleUserNotFoundException(UserNotFoundException e) {
+		log.warn("User not found: {}", e.getMessage());
+		return ResponseEntity.status(e.getErrorCode().getStatus())
+			.body(ApiResponseData.failure(e.getErrorCode().getCode(), e.getMessage()));
+	}
+
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<ApiResponseData<String>> handleValidationException(ValidationException e) {
+		log.warn("Validation error: {}", e.getMessage());
+		return ResponseEntity.status(e.getErrorCode().getStatus())
+			.body(ApiResponseData.failure(e.getErrorCode().getCode(), e.getMessage()));
+	}
+
 	@ExceptionHandler(ApplicationException.class)
 	public ResponseEntity<ApiResponseData<String>> handleApplicationException(ApplicationException e) {
 		Code mappedCode = mapToResponseCode(e.getErrorCode());
