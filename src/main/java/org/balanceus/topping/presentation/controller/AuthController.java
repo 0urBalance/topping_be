@@ -1,24 +1,16 @@
 package org.balanceus.topping.presentation.controller;
 
-import java.util.Optional;
-
-import org.balanceus.topping.domain.model.SggCode;
-import org.balanceus.topping.domain.model.User;
-import org.balanceus.topping.domain.repository.SggCodeRepository;
-import org.balanceus.topping.domain.repository.UserRepository;
+import org.balanceus.topping.application.service.AuthService;
 import org.balanceus.topping.infrastructure.response.ApiResponseData;
 import org.balanceus.topping.infrastructure.security.UserDetailsImpl;
-import org.balanceus.topping.presentation.dto.LoginRequest;
-import org.balanceus.topping.presentation.dto.SignupRequest;
+import org.balanceus.topping.infrastructure.utils.AuthUtils;
 import org.balanceus.topping.presentation.dto.EmailCheckRequest;
+import org.balanceus.topping.presentation.dto.EmailCheckResponse;
+import org.balanceus.topping.presentation.dto.SignupRequest;
+import org.balanceus.topping.presentation.dto.SignupResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,16 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final SggCodeRepository sggCodeRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
+    private final AuthService authService;
 
     @Value("${KAKAO.REST-API-KEY}")
     private String kakaoRestApiKey;
@@ -58,107 +49,28 @@ public class AuthController {
         return "redirect:/auth/signup/step1";
     }
 
-    // API endpoints for session-based auth (handled by Spring Security)
-    // Login is now handled by Spring Security's /login endpoint
-    // This method can be used for additional login response if needed
-    @PostMapping("/api/member/login-status")
-    @ResponseBody
-    public ResponseEntity<ApiResponseData<String>> loginStatus(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            // Handle both UserDetailsImpl and standard User for tests
-            String username;
-            if (authentication.getPrincipal() instanceof UserDetailsImpl) {
-                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-                username = userDetails.getUser().getUsername();
-            } else if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
-                org.springframework.security.core.userdetails.User springUser = 
-                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-                username = springUser.getUsername();
-            } else {
-                username = authentication.getName();
-            }
-            return ResponseEntity.ok(ApiResponseData.success("로그인 성공: " + username));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponseData.failure(401, "인증되지 않은 사용자"));
-        }
-    }
+    // Note: Session-based authentication endpoints are handled by SessionAuthController
+    // - /api/session/login for login
+    // - /api/session/logout for logout
+    // - /api/session/status for login status
+    // - /api/session/user for user information
 
     @PostMapping("/api/member/signup")
     @ResponseBody
-    public ResponseEntity<ApiResponseData<String>> signup(@RequestBody SignupRequest request) {
-        try {
-            // Validate terms agreement
-            if (request.getTermsAgreement() == null || !request.getTermsAgreement()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponseData.failure(400, "이용약관 및 개인정보처리방침에 동의해주세요."));
-            }
-
-            // Validate sggCode
-            if (request.getSggCode() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponseData.failure(400, "지역을 선택해주세요."));
-            }
-
-            // Check if sggCode exists
-            Optional<SggCode> sggCodeOpt = sggCodeRepository.findById(request.getSggCode());
-            if (sggCodeOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponseData.failure(400, "유효하지 않은 지역입니다."));
-            }
-
-            // Check if email already exists
-            Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-            if (existingUser.isPresent()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(ApiResponseData.failure(409, "이미 등록된 이메일입니다."));
-            }
-
-            // Create new user
-            SggCode sggCode = sggCodeOpt.get();
-            
-            User newUser = new User();
-            newUser.setUsername(request.getUsername());
-            newUser.setEmail(request.getEmail());
-            newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-            newUser.setRole(request.getRole());
-            newUser.setSggCode(sggCode);
-            newUser.setTermsAgreement(request.getTermsAgreement());
-
-            // Save user
-            userRepository.save(newUser);
-
-            return ResponseEntity.ok(ApiResponseData.success("회원가입이 완료되었습니다.", "회원가입이 완료되었습니다."));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponseData.failure(500, "회원가입 중 오류가 발생했습니다."));
-        }
+    public ResponseEntity<ApiResponseData<SignupResponse>> signup(@RequestBody SignupRequest request) {
+        log.debug("User signup request for email: {}", AuthUtils.maskEmail(request.getEmail()));
+        
+        SignupResponse response = authService.registerUser(request);
+        return ResponseEntity.ok(ApiResponseData.success(response));
     }
 
     @PostMapping("/api/member/check-email")
     @ResponseBody
-    public ResponseEntity<ApiResponseData<Object>> checkEmail(@RequestBody EmailCheckRequest request) {
-        try {
-            Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-            boolean exists = existingUser.isPresent();
-            
-            return ResponseEntity.ok(ApiResponseData.success(new Object() {
-                public final boolean exists = existingUser.isPresent();
-            }));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponseData.failure(500, "이메일 확인 중 오류가 발생했습니다."));
-        }
+    public ResponseEntity<ApiResponseData<EmailCheckResponse>> checkEmail(@RequestBody EmailCheckRequest request) {
+        log.debug("Email availability check for: {}", AuthUtils.maskEmail(request.getEmail()));
+        
+        EmailCheckResponse response = authService.checkEmailAvailability(request);
+        return ResponseEntity.ok(ApiResponseData.success(response));
     }
 
-    // Logout is now handled by Spring Security's /logout endpoint
-    // This method can be used for additional logout response if needed
-    @PostMapping("/api/member/logout-status")
-    @ResponseBody
-    public ResponseEntity<ApiResponseData<String>> logoutStatus() {
-        // Session logout is handled by Spring Security
-        return ResponseEntity.ok(ApiResponseData.success("로그아웃되었습니다."));
-    }
 }
