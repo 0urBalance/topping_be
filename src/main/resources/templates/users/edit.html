@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 정보 수정 - Topping</title>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T5T3CSLT');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google tag (gtag.js) -->
+    <script async src='https://www.googletagmanager.com/gtag/js?id=G-Y1ZSWHSQD0'></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Y1ZSWHSQD0');
+    </script>
+    
+    <!-- CSS Framework -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    
+    <style>
+        .edit-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: var(--spacing-xl);
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .page-header h1 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb {
+            margin-bottom: var(--spacing-lg);
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb span {
+            color: var(--text-secondary);
+            margin: 0 8px;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-xl);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: var(--primary-color);
+            color: white;
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: var(--spacing-xl);
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(135, 96, 79, 0.1);
+        }
+        
+        .form-control.is-invalid {
+            border-color: var(--error-color);
+        }
+        
+        .invalid-feedback {
+            display: block;
+            color: var(--error-color);
+            font-size: 0.875rem;
+            margin-top: var(--spacing-xs);
+        }
+        
+        .form-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+        
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: var(--surface-color);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--text-secondary);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        /* User Info Display */
+        .user-info {
+            background: var(--surface-color);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto var(--spacing-md);
+        }
+        
+        .user-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Password strength indicator */
+        .password-requirements {
+            background: var(--surface-color);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-top: var(--spacing-sm);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .password-requirements ul {
+            margin: var(--spacing-xs) 0 0 0;
+            padding-left: var(--spacing-lg);
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .edit-container {
+                padding: var(--spacing-md);
+            }
+            
+            .card-body {
+                padding: var(--spacing-lg);
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src='https://www.googletagmanager.com/ns.html?id=GTM-T5T3CSLT'
+    height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="edit-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/mypage">마이페이지</a> <span>></span> 
+            <a href="/mypage/profile">프로필</a> <span>></span> 
+            <span>내 정보 수정</span>
+        </div>
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>내 정보 수정</h1>
+            <p>개인정보와 비밀번호를 안전하게 관리하세요</p>
+        </div>
+        
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        
+        <!-- User Info Display -->
+        <div class="user-info">
+            <div class="user-avatar" th:text="${user.username != null ? #strings.substring(user.username, 0, 1) : 'U'}">U</div>
+            <h3 th:text="${user.username}">사용자명</h3>
+            <div class="user-email" th:text="${user.email}">user@example.com</div>
+        </div>
+        
+        <!-- Profile Edit Form -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">기본 정보 수정</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/users/edit}" th:object="${userEditForm}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="username">사용자명 <span style="color: var(--error-color);">*</span></label>
+                        <input type="text" id="username" th:field="*{username}" 
+                               class="form-control" 
+                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                               required maxlength="50" placeholder="사용자명을 입력하세요">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="phoneNumber">전화번호</label>
+                        <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" 
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                               pattern="010-[0-9]{4}-[0-9]{4}" 
+                               placeholder="010-1234-5678">
+                        <div class="form-text">형식: 010-1234-5678 (선택사항)</div>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-symbols-outlined">save</span>
+                            저장하기
+                        </button>
+                        <a href="/mypage/profile" class="btn btn-secondary">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            취소
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Password Change Form -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">비밀번호 변경</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/users/edit/password}" th:object="${passwordChangeForm}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="currentPassword">현재 비밀번호 <span style="color: var(--error-color);">*</span></label>
+                        <input type="password" id="currentPassword" th:field="*{currentPassword}" 
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''"
+                               required placeholder="현재 비밀번호를 입력하세요">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="newPassword">새 비밀번호 <span style="color: var(--error-color);">*</span></label>
+                        <input type="password" id="newPassword" th:field="*{newPassword}" 
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid' : ''"
+                               required minlength="8" maxlength="100" 
+                               placeholder="새 비밀번호를 입력하세요">
+                        <div class="password-requirements">
+                            <strong>비밀번호 요구사항:</strong>
+                            <ul>
+                                <li>8자 이상 100자 이하</li>
+                                <li>안전한 비밀번호를 위해 영문, 숫자, 특수문자 조합을 권장합니다</li>
+                            </ul>
+                        </div>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">새 비밀번호 확인 <span style="color: var(--error-color);">*</span></label>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" 
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
+                               required placeholder="새 비밀번호를 다시 입력하세요">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-symbols-outlined">lock_reset</span>
+                            비밀번호 변경
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Password confirmation validation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            
+            function validatePasswordMatch() {
+                if (newPassword.value && confirmPassword.value) {
+                    if (newPassword.value !== confirmPassword.value) {
+                        confirmPassword.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                    } else {
+                        confirmPassword.setCustomValidity('');
+                    }
+                }
+            }
+            
+            newPassword.addEventListener('input', validatePasswordMatch);
+            confirmPassword.addEventListener('input', validatePasswordMatch);
+            
+            // Form submission validation
+            document.querySelector('form[action*="password"]').addEventListener('submit', function(e) {
+                validatePasswordMatch();
+                if (newPassword.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    alert('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
