@@ -639,10 +639,10 @@
             pointer-events: none;
         }
 
-        /* Registry Section - Brown Theme */
+        /* Registry Section - Enhanced Brown Theme */
         .registry-section {
-            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #CD853F 100%);
-            padding: 80px 0;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 30%, #8B4513 70%, #A0522D 100%);
+            padding: 90px 0;
             text-align: center;
             color: white;
             position: relative;
@@ -660,87 +660,321 @@
             background-size: 1200px 120px;
         }
 
+        /* Decorative Chocolate Bar Elements with Grid Pattern */
+        .registry-section::after {
+            content: '';
+            position: absolute;
+            bottom: 50px;
+            right: 80px;
+            width: 160px;
+            height: 100px;
+            background: 
+                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                #6D4C41;
+            background-size: 8px 8px, 8px 8px, 100% 100%;
+            border-radius: 8px;
+            transform: rotate(25deg);
+            box-shadow: 
+                0 8px 20px rgba(0,0,0,0.3),
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                inset 0 -2px 4px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .registry-container::before {
+            content: '';
+            position: absolute;
+            top: 80px;
+            right: 40px;
+            width: 120px;
+            height: 75px;
+            background: 
+                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                #8D6E63;
+            background-size: 6px 6px, 6px 6px, 100% 100%;
+            border-radius: 6px;
+            transform: rotate(-15deg);
+            box-shadow: 
+                0 6px 15px rgba(0,0,0,0.25),
+                inset 0 1px 3px rgba(255,255,255,0.1),
+                inset 0 -1px 3px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .registry-container::after {
+            content: '';
+            position: absolute;
+            bottom: 30px;
+            right: 220px;
+            width: 100px;
+            height: 60px;
+            background: 
+                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                #5D4037;
+            background-size: 5px 5px, 5px 5px, 100% 100%;
+            border-radius: 4px;
+            transform: rotate(45deg);
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.25),
+                inset 0 1px 2px rgba(255,255,255,0.1),
+                inset 0 -1px 2px rgba(0,0,0,0.2);
+            z-index: 3;
+        }
+
+        /* Additional chocolate piece */
+        .registry-section:before {
+            content: '';
+            position: absolute;
+            bottom: 100px;
+            right: 150px;
+            width: 80px;
+            height: 50px;
+            background: 
+                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
+                #4A2C2A;
+            background-size: 4px 4px, 4px 4px, 100% 100%;
+            border-radius: 3px;
+            transform: rotate(-35deg);
+            box-shadow: 
+                0 3px 8px rgba(0,0,0,0.2),
+                inset 0 1px 2px rgba(255,255,255,0.1);
+            z-index: 4;
+        }
+
+        /* Background Decorative Elements */
+        .registry-title::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: 100px;
+            width: 50px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(45deg);
+            z-index: 0;
+        }
+        
+        .registry-title::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 160px;
+            width: 35px;
+            height: 55px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(30deg);
+            z-index: 0;
+        }
+
+        .registry-subtitle::before {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -80px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .registry-subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -40px;
+            width: 70px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
         .registry-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
             position: relative;
-            z-index: 2;
+            z-index: 10;
         }
 
         .registry-title {
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 2.5rem;
+            font-weight: 700;
             color: white;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+            position: relative;
         }
 
         .registry-subtitle {
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 50px;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.95);
+            margin-bottom: 60px;
+            font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            position: relative;
         }
 
         .registry-icons {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
+            gap: 25px;
+            margin-bottom: 50px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .registry-icon {
-            width: 80px;
-            height: 80px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 15;
         }
 
-        .registry-icon:nth-child(1) { background: #a8e6cf; color: #2d8659; }
-        .registry-icon:nth-child(2) { background: #ffd93d; color: #b8860b; }
-        .registry-icon:nth-child(3) { background: #ffb3ba; color: #dc2626; }
-        .registry-icon:nth-child(4) { background: #a8c8ec; color: #1e40af; }
-        .registry-icon:nth-child(5) { background: #c8a8e9; color: #7c3aed; }
+        .registry-icon-utensil { 
+            background: #B8E6D3; 
+            color: #2d5016; 
+            border: none;
+        }
+        
+        .registry-icon-noodle { 
+            background: #FFFFFF; 
+            color: #8B4513; 
+            border: 2px solid rgba(220,220,220,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        
+        .registry-icon-cake { 
+            background: #FFE066; 
+            color: #8B4513; 
+            border: none;
+        }
+        
+        .registry-icon-coffee { 
+            background: #2E7D32; 
+            color: #ffffff; 
+            border: none;
+        }
+        
+        .registry-icon-map { 
+            background: #F5F5F5; 
+            color: #666666; 
+            border: 2px solid rgba(200,200,200,0.3);
+        }
 
         .registry-icon:hover {
-            transform: translateY(-8px) scale(1.1);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
         }
 
-        /* Registry Button - Design Snippets Style */
+        .registry-icon:focus {
+            outline: 3px solid rgba(255,255,255,0.6);
+            outline-offset: 2px;
+        }
+
+        .registry-icon:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        /* Enhance icon hover effects */
+        .registry-icon-utensil:hover { 
+            background: #A5E0C6; 
+            transform: translateY(-8px) scale(1.05) rotate(5deg);
+        }
+        
+        .registry-icon-noodle:hover { 
+            background: #F8F8F8; 
+            border-color: rgba(139, 69, 19, 0.4);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .registry-icon-cake:hover { 
+            background: #FFD74A; 
+            transform: translateY(-8px) scale(1.05) rotate(-3deg);
+        }
+        
+        .registry-icon-coffee:hover { 
+            background: #1B5E20; 
+        }
+        
+        .registry-icon-map:hover { 
+            background: #EEEEEE; 
+            border-color: rgba(139, 69, 19, 0.4);
+        }
+
+        /* Enhanced Registry Button */
         .registry-btn {
-            /* Use modern button design */
             background: white;
-            color: var(--section-bg-dark);
-            border: 1px solid var(--gray-300);
-            padding: var(--spacing-4) var(--spacing-8);
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-base);
+            color: #8B4513;
+            border: none;
+            padding: 16px 45px;
+            border-radius: 28px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all var(--transition-fast);
-            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
             display: inline-flex;
             align-items: center;
-            gap: var(--spacing-2);
+            gap: 8px;
+            text-transform: none;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .registry-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #DC143C;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(220, 20, 60, 0.3);
         }
 
         .registry-btn:hover {
-            background: var(--gray-100);
-            transform: translateY(-2px);
-            box-shadow: var(--card-shadow-hover);
-            border-color: var(--gray-400);
+            background: #f8f8f8;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            color: #6D4C41;
+        }
+
+        .registry-btn:hover::after {
+            bottom: -18px;
+            box-shadow: 0 3px 6px rgba(220, 20, 60, 0.4);
         }
 
         .registry-btn:focus {
-            outline: 2px solid var(--accent-purple);
+            outline: 3px solid rgba(255,255,255,0.5);
             outline-offset: 2px;
+        }
+
+        .registry-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .registry-btn:active::after {
+            bottom: -16px;
         }
 
         /* FAQ Section */
@@ -1081,15 +1315,62 @@
                 min-width: 250px;
             }
 
+            .registry-section {
+                padding: 60px 0;
+            }
+            
+            .registry-title {
+                font-size: 2rem;
+                margin-bottom: 12px;
+            }
+            
+            .registry-subtitle {
+                font-size: 1rem;
+                margin-bottom: 40px;
+            }
+            
             .registry-icons {
                 flex-wrap: wrap;
-                gap: 15px;
+                gap: 12px;
+                margin-bottom: 40px;
             }
             
             .registry-icon {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
+                width: 80px;
+                height: 80px;
+            }
+            
+            .registry-icon svg {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .registry-btn {
+                padding: 14px 35px;
+                font-size: 1rem;
+                border-radius: 25px;
+            }
+            
+            .registry-btn::after {
+                width: 6px;
+                height: 6px;
+                bottom: -12px;
+            }
+            
+            /* Hide most decorative elements on mobile for better performance */
+            .registry-section::after,
+            .registry-section:before,
+            .registry-container::before,
+            .registry-container::after {
+                display: none;
+            }
+            
+            /* Keep only subtle background decorations */
+            .registry-title::before,
+            .registry-title::after,
+            .registry-subtitle::before,
+            .registry-subtitle::after {
+                display: none;
             }
 
             .faq-container {
@@ -1296,12 +1577,59 @@
             <h2 class="registry-title">Registry My ITEM</h2>
             <p class="registry-subtitle">우리 매장과 어울리는 상품을 직접 찾아보세요!</p>
 
-            <div class="registry-icons">
-                <div class="registry-icon">🔧</div>
-                <div class="registry-icon">🥛</div>
-                <div class="registry-icon">🍰</div>
-                <div class="registry-icon">☕</div>
-                <div class="registry-icon">🎨</div>
+            <div class="registry-icons" role="group" aria-label="상품 카테고리">
+                <div class="registry-icon registry-icon-utensil" role="button" tabindex="0" aria-label="조리 도구">
+                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+                        <path d="M30 12L30 52C30 54 28 56 26 56C24 56 22 54 22 52L22 12" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <ellipse cx="26" cy="15" rx="6" ry="4" fill="currentColor"/>
+                        <path d="M20 15L32 15" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="registry-icon registry-icon-noodle" role="button" tabindex="0" aria-label="면류 요리">
+                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+                        <ellipse cx="32" cy="40" rx="16" ry="6" fill="#D4914E"/>
+                        <path d="M16 34c0-2 2-4 4-4h24c2 0 4 2 4 4v6H16v-6z" fill="#D4914E"/>
+                        <rect x="20" y="32" width="1" height="8" fill="#8B4513"/>
+                        <rect x="24" y="32" width="1" height="8" fill="#8B4513"/>
+                        <rect x="28" y="32" width="1" height="8" fill="#8B4513"/>
+                        <rect x="32" y="32" width="1" height="8" fill="#8B4513"/>
+                        <rect x="36" y="32" width="1" height="8" fill="#8B4513"/>
+                        <rect x="40" y="32" width="1" height="8" fill="#8B4513"/>
+                        <rect x="44" y="32" width="1" height="8" fill="#8B4513"/>
+                        <path d="M45 25L48 35" stroke="#8B4513" stroke-width="2" fill="none"/>
+                        <path d="M48 25L51 35" stroke="#8B4513" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="registry-icon registry-icon-cake" role="button" tabindex="0" aria-label="디저트 케이크">
+                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+                        <path d="M18 35L46 35L44 50L20 50Z" fill="#8B4513"/>
+                        <rect x="20" y="30" width="24" height="5" fill="#D2691E"/>
+                        <rect x="22" y="25" width="20" height="5" fill="#8B4513"/>
+                        <rect x="24" y="20" width="16" height="5" fill="#F5DEB3"/>
+                        <circle cx="28" cy="17" r="2" fill="#DC143C"/>
+                        <circle cx="36" cy="17" r="2" fill="#DC143C"/>
+                        <path d="M18 35L20 50L22 35" fill="#654321"/>
+                        <path d="M42 35L44 50L46 35" fill="#654321"/>
+                    </svg>
+                </div>
+                <div class="registry-icon registry-icon-coffee" role="button" tabindex="0" aria-label="커피 음료">
+                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+                        <ellipse cx="32" cy="45" rx="14" ry="3" fill="#E8E8E8"/>
+                        <path d="M18 28h28c2 0 4 2 4 4v10c0 3-3 6-6 6H24c-3 0-6-3-6-6V32c0-2 2-4 4-4z" fill="white"/>
+                        <path d="M20 30h24v10c0 2-2 4-4 4H24c-2 0-4-2-4-4V30z" fill="#8B4513"/>
+                        <path d="M46 32h4c2 0 4 2 4 4v2c0 2-2 4-4 4h-4" fill="none" stroke="white" stroke-width="2"/>
+                        <path d="M24 20c0-1 1-2 2-2s2 1 2 2M30 20c0-1 1-2 2-2s2 1 2 2M36 20c0-1 1-2 2-2s2 1 2 2" fill="none" stroke="white" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div class="registry-icon registry-icon-map" role="button" tabindex="0" aria-label="위치 및 정보">
+                    <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
+                        <rect x="16" y="20" width="32" height="24" rx="2" fill="currentColor"/>
+                        <path d="M20 24h24M20 28h24M20 32h24M20 36h16" stroke="white" stroke-width="1"/>
+                        <circle cx="40" cy="34" r="3" fill="white"/>
+                        <path d="M16 20L48 20L44 16L20 16Z" fill="currentColor"/>
+                        <rect x="22" y="12" width="20" height="4" fill="currentColor"/>
+                    </svg>
+                </div>
             </div>
 
             <button class="registry-btn" onclick="handleStoreOwnerAction('/products/create')">상품등록</button>
