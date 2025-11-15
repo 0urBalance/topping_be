@@ -176,7 +176,9 @@ public class KakaoService {
 			email = jsonNode.get("kakao_account").get("email").asText();
 		}
 
-		log.info("카카오 사용자 정보 획득: ID={}, nickname={}, email={}", kakaoId, nickname, email);
+		log.info("카카오 사용자 정보 획득 성공 - kakaoId: {}, nickname: {}, hasEmail: {}", 
+			kakaoId, nickname, email != null);
+		log.debug("카카오 사용자 상세 정보 - email: {}", email);
 		return new KakaoUserInfoDto(kakaoId, nickname, email);
 	}
 
@@ -211,8 +213,10 @@ public class KakaoService {
 		User newUser = createNewUserFromKakao(kakaoUserInfo);
 		User savedUser = userRepository.save(newUser);
 		
-		log.info("카카오 신규 사용자 생성: {}", savedUser.getEmail());
-		return new UserResolution(savedUser, !kakaoUserInfo.hasValidEmail(), false);
+		boolean placeholderEmail = !kakaoUserInfo.hasValidEmail();
+		log.info("카카오 신규 사용자 생성 완료 - email: {}, placeholderEmail: {}", 
+			savedUser.getEmail(), placeholderEmail);
+		return new UserResolution(savedUser, placeholderEmail, false);
 	}
 
 	/**
@@ -261,7 +265,8 @@ public class KakaoService {
 			SecurityContextHolder.getContext()
 		);
 		
-		log.debug("사용자 세션 인증 완료 - 세션 ID: {}, 사용자: {}", request.getSession().getId(), user.getEmail());
+		log.info("카카오 로그인 세션 인증 완료 - sessionId: {}, email: {}, kakaoId: {}", 
+			request.getSession().getId(), user.getEmail(), user.getKakaoId());
 	}
 
 	private String generatePlaceholderEmail(Long kakaoId) {
