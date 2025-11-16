@@ -119,24 +119,52 @@ function showEmailResult(message, type) {
 /* ===== SOCIAL LOGIN FUNCTIONS ===== */
 
 function loginWithKakao() {
-    // Get Kakao API key from template or meta tag
-    const restApiKey = document.querySelector('meta[name="kakao-rest-api-key"]')?.getAttribute('content') || 
-                     window.kakaoRestApiKey || '';
-    const redirectUri = document.querySelector('meta[name="kakao-redirect-uri"]')?.getAttribute('content') || 
-                       window.kakaoRedirectUri || '';
+    try {
+        console.log('카카오 로그인 시작...');
+        
+        // Get Kakao API key from template or meta tag
+        const restApiKey = document.querySelector('meta[name="kakao-rest-api-key"]')?.getAttribute('content') || 
+                         window.kakaoRestApiKey || '';
+        const redirectUri = document.querySelector('meta[name="kakao-redirect-uri"]')?.getAttribute('content') || 
+                           window.kakaoRedirectUri || '';
 
-    if (!restApiKey || !redirectUri) {
-        console.error('Kakao login configuration missing');
-        showError('카카오 로그인 설정이 올바르지 않습니다.');
-        return;
+        console.log('카카오 로그인 설정 확인:', { hasApiKey: !!restApiKey, hasRedirectUri: !!redirectUri });
+
+        if (!restApiKey || !redirectUri) {
+            console.error('Kakao login configuration missing:', { restApiKey, redirectUri });
+            showError('카카오 로그인 설정이 올바르지 않습니다. 관리자에게 문의해주세요.');
+            return;
+        }
+
+        // Show loading state
+        const loginBtn = document.querySelector('.social-btn.kakao');
+        if (loginBtn) {
+            loginBtn.disabled = true;
+            loginBtn.textContent = '카카오 로그인 중...';
+        }
+
+        const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize` +
+            `?client_id=${restApiKey}` +
+            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+            `&response_type=code`;
+
+        console.log('카카오 인증 페이지로 이동:', kakaoAuthUrl);
+        
+        setTimeout(() => {
+            window.location.href = kakaoAuthUrl;
+        }, 100);
+        
+    } catch (error) {
+        console.error('카카오 로그인 시작 중 오류 발생:', error);
+        showError('카카오 로그인 중 오류가 발생했습니다. 페이지를 새로고침한 후 다시 시도해주세요.');
+        
+        // Reset button state
+        const loginBtn = document.querySelector('.social-btn.kakao');
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = '카카오로 로그인';
+        }
     }
-
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize` +
-        `?client_id=${restApiKey}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=code`;
-
-    window.location.href = kakaoAuthUrl;
 }
 
 function loginWithNaver() {

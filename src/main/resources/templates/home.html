@@ -68,14 +68,77 @@
         .notification-banner {
             max-width: 960px;
             margin: 20px auto;
-            padding: 14px 20px;
-            border-radius: 8px;
+            padding: 16px 20px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
-            font-size: 15px;
-            line-height: 1.4;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            animation: slideInFromTop 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .notification-banner.auto-dismiss {
+            animation: slideInFromTop 0.3s ease-out, fadeOut 0.5s ease-in 7.5s forwards;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
         }
 
         .notification-banner.success {
@@ -1419,9 +1482,21 @@
 
 <!-- Main Content -->
 <main id="main-content" class="main-content">
-    <div th:if="${kakaoLoginMessage}" class="notification-banner" th:classappend="${kakaoEmailNotice} ? ' warning' : ' success'">
-        <span th:text="${kakaoLoginMessage}">카카오 로그인 안내 메시지</span>
-        <a th:if="${kakaoEmailNotice}" href="/mypage" class="notification-action">이메일 등록하기</a>
+    <div th:if="${kakaoLoginMessage}" 
+         class="notification-banner auto-dismiss" 
+         th:classappend="${kakaoEmailNotice} ? ' warning' : ' success'"
+         data-auto-dismiss="8000">
+        <div class="notification-content">
+            <span class="notification-icon" th:classappend="${kakaoEmailNotice} ? ' warning-icon' : ' success-icon'">
+                <span th:if="${kakaoEmailNotice}" class="material-symbols-outlined">warning</span>
+                <span th:if="${!kakaoEmailNotice}" class="material-symbols-outlined">check_circle</span>
+            </span>
+            <span class="notification-text" th:text="${kakaoLoginMessage}">카카오 로그인 안내 메시지</span>
+            <a th:if="${kakaoEmailNotice}" href="/mypage/profile" class="notification-action">이메일 등록하기</a>
+        </div>
+        <button class="notification-close" onclick="dismissNotification(this.parentElement)">
+            <span class="material-symbols-outlined">close</span>
+        </button>
     </div>
 
     <!-- Hero Section -->
@@ -2130,6 +2205,35 @@
         }
     }
 
+    // Notification functionality
+    function initializeNotifications() {
+        // Auto-dismiss notifications
+        const notifications = document.querySelectorAll('.notification-banner.auto-dismiss');
+        
+        notifications.forEach(notification => {
+            const dismissTime = parseInt(notification.dataset.autoDismiss) || 8000;
+            
+            setTimeout(() => {
+                dismissNotification(notification);
+            }, dismissTime);
+        });
+    }
+    
+    function dismissNotification(element) {
+        if (!element) return;
+        
+        element.style.animation = 'fadeOut 0.3s ease-in forwards';
+        
+        setTimeout(() => {
+            if (element && element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        }, 300);
+    }
+    
+    // Make function globally available
+    window.dismissNotification = dismissNotification;
+
     // Add CSS for button pulse animation
     const additionalStyles = document.createElement('style');
     additionalStyles.textContent = `
@@ -2158,6 +2262,9 @@
         
         // Initialize FAQ functionality
         initializeFAQ();
+        
+        // Initialize notification functionality
+        initializeNotifications();
 
         // Add event delegation for category filtering buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
