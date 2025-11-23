@@ -129,8 +129,8 @@ function resetAllMenuImages() {
         'menu-home': '/image/sidebar/icon_home_default.png',
         'menu-explore': '/image/sidebar/icon_collabo_default.png',
         'menu-chat': '/image/sidebar/icon_chat_default.png',
-        'menu-mypage': '/image/sidebar/icon_mypage_default.png',
-        'menu-signup': '/image/sidebar/icon_join_default.png'
+        'menu-mypage': '/image/sidebar/myPage.png',
+        'menu-signup': '/image/sidebar/sign_in.png'
     };
     
     Object.entries(menuConfigs).forEach(([className, defaultSrc]) => {
@@ -357,12 +357,12 @@ function updateMenuIcons() {
         },
         'menu-mypage': {
             paths: ['/mypage'],
-            default: '/image/sidebar/icon_mypage_default.png',
-            pressed: '/image/sidebar/icon_mypage_pressed.png'
+            default: '/image/sidebar/myPage.png',
+            pressed: '/image/sidebar/myPage.png'
         },
         'menu-signup': {
             paths: ['/signup'],
-            default: '/image/sidebar/icon_join_default.png',
+            default: '/image/sidebar/sign_in.png',
             pressed: '/image/sidebar/icon_join_pressed.png'
         }
     };

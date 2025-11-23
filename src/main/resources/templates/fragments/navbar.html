@@ -121,7 +121,7 @@
                     <a href="/mypage" class="menu-link menu-mypage"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/mypage') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined">person</span>-->
-                        <img th:src="@{/image/sidebar/icon_mypage_default.png}" 
+                        <img th:src="@{/image/sidebar/myPage.png}"
                              alt="MyPage" 
                              class="menu-icon">
                     </a>
@@ -139,7 +139,7 @@
                     <a href="/signup/step/1" class="menu-link menu-signup"
                        th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith('/signup') ? 'active' : ''}">
 <!--                        <span class="material-symbols-outlined">person_add</span>-->
-                        <img th:src="@{/image/sidebar/icon_join_default.png}" 
+                        <img th:src="@{/image/sidebar/sign_in.png}"
                              alt="Join" 
                              class="menu-icon">
                     </a>
