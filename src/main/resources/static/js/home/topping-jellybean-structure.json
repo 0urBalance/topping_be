@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "exportedAt": "2025-12-02T07:43:19.921Z",
+    "componentName": "topping-jellybean",
+    "totalElements": 7,
+    "nestingDepth": 2,
+    "plugin": "Figma to JSON Exporter"
+  },
+  "designTokens": {
+    "colors": {},
+    "fonts": {},
+    "spacing": {
+      "gap-10": "10px"
+    },
+    "effects": {}
+  },
+  "structure": {
+    "name": "topping-jellybean",
+    "type": "FRAME",
+    "size": {
+      "w": 2640,
+      "h": 1226
+    },
+    "styles": {
+      "layout": {
+        "direction": "row",
+        "gap": 10,
+        "align": {
+          "main": "start",
+          "cross": "start"
+        }
+      }
+    },
+    "children": [
+      {
+        "name": "pattern-wh",
+        "type": "INSTANCE",
+        "size": {
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "name": "pattern-wh",
+        "type": "INSTANCE",
+        "size": {
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "name": "pattern-wh",
+        "type": "INSTANCE",
+        "size": {
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "name": "pattern-wh",
+        "type": "INSTANCE",
+        "size": {
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "name": "pattern-wh",
+        "type": "INSTANCE",
+        "size": {
+          "w": 0,
+          "h": 0
+        }
+      },
+      {
+        "name": "pattern-wh",
+        "type": "INSTANCE",
+        "size": {
+          "w": 0,
+          "h": 0
+        }
+      }
+    ]
+  },
+  "summary": {
+    "components": 0,
+    "instances": 6,
+    "frames": 1,
+    "texts": 0,
+    "hasAutoLayout": true,
+    "hasEffects": false
+  }
+}
