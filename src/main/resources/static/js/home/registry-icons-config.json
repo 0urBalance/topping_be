@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Registry icons configuration mapping to structure JSON files"
+  },
+  "icons": [
+    {
+      "id": "aryeong",
+      "label": "아령",
+      "className": "registry-icon-aryeong",
+      "structureFile": "/js/home/aryeong-structure.json",
+      "styling": {
+        "background": "#B8E6D3",
+        "color": "#2D5016"
+      }
+    },
+    {
+      "id": "raman",
+      "label": "라면",
+      "className": "registry-icon-raman",
+      "structureFile": "/js/home/raman-structure.json",
+      "styling": {
+        "background": "#F5E6D3",
+        "color": "#8B4513"
+      }
+    },
+    {
+      "id": "cake",
+      "label": "케이크",
+      "className": "registry-icon-cake",
+      "structureFile": "/js/home/cake-structure.json",
+      "styling": {
+        "background": "#FFE066",
+        "color": "#8B4513"
+      }
+    },
+    {
+      "id": "coffee",
+      "label": "커피",
+      "className": "registry-icon-coffee",
+      "structureFile": "/js/home/coffee-structure.json",
+      "styling": {
+        "background": "#2E7D32",
+        "color": "#ffffff"
+      }
+    },
+    {
+      "id": "tshort",
+      "label": "티셔츠",
+      "className": "registry-icon-tshort",
+      "structureFile": "/js/home/t-short-structure.json",
+      "styling": {
+        "background": "#FFFFFF",
+        "color": "#666666"
+      }
+    }
+  ],
+  "background": {
+    "id": "jellybean-bg",
+    "structureFiles": [
+      "/js/home/topping-jellybean-bg-structure.json",
+      "/js/home/topping-jellybean-structure.json"
+    ],
+    "targetSelector": ".registry-section"
+  }
+}

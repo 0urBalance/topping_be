@@ -196,12 +196,17 @@
             pointer-events: none;
         }
 
-        /* Modern Hero Container */
+        /* Modern Hero Container - Fill hero-section */
         .hero-container {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 10;
-            max-width: var(--container-lg);
-            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
         }
 
@@ -246,8 +251,8 @@
         .floating-element:nth-child(1) {
             top: var(--spacing-8);
             left: var(--spacing-8);
-            width: 48px;
-            height: 48px;
+            width: 200px;
+            height: 200px;
             background: linear-gradient(45deg, #fbbf24, #f59e0b);
             border: 4px solid rgba(255, 255, 255, 0.2);
             transform: rotate(12deg);
@@ -704,158 +709,85 @@
 
         /* Registry Section - Enhanced Brown Theme */
         .registry-section {
-            background: linear-gradient(135deg, #8B4513 0%, #A0522D 30%, #8B4513 70%, #A0522D 100%);
-            padding: 90px 0;
+            background: #87604F; /* 단색 브라운 (디자인 매칭) */
+            padding: 30px 0; /* Reduced from 90px for compact layout */
             text-align: center;
             color: white;
             position: relative;
             overflow: hidden;
         }
 
+        /* 왼쪽 상단 - 보라색 블롭 */
         .registry-section::before {
             content: '';
             position: absolute;
-            top: -50px;
-            left: 0;
-            right: 0;
-            height: 100px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V60c60,0,120-60,180-60s120,60,180,60,120-60,180-60,120,60,180,60,120-60,180-60,120,60,180,60,120-60,180-60V0Z" fill="%23ffffff"/></svg>') repeat-x;
-            background-size: 1200px 120px;
+            top: 50px;
+            left: 50px;
+            width: 150px;
+            height: 120px;
+            background: #5D4E6D;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            filter: blur(2px);
+            opacity: 0.6;
         }
 
-        /* Decorative Chocolate Bar Elements with Grid Pattern */
+        /* 오른쪽 - 연한 파란색 블롭 */
         .registry-section::after {
             content: '';
             position: absolute;
-            bottom: 50px;
-            right: 80px;
-            width: 160px;
-            height: 100px;
-            background: 
-                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                #6D4C41;
-            background-size: 8px 8px, 8px 8px, 100% 100%;
-            border-radius: 8px;
-            transform: rotate(25deg);
-            box-shadow: 
-                0 8px 20px rgba(0,0,0,0.3),
-                inset 0 2px 4px rgba(255,255,255,0.1),
-                inset 0 -2px 4px rgba(0,0,0,0.2);
-            z-index: 1;
+            top: 200px;
+            right: 180px;
+            width: 100px;
+            height: 80px;
+            background: #A4C2D8;
+            border-radius: 50% 60% 40% 50% / 60% 50% 50% 40%;
+            filter: blur(2px);
+            opacity: 0.5;
         }
 
+        /* 중앙 왼쪽 - 갈색 블롭 */
         .registry-container::before {
             content: '';
             position: absolute;
-            top: 80px;
-            right: 40px;
-            width: 120px;
-            height: 75px;
-            background: 
-                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                #8D6E63;
-            background-size: 6px 6px, 6px 6px, 100% 100%;
-            border-radius: 6px;
-            transform: rotate(-15deg);
-            box-shadow: 
-                0 6px 15px rgba(0,0,0,0.25),
-                inset 0 1px 3px rgba(255,255,255,0.1),
-                inset 0 -1px 3px rgba(0,0,0,0.2);
-            z-index: 2;
+            top: 120px;
+            left: 180px;
+            width: 200px;
+            height: 150px;
+            background: #6B5547;
+            border-radius: 50% 60% 70% 30% / 50% 40% 60% 50%;
+            filter: blur(3px);
+            opacity: 0.4;
+            z-index: 0;
         }
 
+        /* 하단 - 어두운 적갈색 블롭 */
         .registry-container::after {
             content: '';
             position: absolute;
-            bottom: 30px;
-            right: 220px;
-            width: 100px;
-            height: 60px;
-            background: 
-                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                #5D4037;
-            background-size: 5px 5px, 5px 5px, 100% 100%;
-            border-radius: 4px;
-            transform: rotate(45deg);
-            box-shadow: 
-                0 4px 12px rgba(0,0,0,0.25),
-                inset 0 1px 2px rgba(255,255,255,0.1),
-                inset 0 -1px 2px rgba(0,0,0,0.2);
-            z-index: 3;
-        }
-
-        /* Additional chocolate piece */
-        .registry-section:before {
-            content: '';
-            position: absolute;
             bottom: 100px;
-            right: 150px;
-            width: 80px;
-            height: 50px;
-            background: 
-                linear-gradient(45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                linear-gradient(-45deg, transparent 25%, #3E2723 25%, #3E2723 50%, transparent 50%, transparent 75%, #3E2723 75%),
-                #4A2C2A;
-            background-size: 4px 4px, 4px 4px, 100% 100%;
-            border-radius: 3px;
-            transform: rotate(-35deg);
-            box-shadow: 
-                0 3px 8px rgba(0,0,0,0.2),
-                inset 0 1px 2px rgba(255,255,255,0.1);
-            z-index: 4;
+            left: 100px;
+            width: 120px;
+            height: 100px;
+            background: #6D3B3B;
+            border-radius: 60% 40% 50% 60% / 40% 60% 40% 60%;
+            filter: blur(2px);
+            opacity: 0.5;
+            z-index: 0;
         }
 
-        /* Background Decorative Elements */
+
+        /* 오른쪽 하단 - 어두운 적갈색 블롭 */
         .registry-title::before {
             content: '';
             position: absolute;
-            top: -40px;
-            right: 100px;
-            width: 50px;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(45deg);
-            z-index: 0;
-        }
-        
-        .registry-title::after {
-            content: '';
-            position: absolute;
-            top: -10px;
-            right: 160px;
-            width: 35px;
-            height: 55px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(30deg);
-            z-index: 0;
-        }
-
-        .registry-subtitle::before {
-            content: '';
-            position: absolute;
-            bottom: -150px;
-            left: -80px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            z-index: 0;
-        }
-        
-        .registry-subtitle::after {
-            content: '';
-            position: absolute;
-            bottom: -100px;
-            left: -40px;
-            width: 70px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
+            bottom: -80px;
+            right: 60px;
+            width: 180px;
+            height: 140px;
+            background: #7D3E3E;
+            border-radius: 50% 40% 60% 50% / 60% 50% 40% 60%;
+            filter: blur(3px);
+            opacity: 0.4;
             z-index: 0;
         }
 
@@ -888,25 +820,38 @@
 
         .registry-icons {
             display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-bottom: 50px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap; /* Force single row on desktop - won't wrap */
+            justify-content: space-evenly;
+            gap: 5px; /* Reduced from 25px for compact layout */
+            margin-bottom: 20px; /* Reduced from 50px */
             align-items: center;
         }
 
         .registry-icon {
-            width: 110px;
-            height: 110px;
+            width: 140px; /* Fixed size - reasonable for desktop */
+            height: 140px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2); /* 그림자 강화 */
             position: relative;
-            z-index: 15;
+            z-index: 15; /* 블롭보다 위에 표시 */
+        }
+
+        .registry-icon svg {
+            width: 60%; /* Scale proportionally with icon size */
+            height: 60%;
+        }
+
+        /* Image sizing for registry icons */
+        .registry-icon img {
+            width: 60%; /* Scale proportionally with icon size */
+            height: 60%;
+            object-fit: contain;
+            pointer-events: none; /* Prevent image from intercepting clicks */
         }
 
         .registry-icon-utensil { 
@@ -975,9 +920,42 @@
             background: #1B5E20; 
         }
         
-        .registry-icon-map:hover { 
-            background: #EEEEEE; 
+        .registry-icon-map:hover {
+            background: #EEEEEE;
             border-color: rgba(139, 69, 19, 0.4);
+        }
+
+        /* 새로운 아이콘 스타일 (JSON-driven rendering) */
+        .registry-icon-aryeong {
+            background: #E3F2FD;
+            color: #1565C0;
+            border: none;
+        }
+
+        .registry-icon-aryeong:hover {
+            background: #BBDEFB;
+            transform: translateY(-8px) scale(1.05) rotate(5deg);
+        }
+
+        .registry-icon-raman {
+            background: #FFF3E0;
+            color: #E65100;
+            border: none;
+        }
+
+        .registry-icon-raman:hover {
+            background: #FFE0B2;
+        }
+
+        .registry-icon-tshort {
+            background: #FCE4EC;
+            color: #C2185B;
+            border: none;
+        }
+
+        .registry-icon-tshort:hover {
+            background: #F8BBD0;
+            transform: translateY(-8px) scale(1.05) rotate(-3deg);
         }
 
         /* Enhanced Registry Button */
@@ -1043,27 +1021,30 @@
         /* FAQ Section */
         .faq-section {
             background: #f8f9fa;
-            padding: 80px 0;
+            padding: 60px 0; /* Reduced from 80px for tighter layout */
             color: #333;
         }
 
-        /* FAQ Section - Enhanced Grid Layout */
+        /* FAQ Section - Vertical Stacked Layout */
         .faq-container {
             max-width: var(--container-xl);
             margin: 0 auto;
             padding: 0 var(--spacing-4);
-            display: grid;
-            grid-template-columns: repeat(12, minmax(0, 1fr));
-            gap: var(--spacing-12);
-            align-items: start;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-16); /* 64px gap between content and illustration */
+            align-items: center;
         }
 
         .faq-content {
-            grid-column: span 8;
+            width: 100%;
+            max-width: 800px; /* Constrain FAQ content width for readability */
         }
 
         .faq-illustration {
-            grid-column: span 4;
+            width: 100%;
+            max-width: 500px; /* Constrain illustration width */
+            text-align: center;
         }
 
 
@@ -1249,38 +1230,112 @@
         }
 
         .faq-illustration {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
             text-align: center;
             position: relative;
         }
 
-        .faq-character {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .faq-chat-bubble {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            font-size: 14px;
-            color: #333;
-            max-width: 200px;
-        }
-
-        .faq-chat-bubble::before {
+        .faq-illustration::before {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 30px;
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid white;
+            width: 350px;
+            height: 350px;
+            background: rgba(219, 234, 254, 0.5);
+            border-radius: 50%;
+            top: -50px;
+            left: -30px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .faq-illustration::after {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            background: rgba(254, 243, 199, 0.6);
+            border-radius: 50%;
+            bottom: -40px;
+            right: 50px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .faq-character {
+            max-width: 420px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 3;
+        }
+
+        .faq-cta-heading {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+            line-height: 1.5;
+            margin: 0;
+            text-align: left;
+        }
+
+        .faq-register-btn {
+            background: #87604F;
+            color: white;
+            border: none;
+            padding: 18px 90px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(135, 96, 79, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            align-self: flex-start;
+        }
+
+        .faq-register-btn:hover {
+            background: #6D4C41;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(135, 96, 79, 0.4);
+        }
+
+        .faq-register-btn:focus {
+            outline: 2px solid rgba(135, 96, 79, 0.5);
+            outline-offset: 2px;
+        }
+
+        .faq-store-count {
+            margin: 0;
+            font-size: 14px;
+            color: #87604F;
+            text-align: left;
+        }
+
+        .faq-illustration-content {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 70px;
+            padding: 60px 80px;
+            flex-wrap: nowrap;
+            position: relative;
+            z-index: 2;
+        }
+
+        .faq-text-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 28px;
+            min-width: 380px;
         }
 
         /* Enhanced Responsive Design */
@@ -1379,7 +1434,7 @@
             }
 
             .registry-section {
-                padding: 60px 0;
+                padding: 20px 0; /* Reduced from 60px for compact mobile layout */
             }
             
             .registry-title {
@@ -1393,19 +1448,14 @@
             }
             
             .registry-icons {
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-bottom: 40px;
+                flex-wrap: wrap; /* Allow wrapping on mobile */
+                gap: 12px; /* Slightly larger gap on mobile */
+                margin-bottom: 15px; /* Reduced from 40px */
             }
-            
+
             .registry-icon {
-                width: 80px;
+                width: 80px; /* Smaller on mobile */
                 height: 80px;
-            }
-            
-            .registry-icon svg {
-                width: 28px;
-                height: 28px;
             }
             
             .registry-btn {
@@ -1436,29 +1486,79 @@
                 display: none;
             }
 
-            .faq-container {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-8);
+            .faq-section {
+                padding: 40px 0; /* Reduced from 60px for mobile */
             }
 
-            .faq-content,
-            .faq-illustration {
-                grid-column: span 12;
+            .faq-container {
+                gap: var(--spacing-12); /* 48px gap - increased for better separation */
             }
-            
+
+            .faq-content {
+                max-width: 100%; /* Full width on mobile */
+            }
+
+            .faq-illustration {
+                max-width: 100%; /* Full width on mobile */
+                padding: 20px; /* Add padding */
+            }
+
+            .faq-illustration-content {
+                flex-direction: column;
+                gap: 30px;
+                padding: 30px 20px;
+            }
+
+            .faq-text-group {
+                gap: 20px;
+                min-width: auto;
+                align-items: center;
+                width: 100%;
+            }
+
+            .faq-character {
+                max-width: 280px;
+            }
+
+            .faq-cta-heading {
+                font-size: 24px;
+                text-align: center;
+            }
+
+            .faq-register-btn {
+                padding: 16px 70px;
+                font-size: 16px;
+                align-self: center;
+            }
+
+            .faq-store-count {
+                font-size: 13px;
+                text-align: center;
+            }
+
+            .faq-illustration::before {
+                width: 200px;
+                height: 200px;
+                top: -30px;
+                left: -50px;
+                opacity: 0.3;
+            }
+
+            .faq-illustration::after {
+                width: 150px;
+                height: 150px;
+                bottom: -20px;
+                right: -30px;
+                opacity: 0.3;
+            }
+
             .faq-categories {
                 gap: 8px;
             }
-            
+
             .faq-category-btn {
                 font-size: 12px;
                 padding: 6px 12px;
-            }
-            
-            .faq-chat-bubble {
-                position: static;
-                margin: 20px auto;
-                max-width: 280px;
             }
         }
     </style>
@@ -1508,14 +1608,14 @@
         <div class="floating-elements-lottie" id="home-interaction-animation"></div>
         
         <!-- Modern Decorative Elements -->
-        <div class="floating-elements">
-            <div class="floating-element"></div>
-            <div class="floating-element"></div>
-            <div class="floating-element">💬</div>
-            <div class="floating-element"></div>
-            <div class="floating-element"></div>
-            <div class="floating-element"></div>
-        </div>
+<!--        <div class="floating-elements">-->
+<!--            <div class="floating-element"></div>-->
+<!--            <div class="floating-element"></div>-->
+<!--            <div class="floating-element">💬</div>-->
+<!--            <div class="floating-element"></div>-->
+<!--            <div class="floating-element"></div>-->
+<!--            <div class="floating-element"></div>-->
+<!--        </div>-->
         
         <div class="hero-container">
             <div class="hero-content">
@@ -1549,9 +1649,9 @@
                     <h3 class="category-title">인기 키워드</h3>
 
                     <div class="category-filters">
-                        <button class="category-btn" 
-                                th:classappend="${selectedCategory == null ? 'active' : ''}"
-                                data-category="">전체</button>
+<!--                        <button class="category-btn" -->
+<!--                                th:classappend="${selectedCategory == null ? 'active' : ''}"-->
+<!--                                data-category="">전체</button>-->
                         <button th:each="category : ${categories}"
                                 class="category-btn"
                                 th:classappend="${category.name() == selectedCategory ? 'active' : ''}"
@@ -1562,19 +1662,19 @@
                     <div class="subcategory-grid">
                         <div class="subcategory-item">
                             <div class="subcategory-icon">☕</div>
-                            <div>커피 / 아메리카노</div>
+                            <div>커피</div>
                         </div>
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">🍃</div>
-                            <div>차류 / 차류</div>
+                            <div class="subcategory-icon">🍗</div>
+                            <div>치킨</div>
                         </div>
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">🥤</div>
-                            <div>음료 / 음료</div>
+                            <div class="subcategory-icon">🍕</div>
+                            <div>피자</div>
                         </div>
                         <div class="subcategory-item">
-                            <div class="subcategory-icon">🧀</div>
-                            <div>무스 / 플레치</div>
+                            <div class="subcategory-icon">🥗</div>
+                            <div>샐러드</div>
                         </div>
                     </div>
                 </div>
@@ -1652,62 +1752,60 @@
             <h2 class="registry-title">Registry My ITEM</h2>
             <p class="registry-subtitle">우리 매장과 어울리는 상품을 직접 찾아보세요!</p>
 
+            <!-- 정적 이미지 렌더링 -->
             <div class="registry-icons" role="group" aria-label="상품 카테고리">
-                <div class="registry-icon registry-icon-utensil" role="button" tabindex="0" aria-label="조리 도구">
-                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
-                        <path d="M30 12L30 52C30 54 28 56 26 56C24 56 22 54 22 52L22 12" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <ellipse cx="26" cy="15" rx="6" ry="4" fill="currentColor"/>
-                        <path d="M20 15L32 15" stroke="currentColor" stroke-width="2"/>
-                    </svg>
+                <!-- 아령 (Dumbbells) -->
+                <div class="registry-icon registry-icon-aryeong"
+                     role="button"
+                     tabindex="0"
+                     aria-label="아령 상품 찾기"
+                     onclick="handleStoreOwnerAction('/products/create')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStoreOwnerAction('/products/create');}">
+                    <img src="/image/home/aryeong.png" alt="아령 아이콘" aria-hidden="true">
                 </div>
-                <div class="registry-icon registry-icon-noodle" role="button" tabindex="0" aria-label="면류 요리">
-                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
-                        <ellipse cx="32" cy="40" rx="16" ry="6" fill="#D4914E"/>
-                        <path d="M16 34c0-2 2-4 4-4h24c2 0 4 2 4 4v6H16v-6z" fill="#D4914E"/>
-                        <rect x="20" y="32" width="1" height="8" fill="#8B4513"/>
-                        <rect x="24" y="32" width="1" height="8" fill="#8B4513"/>
-                        <rect x="28" y="32" width="1" height="8" fill="#8B4513"/>
-                        <rect x="32" y="32" width="1" height="8" fill="#8B4513"/>
-                        <rect x="36" y="32" width="1" height="8" fill="#8B4513"/>
-                        <rect x="40" y="32" width="1" height="8" fill="#8B4513"/>
-                        <rect x="44" y="32" width="1" height="8" fill="#8B4513"/>
-                        <path d="M45 25L48 35" stroke="#8B4513" stroke-width="2" fill="none"/>
-                        <path d="M48 25L51 35" stroke="#8B4513" stroke-width="2" fill="none"/>
-                    </svg>
+
+                <!-- 라면 (Noodles) -->
+                <div class="registry-icon registry-icon-raman"
+                     role="button"
+                     tabindex="0"
+                     aria-label="라면 상품 찾기"
+                     onclick="handleStoreOwnerAction('/products/create')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStoreOwnerAction('/products/create');}">
+                    <img src="/image/home/raman.png" alt="라면 아이콘" aria-hidden="true">
                 </div>
-                <div class="registry-icon registry-icon-cake" role="button" tabindex="0" aria-label="디저트 케이크">
-                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
-                        <path d="M18 35L46 35L44 50L20 50Z" fill="#8B4513"/>
-                        <rect x="20" y="30" width="24" height="5" fill="#D2691E"/>
-                        <rect x="22" y="25" width="20" height="5" fill="#8B4513"/>
-                        <rect x="24" y="20" width="16" height="5" fill="#F5DEB3"/>
-                        <circle cx="28" cy="17" r="2" fill="#DC143C"/>
-                        <circle cx="36" cy="17" r="2" fill="#DC143C"/>
-                        <path d="M18 35L20 50L22 35" fill="#654321"/>
-                        <path d="M42 35L44 50L46 35" fill="#654321"/>
-                    </svg>
+
+                <!-- 케이크 (Cake) -->
+                <div class="registry-icon registry-icon-cake"
+                     role="button"
+                     tabindex="0"
+                     aria-label="케이크 상품 찾기"
+                     onclick="handleStoreOwnerAction('/products/create')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStoreOwnerAction('/products/create');}">
+                    <img src="/image/home/cake.png" alt="케이크 아이콘" aria-hidden="true">
                 </div>
-                <div class="registry-icon registry-icon-coffee" role="button" tabindex="0" aria-label="커피 음료">
-                    <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
-                        <ellipse cx="32" cy="45" rx="14" ry="3" fill="#E8E8E8"/>
-                        <path d="M18 28h28c2 0 4 2 4 4v10c0 3-3 6-6 6H24c-3 0-6-3-6-6V32c0-2 2-4 4-4z" fill="white"/>
-                        <path d="M20 30h24v10c0 2-2 4-4 4H24c-2 0-4-2-4-4V30z" fill="#8B4513"/>
-                        <path d="M46 32h4c2 0 4 2 4 4v2c0 2-2 4-4 4h-4" fill="none" stroke="white" stroke-width="2"/>
-                        <path d="M24 20c0-1 1-2 2-2s2 1 2 2M30 20c0-1 1-2 2-2s2 1 2 2M36 20c0-1 1-2 2-2s2 1 2 2" fill="none" stroke="white" stroke-width="1.5"/>
-                    </svg>
+
+                <!-- 커피 (Coffee) -->
+                <div class="registry-icon registry-icon-coffee"
+                     role="button"
+                     tabindex="0"
+                     aria-label="커피 상품 찾기"
+                     onclick="handleStoreOwnerAction('/products/create')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStoreOwnerAction('/products/create');}">
+                    <img src="/image/home/coffee.png" alt="커피 아이콘" aria-hidden="true">
                 </div>
-                <div class="registry-icon registry-icon-map" role="button" tabindex="0" aria-label="위치 및 정보">
-                    <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
-                        <rect x="16" y="20" width="32" height="24" rx="2" fill="currentColor"/>
-                        <path d="M20 24h24M20 28h24M20 32h24M20 36h16" stroke="white" stroke-width="1"/>
-                        <circle cx="40" cy="34" r="3" fill="white"/>
-                        <path d="M16 20L48 20L44 16L20 16Z" fill="currentColor"/>
-                        <rect x="22" y="12" width="20" height="4" fill="currentColor"/>
-                    </svg>
+
+                <!-- 티셔츠 (T-Shirt) -->
+                <div class="registry-icon registry-icon-tshort"
+                     role="button"
+                     tabindex="0"
+                     aria-label="티셔츠 상품 찾기"
+                     onclick="handleStoreOwnerAction('/products/create')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStoreOwnerAction('/products/create');}">
+                    <img src="/image/home/t-short.png" alt="티셔츠 아이콘" aria-hidden="true">
                 </div>
             </div>
 
-            <button class="registry-btn" onclick="handleStoreOwnerAction('/products/create')">상품등록</button>
+            <button class="registry-btn" onclick="handleStoreOwnerAction('/products/create')">찾아보기</button>
         </div>
     </section>
 
@@ -1784,18 +1882,21 @@
                     </li>
                 </ul>
             </div>
-            
+
+            <!-- Moved inside container, positioned below content -->
             <div class="faq-illustration">
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 120px; margin-bottom: 20px;">🧑‍💼</div>
-                    <div class="faq-chat-bubble">
-                        나의 매장을 등록하고<br>
-                        콜라보 제안 받기!
+                <div class="faq-illustration-content">
+                    <img src="/image/home/qna.png" alt="FAQ 안내" class="faq-character">
+                    <div class="faq-text-group">
+                        <h2 class="faq-cta-heading">
+                            나의 매장을 등록하고<br>
+                            콜라보 제안 받기!
+                        </h2>
+                        <button class="faq-register-btn" onclick="handleStoreOwnerAction('/stores/register')">등록하기</button>
+                        <p class="faq-store-count">
+                            <span th:text="|${storeCount}개의|"></span> 협업상품이 콜라보를 요청하고있어요!
+                        </p>
                     </div>
-                    <button class="cta-btn" onclick="handleStoreOwnerAction('/stores/register')" style="margin-top: 30px;">매장등록</button>
-                    <p style="margin-top: 15px; font-size: 12px; color: #666;">
-                        <span th:text="|${storeCount}개의|"></span> 매장이 토핑과 함께 콜라보 중이에요!
-                    </p>
                 </div>
             </div>
         </div>
@@ -2407,5 +2508,9 @@
         }
     });
 </script>
+
+<!-- Registry Icons Dynamic Renderer (Disabled - Using static images instead) -->
+<!-- <script src="/js/registry-icons-renderer.js"></script> -->
+
 </body>
 </html>
