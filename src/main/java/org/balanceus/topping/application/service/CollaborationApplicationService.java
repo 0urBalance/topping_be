@@ -218,6 +218,28 @@ public class CollaborationApplicationService {
         if (form.getRevenueStructure() != null && !form.getRevenueStructure().isBlank()) {
             proposal.setProfitShare(form.getRevenueStructure().trim());
         }
+
+        // Handle new fields for redesigned form
+        if (form.getExpectedBenefit() != null && !form.getExpectedBenefit().isBlank()) {
+            proposal.setExpectedBenefit(form.getExpectedBenefit().trim());
+        }
+        if (form.getCollaborationStartDate() != null && !form.getCollaborationStartDate().isBlank()) {
+            try {
+                LocalDate collabStart = LocalDate.parse(form.getCollaborationStartDate());
+                proposal.setCollaborationStartDate(collabStart);
+            } catch (Exception e) {
+                log.warn("Failed to parse collaboration start date: {}", form.getCollaborationStartDate());
+            }
+        }
+        if (form.getCollaborationEndDate() != null && !form.getCollaborationEndDate().isBlank()) {
+            try {
+                LocalDate collabEnd = LocalDate.parse(form.getCollaborationEndDate());
+                proposal.setCollaborationEndDate(collabEnd);
+            } catch (Exception e) {
+                log.warn("Failed to parse collaboration end date: {}", form.getCollaborationEndDate());
+            }
+        }
+
         collaborationProposalRepository.save(proposal);
 
         try {

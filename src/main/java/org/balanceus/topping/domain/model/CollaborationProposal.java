@@ -77,6 +77,13 @@ public class CollaborationProposal {
 	@Column(length = 2000)
 	private String description;
 
+	// New fields for redesigned form
+	@Column(length = 100)
+	private String expectedBenefit;
+
+	private LocalDate collaborationStartDate;
+	private LocalDate collaborationEndDate;
+
 	@Enumerated(EnumType.STRING)
 	private CollaborationStatus status;
 

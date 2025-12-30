@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>콜라보를 제안하고 싶으신가요? - Topping</title>
-    
+
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -21,7 +21,7 @@
       gtag('js', new Date());
       gtag('config', 'G-Y1ZSWHSQD0');
     </script>
-    
+
     <!-- MANDATORY: Include framework CSS -->
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/main.css}">
@@ -29,107 +29,168 @@
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    
+
     <style>
-        .collaboration-header {
-            background: var(--primary-light);
-            padding: var(--spacing-2xl);
-            text-align: center;
+        /* Banner Styles */
+        .collaboration-banner {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
             margin-bottom: var(--spacing-xl);
-            border-radius: 12px;
         }
-        
-        .collaboration-header .icon {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 12px;
-            margin: 0 auto var(--spacing-lg);
+
+        .collaboration-banner .banner-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .collaboration-banner .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            color: var(--primary-color);
         }
-        
-        .collaboration-header h1 {
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        .collaboration-header p {
-            color: #666;
-            font-size: 1rem;
-        }
-        
-        .form-container {
-            max-width: 1200px;
-            margin: 0 auto;
+
+        .collaboration-banner .banner-content {
             background: white;
-            border-radius: 12px;
-            padding: var(--spacing-2xl);
+            padding: var(--spacing-xl) var(--spacing-2xl);
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
-        .role-section {
+
+        .collaboration-banner .banner-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .collaboration-banner .banner-text h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        .collaboration-banner .banner-text p {
+            color: #666;
+            font-size: 0.875rem;
+            margin: var(--spacing-xs) 0 0 0;
+        }
+
+        /* Form Container */
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg) var(--spacing-2xl);
+        }
+
+        /* Store Selection Section */
+        .store-selection-section {
             background: #f8f9fa;
-            border: 2px solid #e9ecef;
+            border: 1px solid #e9ecef;
             border-radius: 8px;
             padding: var(--spacing-lg);
             margin-bottom: var(--spacing-xl);
         }
-        
-        .role-section.business-owner {
-            border-color: var(--primary-color);
-            background: var(--primary-light);
-        }
-        
-        .role-section h3 {
+
+        .store-selection-section h3 {
             margin: 0 0 var(--spacing-md) 0;
             color: var(--primary-color);
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: bold;
         }
-        
+
         .store-card {
             background: white;
             border: 1px solid #dee2e6;
             border-radius: 8px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
         }
-        
+
         .store-card h4 {
-            margin: 0 0 var(--spacing-sm) 0;
-            font-size: 1.125rem;
+            margin: 0 0 var(--spacing-xs) 0;
+            font-size: 1rem;
             font-weight: bold;
         }
-        
+
         .store-card .category {
             background: #e9ecef;
             color: #495057;
-            padding: 4px 8px;
+            padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: bold;
             display: inline-block;
         }
-        
-        .searchable-select {
-            position: relative;
+
+        /* Form Group Styles */
+        .form-group {
             margin-bottom: var(--spacing-lg);
         }
-        
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: #333;
+        }
+
+        .form-label.required::before {
+            content: "*";
+            color: #dc3545;
+            margin-right: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(107, 52, 16, 0.1);
+        }
+
+        .form-hint {
+            display: block;
+            font-size: 0.813rem;
+            color: #666;
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Searchable Select */
+        .searchable-select {
+            position: relative;
+        }
+
         .searchable-select input {
             width: 100%;
             padding: var(--spacing-md);
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 1rem;
+            box-sizing: border-box;
         }
-        
+
         .searchable-select .dropdown {
             position: absolute;
             top: 100%;
@@ -144,276 +205,335 @@
             z-index: 1000;
             display: none;
         }
-        
+
         .searchable-select .dropdown.active {
             display: block;
         }
-        
+
         .searchable-select .option {
             padding: var(--spacing-md);
             cursor: pointer;
             border-bottom: 1px solid #f1f3f5;
         }
-        
+
         .searchable-select .option:hover {
             background: #f8f9fa;
         }
-        
+
         .searchable-select .option.selected {
             background: var(--primary-light);
             color: var(--primary-color);
         }
-        
-        .date-picker-container {
-            margin-bottom: var(--spacing-lg);
+
+        /* Benefit Select Styles */
+        .benefit-select-container {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
         }
-        
+
+        .benefit-select-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background: white;
+            cursor: pointer;
+        }
+
+        .benefit-select-trigger .placeholder {
+            color: #666;
+        }
+
+        .benefit-select-trigger .selected-text {
+            color: #333;
+        }
+
+        .benefit-options {
+            border-top: 1px solid #ddd;
+            background: #fafafa;
+        }
+
+        .benefit-option {
+            padding: var(--spacing-md);
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+        }
+
+        .benefit-option:last-child {
+            border-bottom: none;
+        }
+
+        .benefit-option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .benefit-option.selected {
+            background-color: var(--primary-light);
+        }
+
+        .benefit-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .benefit-subtitle {
+            font-size: 0.813rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Date Range Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        .date-range-input {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            position: relative;
+        }
+
+        .date-range-input .form-control {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .date-separator {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .calendar-icon {
+            position: absolute;
+            right: var(--spacing-md);
+            color: #666;
+            pointer-events: none;
+        }
+
+        /* Calendar Styles */
         .calendar {
             background: white;
-            border: 1px solid var(--border-color, #e9ecef);
+            border: 1px solid #e9ecef;
             border-radius: 12px;
             overflow: hidden;
             margin-top: var(--spacing-sm);
             display: none;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
+            position: absolute;
+            z-index: 1000;
+            width: 100%;
         }
-        
+
         .calendar.active {
             display: block;
-            animation: calendarSlideIn 0.2s ease-out;
         }
-        
-        @keyframes calendarSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
+
         .calendar-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-lg);
+            padding: var(--spacing-md);
             background: var(--primary-light);
-            border-bottom: 1px solid var(--border-color, #e9ecef);
+            border-bottom: 1px solid #e9ecef;
         }
-        
+
         .calendar-nav {
             background: white;
-            border: 1px solid var(--border-color, #e9ecef);
-            font-size: 1.125rem;
+            border: 1px solid #e9ecef;
+            font-size: 1rem;
             cursor: pointer;
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: 6px;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 4px;
             color: var(--primary-color);
-            transition: all 0.2s ease;
             font-weight: bold;
         }
-        
+
         .calendar-nav:hover {
             background: var(--primary-color);
             color: white;
-            transform: scale(1.05);
         }
-        
+
         .calendar-month {
             font-weight: bold;
-            font-size: 1.125rem;
+            font-size: 1rem;
             color: var(--primary-color);
         }
-        
+
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
         }
-        
+
         .calendar-day-header {
-            padding: var(--spacing-md);
+            padding: var(--spacing-sm);
             text-align: center;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: bold;
             color: #666;
             background: #f8f9fa;
-            border-bottom: 1px solid var(--border-color, #e9ecef);
         }
-        
+
         .calendar-day {
-            padding: var(--spacing-md);
+            padding: var(--spacing-sm);
             text-align: center;
             cursor: pointer;
-            border: 1px solid transparent;
             font-size: 0.875rem;
-            min-height: 45px;
+            min-height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            position: relative;
         }
-        
+
         .calendar-day:hover:not(.other-month) {
             background: var(--primary-light);
             color: var(--primary-color);
-            transform: scale(1.1);
-            border-radius: 6px;
         }
-        
+
         .calendar-day.other-month {
-            color: #adb5bd;
+            color: #ccc;
             cursor: not-allowed;
         }
-        
+
         .calendar-day.today {
-            background: var(--info-color, #2563eb);
+            background: #2563eb;
             color: white;
-            border-radius: 6px;
+            border-radius: 4px;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
         }
-        
+
         .calendar-day.selected {
             background: var(--primary-color);
             color: white;
-            border-radius: 6px;
+            border-radius: 4px;
             font-weight: bold;
-            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
         }
-        
+
         .calendar-day.in-range {
             background: #d4a574;
             color: white;
-            font-weight: 500;
         }
-        
-        .calendar-day.in-range:first-of-type,
-        .calendar-day.selected:first-of-type {
-            border-radius: 6px 0 0 6px;
+
+        /* Simple Select with Visible Options */
+        .simple-select-container {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
         }
-        
-        .calendar-day.in-range:last-of-type,
-        .calendar-day.selected:last-of-type {
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .date-range-display {
-            background: var(--primary-light);
-            border: 1px solid var(--primary-color);
-            border-radius: 8px;
-            padding: var(--spacing-md);
-            margin-top: var(--spacing-sm);
-            font-size: 0.875rem;
-            color: var(--primary-color);
-            font-weight: 500;
-            text-align: center;
-        }
-        
-        .calendar-quick-actions {
+
+        .simple-select-trigger {
             display: flex;
-            gap: var(--spacing-xs);
+            justify-content: space-between;
+            align-items: center;
             padding: var(--spacing-md);
-            background: #f8f9fa;
-            border-top: 1px solid var(--border-color, #e9ecef);
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .quick-action-btn {
             background: white;
-            border: 1px solid var(--border-color, #e9ecef);
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: 4px;
-            font-size: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+        }
+
+        .simple-select-trigger .placeholder {
             color: #666;
         }
-        
-        .quick-action-btn:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+
+        .simple-select-options {
+            border-top: 1px solid #eee;
+            background: #fafafa;
         }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-lg);
+
+        .simple-option {
+            padding: var(--spacing-md);
+            cursor: pointer;
+            background: white;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+        }
+
+        .simple-option:last-child {
+            border-bottom: none;
+        }
+
+        .simple-option:hover,
+        .simple-option.selected {
+            background-color: var(--primary-light);
+        }
+
+        /* Submit Button */
+        .form-actions {
+            text-align: center;
+            margin-top: var(--spacing-xl);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: var(--spacing-md) var(--spacing-2xl);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            min-width: 200px;
+        }
+
+        .btn-submit:hover {
+            background-color: #5a2d0d;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: 6px;
             margin-bottom: var(--spacing-lg);
         }
-        
+
+        .alert-error {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
+            .collaboration-banner {
+                height: 200px;
+            }
+
+            .collaboration-banner .banner-content {
+                flex-direction: column;
+                padding: var(--spacing-lg);
+                gap: var(--spacing-sm);
+            }
+
+            .collaboration-banner .banner-text h1 {
+                font-size: 1.125rem;
+            }
+
+            .form-container {
+                padding: 0 var(--spacing-md) var(--spacing-xl);
+            }
+
             .form-row {
                 grid-template-columns: 1fr;
                 gap: var(--spacing-md);
             }
-            
-            .collaboration-header {
-                padding: var(--spacing-lg);
+
+            .date-range-input {
+                flex-direction: column;
             }
-            
-            .form-container {
-                padding: var(--spacing-lg);
-                margin: 0 var(--spacing-md);
+
+            .date-separator {
+                display: none;
             }
-            
-            .calendar-day {
-                min-height: 50px;
-                font-size: 1rem;
-                touch-action: manipulation;
-            }
-            
-            .calendar-nav {
-                padding: var(--spacing-md);
-                font-size: 1.25rem;
-                min-width: 44px;
-                min-height: 44px;
-            }
-            
-            .quick-action-btn {
-                padding: var(--spacing-sm) var(--spacing-md);
-                font-size: 0.875rem;
-                min-height: 44px;
-                touch-action: manipulation;
-            }
-            
-            .searchable-select .dropdown {
-                max-height: 150px;
-            }
-            
-            .searchable-select input {
-                font-size: 16px; /* Prevents zoom on iOS */
-                min-height: 44px;
-            }
-        }
-        
-        /* Touch-specific styles */
-        @media (hover: none) and (pointer: coarse) {
-            .calendar-day:hover {
-                background: inherit;
-                transform: none;
-            }
-            
-            .calendar-day:active {
-                background: var(--primary-light);
-                transform: scale(0.95);
-            }
-            
-            .quick-action-btn:hover {
-                background: white;
-                color: #666;
-                border-color: var(--border-color, #e9ecef);
-            }
-            
-            .quick-action-btn:active {
-                background: var(--primary-color);
-                color: white;
-                border-color: var(--primary-color);
+
+            .btn-submit {
+                width: 100%;
             }
         }
     </style>
@@ -423,126 +543,97 @@
     <noscript><iframe src='https://www.googletagmanager.com/ns.html?id=GTM-T5T3CSLT'
     height='0' width='0' style='display:none;visibility:hidden'></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    
+
     <!-- MANDATORY: Include navbar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
-    
+
     <!-- MANDATORY: Main content with proper layout -->
     <main id="main-content" class="main-content">
-        <div class="collaboration-header">
-            <div class="icon">🤝</div>
-            <h1>콜라보를 제안하고 싶으신가요?</h1>
-            <p>다양한 콜라보 상점을 위해 직접 제안해 보세요.</p>
+        <!-- Banner Image Section -->
+        <div class="collaboration-banner">
+            <img th:src="@{/image/collaboration/proposal-banner.png}" alt="콜라보 제안 배너" class="banner-image">
+            <div class="banner-overlay">
+                <div class="banner-content">
+                    <div class="banner-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="12" height="12" x="6" y="6" rx="2" fill="#E8B89D"/>
+                            <rect width="12" height="12" x="30" y="6" rx="2" fill="#6B3410"/>
+                            <rect width="12" height="12" x="6" y="30" rx="2" fill="#4A7C59"/>
+                            <rect width="12" height="12" x="30" y="30" rx="2" fill="#F4D03F"/>
+                            <rect width="12" height="24" x="18" y="12" rx="2" fill="#E8B89D" transform="rotate(90 18 12)"/>
+                        </svg>
+                    </div>
+                    <div class="banner-text">
+                        <h1>콜라보를 제안하고 싶으신가요?</h1>
+                        <p>다양한 콜라보 실현을 위해 직접 제안해 보세요.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        
+
         <div class="form-container">
             <!-- Error Messages -->
-            <div th:if="${param.error}" class="alert alert-error" style="margin-bottom: var(--spacing-lg);">
+            <div th:if="${param.error}" class="alert alert-error">
                 <span th:if="${param.error[0] == 'title_required'}">제목을 입력해주세요.</span>
-                <span th:if="${param.error[0] == 'description_required'}">상세 내용을 입력해주세요.</span>
+                <span th:if="${param.error[0] == 'description_required'}">각자의 역할을 입력해주세요.</span>
                 <span th:if="${param.error[0] == 'target_store_required'}">콜라보할 가게를 선택해주세요.</span>
                 <span th:if="${param.error[0] == 'invalid_date_range'}">종료일이 시작일보다 이후여야 합니다.</span>
                 <span th:if="${param.error[0] == 'invalid_date_format'}">올바른 날짜 형식을 입력해주세요.</span>
             </div>
-            
+
             <form action="/collaborations/apply" method="post" id="collaborationForm">
-                
-                <!-- Business Owner Section -->
-                <div sec:authorize="hasRole('ROLE_BUSINESS_OWNER')" class="role-section business-owner">
-                    <h3>✨ 점주님의 가게</h3>
-                    <div th:if="${userStore}" class="store-card">
-                        <h4 th:text="${userStore.name}">가게명</h4>
-                        <p th:text="${userStore.description}" style="color: #666; margin: var(--spacing-sm) 0;">가게 설명</p>
-                        <span class="category" th:text="${userStore.category}">카테고리</span>
-                        <input type="hidden" name="sourceStoreId" th:value="${userStore.uuid}">
+
+                <!-- Store Selection Section -->
+                <div class="store-selection-section">
+                    <!-- Business Owner's Store -->
+                    <div sec:authorize="hasRole('ROLE_BUSINESS_OWNER')">
+                        <h3>내 가게</h3>
+                        <div th:if="${userStore}" class="store-card">
+                            <h4 th:text="${userStore.name}">가게명</h4>
+                            <span class="category" th:text="${userStore.category}">카테고리</span>
+                            <input type="hidden" name="sourceStoreId" th:value="${userStore.uuid}">
+                        </div>
                     </div>
-                    <p style="color: #666; font-size: 0.875rem; margin: 0;">
-                        ✓ 점주님의 가게가 자동으로 선택되었습니다.
-                    </p>
-                </div>
-                
-                <!-- Regular User Section -->
-                <div sec:authorize="hasRole('ROLE_USER')" class="role-section">
-                    <h3>🏪 콜라보하고 싶은 가게</h3>
-                    <div class="form-group">
-                        <label class="form-label">콜라보할 상대방 가게</label>
-                        <div class="searchable-select">
-                            <input type="text" placeholder="가게를 입력하세요" class="store-search-input">
-                            <div class="dropdown" id="storeDropdown">
-                                <div th:each="store : ${allStores}" 
-                                     class="option" 
-                                     th:data-value="${store.uuid}"
-                                     th:data-name="${store.name}"
-                                     th:data-category="${store.category}"
-                                     th:text="${store.name + ' - ' + store.category}">
-                                </div>
+
+                    <!-- Target Store Selection -->
+                    <h3 style="margin-top: var(--spacing-lg);">콜라보하고 싶은 가게</h3>
+                    <div class="searchable-select">
+                        <input type="text" placeholder="가게를 검색하세요" class="store-search-input" id="storeSearchInput">
+                        <div class="dropdown" id="storeDropdown">
+                            <div th:each="store : ${allStores}"
+                                 class="option"
+                                 th:data-value="${store.uuid}"
+                                 th:data-name="${store.name}"
+                                 th:data-category="${store.category}"
+                                 th:text="${store.name + ' - ' + store.category}">
                             </div>
                         </div>
-                        <input type="hidden" name="targetStoreId" id="selectedStoreId">
                     </div>
-                </div>
-                
-                <!-- Store Selection for Business Owners -->
-                <div sec:authorize="hasRole('ROLE_BUSINESS_OWNER')">
-                    <div class="form-group">
-                        <label class="form-label">콜라보하고 싶은 가게</label>
-                        <div class="searchable-select">
-                            <input type="text" placeholder="가게를 입력하세요" class="store-search-input">
-                            <div class="dropdown" id="targetStoreDropdown">
-                                <div th:each="store : ${allStores}" 
-                                     class="option" 
-                                     th:data-value="${store.uuid}"
-                                     th:data-name="${store.name}"
-                                     th:data-category="${store.category}"
-                                     th:text="${store.name + ' - ' + store.category}">
-                                </div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="targetStoreId" id="selectedTargetStoreId">
-                    </div>
-                </div>
-                
-                <!-- Form Fields Row -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">업종</label>
-                        <select class="form-control" name="category">
-                            <option value="">업종을 선택하세요</option>
-                            <option value="RESTAURANT">음식점</option>
-                            <option value="CAFE">카페</option>
-                            <option value="RETAIL">소매</option>
-                            <option value="SERVICE">서비스</option>
-                            <option value="OTHER">기타</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
+                    <input type="hidden" name="targetStoreId" id="selectedStoreId">
+
+                    <!-- Product Selection (Optional) -->
+                    <div style="margin-top: var(--spacing-md);">
                         <label class="form-label">상대방 상품 (선택사항)</label>
                         <div class="searchable-select">
-                            <input type="text" placeholder="상품을 입력하세요" class="product-search-input" disabled>
-                            <div class="dropdown" id="productDropdown">
-                                <!-- Products will be populated dynamically based on selected store -->
-                            </div>
+                            <input type="text" placeholder="상품을 선택하세요" class="product-search-input" id="productSearchInput" disabled>
+                            <div class="dropdown" id="productDropdown"></div>
                         </div>
                         <input type="hidden" name="targetProductId" id="selectedProductId">
-                        <small class="form-text text-muted">먼저 가게를 선택하면 해당 가게의 상품을 선택할 수 있습니다.</small>
+                        <span class="form-hint">가게를 선택하면 해당 가게의 상품을 선택할 수 있습니다.</span>
                     </div>
-                </div>
-                
-                <!-- Proposer Product Selection -->
-                <div class="form-row">
-                    <div class="form-group">
+
+                    <!-- Proposer Product Selection (Optional) -->
+                    <div sec:authorize="hasRole('ROLE_BUSINESS_OWNER')" style="margin-top: var(--spacing-md);">
                         <label class="form-label">내 상품 (선택사항)</label>
                         <div class="searchable-select">
                             <input type="text" placeholder="내 상품을 선택하세요" class="proposer-product-search-input" id="proposerProductInput">
                             <div class="dropdown" id="proposerProductDropdown">
                                 <div th:if="${userProducts != null and !userProducts.isEmpty()}">
-                                    <div th:each="product : ${userProducts}" 
-                                         class="option" 
+                                    <div th:each="product : ${userProducts}"
+                                         class="option"
                                          th:data-value="${product.uuid}"
                                          th:data-name="${product.name}"
-                                         th:data-price="${product.price}"
-                                         th:text="${product.name + (product.price != null ? ' - ' + product.price + '원' : ' - 가격 미정')}">
+                                         th:text="${product.name}">
                                     </div>
                                 </div>
                                 <div th:if="${userProducts == null or userProducts.isEmpty()}" class="option disabled">
@@ -551,39 +642,65 @@
                             </div>
                         </div>
                         <input type="hidden" name="proposerProductId" id="selectedProposerProductId">
-                        <small class="form-text text-muted">콜라보에 참여할 내 상품을 선택해주세요 (선택사항).</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <!-- Empty column for layout balance -->
                     </div>
                 </div>
-                
-                <!-- Date Range Picker -->
+
+                <!-- Proposal Title -->
+                <div class="form-group">
+                    <label class="form-label required">제안 제목</label>
+                    <input type="text"
+                           class="form-control"
+                           name="collaborationTitle"
+                           required
+                           placeholder="예시) 저희 가게 빵과 사장님 가게 햄으로 샌드위치 만들기">
+                </div>
+
+                <!-- Expected Benefit -->
+                <div class="form-group">
+                    <label class="form-label required">원하는 기대 효과</label>
+                    <div class="benefit-select-container">
+                        <div class="benefit-select-trigger" id="benefitSelectTrigger">
+                            <span class="placeholder" id="benefitPlaceholder">선택 또는 입력하세요.</span>
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </div>
+                        <div class="benefit-options" id="benefitOptions">
+                            <div class="benefit-option" data-value="NEW_CUSTOMERS">
+                                <div class="benefit-title">새로운 손님 유입 및 매출 증가를 기대해요.</div>
+                                <div class="benefit-subtitle">서로 단골손님을 소개하거나, 함께 이벤트/쿠폰을 진행해 가게 방문객을 늘리고 싶어요.</div>
+                            </div>
+                            <div class="benefit-option" data-value="REDUCE_MARKETING">
+                                <div class="benefit-title">마케팅 비용을 줄이고 싶어요.</div>
+                                <div class="benefit-subtitle">전단지-홍보물-온라인 홍보 등을 혼자 할 때보다 부담 없이 같이 하길 원해요.</div>
+                            </div>
+                            <div class="benefit-option" data-value="UNIQUE_PRODUCTS">
+                                <div class="benefit-title">가게만의 특별한 상품-세트를 만들어 경쟁력을 높이고 싶어요.</div>
+                                <div class="benefit-subtitle">다른 가게와 콜라보 제품/메뉴/선물세트 같은 차별화된 판매 포인트를 만들고 싶어요.</div>
+                            </div>
+                            <div class="benefit-option" data-value="SHARE_COSTS">
+                                <div class="benefit-title">운영 비용-설비 부담을 나누고 싶어요.</div>
+                                <div class="benefit-subtitle">재료 공동 구매, 기계/공간 공유 등으로 운영 비용을 줄이고 효율적으로 운영하고 싶어요.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="expectedBenefit" id="expectedBenefitInput">
+                </div>
+
+                <!-- Date Range Pickers -->
                 <div class="form-row">
+                    <!-- Recruitment Period -->
                     <div class="form-group">
-                        <label class="form-label">모집 기간</label>
-                        <div class="date-picker-container">
-                            <input type="text" 
-                                   class="form-control" 
-                                   placeholder="시작일 — 마감일" 
-                                   readonly
-                                   id="dateRangeDisplay"
-                                   onclick="toggleCalendar()">
-                            <div class="calendar" id="calendar">
+                        <label class="form-label required">모집 기간</label>
+                        <div class="date-range-input" style="position: relative;">
+                            <input type="text" class="form-control" placeholder="시작일" id="recruitStartDisplay" readonly onclick="toggleCalendar('recruit')">
+                            <span class="date-separator">-</span>
+                            <input type="text" class="form-control" placeholder="마감일" id="recruitEndDisplay" readonly onclick="toggleCalendar('recruit')">
+                            <div class="calendar" id="recruitCalendar">
                                 <div class="calendar-header">
-                                    <button type="button" class="calendar-nav" onclick="changeMonth(-1)">‹</button>
-                                    <span class="calendar-month" id="calendarMonth">2025년 7월</span>
-                                    <button type="button" class="calendar-nav" onclick="changeMonth(1)">›</button>
+                                    <button type="button" class="calendar-nav" onclick="changeMonth('recruit', -1)">&lt;</button>
+                                    <span class="calendar-month" id="recruitCalendarMonth">2025년 1월</span>
+                                    <button type="button" class="calendar-nav" onclick="changeMonth('recruit', 1)">&gt;</button>
                                 </div>
-                                <div class="calendar-quick-actions">
-                                    <button type="button" class="quick-action-btn" onclick="selectToday()">오늘</button>
-                                    <button type="button" class="quick-action-btn" onclick="selectTomorrow()">내일</button>
-                                    <button type="button" class="quick-action-btn" onclick="selectThisWeek()">이번 주</button>
-                                    <button type="button" class="quick-action-btn" onclick="selectNextWeek()">다음 주</button>
-                                    <button type="button" class="quick-action-btn" onclick="clearSelection()">초기화</button>
-                                </div>
-                                <div class="calendar-grid" id="calendarDays">
+                                <div class="calendar-grid" id="recruitCalendarDays">
                                     <div class="calendar-day-header">일</div>
                                     <div class="calendar-day-header">월</div>
                                     <div class="calendar-day-header">화</div>
@@ -591,713 +708,591 @@
                                     <div class="calendar-day-header">목</div>
                                     <div class="calendar-day-header">금</div>
                                     <div class="calendar-day-header">토</div>
-                                    <!-- Calendar days will be dynamically generated directly as grid children -->
                                 </div>
                             </div>
-                            <div class="date-range-display" id="selectedDateRange">
-                                날짜를 선택해주세요.
+                        </div>
+                        <input type="hidden" name="startDate" id="recruitStartInput">
+                        <input type="hidden" name="endDate" id="recruitEndInput">
+                    </div>
+
+                    <!-- Collaboration Period -->
+                    <div class="form-group">
+                        <label class="form-label required">콜라보 진행 기간</label>
+                        <div class="date-range-input" style="position: relative;">
+                            <input type="text" class="form-control" placeholder="시작일" id="collabStartDisplay" readonly onclick="toggleCalendar('collab')">
+                            <span class="date-separator">-</span>
+                            <input type="text" class="form-control" placeholder="마감일" id="collabEndDisplay" readonly onclick="toggleCalendar('collab')">
+                            <div class="calendar" id="collabCalendar">
+                                <div class="calendar-header">
+                                    <button type="button" class="calendar-nav" onclick="changeMonth('collab', -1)">&lt;</button>
+                                    <span class="calendar-month" id="collabCalendarMonth">2025년 1월</span>
+                                    <button type="button" class="calendar-nav" onclick="changeMonth('collab', 1)">&gt;</button>
+                                </div>
+                                <div class="calendar-grid" id="collabCalendarDays">
+                                    <div class="calendar-day-header">일</div>
+                                    <div class="calendar-day-header">월</div>
+                                    <div class="calendar-day-header">화</div>
+                                    <div class="calendar-day-header">수</div>
+                                    <div class="calendar-day-header">목</div>
+                                    <div class="calendar-day-header">금</div>
+                                    <div class="calendar-day-header">토</div>
+                                </div>
                             </div>
                         </div>
-                        <input type="hidden" name="startDate" id="startDateInput">
-                        <input type="hidden" name="endDate" id="endDateInput">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">콜라보 진행 기간</label>
-                        <input type="text" 
-                               class="form-control" 
-                               name="collaborationDuration"
-                               placeholder="콜라보 진행 기간을 입력하세요. (예:시기미정)">
+                        <input type="hidden" name="collaborationStartDate" id="collabStartInput">
+                        <input type="hidden" name="collaborationEndDate" id="collabEndInput">
                     </div>
                 </div>
-                
-                <!-- Additional Form Fields -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">수익 배분 구조</label>
-                        <input type="text" 
-                               class="form-control" 
-                               name="revenueStructure"
-                               placeholder="수익 배분 구조을 입력하세요">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">콜라보 장소</label>
-                        <select class="form-control" name="collaborationLocation">
-                            <option value="">콜라보 장소을 선택하세요</option>
-                            <option value="우리 가게">우리 가게</option>
-                            <option value="상대방 가게">상대방 가게</option>
-                            <option value="양쪽 가게">양쪽 가게</option>
-                            <option value="외부 장소">외부 장소</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Main Form Fields -->
+
+                <!-- Respective Roles -->
                 <div class="form-group">
-                    <label class="form-label">제목</label>
-                    <input type="text" 
-                           class="form-control" 
-                           name="collaborationTitle" 
-                           required
-                           placeholder="콜라보 제목을 입력하세요">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">상세 내용</label>
-                    <textarea class="form-control" 
-                              name="description" 
-                              rows="6" 
+                    <label class="form-label required">각자의 역할</label>
+                    <textarea class="form-control"
+                              name="description"
+                              rows="4"
                               required
-                              placeholder="콜라보에 대한 상세한 설명을 입력하세요..."></textarea>
+                              placeholder="예시) 저희 매장은 이걸 할게요! 사장님 가게는 이걸 해주셨으면 해요."></textarea>
+                    <span class="form-hint">역할을 명확히 나누면 서로 오해할 일이 없어요.</span>
                 </div>
-                
-                <!-- Form Actions -->
-                <div class="form-actions" style="text-align: center; margin-top: var(--spacing-xl);">
-                    <button type="submit" class="btn btn-primary btn-lg">제안하기</button>
+
+                <!-- Revenue Structure & Location -->
+                <div class="form-row">
+                    <!-- Revenue Structure -->
+                    <div class="form-group">
+                        <label class="form-label required">수익 배분 구조</label>
+                        <div class="simple-select-container">
+                            <div class="simple-select-trigger" id="revenueSelectTrigger">
+                                <span class="placeholder" id="revenuePlaceholder">선택 또는 입력하세요.</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </div>
+                            <div class="simple-select-options" id="revenueOptions">
+                                <div class="simple-option" data-value="채팅으로 협의">채팅으로 협의</div>
+                                <div class="simple-option" data-value="각자 판매 대금 정산">각자 판매 대금 정산</div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="revenueStructure" id="revenueStructureInput">
+                    </div>
+
+                    <!-- Collaboration Location -->
+                    <div class="form-group">
+                        <label class="form-label required">콜라보 장소</label>
+                        <div class="simple-select-container">
+                            <div class="simple-select-trigger" id="locationSelectTrigger">
+                                <span class="placeholder" id="locationPlaceholder">콜라보 장소를 선택하세요.</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </div>
+                            <div class="simple-select-options" id="locationOptions">
+                                <div class="simple-option" data-value="이후 협의">이후 협의</div>
+                                <div class="simple-option" data-value="각각 픽업">각각 픽업</div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="collaborationLocation" id="collaborationLocationInput">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">제안하기</button>
                 </div>
             </form>
         </div>
     </main>
-    
+
     <!-- MANDATORY: Include footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
-    
+
     <!-- MANDATORY: Include common modals -->
     <div th:replace="~{fragments/modals :: policy-modals}"></div>
-    
+
     <!-- MANDATORY: Include framework JavaScript -->
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/main-common.js}"></script>
-    
+
     <!-- Store-Product Data Mapping -->
     <script th:inline="javascript">
-        // Load store-products mapping from server-generated JSON
         let storeData = {};
         try {
             const storeDataRaw = /*[[${storeDataJson}]]*/ '{}';
-            // Store data loaded from server
-            
             if (typeof storeDataRaw === 'string') {
                 storeData = JSON.parse(storeDataRaw);
             } else {
                 storeData = storeDataRaw;
-            }
-            
-            // Store data parsed successfully
-            
-            // Log sample store data
-            const firstStoreKey = Object.keys(storeData)[0];
-            if (firstStoreKey) {
-                // Sample store data available
             }
         } catch (error) {
             console.error('Error parsing store data JSON:', error);
             storeData = {};
         }
     </script>
-    
+
     <script>
-        // Calendar functionality
-        let currentDate = new Date();
-        let selectedStartDate = null;
-        let selectedEndDate = null;
-        let isSelectingRange = false;
-        
-        function toggleCalendar() {
-            const calendar = document.getElementById('calendar');
-            calendar.classList.toggle('active');
-            if (calendar.classList.contains('active')) {
-                generateCalendar();
+        // Calendar State
+        const calendarState = {
+            recruit: {
+                currentDate: new Date(),
+                startDate: null,
+                endDate: null
+            },
+            collab: {
+                currentDate: new Date(),
+                startDate: null,
+                endDate: null
+            }
+        };
+
+        // Toggle Calendar
+        function toggleCalendar(type) {
+            const calendar = document.getElementById(type + 'Calendar');
+            const isActive = calendar.classList.contains('active');
+
+            // Close all calendars first
+            document.querySelectorAll('.calendar').forEach(c => c.classList.remove('active'));
+
+            if (!isActive) {
+                calendar.classList.add('active');
+                generateCalendar(type);
             }
         }
-        
-        function changeMonth(delta) {
-            currentDate.setMonth(currentDate.getMonth() + delta);
-            generateCalendar();
+
+        // Change Month
+        function changeMonth(type, delta) {
+            calendarState[type].currentDate.setMonth(calendarState[type].currentDate.getMonth() + delta);
+            generateCalendar(type);
         }
-        
-        function generateCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            
-            // Update month display
-            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', 
-                               '7월', '8월', '9월', '10월', '11월', '12월'];
-            document.getElementById('calendarMonth').textContent = `${year}년 ${monthNames[month]}`;
-            
-            // Generate calendar days
+
+        // Generate Calendar
+        function generateCalendar(type) {
+            const state = calendarState[type];
+            const year = state.currentDate.getFullYear();
+            const month = state.currentDate.getMonth();
+
+            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+            document.getElementById(type + 'CalendarMonth').textContent = `${year}년 ${monthNames[month]}`;
+
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const daysInPrevMonth = new Date(year, month, 0).getDate();
-            
-            const calendarGrid = document.getElementById('calendarDays');
-            
-            // Remove existing calendar day elements (keep headers)
+
+            const calendarGrid = document.getElementById(type + 'CalendarDays');
+
+            // Remove existing day elements (keep headers)
             const existingDays = calendarGrid.querySelectorAll('.calendar-day');
             existingDays.forEach(day => day.remove());
-            
+
             // Previous month days
             for (let i = firstDay - 1; i >= 0; i--) {
                 const day = daysInPrevMonth - i;
-                const dayEl = createDayElement(day, true, new Date(year, month - 1, day));
+                const dayEl = createDayElement(type, day, true, new Date(year, month - 1, day));
                 calendarGrid.appendChild(dayEl);
             }
-            
+
             // Current month days
             for (let day = 1; day <= daysInMonth; day++) {
-                const dayEl = createDayElement(day, false, new Date(year, month, day));
+                const dayEl = createDayElement(type, day, false, new Date(year, month, day));
                 calendarGrid.appendChild(dayEl);
             }
-            
-            // Next month days
-            const totalCells = 7 + calendarGrid.querySelectorAll('.calendar-day').length; // 7 headers + current days
-            const remainingCells = 49 - totalCells; // 7 rows × 7 days
+
+            // Next month days to fill remaining cells
+            const totalCells = firstDay + daysInMonth;
+            const remainingCells = (7 - (totalCells % 7)) % 7;
             for (let day = 1; day <= remainingCells; day++) {
-                const dayEl = createDayElement(day, true, new Date(year, month + 1, day));
+                const dayEl = createDayElement(type, day, true, new Date(year, month + 1, day));
                 calendarGrid.appendChild(dayEl);
             }
         }
-        
-        function createDayElement(day, isOtherMonth, date) {
+
+        // Create Day Element
+        function createDayElement(type, day, isOtherMonth, date) {
+            const state = calendarState[type];
             const dayEl = document.createElement('div');
             dayEl.className = 'calendar-day';
             dayEl.textContent = day;
-            
+
             if (isOtherMonth) {
                 dayEl.classList.add('other-month');
             }
-            
-            // Check if today
+
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
             if (date.toDateString() === today.toDateString()) {
                 dayEl.classList.add('today');
             }
-            
-            // Check if selected
-            if (selectedStartDate && date.toDateString() === selectedStartDate.toDateString()) {
+
+            if (state.startDate && date.toDateString() === state.startDate.toDateString()) {
                 dayEl.classList.add('selected');
             }
-            if (selectedEndDate && date.toDateString() === selectedEndDate.toDateString()) {
+            if (state.endDate && date.toDateString() === state.endDate.toDateString()) {
                 dayEl.classList.add('selected');
             }
-            
-            // Check if in range
-            if (selectedStartDate && selectedEndDate && 
-                date >= selectedStartDate && date <= selectedEndDate) {
+
+            if (state.startDate && state.endDate && date > state.startDate && date < state.endDate) {
                 dayEl.classList.add('in-range');
             }
-            
-            dayEl.addEventListener('click', () => selectDate(date, dayEl));
-            
+
+            if (!isOtherMonth) {
+                dayEl.addEventListener('click', () => selectDate(type, date));
+            }
+
             return dayEl;
         }
-        
-        function selectDate(date, element) {
-            if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-                // Select start date
-                selectedStartDate = date;
-                selectedEndDate = null;
-                isSelectingRange = true;
-            } else if (selectedStartDate && !selectedEndDate) {
-                // Select end date
-                if (date < selectedStartDate) {
-                    // Swap if end date is before start date
-                    selectedEndDate = selectedStartDate;
-                    selectedStartDate = date;
+
+        // Select Date
+        function selectDate(type, date) {
+            const state = calendarState[type];
+
+            if (!state.startDate || (state.startDate && state.endDate)) {
+                state.startDate = date;
+                state.endDate = null;
+            } else if (state.startDate && !state.endDate) {
+                if (date < state.startDate) {
+                    state.endDate = state.startDate;
+                    state.startDate = date;
                 } else {
-                    selectedEndDate = date;
+                    state.endDate = date;
                 }
-                isSelectingRange = false;
             }
-            
-            updateDateDisplay();
-            generateCalendar();
-            
-            if (selectedStartDate && selectedEndDate) {
+
+            updateDateDisplay(type);
+            generateCalendar(type);
+
+            if (state.startDate && state.endDate) {
                 setTimeout(() => {
-                    document.getElementById('calendar').classList.remove('active');
-                }, 500);
+                    document.getElementById(type + 'Calendar').classList.remove('active');
+                }, 300);
             }
         }
-        
-        function updateDateDisplay() {
-            const display = document.getElementById('dateRangeDisplay');
-            const rangeDisplay = document.getElementById('selectedDateRange');
-            const startInput = document.getElementById('startDateInput');
-            const endInput = document.getElementById('endDateInput');
-            
-            if (selectedStartDate && selectedEndDate) {
-                const startStr = formatDate(selectedStartDate);
-                const endStr = formatDate(selectedEndDate);
-                display.value = `${startStr} — ${endStr}`;
-                rangeDisplay.textContent = `선택된 기간: ${startStr} ~ ${endStr}`;
-                startInput.value = selectedStartDate.toISOString().split('T')[0];
-                endInput.value = selectedEndDate.toISOString().split('T')[0];
-            } else if (selectedStartDate) {
-                const startStr = formatDate(selectedStartDate);
-                display.value = `${startStr} — `;
-                rangeDisplay.textContent = `시작일: ${startStr} (종료일을 선택하세요)`;
-                startInput.value = selectedStartDate.toISOString().split('T')[0];
-                endInput.value = '';
+
+        // Update Date Display
+        function updateDateDisplay(type) {
+            const state = calendarState[type];
+            const startDisplay = document.getElementById(type + 'StartDisplay');
+            const endDisplay = document.getElementById(type + 'EndDisplay');
+            const startInput = document.getElementById(type + 'StartInput');
+            const endInput = document.getElementById(type + 'EndInput');
+
+            if (state.startDate) {
+                startDisplay.value = formatDateKorean(state.startDate);
+                startInput.value = formatDateISO(state.startDate);
             } else {
-                display.value = '';
-                rangeDisplay.textContent = '날짜를 선택해주세요.';
+                startDisplay.value = '';
                 startInput.value = '';
+            }
+
+            if (state.endDate) {
+                endDisplay.value = formatDateKorean(state.endDate);
+                endInput.value = formatDateISO(state.endDate);
+            } else {
+                endDisplay.value = '';
                 endInput.value = '';
             }
         }
-        
-        function formatDate(date) {
+
+        // Format Date Korean
+        function formatDateKorean(date) {
             return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
         }
-        
-        // Quick action functions
-        function selectToday() {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            selectedStartDate = today;
-            selectedEndDate = tomorrow;
-            updateDateDisplay();
-            generateCalendar();
+
+        // Format Date ISO
+        function formatDateISO(date) {
+            return date.toISOString().split('T')[0];
         }
-        
-        function selectTomorrow() {
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const dayAfter = new Date(tomorrow);
-            dayAfter.setDate(dayAfter.getDate() + 1);
-            
-            selectedStartDate = tomorrow;
-            selectedEndDate = dayAfter;
-            updateDateDisplay();
-            generateCalendar();
-        }
-        
-        function selectThisWeek() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - dayOfWeek);
-            
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            
-            selectedStartDate = startOfWeek;
-            selectedEndDate = endOfWeek;
-            updateDateDisplay();
-            generateCalendar();
-        }
-        
-        function selectNextWeek() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const startOfNextWeek = new Date(today);
-            startOfNextWeek.setDate(today.getDate() + (7 - dayOfWeek));
-            
-            const endOfNextWeek = new Date(startOfNextWeek);
-            endOfNextWeek.setDate(startOfNextWeek.getDate() + 6);
-            
-            selectedStartDate = startOfNextWeek;
-            selectedEndDate = endOfNextWeek;
-            updateDateDisplay();
-            generateCalendar();
-        }
-        
-        function clearSelection() {
-            selectedStartDate = null;
-            selectedEndDate = null;
-            updateDateDisplay();
-            generateCalendar();
-        }
-        
-        // Keyboard support
-        function handleCalendarKeyboard(event) {
-            if (!document.getElementById('calendar').classList.contains('active')) return;
-            
-            const key = event.key;
-            
-            switch(key) {
-                case 'Escape':
-                    document.getElementById('calendar').classList.remove('active');
-                    event.preventDefault();
-                    break;
-                case 'ArrowLeft':
-                    changeMonth(-1);
-                    event.preventDefault();
-                    break;
-                case 'ArrowRight':
-                    changeMonth(1);
-                    event.preventDefault();
-                    break;
-                case 'Enter':
-                    if (selectedStartDate && selectedEndDate) {
-                        document.getElementById('calendar').classList.remove('active');
-                    }
-                    event.preventDefault();
-                    break;
-            }
-        }
-        
-        // Add keyboard event listener
-        document.addEventListener('keydown', handleCalendarKeyboard);
-        
-        // Searchable dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInputs = document.querySelectorAll('.store-search-input');
-            
-            searchInputs.forEach(input => {
-                const dropdown = input.nextElementSibling;
-                const options = dropdown.querySelectorAll('.option');
-                
-                input.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase();
-                    let hasVisibleOptions = false;
-                    
-                    options.forEach(option => {
-                        const text = option.textContent.toLowerCase();
-                        if (text.includes(searchTerm)) {
-                            option.style.display = 'block';
-                            hasVisibleOptions = true;
-                        } else {
-                            option.style.display = 'none';
-                        }
-                    });
-                    
-                    dropdown.classList.toggle('active', hasVisibleOptions && searchTerm.length > 0);
-                });
-                
-                input.addEventListener('focus', function() {
-                    dropdown.classList.add('active');
-                });
-                
-                input.addEventListener('blur', function() {
-                    setTimeout(() => dropdown.classList.remove('active'), 200);
-                });
-                
-                options.forEach(option => {
-                    option.addEventListener('click', function() {
-                        const value = this.dataset.value;
-                        const name = this.dataset.name;
-                        const category = this.dataset.category;
-                        
-                        input.value = name;
-                        
-                        // Set the appropriate hidden input
-                        const hiddenInput = dropdown.id === 'storeDropdown' ? 
-                            document.getElementById('selectedStoreId') : 
-                            document.getElementById('selectedTargetStoreId');
-                        
-                        if (hiddenInput) {
-                            hiddenInput.value = value;
-                        }
-                        
-                        // Auto-select category and populate products
-                        handleStoreSelection(value, name, category);
-                        
-                        dropdown.classList.remove('active');
-                    });
+
+        // Benefit Select
+        function setupBenefitSelect() {
+            const options = document.querySelectorAll('.benefit-option');
+            const hiddenInput = document.getElementById('expectedBenefitInput');
+            const placeholder = document.getElementById('benefitPlaceholder');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    hiddenInput.value = this.dataset.value;
+                    placeholder.textContent = this.querySelector('.benefit-title').textContent;
+                    placeholder.classList.remove('placeholder');
+                    placeholder.classList.add('selected-text');
                 });
             });
-            
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.searchable-select')) {
-                    document.querySelectorAll('.dropdown').forEach(dropdown => {
-                        dropdown.classList.remove('active');
-                    });
-                }
+        }
+
+        // Simple Select
+        function setupSimpleSelect(containerId, inputId, placeholderId) {
+            const container = document.getElementById(containerId);
+            const options = container.querySelectorAll('.simple-option');
+            const hiddenInput = document.getElementById(inputId);
+            const placeholder = document.getElementById(placeholderId);
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    hiddenInput.value = this.dataset.value;
+                    placeholder.textContent = this.dataset.value;
+                    placeholder.classList.remove('placeholder');
+                    placeholder.classList.add('selected-text');
+                });
             });
-            
-            // Setup proposer product search functionality
-            setupProposerProductSearch();
-        });
-        
-        // Proposer product search functionality
-        function setupProposerProductSearch() {
-            const proposerInput = document.querySelector('.proposer-product-search-input');
-            const proposerDropdown = document.getElementById('proposerProductDropdown');
-            
-            if (!proposerInput || !proposerDropdown) {
-                console.log('Proposer product elements not found');
-                return;
-            }
-            
-            const options = proposerDropdown.querySelectorAll('.option:not(.disabled)');
-            
-            // Input event for search
-            proposerInput.addEventListener('input', function() {
+        }
+
+        // Store Search
+        function setupStoreSearch() {
+            const input = document.getElementById('storeSearchInput');
+            const dropdown = document.getElementById('storeDropdown');
+            const options = dropdown.querySelectorAll('.option');
+            const hiddenInput = document.getElementById('selectedStoreId');
+
+            input.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
-                let hasVisibleOptions = false;
-                
+                let hasVisible = false;
+
                 options.forEach(option => {
                     const text = option.textContent.toLowerCase();
                     if (text.includes(searchTerm)) {
                         option.style.display = 'block';
-                        hasVisibleOptions = true;
+                        hasVisible = true;
                     } else {
                         option.style.display = 'none';
                     }
                 });
-                
-                proposerDropdown.classList.toggle('active', hasVisibleOptions && searchTerm.length > 0);
+
+                dropdown.classList.toggle('active', hasVisible && searchTerm.length > 0);
             });
-            
-            // Focus event
-            proposerInput.addEventListener('focus', function() {
-                if (options.length > 0) {
-                    proposerDropdown.classList.add('active');
-                }
+
+            input.addEventListener('focus', function() {
+                dropdown.classList.add('active');
             });
-            
-            // Blur event
-            proposerInput.addEventListener('blur', function() {
-                setTimeout(() => proposerDropdown.classList.remove('active'), 200);
+
+            input.addEventListener('blur', function() {
+                setTimeout(() => dropdown.classList.remove('active'), 200);
             });
-            
-            // Option click events
+
             options.forEach(option => {
                 option.addEventListener('click', function() {
                     const value = this.dataset.value;
                     const name = this.dataset.name;
-                    
-                    console.log('Proposer product selected:', name, value);
-                    
-                    proposerInput.value = name;
-                    document.getElementById('selectedProposerProductId').value = value;
-                    proposerDropdown.classList.remove('active');
+
+                    input.value = name;
+                    hiddenInput.value = value;
+                    dropdown.classList.remove('active');
+
+                    // Load products for this store
+                    loadStoreProducts(value);
                 });
             });
         }
-        
-        // Auto-selection functionality
-        function handleStoreSelection(storeUuid, storeName, storeCategory) {
-            console.log('=== STORE SELECTION START ===');
-            console.log('Store selected:', storeUuid, storeName, storeCategory);
-            console.log('Available store data keys:', Object.keys(storeData));
-            
-            // 1. Auto-populate category field
-            const categorySelect = document.querySelector('select[name="category"]');
-            const categoryMapping = {
-                'RESTAURANT': 'RESTAURANT',
-                'CAFE': 'CAFE', 
-                'RETAIL': 'RETAIL',
-                'SERVICE': 'SERVICE',
-                'OTHER': 'OTHER'
-            };
-            
-            if (categorySelect && categoryMapping[storeCategory]) {
-                categorySelect.value = categoryMapping[storeCategory];
-                console.log('Category auto-selected:', categoryMapping[storeCategory]);
-            } else {
-                console.warn('Category select not found or category not mapped:', storeCategory);
-            }
-            
-            // 2. Populate product dropdown
-            const store = storeData[storeUuid];
-            console.log('Found store in data:', store);
-            
-            if (store && store.products) {
-                console.log('Store has products:', store.products.length);
-                updateProductDropdown(store.products);
-            } else if (store) {
-                console.warn('Store found but no products:', store);
-                updateProductDropdown([]);
-            } else {
-                console.error('Store not found in data for UUID:', storeUuid);
-                updateProductDropdown([]);
-            }
-            
-            console.log('=== STORE SELECTION END ===');
-        }
-        
-        function updateProductDropdown(products) {
-            console.log('=== UPDATE PRODUCT DROPDOWN START ===');
-            console.log('Products received:', products);
-            
-            const productInput = document.querySelector('.product-search-input');
+
+        // Load Store Products
+        function loadStoreProducts(storeUuid) {
+            const productInput = document.getElementById('productSearchInput');
             const productDropdown = document.getElementById('productDropdown');
-            
-            console.log('Product input element:', productInput);
-            console.log('Product dropdown element:', productDropdown);
-            
-            if (!productInput || !productDropdown) {
-                console.error('Product input or dropdown not found!');
-                return;
-            }
-            
-            // Clear existing options
+            const productHidden = document.getElementById('selectedProductId');
+
             productDropdown.innerHTML = '';
-            console.log('Cleared existing options');
-            
-            if (!products || products.length === 0) {
-                console.log('No products available, showing disabled state');
+            productInput.value = '';
+            productHidden.value = '';
+
+            const store = storeData[storeUuid];
+
+            if (!store || !store.products || store.products.length === 0) {
                 productDropdown.innerHTML = '<div class="option disabled">등록된 상품이 없습니다</div>';
-                productInput.placeholder = '등록된 상품이 없습니다';
                 productInput.disabled = true;
+                productInput.placeholder = '등록된 상품이 없습니다';
                 return;
             }
-            
-            console.log('Processing', products.length, 'products');
-            
-            // Add product options
-            let addedProductCount = 0;
-            products.forEach((product, index) => {
-                console.log(`Processing product ${index + 1}:`, product);
-                
-                if (product.isAvailable) {
-                    const option = document.createElement('div');
-                    option.className = 'option';
-                    option.dataset.value = product.uuid;
-                    option.dataset.name = product.name;
-                    option.textContent = `${product.name} - ${product.price ? product.price.toLocaleString() + '원' : '가격 미정'}`;
-                    
-                    option.addEventListener('click', function() {
-                        console.log('Product option clicked:', product.name);
-                        productInput.value = product.name;
-                        document.getElementById('selectedProductId').value = product.uuid;
-                        productDropdown.classList.remove('active');
-                        console.log('Product selected and form updated:', product.name, product.uuid);
-                    });
-                    
-                    productDropdown.appendChild(option);
-                    addedProductCount++;
-                    console.log(`Added product option: ${product.name}`);
-                } else {
-                    console.log(`Skipped unavailable product: ${product.name}`);
-                }
-            });
-            
-            console.log(`Added ${addedProductCount} available products to dropdown`);
-            
-            // Enable product input and update placeholder
+
             productInput.disabled = false;
-            productInput.placeholder = '상품을 입력하세요';
-            productInput.value = ''; // Clear previous value
-            document.getElementById('selectedProductId').value = ''; // Clear hidden input
-            
-            // Add search functionality for products
-            setupProductSearch(productInput, productDropdown);
-            
-            console.log('Product dropdown updated successfully');
-            console.log('=== UPDATE PRODUCT DROPDOWN END ===');
+            productInput.placeholder = '상품을 선택하세요';
+
+            store.products.filter(p => p.isAvailable).forEach(product => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.dataset.value = product.uuid;
+                option.dataset.name = product.name;
+                option.textContent = product.name + (product.price ? ' - ' + product.price.toLocaleString() + '원' : '');
+
+                option.addEventListener('click', function() {
+                    productInput.value = product.name;
+                    productHidden.value = product.uuid;
+                    productDropdown.classList.remove('active');
+                });
+
+                productDropdown.appendChild(option);
+            });
+
+            setupProductSearch();
         }
-        
-        function setupProductSearch(input, dropdown) {
+
+        // Product Search
+        function setupProductSearch() {
+            const input = document.getElementById('productSearchInput');
+            const dropdown = document.getElementById('productDropdown');
+
             input.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
                 const options = dropdown.querySelectorAll('.option:not(.disabled)');
-                let hasVisibleOptions = false;
-                
+                let hasVisible = false;
+
                 options.forEach(option => {
                     const text = option.textContent.toLowerCase();
                     if (text.includes(searchTerm)) {
                         option.style.display = 'block';
-                        hasVisibleOptions = true;
+                        hasVisible = true;
                     } else {
                         option.style.display = 'none';
                     }
                 });
-                
-                dropdown.classList.toggle('active', hasVisibleOptions && searchTerm.length > 0);
+
+                dropdown.classList.toggle('active', hasVisible);
             });
-            
+
             input.addEventListener('focus', function() {
                 if (!this.disabled) {
                     dropdown.classList.add('active');
                 }
             });
-            
+
             input.addEventListener('blur', function() {
                 setTimeout(() => dropdown.classList.remove('active'), 200);
             });
         }
-        
-        // Form validation
+
+        // Proposer Product Search
+        function setupProposerProductSearch() {
+            const input = document.getElementById('proposerProductInput');
+            const dropdown = document.getElementById('proposerProductDropdown');
+            const hiddenInput = document.getElementById('selectedProposerProductId');
+
+            if (!input || !dropdown) return;
+
+            const options = dropdown.querySelectorAll('.option:not(.disabled)');
+
+            input.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                let hasVisible = false;
+
+                options.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        option.style.display = 'block';
+                        hasVisible = true;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+
+                dropdown.classList.toggle('active', hasVisible && searchTerm.length > 0);
+            });
+
+            input.addEventListener('focus', function() {
+                if (options.length > 0) {
+                    dropdown.classList.add('active');
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                setTimeout(() => dropdown.classList.remove('active'), 200);
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    input.value = this.dataset.name;
+                    hiddenInput.value = this.dataset.value;
+                    dropdown.classList.remove('active');
+                });
+            });
+        }
+
+        // Form Validation
         document.getElementById('collaborationForm').addEventListener('submit', function(e) {
             const title = document.querySelector('input[name="collaborationTitle"]').value.trim();
             const description = document.querySelector('textarea[name="description"]').value.trim();
-            const targetStoreId = document.querySelector('input[name="targetStoreId"]').value;
-            const targetProductId = document.getElementById('selectedProductId').value;
-            const proposerProductId = document.getElementById('selectedProposerProductId').value;
-            const startDate = document.getElementById('startDateInput').value;
-            const endDate = document.getElementById('endDateInput').value;
-            
+            const targetStoreId = document.getElementById('selectedStoreId').value;
+            const expectedBenefit = document.getElementById('expectedBenefitInput').value;
+            const recruitStart = document.getElementById('recruitStartInput').value;
+            const recruitEnd = document.getElementById('recruitEndInput').value;
+            const collabStart = document.getElementById('collabStartInput').value;
+            const collabEnd = document.getElementById('collabEndInput').value;
+            const revenueStructure = document.getElementById('revenueStructureInput').value;
+            const collaborationLocation = document.getElementById('collaborationLocationInput').value;
+
             if (!title) {
-                alert('제목을 입력해주세요.');
+                alert('제안 제목을 입력해주세요.');
                 e.preventDefault();
                 return;
             }
-            
-            if (!description) {
-                alert('상세 내용을 입력해주세요.');
-                e.preventDefault();
-                return;
-            }
-            
+
             if (!targetStoreId) {
-                alert('콜라보할 가게를 선택해주세요.');
+                alert('콜라보하고 싶은 가게를 선택해주세요.');
                 e.preventDefault();
                 return;
             }
-            
-            // Validate product selection matches store selection
-            if (targetProductId) {
-                const store = storeData[targetStoreId];
-                if (store && store.products) {
-                    const productExists = store.products.some(p => p.uuid === targetProductId);
-                    if (!productExists) {
-                        alert('선택된 상품이 선택된 가게의 상품이 아닙니다. 다시 선택해주세요.');
-                        e.preventDefault();
-                        return;
-                    }
-                }
+
+            if (!expectedBenefit) {
+                alert('원하는 기대 효과를 선택해주세요.');
+                e.preventDefault();
+                return;
             }
-            
-            // Validate proposer product if selected
-            if (proposerProductId) {
-                const proposerInput = document.querySelector('.proposer-product-search-input');
-                const proposerDropdown = document.getElementById('proposerProductDropdown');
-                const validOptions = proposerDropdown.querySelectorAll('.option:not(.disabled)');
-                
-                let isValidProposerProduct = false;
-                validOptions.forEach(option => {
-                    if (option.dataset.value === proposerProductId) {
-                        isValidProposerProduct = true;
-                    }
-                });
-                
-                if (!isValidProposerProduct) {
-                    alert('유효하지 않은 내 상품이 선택되었습니다. 다시 선택해주세요.');
-                    e.preventDefault();
-                    return;
-                }
-            }
-            
-            if (!startDate || !endDate) {
+
+            if (!recruitStart || !recruitEnd) {
                 alert('모집 기간을 선택해주세요.');
                 e.preventDefault();
                 return;
             }
-            
-            if (new Date(endDate) <= new Date(startDate)) {
-                alert('종료일이 시작일보다 이후여야 합니다.');
+
+            if (new Date(recruitEnd) <= new Date(recruitStart)) {
+                alert('모집 기간의 종료일이 시작일보다 이후여야 합니다.');
                 e.preventDefault();
                 return;
             }
-            
-            // Validate date is not in the past
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const selectedStart = new Date(startDate);
-            
-            if (selectedStart < today) {
-                alert('시작일은 오늘 이후로 선택해주세요.');
+
+            if (!collabStart || !collabEnd) {
+                alert('콜라보 진행 기간을 선택해주세요.');
                 e.preventDefault();
                 return;
             }
+
+            if (new Date(collabEnd) <= new Date(collabStart)) {
+                alert('콜라보 진행 기간의 종료일이 시작일보다 이후여야 합니다.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!description) {
+                alert('각자의 역할을 입력해주세요.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!revenueStructure) {
+                alert('수익 배분 구조를 선택해주세요.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!collaborationLocation) {
+                alert('콜라보 장소를 선택해주세요.');
+                e.preventDefault();
+                return;
+            }
+        });
+
+        // Close calendar when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.date-range-input')) {
+                document.querySelectorAll('.calendar').forEach(c => c.classList.remove('active'));
+            }
+            if (!e.target.closest('.searchable-select')) {
+                document.querySelectorAll('.searchable-select .dropdown').forEach(d => d.classList.remove('active'));
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupBenefitSelect();
+            setupSimpleSelect('revenueOptions', 'revenueStructureInput', 'revenuePlaceholder');
+            setupSimpleSelect('locationOptions', 'collaborationLocationInput', 'locationPlaceholder');
+            setupStoreSearch();
+            setupProposerProductSearch();
         });
     </script>
 </body>

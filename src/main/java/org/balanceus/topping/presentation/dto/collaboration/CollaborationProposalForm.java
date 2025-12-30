@@ -20,4 +20,9 @@ public class CollaborationProposalForm {
     private String collaborationDuration;
     private String collaborationLocation;
     private String revenueStructure;
+
+    // New fields for redesigned form
+    private String expectedBenefit;           // "원하는 기대 효과"
+    private String collaborationStartDate;    // 콜라보 진행 시작일
+    private String collaborationEndDate;      // 콜라보 진행 종료일
 }
