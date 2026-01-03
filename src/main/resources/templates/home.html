@@ -1561,6 +1561,267 @@
                 padding: 6px 12px;
             }
         }
+
+        /* ===== Welcome Popup Styles ===== */
+        .welcome-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal, 1050);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .welcome-popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .welcome-popup {
+            background: #FDF6F0;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: popupSlideIn 0.3s ease;
+        }
+
+        @keyframes popupSlideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .welcome-popup-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .welcome-popup-close:hover {
+            background: rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        .welcome-popup-content {
+            padding: 40px 30px;
+        }
+
+        .welcome-popup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-popup-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .welcome-popup-subtitle {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .welcome-popup-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .welcome-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .welcome-card-icon {
+            font-size: 1.4rem;
+        }
+
+        .welcome-card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .welcome-card-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .welcome-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .welcome-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #87604F;
+            cursor: pointer;
+        }
+
+        .welcome-option label {
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .welcome-popup-cta {
+            background: #F5EEE8;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .welcome-cta-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .welcome-cta-icon img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .welcome-cta-content {
+            flex: 1;
+        }
+
+        .welcome-cta-message {
+            font-size: 0.85rem;
+            color: #87604F;
+            margin-bottom: 4px;
+        }
+
+        .welcome-cta-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .welcome-cta-btn {
+            background: #87604F;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .welcome-cta-btn:hover {
+            background: #6f4f41;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(135, 96, 79, 0.3);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .welcome-popup {
+                width: 95%;
+                max-height: 85vh;
+            }
+
+            .welcome-popup-content {
+                padding: 30px 20px;
+            }
+
+            .welcome-popup-title {
+                font-size: 1.4rem;
+            }
+
+            .welcome-popup-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .welcome-popup-cards {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .welcome-card {
+                padding: 16px;
+            }
+
+            .welcome-card-title {
+                font-size: 0.9rem;
+            }
+
+            .welcome-option {
+                font-size: 0.8rem;
+            }
+
+            .welcome-popup-cta {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+                padding: 20px;
+            }
+
+            .welcome-cta-btn {
+                width: 100%;
+            }
+        }
     </style>
 
     <!-- Favicon -->
@@ -1914,6 +2175,142 @@
         (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
 </main>
+
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup-overlay">
+    <div class="welcome-popup">
+        <button class="welcome-popup-close" onclick="closeWelcomePopup()" aria-label="닫기">&times;</button>
+
+        <div class="welcome-popup-content">
+            <div class="welcome-popup-header">
+                <h2 class="welcome-popup-title">
+                    <span>🤝</span> 사장님, 우리 같이 해보면 이런 게 좋습니다! <span>✨</span>
+                </h2>
+                <p class="welcome-popup-subtitle">
+                    이번에 저와 함께하시면, 사장님 가게에 다음과 같은 좋은 점이 생길 겁니다.<br>
+                    (해당하는 것을 골라주세요)
+                </p>
+            </div>
+
+            <div class="welcome-popup-cards">
+                <!-- Card 1: 손님 유입 -->
+                <div class="welcome-card">
+                    <div class="welcome-card-header">
+                        <span class="welcome-card-icon">🤝</span>
+                        <h3 class="welcome-card-title">손님을 더 많이 오게 할 수 있습니다.</h3>
+                    </div>
+                    <div class="welcome-card-options">
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt1-1">
+                            <label for="opt1-1">우리 가게 메뉴가 더 많은 사람들에게 알려집니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt1-2">
+                            <label for="opt1-2">새로운 고객층을 만날 수 있습니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt1-3">
+                            <label for="opt1-3">이벤트와 프로모션으로 방문 동기를 만듭니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt1-4">
+                            <label for="opt1-4">SNS와 입소문으로 자연스럽게 홍보됩니다</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: 비용 절감 -->
+                <div class="welcome-card">
+                    <div class="welcome-card-header">
+                        <span class="welcome-card-icon">✅</span>
+                        <h3 class="welcome-card-title">가게 운영에 드는 돈을 아낄 수 있습니다.</h3>
+                    </div>
+                    <div class="welcome-card-options">
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt2-1">
+                            <label for="opt2-1">광고비 없이도 효과적인 마케팅이 가능합니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt2-2">
+                            <label for="opt2-2">재료비 절감 방법을 함께 찾드립니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt2-3">
+                            <label for="opt2-3">공동 구매로 비용을 줄일 수 있습니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt2-4">
+                            <label for="opt2-4">운영 효율을 높이는 노하우를 공유합니다</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: 특별함 창출 -->
+                <div class="welcome-card">
+                    <div class="welcome-card-header">
+                        <span class="welcome-card-icon">⭐</span>
+                        <h3 class="welcome-card-title">우리 가게만의 '특별한 것'을 만들 수 있습니다.</h3>
+                    </div>
+                    <div class="welcome-card-options">
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt3-1">
+                            <label for="opt3-1">다른 곳에서는 맛볼 수 없는 독특한 메뉴</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt3-2">
+                            <label for="opt3-2">우리 가게만의 스토리와 브랜드</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt3-3">
+                            <label for="opt3-3">손님과 더 깊은 관계를 맺을 수 있습니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt3-4">
+                            <label for="opt3-4">지역 특색을 살린 차별화된 콘텐츠</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: 지역 활성화 -->
+                <div class="welcome-card">
+                    <div class="welcome-card-header">
+                        <span class="welcome-card-icon">✅</span>
+                        <h3 class="welcome-card-title">가게와 동네에 활기를 불어넣을 수 있습니다.</h3>
+                    </div>
+                    <div class="welcome-card-options">
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt4-1">
+                            <label for="opt4-1">이웃 가게들과 함께 성장하는 선순환</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt4-2">
+                            <label for="opt4-2">지역 커뮤니티를 더욱 단단하게 만듭니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt4-3">
+                            <label for="opt4-3">동네 명소로 자리잡을 수 있습니다</label>
+                        </div>
+                        <div class="welcome-option">
+                            <input type="checkbox" id="opt4-4">
+                            <label for="opt4-4">상인과 손님 모두가 행복한 공간을 만듭니다</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-popup-cta">
+                <div class="welcome-cta-icon">
+                    <img src="/image/topping_M_text.png" alt="토핑 로고" onerror="this.parentElement.innerHTML='🏪'">
+                </div>
+                <div class="welcome-cta-content">
+                    <p class="welcome-cta-message">이제 우리 가게도 함께 성장해요!</p>
+                    <p class="welcome-cta-title">토핑과 함께라면 더 맛있는 내일이 시작됩니다</p>
+                </div>
+                <button class="welcome-cta-btn" onclick="startCollaboration()">콜라보 시작하기</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Footer -->
 <div th:replace="~{fragments/footer :: footer}"></div>
@@ -2511,6 +2908,67 @@
 
 <!-- Registry Icons Dynamic Renderer (Disabled - Using static images instead) -->
 <!-- <script src="/js/registry-icons-renderer.js"></script> -->
+
+<!-- Welcome Popup Script -->
+<script>
+    // Welcome Popup Functions
+    const WELCOME_POPUP_KEY = 'topping_welcome_popup_shown';
+
+    function showWelcomePopup() {
+        const popup = document.getElementById('welcomePopup');
+        if (popup) {
+            popup.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeWelcomePopup() {
+        const popup = document.getElementById('welcomePopup');
+        if (popup) {
+            popup.classList.remove('active');
+            document.body.style.overflow = '';
+            // Mark as shown for this session
+            sessionStorage.setItem(WELCOME_POPUP_KEY, 'true');
+        }
+    }
+
+    function startCollaboration() {
+        closeWelcomePopup();
+        window.location.href = '/explore';
+    }
+
+    // Initialize welcome popup on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if popup has been shown in this session
+        const popupShown = sessionStorage.getItem(WELCOME_POPUP_KEY);
+
+        if (!popupShown) {
+            // Show popup after a short delay for better UX
+            setTimeout(showWelcomePopup, 500);
+        }
+
+        // Close popup when clicking outside
+        const popupOverlay = document.getElementById('welcomePopup');
+        if (popupOverlay) {
+            popupOverlay.addEventListener('click', function(e) {
+                if (e.target === popupOverlay) {
+                    closeWelcomePopup();
+                }
+            });
+        }
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeWelcomePopup();
+            }
+        });
+    });
+
+    // Make functions globally available
+    window.closeWelcomePopup = closeWelcomePopup;
+    window.startCollaboration = startCollaboration;
+</script>
 
 </body>
 </html>
