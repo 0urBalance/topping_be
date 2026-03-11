@@ -795,28 +795,28 @@ a:hover, a:focus {
     overflow: hidden;
 }
 
-.btn-primary {
+.btn-purple {
     background: var(--accent-purple);
     color: white;
     border: none;
     box-shadow: 0 4px 15px rgba(107, 92, 231, 0.3);
 }
 
-.btn-primary:hover, .btn-primary:focus {
+.btn-purple:hover, .btn-purple:focus {
     background: var(--accent-purple-hover);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(107, 92, 231, 0.4);
     text-decoration: none;
 }
 
-.btn-secondary {
+.btn-outline-dark {
     background: white;
     color: var(--section-bg-dark);
     border: 1px solid var(--gray-300);
     box-shadow: var(--card-shadow);
 }
 
-.btn-secondary:hover, .btn-secondary:focus {
+.btn-outline-dark:hover, .btn-outline-dark:focus {
     background: var(--gray-100);
     transform: translateY(-1px);
     box-shadow: var(--card-shadow-hover);

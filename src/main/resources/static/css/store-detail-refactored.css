@@ -1,34 +1,25 @@
 /* Store Detail Refactored Styles - Optimized for Reusability and Performance */
 
-/* 🎨 CSS Variables - Centralized Design Tokens */
+/* 🎨 CSS Variables - Store Detail Specific Tokens */
 :root {
-    --primary-color: #87604F;
-    --brown-color: #87604f;
-    --brown-hover: #6f4f41;
-    --success-color: #059669;
-    --error-color: #dc2626;
-    --warning-color: #856404;
-    --info-color: #2563eb;
-    --light-bg: #f8f9fa;
+    /* Local aliases for readability */
+    --brown-color: var(--primary-color);
+    --brown-hover: var(--primary-hover);
+    --light-bg: var(--gray-50);
     --dark-gray: #333;
     --medium-gray: #666;
     --light-gray: #999;
     --border-color: #e0e0e0;
+
+    /* Overlay tokens not in base.css */
     --white-transparent-20: rgba(255, 255, 255, 0.2);
     --white-transparent-30: rgba(255, 255, 255, 0.3);
     --black-overlay: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
-    
-    /* Additional color tokens */
     --white: #ffffff;
     --dark: #1a1a1a;
     --text-medium: #6b7280;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --primary-light: #f5eeec;
-    --primary-hover: #6f4f41;
-    
-    /* Spacing Scale */
+
+    /* Store detail specific spacing (px-based for precise layout) */
     --space-xs: 4px;
     --space-sm: 8px;
     --space-md: 16px;
@@ -36,26 +27,11 @@
     --space-xl: 32px;
     --space-2xl: 40px;
     --space-3xl: 48px;
-    
-    /* Border Radius Scale */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 20px;
-    --radius-full: 50%;
-    
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+    /* Store detail specific shadows */
     --shadow-hero: 0 8px 32px rgba(0, 0, 0, 0.3);
     --shadow-action-bar: 0 -2px 12px rgba(0, 0, 0, 0.1);
     --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.1);
-    
-    /* Transitions */
-    --transition-fast: 0.2s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
 }
 
 /* 🧱 Layout Utilities */

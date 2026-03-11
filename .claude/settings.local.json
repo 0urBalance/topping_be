@@ -10,7 +10,8 @@
       "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(wc -l /home/gim/topping/topping_be/src/main/resources/static/css/*.css | sort -rn)"
     ],
     "deny": []
   }

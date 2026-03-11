@@ -1,16 +1,12 @@
 /* Sidebar Navigation Styles */
 :root {
-    --sidebar-width: 160px;
     --sidebar-bg: #ffffff;
     --sidebar-border: #e0e0e0;
-    --primary-color: #87604f;
-    --secondary-color: #856404;
     --text-primary: #333333;
     --text-secondary: #666666;
     --hover-bg: #f8f9fa;
     --active-bg: rgba(135, 96, 79, 0.1);
     --active-color: #87604F;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Main sidebar container */
@@ -22,7 +18,7 @@
     height: 100vh;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--sidebar-border);
-    box-shadow: var(--shadow);
+    box-shadow: var(--card-shadow);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -278,7 +274,7 @@
     border-radius: 8px;
     padding: 12px;
     cursor: pointer;
-    box-shadow: var(--shadow);
+    box-shadow: var(--card-shadow);
     transition: all 0.2s ease;
 }
 
@@ -315,7 +311,7 @@ body {
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .sidebar {
         transform: translateX(-100%);
         width: 280px;

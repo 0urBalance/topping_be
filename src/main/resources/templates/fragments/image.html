@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"></head>
+<body>
+
+    <!--
+        Store image fragment with fallback chain:
+        1) store.mainImage.imagePath (uploaded file)
+        2) store.mainImageUrl (URL string)
+        3) placeholder div
+
+        Usage: <th:block th:replace="~{fragments/image :: store-image(${store}, 'my-css-class')}"></th:block>
+    -->
+    <th:block th:fragment="store-image(store, cssClass)">
+        <img th:if="${store.mainImage != null}"
+             th:src="${store.mainImage.imagePath}"
+             th:alt="${store.name}"
+             th:class="${cssClass}"
+             loading="lazy" />
+        <img th:if="${store.mainImage == null and store.mainImageUrl != null}"
+             th:src="${store.mainImageUrl}"
+             th:alt="${store.name}"
+             th:class="${cssClass}"
+             loading="lazy" />
+        <div th:if="${store.mainImage == null and store.mainImageUrl == null}"
+             th:class="${cssClass} + ' img-placeholder'">
+            <span class="material-symbols-outlined">storefront</span>
+        </div>
+    </th:block>
+
+    <!--
+        Product image fragment with fallback chain:
+        1) product.imageUrl
+        2) placeholder div
+
+        Usage: <th:block th:replace="~{fragments/image :: product-image(${product}, 'my-css-class')}"></th:block>
+    -->
+    <th:block th:fragment="product-image(product, cssClass)">
+        <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+             th:src="${product.imageUrl}"
+             th:alt="${product.name}"
+             th:class="${cssClass}"
+             loading="lazy" />
+        <div th:if="${product.imageUrl == null or #strings.isEmpty(product.imageUrl)}"
+             th:class="${cssClass} + ' img-placeholder'">
+            <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+    </th:block>
+
+</body>
+</html>
