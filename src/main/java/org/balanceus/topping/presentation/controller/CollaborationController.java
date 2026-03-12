@@ -33,10 +33,18 @@ public class CollaborationController {
     private final CollaborationApplicationService collaborationApplicationService;
 
     @GetMapping
-    public String listCollaborations(Model model) {
-        List<CollaborationCardView> collaborations = collaborationApplicationService.getCollaborationCards();
-        model.addAttribute("collaborations", collaborations);
-        return "collaborations/list";
+    public String listCollaborations() {
+        return "redirect:/explore";
+    }
+
+    @GetMapping("/suggest")
+    public String suggestForm(Model model, Principal principal) {
+        return "redirect:/proposals/suggest";
+    }
+
+    @GetMapping("/browse")
+    public String browseProposals(@RequestParam(required = false) String category, Model model) {
+        return "redirect:/proposals/browse" + (category != null && !category.isEmpty() ? "?category=" + category : "");
     }
 
     @GetMapping("/apply")

@@ -204,30 +204,13 @@ public class CollaborationProposalController {
 	}
 
 	@GetMapping("/mypage")
-	public String myPage(Model model, Principal principal) {
-		User user = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		List<CollaborationProposal> myProposals = proposalRepository.findByProposerUser(user);
-		model.addAttribute("proposals", myProposals);
-		return "proposals/mypage";
+	public String myPage() {
+		return "redirect:/mypage/applications";
 	}
 
 	@GetMapping("/dashboard")
-	@PreAuthorize("hasRole('BUSINESS_OWNER')")
-	public String businessDashboard(Model model, Principal principal) {
-		User businessOwner = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-
-		List<CollaborationProposal> pendingProposals = 
-				proposalRepository.findByStatusOrderByCreatedAtDesc(CollaborationProposal.CollaborationStatus.PENDING);
-		
-		// Target business owner proposals handled through targetStore relationship
-		List<CollaborationProposal> myTargetedProposals = List.of(); // TODO: Implement with targetStore query
-
-		model.addAttribute("pendingProposals", pendingProposals);
-		model.addAttribute("myTargetedProposals", myTargetedProposals);
-		return "proposals/business-dashboard";
+	public String businessDashboard() {
+		return "redirect:/mypage/received";
 	}
 
 	@PostMapping("/{proposalId}/accept")

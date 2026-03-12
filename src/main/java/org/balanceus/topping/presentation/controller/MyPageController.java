@@ -10,15 +10,15 @@ import org.balanceus.topping.domain.model.Product;
 import org.balanceus.topping.domain.model.ProductWishlist;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
+import org.balanceus.topping.domain.model.Wishlist;
 import org.balanceus.topping.domain.repository.ChatRoomRepository;
 import org.balanceus.topping.domain.repository.CollaborationProposalRepository;
 import org.balanceus.topping.domain.repository.CollaborationRepository;
 import org.balanceus.topping.domain.repository.ProductWishlistRepository;
-import org.balanceus.topping.application.service.ProductService;
 import org.balanceus.topping.domain.repository.StoreRepository;
 import org.balanceus.topping.domain.repository.UserRepository;
 import org.balanceus.topping.domain.repository.WishlistRepository;
-import org.balanceus.topping.domain.model.Wishlist;
+import org.balanceus.topping.application.service.ProductService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -209,42 +209,8 @@ public class MyPageController {
 	}
 
 	@GetMapping("/collabos")
-	public String myPageCollabos(Model model, Principal principal) {
-		log.debug("MyPage Collaborations accessed - Principal: {}", principal);
-		
-		if (principal == null) {
-			log.warn("Principal is null - redirecting to login");
-			return "redirect:/login";
-		}
-
-		User user = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-		
-		// Get user's store if exists
-		Store userStore = storeRepository.findByUser(user).orElse(null);
-		
-		// Get user's proposals (both as user and store owner) - use OR query to prevent duplicates
-		List<CollaborationProposal> proposals = userStore != null ? 
-			proposalRepository.findByProposerUserOrProposerStore(user, userStore) : 
-			proposalRepository.findByProposerUser(user);
-		
-		// Get user's collaboration applications (submitted via apply form)
-		List<Collaboration> myApplications = userStore != null ? 
-			collaborationRepository.findByStoreParticipation(userStore) : List.of();
-		
-		// Get collaborations where user is involved
-		List<CollaborationProposal> acceptedCollaborations = proposalRepository
-				.findByStatus(CollaborationProposal.CollaborationStatus.ACCEPTED);
-		
-		
-		// Get active chat rooms
-		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
-
-		model.addAttribute("proposals", proposals);
-		model.addAttribute("myApplications", myApplications);
-		model.addAttribute("acceptedCollaborations", acceptedCollaborations);
-		model.addAttribute("activeChatRooms", activeChatRooms);
-		return "mypage/collabos";
+	public String myPageCollabos() {
+		return "redirect:/mypage/applications";
 	}
 
 	@GetMapping("/applications")
@@ -313,39 +279,8 @@ public class MyPageController {
 	}
 
 	@GetMapping("/ongoing")
-	public String myPageOngoing(Model model, Principal principal) {
-		log.debug("MyPage Ongoing Collaborations accessed - Principal: {}", principal);
-		
-		if (principal == null) {
-			log.warn("Principal is null - redirecting to login");
-			return "redirect:/login";
-		}
-
-		User user = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
-		
-		// Get user's store if exists
-		Store userStore = storeRepository.findByUser(user).orElse(null);
-		
-		// Get user's accepted collaboration applications
-		List<Collaboration> myApplications = userStore != null ? 
-			collaborationRepository.findByStoreParticipation(userStore) : List.of();
-		List<Collaboration> ongoingCollaborations = myApplications.stream()
-				.filter(collab -> collab.getStatus() == Collaboration.CollaborationStatus.ACCEPTED)
-				.toList();
-		
-		// Get collaborations where user's store is involved and accepted
-		List<Collaboration> acceptedReceivedApplications = userStore != null ?
-			collaborationRepository.findByStoreAndStatus(userStore, Collaboration.CollaborationStatus.ACCEPTED) :
-			List.of();
-		
-		// Get active chat rooms
-		List<ChatRoom> activeChatRooms = chatRoomRepository.findByIsActiveTrue();
-
-		model.addAttribute("ongoingCollaborations", ongoingCollaborations);
-		model.addAttribute("acceptedReceivedApplications", acceptedReceivedApplications);
-		model.addAttribute("activeChatRooms", activeChatRooms);
-		return "mypage/ongoing";
+	public String myPageOngoing() {
+		return "redirect:/mypage/applications";
 	}
 
 	@GetMapping("/received")

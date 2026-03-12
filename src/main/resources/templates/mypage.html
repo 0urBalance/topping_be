@@ -198,13 +198,13 @@
             </div>
 
             <!-- Ongoing Collaborations -->
-            <div class="stat-card ongoing" onclick="location.href='/mypage/ongoing'">
+            <div class="stat-card ongoing" onclick="location.href='/mypage/applications'">
                 <div class="stat-content">
                     <div class="stat-number" th:text="${ongoingCollaborationCount ?: 0}">2</div>
                     <div class="stat-label">진행중 콜라보</div>
                     <div class="stat-description">현재 활성 상태인 콜라보</div>
                 </div>
-                <a href="/mypage/ongoing" class="stat-action">관리하기</a>
+                <a href="/mypage/applications" class="stat-action">관리하기</a>
             </div>
 
             <!-- My Products -->
@@ -268,14 +268,14 @@
         <div class="collaboration-section">
             <div class="section-header">
                 <h3>나의 콜라보 제안</h3>
-                <a href="/mypage/collabos" class="more-link">더 보기 ></a>
+                <a href="/mypage/applications" class="more-link">더 보기 ></a>
             </div>
             <div class="collaboration-actions">
                 <a href="/products/create" class="action-btn-new">
                     <span class="material-symbols-outlined">add_circle</span>
                     새 상품 등록
                 </a>
-                <a href="/collabo/suggest" class="action-btn-new">
+                <a href="/collaborations/suggest" class="action-btn-new">
                     <span class="material-symbols-outlined">search</span>
                     콜라보 찾기
                 </a>

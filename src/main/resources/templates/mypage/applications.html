@@ -180,7 +180,7 @@
                            th:if="${myApp.partnerProduct != null or myApp.initiatorProduct != null}"
                            class="btn">상품 보기</a>
                         <a th:if="${myApp.status.name() == 'ACCEPTED'}" 
-                           th:href="@{'/mypage/ongoing'}" 
+                           th:href="@{'/chat/rooms'}" 
                            class="btn btn-success">콜라보 관리</a>
                         <a th:if="${myApp.initiatorProduct != null}" 
                            th:href="@{'/products/' + ${myApp.initiatorProduct.uuid}}" 
@@ -275,7 +275,7 @@
                     </div>
                     
                     <div class="actions">
-                        <a th:href="@{'/mypage/ongoing'}" class="btn btn-success">콜라보 관리</a>
+                        <a th:href="@{'/chat/rooms'}" class="btn btn-success">콜라보 관리</a>
                         <a th:href="@{'/products/' + ${acceptedApp.partnerProduct != null ? acceptedApp.partnerProduct.uuid : (acceptedApp.initiatorProduct != null ? acceptedApp.initiatorProduct.uuid : '#')}}" 
                            th:if="${acceptedApp.partnerProduct != null or acceptedApp.initiatorProduct != null}"
                            class="btn">상품 보기</a>
