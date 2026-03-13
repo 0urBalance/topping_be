@@ -1,245 +1,67 @@
 # Collaboration Domain - Claude Guidance
 
 ## Overview
-The Collaboration domain handles business matching, partnership proposals, and collaborative project management for the Topping platform.
+사업자 간 협업 매칭, 파트너십 제안, 콜라보 프로젝트 관리를 담당. **두 개의 별도 엔티티**로 구성.
 
 ## Core Entities
-- **Collaboration** - Accepted collaborations with chat integration
-- **CollaborationProposal** - Pending collaboration proposals
-- **ProposalSource** - Enum for proposal origin (GUEST_TO_BUSINESS, BUSINESS_TO_BUSINESS)
 
-## Dual Entity Architecture
+### 이중 엔티티 구조 (핵심)
+- **`Collaboration`** — **수락된** 콜라보. 채팅방이 연결됨
+- **`CollaborationProposal`** — **대기 중인** 제안. 수락 시 `Collaboration`으로 전환
+- **`ProposalSource`** — `GUEST_TO_BUSINESS` | `BUSINESS_TO_BUSINESS`
 
-### Entity Relationships
-```java
-// Collaboration (Accepted collaborations)
-@Entity
-public class Collaboration {
-    @Id @GeneratedValue private UUID uuid;
-    private String title;
-    private String description; // ⚠️ Use 'description', NOT 'message'
-    @ManyToOne private Product initiatorProduct;
-    @ManyToOne private Product partnerProduct; // Can be null for services
-    @ManyToOne private Store initiatorStore;
-    @ManyToOne private Store partnerStore;
-    @ManyToOne private User initiator;
-    @ManyToOne private User partner;
-}
+### 필드 참조 매핑 (자주 틀리는 부분)
 
-// CollaborationProposal (Pending proposals)
-@Entity
-public class CollaborationProposal {
-    @Id @GeneratedValue private UUID uuid;
-    private String title;
-    private String description;
-    @ManyToOne private Product initiatorProduct;
-    @ManyToOne private Product partnerProduct;
-    @ManyToOne private Store initiatorStore;
-    @ManyToOne private Store partnerStore;
-    @Enumerated private ProposalSource source;
-}
-```
+| 잘못된 참조 | 올바른 참조 |
+|---|---|
+| `collaboration.product` | 없음 → 아래 조건 분기 사용 |
+| `collaboration.message` | `collaboration.description` |
+| `collaboration.applicantProduct` | `collaboration.initiatorProduct` |
+| `application.product` | 조건 분기로 `initiatorProduct`/`partnerProduct` 선택 |
 
-### Repository Pattern
-```java
-// Separate repositories for each entity
-// CollaborationRepository - for accepted collaborations
-// CollaborationProposalRepository - for pending proposals
-
-// Service method for unified view
-public List<Object> getAllUserCollaborations(User user) {
-    List<Collaboration> collaborations = collaborationRepository.findByUser(user);
-    List<CollaborationProposal> proposals = proposalRepository.findByUser(user);
-    // Combine and return unified view
-}
-```
-
-## Template Field References
-
-### Critical Field Mappings
 ```html
-<!-- ✅ Correct field references -->
-<h2 th:text="${collaboration.title}">Collaboration Title</h2>
-<p th:text="${collaboration.description}">Description</p>
-
-<!-- Product conditional logic -->
+<!-- ✅ 올바른 상품 표시 패턴 -->
 <div th:if="${collaboration.partnerProduct != null}">
-    <span th:text="${collaboration.partnerProduct.title}">Partner Product</span>
+    <span th:text="${collaboration.partnerProduct.title}">파트너 상품</span>
 </div>
 <div th:unless="${collaboration.partnerProduct != null}">
-    <span th:text="${collaboration.initiatorProduct.title}">Initiator Product</span>
-</div>
-
-<!-- ❌ Common mistakes to avoid -->
-<!-- th:text="${collaboration.product}" --> <!-- Field doesn't exist -->
-<!-- th:text="${collaboration.message}" --> <!-- Use 'description' -->
-<!-- th:text="${collaboration.applicantProduct}" --> <!-- Use 'initiatorProduct' -->
-```
-
-### MyPage Integration Templates
-```html
-<!-- Unified received page showing both entities -->
-<div class="collaboration-section">
-    <h3>받은 제안서 (CollaborationProposal)</h3>
-    <div th:each="proposal : ${proposals}">
-        <div class="proposal-card">
-            <h4 th:text="${proposal.title}">Proposal Title</h4>
-            <p th:text="${proposal.description}">Proposal Description</p>
-            <div th:if="${proposal.partnerProduct != null}">
-                <span th:text="${proposal.partnerProduct.title}">Product Name</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="collaboration-section">
-    <h3>진행 중인 콜라보 (Collaboration)</h3>
-    <div th:each="collabo : ${collaborations}">
-        <div class="collaboration-card">
-            <h4 th:text="${collabo.title}">Collaboration Title</h4>
-            <p th:text="${collabo.description}">Collaboration Description</p>
-        </div>
-    </div>
+    <span th:text="${collaboration.initiatorProduct.title}">제안자 상품</span>
 </div>
 ```
 
-## Controller Patterns
+### 공통 필드 (Collaboration & CollaborationProposal)
+- `uuid`, `title`, `description`
+- `initiatorProduct` (ManyToOne, 서비스형 콜라보는 null 가능)
+- `partnerProduct` (ManyToOne, null 가능)
+- `initiatorStore`, `partnerStore`, `initiator`, `partner`
 
-### Proposal Acceptance Flow
-```java
-@PostMapping("/collaborations/{proposalId}/accept")
-public String acceptProposal(@PathVariable UUID proposalId, 
-                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    // 1. Find the proposal
-    CollaborationProposal proposal = proposalService.findById(proposalId);
-    
-    // 2. Create accepted collaboration
-    Collaboration collaboration = collaborationService.acceptProposal(proposal, userDetails.getUser());
-    
-    // 3. Create chat room automatically
-    chatService.createChatRoomForCollaboration(collaboration);
-    
-    // 4. Delete the proposal
-    proposalService.delete(proposalId);
-    
-    return "redirect:/mypage/ongoing";
-}
-```
+## Key Patterns
 
-### Collaboration Application
-```java
-@PostMapping("/collaborations/apply")
-public String applyCollaboration(@ModelAttribute CollaborationApplicationForm form,
-                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    // Create proposal entity
-    CollaborationProposal proposal = proposalService.createProposal(form, userDetails.getUser());
-    
-    // Automatic chat room creation happens only after acceptance
-    return "redirect:/mypage/applications";
-}
-```
+### 제안 수락 흐름
+1. `CollaborationProposal` 조회
+2. `Collaboration` 생성 (수락된 콜라보)
+3. **채팅방 자동 생성** (`chatService.createChatRoomForCollaboration(collaboration)`)
+4. `CollaborationProposal` 삭제
+5. `/mypage/ongoing` 리다이렉트
 
-## Chat Integration
-
-### Automatic Room Creation
-```java
-// Service method in ChatService
-@Transactional
-public ChatRoom createChatRoomForCollaboration(Collaboration collaboration) {
-    // Check if room already exists
-    Optional<ChatRoom> existingRoom = chatRoomRepository.findByCollaborationUuid(collaboration.getUuid());
-    if (existingRoom.isPresent()) {
-        return existingRoom.get();
-    }
-    
-    // Create new room
-    ChatRoom chatRoom = ChatRoom.builder()
-        .name(collaboration.getTitle() + " 채팅방")
-        .collaborationUuid(collaboration.getUuid())
-        .build();
-    
-    return chatRoomRepository.save(chatRoom);
-}
-
-// Also supports CollaborationProposal
-public ChatRoom createChatRoomForProposal(CollaborationProposal proposal) {
-    // Similar logic for proposals
-}
-```
-
-## Service Layer Patterns
-
-### Collaboration Statistics
-```java
-public CollaborationStats getUserCollaborationStats(User user) {
-    long ongoingCount = collaborationRepository.countByUserAndStatus(user, ONGOING);
-    long proposalsCount = proposalRepository.countByTargetUser(user);
-    long applicationsCount = proposalRepository.countByInitiator(user);
-    
-    return CollaborationStats.builder()
-        .ongoingCollaborations(ongoingCount)
-        .receivedProposals(proposalsCount)
-        .sentApplications(applicationsCount)
-        .build();
-}
-```
-
-### Form Processing
-```java
-// Dynamic form system for collaboration applications
-@Service
-public class CollaborationService {
-    
-    public CollaborationProposal createApplicationProposal(CollaborationApplicationForm form, User applicant) {
-        Store targetStore = storeRepository.findById(form.getStoreId());
-        Product applicantProduct = productRepository.findById(form.getProductId());
-        
-        return CollaborationProposal.builder()
-            .title(form.getTitle())
-            .description(form.getDescription())
-            .initiatorProduct(applicantProduct)
-            .initiatorStore(applicant.getStore())
-            .partnerStore(targetStore)
-            .source(ProposalSource.GUEST_TO_BUSINESS)
-            .build();
-    }
-}
-```
+### Repository Pattern
+- `CollaborationRepository` — 수락된 콜라보
+- `CollaborationProposalRepository` — 대기 중인 제안
+- 각각 3-layer pattern 적용
 
 ## Common Pitfalls
-- ❌ **Field References**: Never use `collaboration.product` → use conditional logic with `partnerProduct`/`initiatorProduct`
-- ❌ **Message Field**: Use `collaboration.description`, NOT `collaboration.message`
-- ❌ **Applicant Fields**: Use `initiatorProduct`, NOT `applicantProduct`
-- ❌ **Chat Room Creation**: Only create rooms for accepted collaborations, not proposals
-- ❌ **Entity Confusion**: Distinguish between `Collaboration` (accepted) and `CollaborationProposal` (pending)
-- ❌ **Null Safety**: Always check if `partnerProduct` is null for service-based collaborations
-
-## API Response Patterns
-```java
-// Unified collaboration data
-@GetMapping("/api/collaborations/summary")
-public ResponseEntity<ApiResponseData<CollaborationSummaryResponse>> getCollaborationSummary(
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    CollaborationSummaryResponse response = collaborationService.getSummary(userDetails.getUser());
-    return ResponseEntity.ok(ApiResponseData.success(response));
-}
-```
+- ❌ **`collaboration.product`**: 이 필드 없음 → `partnerProduct`/`initiatorProduct` 조건 분기 사용
+- ❌ **`collaboration.message`**: `description` 필드 사용
+- ❌ **`applicantProduct`**: `initiatorProduct` 사용
+- ❌ **채팅방 조기 생성**: 제안 수락 시에만 채팅방 생성 (제안 단계에서 금지)
+- ❌ **엔티티 혼동**: `Collaboration`(수락) vs `CollaborationProposal`(대기) 구분 필수
+- ❌ **Null Safety**: 서비스형 콜라보는 `partnerProduct == null` 가능
 
 ## Integration Points
-- **Chat Domain**: Automatic chat room creation for accepted collaborations
-- **Product Domain**: Product-based and service-based collaborations
-- **Store Domain**: Store-to-store business partnerships
-- **User Domain**: User roles and ownership verification
-
-## Testing Patterns
-```java
-@ActiveProfiles("test")
-class CollaborationServiceTest {
-    // Test proposal creation and acceptance flow
-    // Verify chat room creation integration
-    // Test dual entity queries and statistics
-}
-```
+- **Chat Domain**: 수락된 콜라보에 채팅방 자동 생성
+- **Product Domain**: `initiatorProduct`/`partnerProduct` 참조
+- **Store Domain**: 가게 간 비즈니스 파트너십
+- **User Domain**: 사용자 역할 및 소유권 검증
 
 ## Related Documentation
 - [Main Claude Guidance](../../../CLAUDE.md)

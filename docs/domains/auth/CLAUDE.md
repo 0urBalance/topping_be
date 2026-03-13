@@ -1,289 +1,56 @@
 # Auth Domain - Claude Guidance
 
 ## Overview
-The Auth domain handles session-based authentication, authorization, and Kakao social login integration for the Topping platform.
+세션 기반 인증, Spring Security 설정, Kakao 소셜 로그인 통합을 담당.
 
-## Authentication Architecture
+## Key Patterns
 
-### Session-Based Authentication
-```java
-// SecurityConfig patterns
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-    
-    @Bean
-    public SessionCreationPolicy sessionCreationPolicy() {
-        return SessionCreationPolicy.IF_REQUIRED; // Creates sessions as needed
-    }
-    
-    // CSRF disabled for simplified form handling
-    .csrf(csrf -> csrf.disable())
-}
+### 세션 관리
+- **JSESSIONID 쿠키**로 인증 상태 유지
+- `SessionCreationPolicy.IF_REQUIRED` — 필요 시 세션 생성
+- CSRF: 폼 처리 단순화를 위해 비활성화
+
+### 라우트 권한 규칙
+```
+/                           → permitAll
+/auth/**                    → permitAll
+/api/auth/**                → permitAll
+/support/cs, /support/faq/** → permitAll
+/mypage/**                  → authenticated
+/products/**                → authenticated
+/collaborations/**          → authenticated
+/chat/**                    → authenticated
+/stores/register            → BUSINESS_OWNER or ADMIN
+/admin/**                   → ADMIN only
 ```
 
-### Session Management
-- **JSESSIONID Cookie**: Maintains authentication across requests
-- **Spring Security**: Integrated with UserDetailsImpl and UserDetailsServiceImpl
-- **Session Persistence**: Configured for reliable authentication state
+### Kakao 소셜 로그인
+1. 인가 코드 수신 → Kakao 액세스 토큰 교환
+2. Kakao 사용자 정보 조회
+3. DB에서 사용자 조회 (없으면 자동 생성: role=USER, sggCode="11680")
+4. Spring Security 세션 생성 (JWT 아님)
+- Kakao 액세스 토큰은 초기 인증에만 사용, 저장 금지
 
-## User Authentication Flow
-
-### Login Process
-```java
-@PostMapping("/api/session/login")
-public ResponseEntity<ApiResponseData<String>> login(@RequestBody LoginRequest request, 
-                                                   HttpServletRequest httpRequest) {
-    // Authenticate user
-    Authentication auth = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-    );
-    
-    // Set security context
-    SecurityContextHolder.getContext().setAuthentication(auth);
-    
-    // Create session
-    HttpSession session = httpRequest.getSession(true);
-    
-    return ResponseEntity.ok(ApiResponseData.success("로그인 성공"));
-}
-```
-
-### Session Status Check
-```java
-@GetMapping("/api/session/user")
-public ResponseEntity<ApiResponseData<SessionUserInfo>> getCurrentUser(
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    if (userDetails == null) {
-        return ResponseEntity.ok(ApiResponseData.failure("USER_NOT_AUTHENTICATED", "인증되지 않은 사용자"));
-    }
-    
-    SessionUserInfo userInfo = SessionUserInfo.from(userDetails.getUser());
-    return ResponseEntity.ok(ApiResponseData.success(userInfo));
-}
-```
-
-## Kakao Social Login Integration
-
-### OAuth Flow
-```java
-@Service
-public class KakaoService {
-    
-    @Value("${kakao.rest-api-key}")
-    private String kakaoRestApiKey;
-    
-    public String authenticateWithKakao(String code) {
-        // 1. Exchange code for access token
-        String accessToken = getKakaoAccessToken(code);
-        
-        // 2. Get user info from Kakao
-        KakaoUserInfoDto kakaoUser = getKakaoUserInfo(accessToken);
-        
-        // 3. Find or create user
-        User user = findOrCreateUser(kakaoUser);
-        
-        // 4. Create Spring Security session (NOT JWT)
-        createAuthenticationSession(user);
-        
-        return "로그인 성공";
-    }
-    
-    private User findOrCreateUser(KakaoUserInfoDto kakaoUser) {
-        return userRepository.findByEmail(kakaoUser.getEmail())
-            .orElseGet(() -> createNewKakaoUser(kakaoUser));
-    }
-    
-    private User createNewKakaoUser(KakaoUserInfoDto kakaoUser) {
-        return User.builder()
-            .email(kakaoUser.getEmail())
-            .name(kakaoUser.getNickname())
-            .role(Role.USER) // Default role
-            .sggCode("11680") // Default Seoul/Gangnam
-            .build();
-    }
-}
-```
-
-### Kakao User Data Model
-```java
-@Data
-public class KakaoUserInfoDto {
-    private Long id;
-    private String nickname;
-    private String email;
-    private String profileImage;
-    
-    // Domain validation logic
-    public boolean isValidForRegistration() {
-        return email != null && !email.trim().isEmpty() 
-            && nickname != null && !nickname.trim().isEmpty();
-    }
-}
-```
-
-## Authorization Patterns
-
-### Controller Level Authorization
-```java
-// Method level security
-@PreAuthorize("hasRole('BUSINESS_OWNER') or hasRole('ADMIN')")
-@GetMapping("/stores/register")
-public String storeRegistrationForm() {
-    return "store/register";
-}
-
-// Authentication required
-@GetMapping("/mypage")
-public String myPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-    if (userDetails == null) {
-        return "redirect:/auth/login";
-    }
-    return "mypage/dashboard";
-}
-```
-
-### Template Level Authorization
+### Template 권한 확인
 ```html
-<!-- Role-based rendering -->
-<div sec:authorize="hasRole('BUSINESS_OWNER')">
-    <a href="/stores/register" class="btn">가게 등록</a>
-</div>
-
-<!-- Authentication check -->
-<div sec:authorize="isAuthenticated()">
-    <span th:text="${#authentication.principal.user.name}">사용자명</span>
-    <a href="/auth/logout">로그아웃</a>
-</div>
-
-<div sec:authorize="!isAuthenticated()">
-    <a href="/auth/login">로그인</a>
-    <a href="/auth/signup">회원가입</a>
-</div>
-```
-
-## Route Protection
-
-### Security Configuration
-```java
-@Configuration
-public class SecurityConfig {
-    
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
-            .authorizeHttpRequests(auth -> auth
-                // Public routes
-                .requestMatchers("/", "/auth/**", "/api/auth/**").permitAll()
-                .requestMatchers("/support/cs", "/support/faq/**").permitAll()
-                
-                // Protected routes
-                .requestMatchers("/mypage/**").authenticated()
-                .requestMatchers("/products/**").authenticated()
-                .requestMatchers("/collaborations/**").authenticated()
-                .requestMatchers("/chat/**").authenticated()
-                
-                // Admin/Business owner routes
-                .requestMatchers("/stores/register").hasAnyRole("BUSINESS_OWNER", "ADMIN")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
-            )
-            .build();
-    }
-}
-```
-
-## User Details Integration
-
-### UserDetailsImpl
-```java
-@Getter
-public class UserDetailsImpl implements UserDetails {
-    private final User user;
-    
-    public UserDetailsImpl(User user) {
-        this.user = user;
-    }
-    
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
-        );
-    }
-    
-    @Override
-    public String getUsername() {
-        return user.getEmail();
-    }
-    
-    // Additional UserDetails methods...
-}
-```
-
-### Service Implementation
-```java
-@Service
-public class UserDetailsServiceImpl implements UserDetailsService {
-    
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
-        
-        return new UserDetailsImpl(user);
-    }
-}
+<div sec:authorize="hasRole('BUSINESS_OWNER')">...</div>
+<div sec:authorize="isAuthenticated()">...</div>
+<div sec:authorize="!isAuthenticated()">...</div>
+<span th:text="${#authentication.principal.user.name}"></span>
 ```
 
 ## Common Pitfalls
-- ❌ **JWT Usage**: This project uses session-based auth, NOT JWT tokens
-- ❌ **Manual Session**: Don't manually create SecurityContext, use authentication flow
-- ❌ **Hard-coded Roles**: Use Role enum constants, not string literals
-- ❌ **Missing CSRF**: CSRF is disabled, but be aware for form submissions
-- ❌ **Kakao Token Storage**: Don't store Kakao access tokens, only use for initial auth
-
-## API Response Patterns
-```java
-// Session endpoints with ApiResponseData wrapper
-@PostMapping("/api/session/logout")
-public ResponseEntity<ApiResponseData<String>> logout(HttpServletRequest request) {
-    HttpSession session = request.getSession(false);
-    if (session != null) {
-        session.invalidate();
-    }
-    SecurityContextHolder.clearContext();
-    return ResponseEntity.ok(ApiResponseData.success("로그아웃 성공"));
-}
-```
+- ❌ **JWT 사용**: 세션 기반 인증 사용, JWT 토큰 방식 아님
+- ❌ **SecurityContext 수동 생성**: 인증 흐름 통해서만 처리
+- ❌ **Role 하드코딩**: `Role` enum 상수 사용
+- ❌ **CSRF 주의**: CSRF 비활성화 상태지만 폼 제출 시 인지 필요
+- ❌ **Kakao 토큰 저장**: Kakao 액세스 토큰 DB 저장 금지
 
 ## Integration Points
-- **User Domain**: User entities and role management
-- **Store Domain**: Business owner verification for store operations
-- **Chat Domain**: User authentication for chat access
-- **All Domains**: Session-based access control across all features
-
-## Testing Patterns
-```java
-@ActiveProfiles("test")
-class AuthControllerTest {
-    // Mock authentication context
-    // Test session creation and destruction
-    // Verify role-based access control
-    
-    @WithMockUser(roles = "BUSINESS_OWNER")
-    @Test
-    void testStoreAccess() {
-        // Test business owner access
-    }
-}
-```
+- **User Domain**: User 엔티티, role 관리
+- **Store Domain**: BUSINESS_OWNER 역할 검증
+- **Chat Domain**: 채팅 접근 인증
+- **전 도메인**: 세션 기반 접근 제어
 
 ## Related Documentation
 - [Main Claude Guidance](../../../CLAUDE.md)

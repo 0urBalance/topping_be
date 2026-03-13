@@ -1,225 +1,70 @@
 # Product Domain - Claude Guidance
 
 ## Overview
-The Product domain handles product listings, collaboration features, and product-based matching for the Topping platform.
+상품 등록, 수정, 다중 이미지 관리, 콜라보 연동을 담당.
 
 ## Core Entities
-- **Product** - Main product entity with UUID primary key
-- **ProductImage** - Multiple images per product with ordering
-- **Wishlist** - User product favorites
-- **Review** - Product reviews and ratings
+- **Product** — UUID PK, `title`(⚠️ `name` 아님), description, store, type(COLLABORATION/INDIVIDUAL)
+- **ProductImage** — imagePath, originalFileName, displayOrder (int)
+- **Wishlist** — 사용자 상품 즐겨찾기
+- **Review** — 상품 리뷰/평점
 
 ## Key Patterns
 
-### Product Entity Structure
+### 라우트 규칙
+```
+/products/create      ← 상품 생성 폼 (⚠️ /products/register 아님)
+/products             ← 상품 생성 POST
+/products/{id}/edit   ← 상품 수정 폼
+/products/{id}        ← 상품 수정 PUT
+```
+
+### 상품 생성 전 가게 보유 확인 (필수)
 ```java
-@Entity
-public class Product {
-    @Id @GeneratedValue private UUID uuid;
-    private String title; // ⚠️ Use 'title', NOT 'name'
-    private String description;
-    @ManyToOne private Store store;
-    @OneToMany(mappedBy = "product") private List<ProductImage> productImages;
-    private ProductType type; // COLLABORATION, INDIVIDUAL
+Store userStore = storeService.findByOwner(userDetails.getUser());
+if (userStore == null) {
+    return "redirect:/stores/register";
 }
 ```
 
 ### Repository Pattern
-- **Domain Interface**: `ProductRepository`
-- **JPA Interface**: `ProductJpaRepository extends JpaRepository<Product, UUID>`
-- **Implementation**: `ProductRepositoryImpl implements ProductRepository`
+- `ProductRepository` → `ProductRepositoryImpl implements ProductRepository`
+- `ProductJpaRepository extends JpaRepository<Product, UUID>`
 
-## Product Routes & Controllers
-
-### Route Patterns
-```java
-// ✅ Correct routes
-@GetMapping("/products/create")     // Product creation form
-@PostMapping("/products")           // Product creation
-@GetMapping("/products/{id}/edit")  // Product edit form
-@PutMapping("/products/{id}")       // Product update
-
-// ❌ Avoid these patterns
-// /products/register (use /products/create)
-```
-
-### Controller Patterns
-```java
-@Controller
-@RequestMapping("/products")
-public class ProductController {
-    
-    @GetMapping("/create")
-    @PreAuthorize("hasRole('BUSINESS_OWNER') or hasRole('ADMIN')")
-    public String createProductForm(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        // Verify user has a store before allowing product creation
-        Store userStore = storeService.findByOwner(userDetails.getUser());
-        if (userStore == null) {
-            return "redirect:/stores/register";
-        }
-        model.addAttribute("productForm", new ProductRequestDto());
-        return "products/create";
-    }
-}
-```
-
-## Multi-Image Management
-
-### ProductImage Entity
-```java
-@Entity
-public class ProductImage {
-    @Id @GeneratedValue private UUID uuid;
-    @ManyToOne private Product product;
-    private String imagePath;
-    private String originalFileName;
-    private int displayOrder;
-}
-```
-
-### Image Upload Integration
-```java
-// Service pattern for product images
-public Product createProductWithImages(ProductRequestDto request, List<MultipartFile> images, User owner) {
-    Product product = createProduct(request, owner);
-    
-    if (images != null && !images.isEmpty()) {
-        for (int i = 0; i < images.size(); i++) {
-            ProductImage productImage = imageUploadService.processProductImage(images.get(i), product, i);
-            productImageRepository.save(productImage);
-        }
-    }
-    return product;
-}
-```
-
-## Template Patterns
-
-### Product Field References
+### Template 필드 참조
 ```html
-<!-- ✅ Correct field references -->
-<h1 th:text="${product.title}">Product Title</h1>
-<p th:text="${product.description}">Product Description</p>
+<!-- ✅ 올바른 참조 -->
+<h1 th:text="${product.title}">제목</h1>
 
-<!-- ❌ Incorrect field references -->
-<!-- <h1 th:text="${product.name}"> --> <!-- Field doesn't exist -->
+<!-- ❌ 잘못된 참조 - 필드 없음 -->
+<!-- th:text="${product.name}" -->
 ```
 
-### Product Card Fragment
-```html
-<!-- Fragment: fragments/product-card.html -->
-<div th:fragment="product-card(product)" class="product-card">
-    <div class="product-image">
-        <img th:if="${product.productImages != null and !product.productImages.empty}"
-             th:src="@{'/uploads/' + ${product.productImages[0].imagePath}}"
-             th:alt="${product.title}" />
-        <div th:unless="${product.productImages != null and !product.productImages.empty}" 
-             class="no-image-placeholder">
-            이미지 없음
-        </div>
-    </div>
-    <div class="product-info">
-        <h3 th:text="${product.title}">Product Title</h3>
-        <p th:text="${product.store.name}">Store Name</p>
-    </div>
-</div>
-```
-
-### Product Forms
-```html
-<!-- Product creation/edit form -->
-<form th:object="${productForm}" method="post" enctype="multipart/form-data">
-    <input th:field="*{title}" type="text" placeholder="상품명" required />
-    <textarea th:field="*{description}" placeholder="상품 설명"></textarea>
-    <select th:field="*{type}">
-        <option value="INDIVIDUAL">개별 상품</option>
-        <option value="COLLABORATION">콜라보 상품</option>
-    </select>
-    <input type="file" name="images" multiple accept="image/*" />
-</form>
-```
-
-## Collaboration Integration
-
-### Product-Collaboration Relationship
+### Cartesian Product 방지
 ```java
-// Product can be part of collaborations
-@Entity
-public class Collaboration {
-    @ManyToOne private Product initiatorProduct;
-    @ManyToOne private Product partnerProduct; // Can be null for service collaborations
-}
+// ❌ 잘못됨 - 다중 JOIN FETCH
+@Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages LEFT JOIN FETCH p.reviews")
 
-// Service method for collaboration products
-public List<Product> getCollaborationProducts(User user) {
-    return productRepository.findByStoreOwnerAndType(user, ProductType.COLLABORATION);
-}
-```
-
-### Template Collaboration Logic
-```html
-<!-- Conditional product display in collaborations -->
-<div th:if="${collaboration.partnerProduct != null}">
-    <!-- Product-based collaboration -->
-    <div class="collaboration-products">
-        <div th:replace="~{fragments/product-card :: product-card(${collaboration.initiatorProduct})}"></div>
-        <div th:replace="~{fragments/product-card :: product-card(${collaboration.partnerProduct})}"></div>
-    </div>
-</div>
-<div th:unless="${collaboration.partnerProduct != null}">
-    <!-- Service-based collaboration -->
-    <div th:replace="~{fragments/product-card :: product-card(${collaboration.initiatorProduct})}"></div>
-</div>
-```
-
-## Query Optimization
-
-### Avoiding Cartesian Product
-```java
-// ❌ Problematic - multiple JOIN FETCH causes Cartesian Product
-@Query("SELECT p FROM Product p " +
-       "LEFT JOIN FETCH p.productImages " +
-       "LEFT JOIN FETCH p.store " +
-       "LEFT JOIN FETCH p.reviews")
-
-// ✅ Correct - separate queries or single JOIN FETCH
+// ✅ 올바름 - 단일 JOIN FETCH 또는 별도 쿼리
 @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.store = :store")
 ```
 
-## Common Pitfalls
-- ❌ **Product Field**: Use `product.title`, NOT `product.name` in templates
-- ❌ **Product Routes**: Use `/products/create`, NOT `/products/register`
-- ❌ **Store Verification**: Always verify user has a store before product creation
-- ❌ **Image Null Safety**: Check `productImages != null and !productImages.empty`
-- ❌ **Cartesian Product**: Avoid multiple JOIN FETCH in single query
-
-## API Response Patterns
-```java
-// Product list with pagination
-@GetMapping("/api/products")
-public ResponseEntity<ApiResponseData<List<ProductSummaryResponse>>> getProducts(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
-    Page<Product> products = productService.getProducts(PageRequest.of(page, size));
-    return ResponseEntity.ok(ApiResponseData.success(products.getContent()));
-}
+### Null Safety (이미지 접근 시)
+```html
+th:if="${product.productImages != null and !product.productImages.empty}"
 ```
+
+## Common Pitfalls
+- ❌ **필드명**: `product.title` 사용. `product.name` 필드 없음
+- ❌ **라우트**: `/products/create` 사용. `/products/register` 아님
+- ❌ **가게 검증 누락**: 상품 생성 전 반드시 owner의 가게 존재 확인
+- ❌ **이미지 Null**: `productImages != null and !productImages.empty` 체크 필수
+- ❌ **Cartesian Product**: 단일 쿼리에 다중 JOIN FETCH 금지
 
 ## Integration Points
-- **Store Domain**: Products belong to stores, require business owner role
-- **Collaboration Domain**: Products can be part of collaboration proposals
-- **Image Upload**: Multi-image management system
-- **Wishlist**: User favorites and product discovery
-
-## Testing Patterns
-```java
-@ActiveProfiles("test")
-class ProductServiceTest {
-    // Test product creation with images
-    // Verify store ownership requirements
-    // Test collaboration product filtering
-}
-```
+- **Store Domain**: 상품은 가게에 속함, BUSINESS_OWNER 역할 필요
+- **Collaboration Domain**: 상품이 콜라보 제안의 `initiatorProduct`/`partnerProduct`
+- **Image Upload**: 다중 이미지 관리 시스템
 
 ## Related Documentation
 - [Main Claude Guidance](../../../CLAUDE.md)

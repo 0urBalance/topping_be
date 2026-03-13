@@ -1,286 +1,200 @@
 # CLAUDE.md
 
-This file provides comprehensive guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with this repository.
+
+## Critical Rules
+
+> These override everything else. Violating any of these causes bugs or build failures.
+
+1. **Session auth only** — Use `Principal` or `@AuthenticationPrincipal UserDetailsImpl`. JWT 사용 금지
+2. **Entity UUID** — 모든 엔티티는 `getUuid()` 사용. `getUserId()`, `getRoomId()` 등 존재하지 않음 (Lombok이 필드명에서 getter 생성)
+3. **API 응답** — `ApiResponseData.success(data)` 사용. `ApiResponseData.success(Code.SUCCESS, data)` 형태 사용 금지
+4. **Thymeleaf fragment** — `th:replace="~{fragments/navbar :: navbar}"` (Thymeleaf 3 문법)
+5. **CSS 금지** — Bootstrap CDN, inline styles, 외부 CSS 프레임워크 사용 금지
+6. **UUID 자동 생성** — `@GeneratedValue` 엔티티에 UUID 수동 설정 금지
+7. **JPA JOIN FETCH** — 단일 쿼리에 다중 JOIN FETCH 금지 (Cartesian Product 발생 → 데이터 중복)
+
+---
 
 ## Project Overview
-Topping (토핑) is a collaboration matching platform backend built with Spring Boot. The project uses a clean architecture approach with domain-driven design principles, enabling businesses to find collaboration partners and manage collaborative projects.
+
+Topping(토핑)은 Spring Boot 기반 협업 매칭 플랫폼. 사업자 간 콜라보 파트너 매칭 및 협업 프로젝트 관리.
 
 ## Quick Start
 
-### Environment Setup
-- **JAVA_HOME**: Set to `/mnt/d/projects/topping/jdk-17.0.12+7` (JDK 17 included in project)
-- **Build Command**: `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew build`
+### Environment
+- **JAVA_HOME**: `/mnt/d/projects/topping/jdk-17.0.12+7`
 
-### Essential Commands
-- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew build` - Build the project
-- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew bootRun` - Run the application
-- `export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7 && ./gradlew test` - Run all tests
+### Commands
+```bash
+export JAVA_HOME=/mnt/d/projects/topping/jdk-17.0.12+7
+./gradlew build      # 빌드
+./gradlew bootRun    # 실행
+./gradlew test       # 테스트
+```
 
 ### Database
-- **Production**: PostgreSQL (env vars: `DB_URL`, `DB_USER`, `DB_PASSWORD`)
-- **Testing**: H2 in-memory database
-- **Configuration**: Uses spring-dotenv, create `.env` file in project root
-- **Connection Pool**: HikariCP optimized (5-30 connections, leak detection enabled)
+- **Production**: PostgreSQL (`DB_URL`, `DB_USER`, `DB_PASSWORD` 환경변수)
+- **Testing**: H2 in-memory
+- **Config**: spring-dotenv 사용, 프로젝트 루트에 `.env` 파일 생성
+- **Pool**: HikariCP (5-30 connections, leak detection enabled)
+
+---
 
 ## Architecture
 
 ### Clean Architecture Layers
-- **`domain/`** - Core business logic and entities
-- **`infrastructure/`** - Technical implementation details
-- **`presentation/`** - REST controllers and DTOs
-- **`application/`** - Application services and DTOs
+- **`domain/`** — 핵심 비즈니스 로직, 엔티티
+- **`infrastructure/`** — 기술 구현 (JPA, 파일 저장 등)
+- **`presentation/`** — REST 컨트롤러, DTO
+- **`application/`** — 애플리케이션 서비스, DTO
 
 ### Tech Stack
-- Spring Boot 3.5.3 with Java 17
+- Spring Boot 3.5.3 + Java 17
 - Spring Data JPA + PostgreSQL
-- Spring Security (session-based authentication)
+- Spring Security (session-based)
 - Lombok + Thymeleaf
-- WebSocket for real-time chat
-- Spring Data repositories with three-layer pattern
-- Multi-image upload system with image processing
-- Async task execution with custom thread pools
+- WebSocket (SockJS + STOMP)
 
-## 📁 Domain Reference
-
-The platform is organized into distinct business domains. Each domain has comprehensive documentation covering models, APIs, business rules, and integration points:
-
-### Core Domains
-- **[👤 User Domain](./docs/domains/user/README.md)** - User accounts, profiles, role-based access control, and phone number validation
-  - **[Claude Guidance](./docs/domains/user/CLAUDE.md)** - User authentication patterns, role management, phone validation, and integration
-- **[🏪 Store Domain](./docs/domains/store/README.md)** - Business store registration and management  
-  - **[Claude Guidance](./docs/domains/store/CLAUDE.md)** - Three-phase registration, multi-image management, authorization patterns
-- **[📦 Product Domain](./docs/domains/product/README.md)** - Product listings, editing capabilities, and collaboration features
-  - **[Claude Guidance](./docs/domains/product/CLAUDE.md)** - Product routes, editing forms, field references, template patterns, collaboration integration
-- **[🤝 Collaboration Domain](./docs/domains/collaboration/README.md)** - Business matching, partnership management, and proposal modifications
-  - **[Claude Guidance](./docs/domains/collaboration/CLAUDE.md)** - Enhanced dual entity architecture, field mappings, chat integration, proposal flows and editing
-
-### Supporting Domains  
-- **[🔐 Authentication Domain](./docs/domains/auth/README.md)** - Session-based authentication with Spring Security and Kakao social login
-  - **[Claude Guidance](./docs/domains/auth/CLAUDE.md)** - Session management, Kakao OAuth, route protection, authorization patterns
-- **[💬 Chat Domain](./docs/domains/chat/README.md)** - Real-time communication and proposal management for collaborations
-  - **[Claude Guidance](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, unread tracking, automatic room creation, proposal modifications
-- **[🔔 Notification Domain](./docs/domains/notification/README.md)** - Event-driven notifications
-  - **[Claude Guidance](./docs/domains/notification/CLAUDE.md)** - Event-driven notifications, UI integration, polling patterns
-- **[🎧 Support Domain](./docs/domains/support/README.md)** - Customer support system with FAQ and inquiry management  
-  - **[Claude Guidance](./docs/domains/support/CLAUDE.md)** - FAQ management, inquiry systems, admin interfaces, public access patterns
-- **[📋 Policy Domain](./docs/domains/policy/README.md)** - Privacy policy and terms of service with modal integration
-  - **[Claude Guidance](./docs/domains/policy/CLAUDE.md)** - Modal integration, agreement validation, footer integration patterns
+---
 
 ## Development Standards
 
-### Repository Pattern
-All repositories follow a consistent three-layer pattern:
-- **Domain Interface**: `{Domain}Repository` (business logic)
-- **JPA Interface**: `{Domain}JpaRepository` (extends JpaRepository)
-- **Implementation**: `{Domain}RepositoryImpl` (implements domain interface)
+### Repository Pattern (전 도메인 공통)
+- **Domain Interface**: `{Domain}Repository`
+- **JPA Interface**: `{Domain}JpaRepository extends JpaRepository<Entity, UUID>`
+- **Implementation**: `{Domain}RepositoryImpl implements {Domain}Repository`
 
-### API Response Pattern
-- **Standard Wrapper**: `ApiResponseData.success(data)` for success responses
-- **Error Handling**: `ApiResponseData.failure(code, message)` for failures
-- **Usage**: Always call `ApiResponseData.success(data)`, not `ApiResponseData.success(Code.SUCCESS, data)`
+### API Response
+- **성공**: `ApiResponseData.success(data)`
+- **실패**: `ApiResponseData.failure(code, message)`
 
 ### Testing
-- **Test Profile**: Use `@ActiveProfiles("test")` annotation
-- **Database**: H2 in-memory database for testing
-- **Configuration**: See `src/test/resources/application-test.properties`
+- `@ActiveProfiles("test")` 어노테이션 사용
+- H2 in-memory DB
+- 설정: `src/test/resources/application-test.properties`
 
-## 🎨 UI/UX Framework
+---
 
-**⚠️ CRITICAL: ALL new templates must use the [Topping CSS Framework](./docs/technical/css-framework.md)**
+## UI/UX Framework
 
-### Quick Reference
-- **Main Pages**: Use `base.css` + framework components
-- **Auth Pages**: Use `auth.css` + framework components
-- **JavaScript**: Use `common.js` or `auth-common.js` (no external CDNs)
-- **Fragments**: Always use navbar, footer, and modals fragments
-- **❌ FORBIDDEN**: Bootstrap CDN, inline styles, external CSS frameworks
+**⚠️ CRITICAL: 모든 새 템플릿은 [Topping CSS Framework](./docs/technical/css-framework.md) 사용**
 
-### Mobile Navigation System
-- **Responsive Design**: Sidebar navigation with hamburger menu for mobile devices
-- **JavaScript Integration**: Dual event handling (inline + event listeners) for maximum compatibility
-- **CSS Framework**: Proper z-index layering and mobile breakpoints at 768px
-- **Accessibility**: Keyboard navigation, focus management, and screen reader support
-- **Touch Support**: Swipe gestures for mobile sidebar open/close functionality
+- **Main Pages**: `base.css` + framework components
+- **Auth Pages**: `auth.css` + framework components
+- **JavaScript**: `common.js` 또는 `auth-common.js` (외부 CDN 금지)
+- **Fragments**: navbar, footer, modals fragments 항상 사용
+- **❌ FORBIDDEN**: Bootstrap CDN, inline styles, 외부 CSS 프레임워크
+- **Mobile**: 768px 브레이크포인트, 햄버거 메뉴 — inline `onclick` + JS event listener 이중 처리 필수
 
-## Key Technical References
+---
 
-### Specialized Documentation
-- **[🎨 CSS Framework & UI System](./docs/technical/css-framework.md)** - Complete UI framework guide
-- **[🖼️ Multi-Image Upload System](./docs/technical/image-upload.md)** - File upload infrastructure
-- **[🤝 Collaboration Forms](./docs/technical/collaboration-forms.md)** - Dynamic form system
-- **[⚡ Frontend Optimization](./docs/technical/frontend-optimization.md)** - Performance improvements
-- **[⚙️ Database & Performance](./docs/technical/database-performance.md)** - Connection pool & async config
+## Domains
 
-### Troubleshooting & Workflow
-- **[🔧 Common Issues](./docs/troubleshooting/common-issues.md)** - Troubleshooting guide
-- **[📋 Development Workflow](./docs/development-workflow.md)** - Best practices and standards
+| Domain | Claude Guide | Key Concerns |
+|---|---|---|
+| User | [CLAUDE.md](./docs/domains/user/CLAUDE.md) | Session auth, RBAC (USER/BUSINESS_OWNER/ADMIN), getUuid() |
+| Store | [CLAUDE.md](./docs/domains/store/CLAUDE.md) | 3단계 등록, multi-image upload, 소유권 검증 |
+| Product | [CLAUDE.md](./docs/domains/product/CLAUDE.md) | `product.title` (not `name`), Cartesian Product, /products/create |
+| Collaboration | [CLAUDE.md](./docs/domains/collaboration/CLAUDE.md) | Dual entity (Collaboration vs Proposal), 필드 참조, chat room 자동 생성 |
+| Auth | [CLAUDE.md](./docs/domains/auth/CLAUDE.md) | Session config, Kakao OAuth, 라우트 권한 |
+| Chat | [CLAUDE.md](./docs/domains/chat/CLAUDE.md) | WebSocket, unread badge, `data.data.uuid` 추출 패턴 |
+| Notification | [CLAUDE.md](./docs/domains/notification/CLAUDE.md) | @Async, 30s polling, NotificationType enum |
+| Support | [CLAUDE.md](./docs/domains/support/CLAUDE.md) | FAQ=public, 문의=authenticated, Admin RBAC |
+| Policy | [CLAUDE.md](./docs/domains/policy/CLAUDE.md) | 이중 모달 시스템, signup 필수 동의 |
 
-## Build Requirements
-- JAVA_HOME must be set to `/mnt/d/projects/topping/jdk-17.0.12+7` for all Gradle commands
-- All build issues resolved and tests passing
-- Session-based authentication (no JWT dependencies)
+---
 
-## Architecture Principles
-- Clean architecture with domain-driven design
-- Consistent repository pattern implementation across all domains
-- Role-based authorization with Spring Security
-- UUID primary keys for all entities
-- Session authentication with JSESSIONID cookies
+## Common Pitfalls
 
-## ⚠️ Common Pitfalls
+- **Session Auth**: `Principal` 또는 `UserDetailsImpl` 사용. JWT 토큰 사용 금지
+- **Entity UUID**: `@GeneratedValue` 엔티티에 UUID 수동 설정 금지
+- **Fragment Syntax**: `th:replace="~{fragments/navbar :: navbar}"` (Thymeleaf 3)
+- **JPA JOIN FETCH**: 단일 쿼리에 다중 JOIN FETCH 금지 → Cartesian Product → 데이터 중복
+- **Null-Safety**: `${object != null and !#strings.isEmpty(object.field)}`
+- **Template JS**: 중첩 `th:if`/`th:each` in JavaScript 섹션 금지 → JSON injection 사용
+- **Entity Persistence**: POST 엔드포인트에서 실제로 엔티티 저장 확인 (validation만으로 끝내지 말 것)
+- **Entity Getter**: `getUuid()` 사용. `getUserId()`, `getRoomId()` 등은 존재하지 않음
+- **Mobile Navbar**: inline `onclick` + JS event listener 이중 처리 (브라우저 호환성)
+- **API Content-Type**: JSON 파싱 전 response content-type 확인 (`"Unexpected token '<'"` 오류 방지)
+- **Collaboration Fields**: `collaboration.product` 필드 없음 → `partnerProduct`/`initiatorProduct` 조건 분기
+- **Collaboration.message**: `description` 필드 사용 (`message` 필드 없음)
 
-**IMPORTANT**: For domain-specific patterns and pitfalls, see individual domain Claude guidance files:
-- **[User Domain Pitfalls](./docs/domains/user/CLAUDE.md#common-pitfalls)**
-- **[Store Domain Pitfalls](./docs/domains/store/CLAUDE.md#common-pitfalls)**  
-- **[Product Domain Pitfalls](./docs/domains/product/CLAUDE.md#common-pitfalls)**
-- **[Collaboration Domain Pitfalls](./docs/domains/collaboration/CLAUDE.md#common-pitfalls)**
-- **[Auth Domain Pitfalls](./docs/domains/auth/CLAUDE.md#common-pitfalls)**
-- **[Chat Domain Pitfalls](./docs/domains/chat/CLAUDE.md#common-pitfalls)**
+---
 
-### Universal Platform Pitfalls
-- **Session Auth**: Use Principal or UserDetailsImpl, not JWT tokens
-- **Entity Creation**: Never manually set UUID for @GeneratedValue entities
-- **Fragment Syntax**: Use `th:replace="~{fragments/navbar :: navbar}"` (Thymeleaf 3 syntax)
-- **JPA JOIN FETCH**: Avoid multiple JOIN FETCH in single query - causes Cartesian Product and data duplication
-- **Null-Safety in Templates**: Use proper null checks: `${object != null and !#strings.isEmpty(object.field)}`
-- **Template Parsing**: Avoid complex nested `th:if` and `th:each` within JavaScript inline sections - use JSON injection instead
-- **Entity Persistence**: Ensure POST endpoints create and save entities, not just validate form data
-- **Entity Method Names**: All entities use `getUuid()` method, NOT `getUserId()`, `getRoomId()`, etc. (Lombok generates getters from field names)
-- **Mobile Navbar**: Use both inline `onclick` and JavaScript event listeners for maximum browser compatibility
-- **API Content-Type**: Check response content-type before parsing JSON to avoid "Unexpected token '<'" errors
+## Environment & Tooling Pitfalls
 
-## Domain-Specific Implementation Details
+### Jetson Nano 빌드 환경
 
-**For detailed implementation patterns, see individual domain Claude guidance files:**
+- **JAVA_HOME** (`gim` 사용자 기준) — PyCharm JBR 사용:
+  ```bash
+  export JAVA_HOME=/home/gim/Downloads/pycharm-community-2023.3.3-aarch64/pycharm-community-2023.3.3/jbr
+  ```
+  (`/usr/lib/jvm/java-17-openjdk-arm64`는 root 전용 — `gim` 사용자 접근 불가)
 
-### Authentication & Authorization
-- **[Auth Domain Guide](./docs/domains/auth/CLAUDE.md)** - Session management, Kakao OAuth, route protection
-- **[User Domain Guide](./docs/domains/user/CLAUDE.md)** - Role-based access control, user management patterns
+- **빌드 디렉토리 권한 충돌** — root로 `bootRun` 실행 중이면 `build/` 와 `.gradle/` 이 root 소유:
+  ```bash
+  ./gradlew compileJava --no-daemon \
+    --project-cache-dir /tmp/gradle-cache-topping \
+    -PbuildDir=/tmp/topping-build
+  ```
 
-### Business Logic Domains  
-- **[Store Domain Guide](./docs/domains/store/CLAUDE.md)** - Three-phase registration, multi-image management
-- **[Product Domain Guide](./docs/domains/product/CLAUDE.md)** - Product routes, editing forms, field references, collaboration integration
-- **[Collaboration Domain Guide](./docs/domains/collaboration/CLAUDE.md)** - Enhanced dual entity architecture, proposal flows, and modification capabilities
+- **Gradle lock 파일 stale** — 죽은 프로세스가 lock 보유 시:
+  ```bash
+  # gim 소유 lock만 삭제 가능
+  find .gradle -name "*.lock" -user gim -delete
+  # root 소유 lock → --project-cache-dir 옵션으로 우회
+  ```
 
-### Communication & Support
-- **[Chat Domain Guide](./docs/domains/chat/CLAUDE.md)** - WebSocket integration, message bubbles, automatic room creation, proposal modifications
-- **[Notification Domain Guide](./docs/domains/notification/CLAUDE.md)** - Event-driven notifications, UI integration
-- **[Support Domain Guide](./docs/domains/support/CLAUDE.md)** - FAQ management, inquiry systems
-- **[Policy Domain Guide](./docs/domains/policy/CLAUDE.md)** - Modal integration, agreement validation
+### 파일 편집 도구 주의사항
 
-## Recent Status & Improvements
-- ✅ **Authentication System**: Migrated from JWT to session-based, fully stable
-- ✅ **Session Persistence**: Fixed across all protected routes, login state maintained
-- ✅ **Store Management**: Role-based access control with BUSINESS_OWNER/ADMIN roles
-- ✅ **MyPage Features**: Comprehensive user dashboard with applications, collaborations, ongoing projects
-- ✅ **Template System**: All template errors resolved, consistent Thymeleaf patterns
-- ✅ **Routing**: All endpoints properly mapped, no broken links
-- ✅ **Build System**: Stable and reliable, no compilation issues
-- ✅ **Customer Support**: FAQ management, inquiry submission, admin response system
-- ✅ **Policy System**: Privacy policy and terms of service with modal integration
-- ✅ **Signup Process**: Enhanced with required agreement validation and modal policy access
-- ✅ **Login UI**: Modern, responsive design matching brand guidelines
-- ✅ **Entity Management**: Fixed optimistic locking issues, proper UUID generation
-- ✅ **CSRF Protection**: Cookie-based token repository, session-safe implementation
-- ✅ **Modal System**: Consistent across all pages, proper event handling
-- ✅ **Footer Integration**: Modal experience integrated across all templates
-- ✅ **Multi-Image Upload System**: Complete file upload infrastructure with validation, processing, and storage
-- ✅ **Store Detail Page**: 3-column responsive layout with enhanced gallery and collaboration features
-- ✅ **Explore Page**: Three-section discovery layout (stores, menus, collaboration products)
-- ✅ **Thread Pool Configuration**: Custom async executor with DiscardOldestPolicy for optimal performance
-- ✅ **Image Management**: Entity relationships, repositories, and service layer for multiple images per store/menu
-- ✅ **Frontend Optimization**: Complete store detail page refactoring with component system, performance improvements, and visual refinements
-- ✅ **Environment-Specific File Upload**: Externalized upload path configuration with profile-based and environment variable support
-- ✅ **JPA Query Optimization**: Fixed product duplication issues caused by Cartesian Product in multiple JOIN FETCH operations
-- ✅ **Home Page Products Enhancement**: Horizontal scrolling layout with drag-and-scroll functionality, limited to 5 products max
-- ✅ **Store Detail Two-Column Layout**: Implemented sidebar with SNS & collaboration information, proper large screen constraints
-- ✅ **Thymeleaf Expression Safety**: Fixed null-safety issues and field binding errors across all templates
-- ✅ **Three-Phase Store Registration**: Resolved multipart parsing errors with architectural solution separating store creation from image upload
-- ✅ **Multipart Debug Resolution**: Comprehensive debugging and testing infrastructure for servlet-level multipart handling
-- ✅ **Collaboration Form Enhancement**: Refactored `/collaborations/apply` with auto-selection functionality, enhanced calendar UI, and critical bug fixes for entity creation and MyPage integration
-- ✅ **Dual Collaboration System**: Unified `/mypage/received` dashboard displaying both guest applications and business proposals with consistent statistics and management actions
-- ✅ **Chat System Integration**: Real-time chat with automatic room creation for accepted collaborations, modern UI with dual collaboration support
-- ✅ **Chat Service Architecture**: Clean service layer with automatic chat room management for both `Collaboration` and `CollaborationProposal` entities  
-- ✅ **Modern Chat Interface**: Complete UI redesign with sidebar navigation, WebSocket integration, search functionality, and responsive design
-- ✅ **Chat API Endpoints**: Complete JSON API implementation with room data, user session, and message sending endpoints
-- ✅ **WebSocket Integration**: Modern SockJS/STOMP implementation with proper error handling and reconnection logic
-- ✅ **Mobile Navbar Fixes**: Resolved hamburger menu functionality with proper event handling and CSS positioning
-- ✅ **Chat UI Enhancement**: Modern message bubble design with proper alignment, color scheme (#6B3410 for own messages), and accessibility features
-- ✅ **Unread Message System**: Red circular badges with real-time count tracking, automatic read status management, and ARIA labels for accessibility
-- ✅ **Message Read Tracking**: Database-level read/unread status with `ChatMessage.readAt` and `ChatMessage.isRead` fields
-- ✅ **Chat UX Improvements**: Auto-hide badges on room selection, proper message alignment (right for own, left for others), and enhanced visual feedback
-- ✅ **Chat System Refactoring**: Unified single-page interface, removed legacy Bootstrap template, modernized with CSS framework compliance
-- ✅ **Real-time Message Broadcasting**: Fixed immediate message display with `SimpMessagingTemplate` WebSocket broadcasting after database save
-- ✅ **Message Bubble Alignment**: Fixed "mine" vs "their" message styling with proper UUID comparison and session data extraction
-- ✅ **Timestamp Display Fix**: Korean-formatted timestamps (오전/오후 HH:mm) with robust date parsing and error handling
-- ✅ **Session Integration Enhancement**: Proper handling of `ApiResponseData<SessionUserInfo>` wrapper for accurate user identification
-- ✅ **SpringEL Evaluation Error Resolution**: Comprehensive fix for all non-existent entity field references across templates (37 total fixes)
-  - Fixed `collaboration.product` → conditional `partnerProduct`/`initiatorProduct` logic (12 occurrences)
-  - Fixed `applicantProduct` → `initiatorProduct` field references (12 occurrences)  
-  - Fixed `application.product` → conditional product field logic (6 occurrences)
-  - Fixed `receivedApp.product` → conditional product field logic (6 occurrences)
-  - Fixed `.message` → `.description` field references (3 occurrences)
-  - **Zero Runtime SpringEL Exceptions**: All "Property or field 'X' cannot be found" errors eliminated
-- ✅ **Phone Number Duplicate Validation**: Enhanced user registration with phone number uniqueness checks and validation
-- ✅ **Product Edit System**: Complete product modification functionality with form validation and data persistence
-- ✅ **Home Page Advanced Filtering**: Implemented sophisticated filtering system for store and product discovery
-- ✅ **Collaboration Entity Refactoring**: Major architectural improvements to collaboration system with enhanced data models
-- ✅ **Chat-Proposal Integration**: Advanced integration allowing proposal modifications directly from chat interface
-- ✅ **Social Login Enhancements**: Fixed Kakao OAuth redirect URLs and improved authentication flow reliability
-- ✅ **Store Category Management**: Enhanced store category editing with improved data integrity and user experience
-- ✅ **Profile Screen Implementation**: Comprehensive MyPage profile management with user information display and editing capabilities
-- ✅ **MyPage Design Enhancements**: Improved visual design and user experience across all MyPage sections
-- ✅ **Collaboration Product Display**: Enhanced store detail pages to show collaborative products instead of just collaborative stores
-- ✅ **Repository Error Resolution**: Fixed logging errors in StoreRepositoryImpl.findAll() method with proper pageable handling
-- ✅ **Error Template Implementation**: Added comprehensive 500 error template for better error handling
-- ✅ **Test Infrastructure Improvements**: Updated test imports and configurations for better test reliability
-- ✅ **Kakao Social Login Stabilization**: Complete implementation with database storage, session management, and IP configuration handling
+- **CRLF line endings** — Windows에서 편집된 파일은 Edit 도구가 `old_string` 찾지 못함:
+  ```bash
+  sed -i 's/\r//' <파일경로>   # LF 정규화 후 편집
+  ```
 
-## Documentation Navigation
+- **탭 들여쓰기 파일** — Read 도구 출력의 스페이스 ≠ 실제 탭 → Edit 실패 시 Python 직접 치환:
+  ```bash
+  python3 -c "
+  with open('File.java','r') as f: c=f.read()
+  c=c.replace('OLD_STRING','NEW_STRING')
+  with open('File.java','w') as f: f.write(c)
+  "
+  ```
 
-### 📚 Main Documentation Hub
-- **[Documentation Index](./docs/README.md)** - Complete documentation navigation and standards
+### Repository 3계층 패턴 — 새 메서드 추가 규칙
 
-### 🔧 Technical Guides
-- **[CSS Framework & UI System](./docs/technical/css-framework.md)** - Complete UI framework documentation
-- **[Multi-Image Upload System](./docs/technical/image-upload.md)** - File upload infrastructure
-- **[Collaboration Forms](./docs/technical/collaboration-forms.md)** - Dynamic form system
-- **[Collaboration Received Page](./docs/technical/COLLABORATION_RECEIVED_PAGE.md)** - Dual collaboration system architecture
-- **[Chat System Integration](./docs/technical/chat-system-integration.md)** - Real-time chat with automatic room creation
-- **[Chat UI Enhancements](./docs/technical/chat-ui-enhancements.md)** - Message bubble design & unread message system
-- **[Chat Real-time Messaging](./docs/technical/chat-real-time-messaging.md)** - Unified interface, immediate message display, and WebSocket broadcasting
-- **[Frontend Optimization](./docs/technical/frontend-optimization.md)** - Performance improvements
-- **[Database & Performance](./docs/technical/database-performance.md)** - Connection pool & async config
+새 쿼리/메서드 추가 시 **3곳 모두** 수정 필수 (누락 시 컴파일 오류 또는 런타임 오류):
+1. `{Domain}JpaRepository` — JPQL/native 쿼리 정의
+2. `{Domain}Repository` (domain interface) — 메서드 선언
+3. `{Domain}RepositoryImpl` — jpaRepository 위임 구현
 
-### 🔧 Troubleshooting Guides
-- **[Common Issues](./docs/troubleshooting/common-issues.md)** - General troubleshooting
-- **[Session Persistence](./docs/SESSION_PERSISTENCE_TROUBLESHOOTING.md)** - Authentication issues and resolutions
-- **[Three-Phase Registration](./docs/troubleshooting/THREE_PHASE_REGISTRATION_SOLUTION.md)** - Store registration architectural solution
-- **[Multipart Debug Resolution](./docs/troubleshooting/multipart/COMPLETE_MULTIPART_DEBUG_RESOLUTION.md)** - Comprehensive multipart debugging journey
+### @PreAuthorize + 혼합 컨트롤러 (페이지/API)
 
-### 🏗️ Quick Domain Access
-- [User Management](./docs/domains/user/README.md) - User accounts and roles | [Claude Guide](./docs/domains/user/CLAUDE.md)
-- [Store Management](./docs/domains/store/README.md) - Business store operations | [Claude Guide](./docs/domains/store/CLAUDE.md)
-- [Product Management](./docs/domains/product/README.md) - Product listings and features | [Claude Guide](./docs/domains/product/CLAUDE.md)
-- [Collaboration Platform](./docs/domains/collaboration/README.md) - Business matching and proposals | [Claude Guide](./docs/domains/collaboration/CLAUDE.md)
-- [Authentication System](./docs/domains/auth/README.md) - Login/logout, session management | [Claude Guide](./docs/domains/auth/CLAUDE.md)
-- [Chat System](./docs/domains/chat/README.md) - Real-time messaging | [Claude Guide](./docs/domains/chat/CLAUDE.md)
-- [Notification System](./docs/domains/notification/README.md) - Event-driven alerts | [Claude Guide](./docs/domains/notification/CLAUDE.md)
-- [Customer Support](./docs/domains/support/README.md) - FAQ and inquiry management | [Claude Guide](./docs/domains/support/CLAUDE.md)
-- [Policy Management](./docs/domains/policy/README.md) - Privacy policy and terms of service | [Claude Guide](./docs/domains/policy/CLAUDE.md)
+페이지 반환 메서드와 `@ResponseBody` API 메서드가 같은 컨트롤러에 혼재 시 `AccessDeniedHandler` 필요:
+- `SecurityConfig.exceptionHandling()` 에 등록
+- `/api/` 경로 또는 `Accept: application/json` → 403 JSON 반환
+- 그 외 → `redirect:/mypage?error=access_denied`
 
-## 🎯 Project Status: Production Ready
+### 사전 실패 테스트 (pre-existing failures)
 
-The Topping platform is now in a stable, production-ready state with:
+내 변경과 무관하게 이미 실패 중인 테스트들:
+- `StoreRegistrationTest` — `StoreViewService`, `StoreEngagementService`, `CollaborationService` @MockBean 누락
+- `CollaborationControllerTest` — CSRF/인증 설정 불일치 (5개)
+- `KakaoLoginControllerTest`, `KakaoLoginIntegrationTest` — Kakao OAuth 환경 없음
 
-- **Complete Authentication System**: Session-based with Kakao social login integration
-- **Full Domain Implementation**: All core business domains functional
-- **Modern UI/UX**: Responsive, accessible, brand-consistent design
-- **Comprehensive Testing**: Unit and integration tests with proper test profiles
-- **Documentation**: Complete domain documentation and troubleshooting guides
-- **Security**: Role-based access control, secure session management, CSRF disabled for simplified forms
-- **Social Login**: Kakao OAuth integration with automatic user registration
-- **Performance**: Optimized HikariCP connection pool, efficient queries, connection leak detection
-- **Database Reliability**: Fixed connection pool exhaustion issues, proper transaction boundaries
+확인 방법: `git stash` → 테스트 실행 → `git stash pop`
 
-The platform is ready for deployment and further feature development.
+---
+
+## Technical Documentation
+
+- [CSS Framework & UI System](./docs/technical/css-framework.md)
+- [Multi-Image Upload System](./docs/technical/image-upload.md)
+- [Collaboration Forms](./docs/technical/collaboration-forms.md)
+- [Frontend Optimization](./docs/technical/frontend-optimization.md)
+- [Database & Performance](./docs/technical/database-performance.md)
+- [Common Issues](./docs/troubleshooting/common-issues.md)
+- [Development Workflow](./docs/development-workflow.md)
+- [Chat System Integration](./docs/technical/chat-system-integration.md)
+- [Chat UI Enhancements](./docs/technical/chat-ui-enhancements.md)

@@ -1,98 +1,53 @@
 # User Domain - Claude Guidance
 
 ## Overview
-The User domain handles user accounts, profiles, authentication, and role-based access control in the Topping platform.
+사용자 계정, 프로필, 세션 인증, 역할 기반 접근 제어(RBAC)를 담당.
 
 ## Core Entities
-- **User** - Main user entity with UUID primary key
-- **Role** - Enum-based role system (USER, BUSINESS_OWNER, ADMIN)
-- **UserDetailsImpl** - Spring Security integration
+- **User** — UUID PK, email, name, role, sggCode, phoneNumber
+- **Role** — `USER` | `BUSINESS_OWNER` | `ADMIN`
+- **UserDetailsImpl** — Spring Security 통합 래퍼
 
 ## Key Patterns
 
-### User Authentication
-- **Session-based authentication** using Spring Security
-- **Principal injection** in controllers: `@AuthenticationPrincipal UserDetailsImpl userDetails`
-- **User retrieval**: `userDetails.getUser()` or `userDetails.getUsername()`
-
-### Role-Based Access Control
+### 인증 정보 접근
 ```java
-// Controller level authorization
+// Controller에서 현재 사용자 조회
+@AuthenticationPrincipal UserDetailsImpl userDetails
+userDetails.getUser()       // User 엔티티
+userDetails.getUsername()   // email
+
+// Template에서 접근
+${#authentication.principal.user.name}
+```
+
+### Role 기반 접근 제어
+```java
+// Controller
 @PreAuthorize("hasRole('BUSINESS_OWNER') or hasRole('ADMIN')")
 
-// Template level checks
+// Template
 sec:authorize="hasRole('BUSINESS_OWNER')"
+sec:authorize="isAuthenticated()"
+sec:authorize="!isAuthenticated()"
 ```
 
-### Repository Pattern
-- **Domain Interface**: `UserRepository` 
-- **JPA Interface**: `UserJpaRepository extends JpaRepository<User, UUID>`
-- **Implementation**: `UserRepositoryImpl implements UserRepository`
-
-## Service Layer Patterns
-
-### UserService Key Methods
-- `findByEmail()` - User lookup for authentication
-- `createUser()` - New user registration 
-- `updateUserProfile()` - Profile management
-- `checkRole()` - Role validation
-
-### Kakao Integration
-- **KakaoService** handles OAuth flow in application layer
-- **Automatic user creation** with default settings (Seoul/Gangnam, ROLE_USER)
-- **Session integration** via SecurityContextHolder (NOT JWT)
-
-## Template Patterns
-
-### User Session Access
-```html
-<!-- Current user access -->
-<span th:text="${#authentication.principal.user.name}"></span>
-
-<!-- Role-based rendering -->
-<div sec:authorize="hasRole('BUSINESS_OWNER')">
-    <a href="/stores/register">가게 등록</a>
-</div>
-```
-
-### Form Binding
-```html
-<!-- User profile form -->
-<form th:object="${userForm}" method="post">
-    <input th:field="*{name}" type="text" />
-    <input th:field="*{email}" type="email" />
-</form>
-```
-
-## API Response Patterns
-```java
-// User session endpoint
-@GetMapping("/api/session/user")
-public ResponseEntity<ApiResponseData<SessionUserInfo>> getCurrentUser() {
-    return ResponseEntity.ok(ApiResponseData.success(sessionUserInfo));
-}
-```
+### Kakao 소셜 로그인
+- KakaoService에서 OAuth 처리 (application layer)
+- 신규 사용자 자동 생성: 기본 role=USER, sggCode="11680" (서울 강남)
+- **세션** 방식 (SecurityContextHolder) — JWT 토큰 방식 아님
 
 ## Common Pitfalls
-- ❌ **Manual UUID Setting**: Never set UUID for @GeneratedValue entities
-- ❌ **JWT Usage**: This project uses session-based auth, not JWT tokens
-- ❌ **Role Hardcoding**: Use Role enum constants, not string literals
-- ❌ **Direct User Creation**: Always use UserService for user operations
+- ❌ **UUID 수동 설정**: `@GeneratedValue` 엔티티에 UUID 수동 지정 금지
+- ❌ **JWT 사용**: 세션 기반 인증 사용, JWT 토큰 방식 아님
+- ❌ **Role 하드코딩**: `Role` enum 상수 사용, 문자열 리터럴 금지
+- ❌ **직접 사용자 생성**: 항상 `UserService`를 통해 사용자 생성
 
 ## Integration Points
-- **Store Domain**: Business owners can register stores
-- **Collaboration Domain**: Users create and manage collaborations
-- **Chat Domain**: User identification for chat rooms
-- **Auth Domain**: Session management and Kakao login
-
-## Testing Patterns
-```java
-@ActiveProfiles("test")
-class UserServiceTest {
-    // Use H2 in-memory database
-    // Mock authentication context for role testing
-}
-```
+- **Store Domain**: BUSINESS_OWNER만 가게 등록 가능
+- **Collaboration Domain**: 사용자가 콜라보 생성/관리
+- **Chat Domain**: 채팅방 참가자 식별
+- **Auth Domain**: 세션 관리, Kakao 로그인
 
 ## Related Documentation
 - [Main Claude Guidance](../../../CLAUDE.md)
