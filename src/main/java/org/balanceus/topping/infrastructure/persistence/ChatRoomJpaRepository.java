@@ -19,6 +19,15 @@ public interface ChatRoomJpaRepository extends JpaRepository<ChatRoom, UUID> {
 	Optional<ChatRoom> findByCollaboration(Collaboration collaboration);
 	
 	List<ChatRoom> findByIsActiveTrue();
+
+	// Admin/diagnostic queries — avoid findAll() + in-memory filtering
+	List<ChatRoom> findByCollaborationIsNotNullAndCollaborationProposalIsNull();
+	List<ChatRoom> findByCollaborationIsNotNull();
+	List<ChatRoom> findByCollaborationProposalIsNotNull();
+	long countByCollaborationProposalIsNotNullAndCollaborationIsNull();
+	long countByCollaborationIsNotNullAndCollaborationProposalIsNull();
+	long countByCollaborationIsNotNullAndCollaborationProposalIsNotNull();
+	long countByCollaborationIsNullAndCollaborationProposalIsNull();
 	
 	@Query("SELECT cr FROM ChatRoom cr WHERE " +
 	       "cr.collaborationProposal IS NOT NULL AND " +

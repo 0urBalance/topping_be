@@ -36,6 +36,16 @@ public interface ChatMessageJpaRepository extends JpaRepository<ChatMessage, UUI
 	@Query("SELECT m.chatRoom.uuid, MAX(m.createdAt) FROM ChatMessage m WHERE m.chatRoom IN :chatRooms GROUP BY m.chatRoom.uuid")
 	List<Object[]> findLatestMessageTimesByRooms(@Param("chatRooms") List<ChatRoom> chatRooms);
 	
+	// Get unread counts for multiple rooms in a single query
+	@Query("SELECT m.chatRoom.uuid, COUNT(m) FROM ChatMessage m " +
+		   "WHERE m.chatRoom IN :chatRooms " +
+		   "AND m.sender != :user " +
+		   "AND m.isRead = false " +
+		   "GROUP BY m.chatRoom.uuid")
+	List<Object[]> findUnreadCountsByRoomsForUser(
+		@Param("chatRooms") List<ChatRoom> chatRooms,
+		@Param("user") User user);
+
 	// Get latest message content previews for multiple rooms using native SQL with window function
 	@Query(value = "SELECT chat_room_uuid, message FROM (" +
 		   "SELECT chat_room_uuid, message, ROW_NUMBER() OVER (PARTITION BY chat_room_uuid ORDER BY created_at DESC) as rn " +

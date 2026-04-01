@@ -76,6 +76,46 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
 	}
 
 	@Override
+	public List<ChatRoom> findByCollaborationNotNullAndCollaborationProposalIsNull() {
+		return jpaRepository.findByCollaborationIsNotNullAndCollaborationProposalIsNull();
+	}
+
+	@Override
+	public List<ChatRoom> findByCollaborationNotNull() {
+		return jpaRepository.findByCollaborationIsNotNull();
+	}
+
+	@Override
+	public List<ChatRoom> findByCollaborationProposalNotNull() {
+		return jpaRepository.findByCollaborationProposalIsNotNull();
+	}
+
+	@Override
+	public long count() {
+		return jpaRepository.count();
+	}
+
+	@Override
+	public long countByCollaborationProposalNotNullAndCollaborationIsNull() {
+		return jpaRepository.countByCollaborationProposalIsNotNullAndCollaborationIsNull();
+	}
+
+	@Override
+	public long countByCollaborationNotNullAndCollaborationProposalIsNull() {
+		return jpaRepository.countByCollaborationIsNotNullAndCollaborationProposalIsNull();
+	}
+
+	@Override
+	public long countByCollaborationNotNullAndCollaborationProposalNotNull() {
+		return jpaRepository.countByCollaborationIsNotNullAndCollaborationProposalIsNotNull();
+	}
+
+	@Override
+	public long countByCollaborationIsNullAndCollaborationProposalIsNull() {
+		return jpaRepository.countByCollaborationIsNullAndCollaborationProposalIsNull();
+	}
+
+	@Override
 	public void deleteById(UUID uuid) {
 		jpaRepository.deleteById(uuid);
 	}

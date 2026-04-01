@@ -54,10 +54,11 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepository {
 	@Override
 	public Map<UUID, Long> getUnreadCountsByRoomsForUser(List<ChatRoom> chatRooms, User user) {
 		Map<UUID, Long> unreadCounts = new HashMap<>();
-		for (ChatRoom chatRoom : chatRooms) {
-			long count = countUnreadMessagesInRoom(chatRoom, user);
-			unreadCounts.put(chatRoom.getUuid(), count);
+		if (chatRooms.isEmpty()) {
+			return unreadCounts;
 		}
+		jpaRepository.findUnreadCountsByRoomsForUser(chatRooms, user)
+			.forEach(row -> unreadCounts.put((UUID) row[0], (Long) row[1]));
 		return unreadCounts;
 	}
 

@@ -108,19 +108,10 @@ public class ChatService {
         
         try {
             // Method 1: Direct lookup by collaboration reference
-            // Look for a proposal that has this collaboration linked to it
-            List<CollaborationProposal> proposalsWithCollaboration = 
-                collaborationProposalRepository.findAll().stream()
-                .filter(proposal -> proposal.getCollaboration() != null && 
-                               proposal.getCollaboration().getUuid().equals(collaboration.getUuid()))
-                .toList();
-                
-            if (!proposalsWithCollaboration.isEmpty()) {
-                if (proposalsWithCollaboration.size() > 1) {
-                    log.warn("Multiple proposals found for collaboration {}, using first one", 
-                             collaboration.getUuid());
-                }
-                return proposalsWithCollaboration.get(0);
+            Optional<CollaborationProposal> directMatch =
+                collaborationProposalRepository.findByCollaboration(collaboration);
+            if (directMatch.isPresent()) {
+                return directMatch.get();
             }
             
             // Method 2: Heuristic lookup by matching attributes
@@ -227,23 +218,6 @@ public class ChatService {
         log.info("Marked messages as read for user {} in room {}", user.getUuid(), chatRoom.getUuid());
     }
 
-    // Helper method to safely get a compatible message type
-    private ChatMessage.MessageType getSafeMessageType(ChatMessage.MessageType requestedType) {
-        // Known problematic types that violate database constraints
-        // These are newer enum values that may not be in the database check constraint
-        if (requestedType == ChatMessage.MessageType.PROPOSAL_ACCEPTED ||
-            requestedType == ChatMessage.MessageType.PROPOSAL_REJECTED ||
-            requestedType == ChatMessage.MessageType.PROPOSAL_MODIFIED ||
-            requestedType == ChatMessage.MessageType.PROPOSAL_STATUS_CHANGE) {
-            
-            log.info("Converting potentially problematic message type {} to TEXT to avoid constraint violation", requestedType);
-            return ChatMessage.MessageType.TEXT;
-        }
-        
-        // For other types, return as-is (TEXT, PROPOSAL_SHARE, PROPOSAL_UPDATE should be safe)
-        return requestedType;
-    }
-
     // Proposal event messaging
     @Transactional
     public void sendProposalStatusMessage(ChatRoom chatRoom, ChatMessage.MessageType messageType, 
@@ -258,30 +232,6 @@ public class ChatService {
         if (messageType == null) {
             log.warn("Message type is null, defaulting to TEXT");
             messageType = ChatMessage.MessageType.TEXT;
-        } else {
-            // Use safe message type to handle potential database constraint issues
-            ChatMessage.MessageType originalType = messageType;
-            messageType = getSafeMessageType(messageType);
-            
-            // If we converted the message type, modify the message to indicate the original intent
-            if (originalType != messageType) {
-                switch (originalType) {
-                    case PROPOSAL_ACCEPTED:
-                        statusMessage = "✅ " + statusMessage;
-                        break;
-                    case PROPOSAL_REJECTED:
-                        statusMessage = "❌ " + statusMessage;
-                        break;
-                    case PROPOSAL_MODIFIED:
-                        statusMessage = "✏️ " + statusMessage;
-                        break;
-                    case PROPOSAL_STATUS_CHANGE:
-                        statusMessage = "🔄 " + statusMessage;
-                        break;
-                    default:
-                        statusMessage = "📝 " + statusMessage;
-                }
-            }
         }
         
         if (statusMessage == null || statusMessage.trim().isEmpty()) {
@@ -299,15 +249,7 @@ public class ChatService {
             systemMessage.setChatRoom(chatRoom);
             systemMessage.setSender(actionUser);
             systemMessage.setMessage(statusMessage);
-            
-            // Handle message type with fallback for database constraint issues
-            try {
-                systemMessage.setMessageType(messageType);
-            } catch (Exception e) {
-                log.warn("Failed to set message type {}, falling back to TEXT: {}", messageType, e.getMessage());
-                systemMessage.setMessageType(ChatMessage.MessageType.TEXT);
-            }
-            
+            systemMessage.setMessageType(messageType);
             systemMessage.setCollaborationProposal(proposal);
             
             // Store proposal data as JSON for potential future use
@@ -327,37 +269,8 @@ public class ChatService {
                 }
             }
             
-            ChatMessage savedMessage;
-            try {
-                savedMessage = chatMessageRepository.save(systemMessage);
-                log.info("Created proposal system message: {} in room {}", messageType, chatRoom.getUuid());
-            } catch (Exception saveException) {
-                String errorMessage = saveException.getMessage() != null ? saveException.getMessage() : "";
-                
-                // Check for specific database constraint violation
-                if (errorMessage.contains("chat_messages_message_type_check") || 
-                    errorMessage.contains("violates check constraint") ||
-                    errorMessage.contains("PROPOSAL_ACCEPTED")) {
-                    
-                    log.warn("Database constraint violation for message type {}, using TEXT fallback", messageType);
-                    
-                    // Fallback: try saving with TEXT type and modified message
-                    systemMessage.setMessageType(ChatMessage.MessageType.TEXT);
-                    systemMessage.setMessage("📝 " + statusMessage + " (시스템 알림)");
-                    
-                    try {
-                        savedMessage = chatMessageRepository.save(systemMessage);
-                        log.info("Successfully saved fallback message as TEXT type in room {}", chatRoom.getUuid());
-                    } catch (Exception fallbackException) {
-                        log.error("Failed to save even TEXT fallback message: {}", fallbackException.getMessage());
-                        return; // Give up on chat notification but don't break the calling flow
-                    }
-                } else {
-                    // Different type of database error
-                    log.error("Database error saving chat message (not constraint violation): {}", errorMessage);
-                    return; // Give up but don't break the calling flow
-                }
-            }
+            ChatMessage savedMessage = chatMessageRepository.save(systemMessage);
+            log.info("Created proposal system message: {} in room {}", messageType, chatRoom.getUuid());
             
             // Broadcast via WebSocket
             broadcastProposalMessage(chatRoom.getUuid(), savedMessage);
@@ -429,9 +342,8 @@ public class ChatService {
         
         try {
             // Find chat rooms that have collaboration but missing collaborationProposal
-            List<ChatRoom> roomsNeedingBackfill = chatRoomRepository.findAll().stream()
-                .filter(room -> room.getCollaboration() != null && room.getCollaborationProposal() == null)
-                .toList();
+            List<ChatRoom> roomsNeedingBackfill =
+                chatRoomRepository.findByCollaborationNotNullAndCollaborationProposalIsNull();
                 
             log.info("Found {} chat rooms needing proposal backfill", roomsNeedingBackfill.size());
             result.setTotalRoomsFound(roomsNeedingBackfill.size());
@@ -476,33 +388,14 @@ public class ChatService {
      */
     public LinkageStatistics getProposalLinkageStatistics() {
         try {
-            List<ChatRoom> allRooms = chatRoomRepository.findAll();
-            
             LinkageStatistics stats = new LinkageStatistics();
-            stats.setTotalChatRooms(allRooms.size());
-            
-            long roomsWithProposalOnly = allRooms.stream()
-                .filter(room -> room.getCollaborationProposal() != null && room.getCollaboration() == null)
-                .count();
-            stats.setRoomsWithProposalOnly(roomsWithProposalOnly);
-            
-            long roomsWithCollaborationOnly = allRooms.stream()
-                .filter(room -> room.getCollaboration() != null && room.getCollaborationProposal() == null)
-                .count();
-            stats.setRoomsWithCollaborationOnly(roomsWithCollaborationOnly);
-            
-            long roomsWithBothLinks = allRooms.stream()
-                .filter(room -> room.getCollaboration() != null && room.getCollaborationProposal() != null)
-                .count();
-            stats.setRoomsWithBothLinks(roomsWithBothLinks);
-            
-            long roomsWithNeitherLink = allRooms.stream()
-                .filter(room -> room.getCollaboration() == null && room.getCollaborationProposal() == null)
-                .count();
-            stats.setRoomsWithNeitherLink(roomsWithNeitherLink);
-            
+            stats.setTotalChatRooms((int) chatRoomRepository.count());
+            stats.setRoomsWithProposalOnly(chatRoomRepository.countByCollaborationProposalNotNullAndCollaborationIsNull());
+            stats.setRoomsWithCollaborationOnly(chatRoomRepository.countByCollaborationNotNullAndCollaborationProposalIsNull());
+            stats.setRoomsWithBothLinks(chatRoomRepository.countByCollaborationNotNullAndCollaborationProposalNotNull());
+            stats.setRoomsWithNeitherLink(chatRoomRepository.countByCollaborationIsNullAndCollaborationProposalIsNull());
             return stats;
-            
+
         } catch (Exception e) {
             log.error("Error gathering linkage statistics: {}", e.getMessage(), e);
             LinkageStatistics errorStats = new LinkageStatistics();
@@ -646,18 +539,16 @@ public class ChatService {
     private void validateSystemWideConsistency(ValidationReport report) {
         try {
             // Check for duplicate chat rooms for same collaboration
-            Map<UUID, List<ChatRoom>> roomsByCollaboration = chatRoomRepository.findAll().stream()
-                .filter(room -> room.getCollaboration() != null)
+            Map<UUID, List<ChatRoom>> roomsByCollaboration = chatRoomRepository.findByCollaborationNotNull().stream()
                 .collect(java.util.stream.Collectors.groupingBy(room -> room.getCollaboration().getUuid()));
-                
+
             roomsByCollaboration.entrySet().stream()
                 .filter(entry -> entry.getValue().size() > 1)
                 .forEach(entry -> report.addIssue(ValidationIssue.duplicateRoomsForCollaboration(
                     entry.getKey(), entry.getValue().stream().map(ChatRoom::getUuid).toList())));
-                    
+
             // Check for duplicate chat rooms for same proposal
-            Map<UUID, List<ChatRoom>> roomsByProposal = chatRoomRepository.findAll().stream()
-                .filter(room -> room.getCollaborationProposal() != null)
+            Map<UUID, List<ChatRoom>> roomsByProposal = chatRoomRepository.findByCollaborationProposalNotNull().stream()
                 .collect(java.util.stream.Collectors.groupingBy(room -> room.getCollaborationProposal().getUuid()));
                 
             roomsByProposal.entrySet().stream()

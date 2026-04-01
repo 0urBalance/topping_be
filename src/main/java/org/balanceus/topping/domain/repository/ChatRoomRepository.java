@@ -20,6 +20,15 @@ public interface ChatRoomRepository {
 	Optional<ChatRoom> findByCollaboration(Collaboration collaboration);
 	
 	List<ChatRoom> findByIsActiveTrue();
+
+	List<ChatRoom> findByCollaborationNotNullAndCollaborationProposalIsNull();
+	List<ChatRoom> findByCollaborationNotNull();
+	List<ChatRoom> findByCollaborationProposalNotNull();
+	long count();
+	long countByCollaborationProposalNotNullAndCollaborationIsNull();
+	long countByCollaborationNotNullAndCollaborationProposalIsNull();
+	long countByCollaborationNotNullAndCollaborationProposalNotNull();
+	long countByCollaborationIsNullAndCollaborationProposalIsNull();
 	
 	List<ChatRoom> findByParticipant(User user);
 	

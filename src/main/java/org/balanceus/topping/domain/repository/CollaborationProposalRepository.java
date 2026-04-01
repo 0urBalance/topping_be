@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
@@ -15,7 +16,9 @@ public interface CollaborationProposalRepository {
 	CollaborationProposal save(CollaborationProposal proposal);
 	
 	Optional<CollaborationProposal> findById(UUID uuid);
-	
+
+	Optional<CollaborationProposal> findByCollaboration(Collaboration collaboration);
+
 	List<CollaborationProposal> findAll();
 	
 	List<CollaborationProposal> findByStatus(CollaborationProposal.CollaborationStatus status);

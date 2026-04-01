@@ -1,8 +1,10 @@
 package org.balanceus.topping.infrastructure.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
@@ -39,6 +41,9 @@ public interface CollaborationProposalJpaRepository extends JpaRepository<Collab
 	
 	List<CollaborationProposal> findByTargetProduct(Product targetProduct);
 	
+	@Query("SELECT cp FROM CollaborationProposal cp WHERE cp.collaboration = :collaboration")
+	Optional<CollaborationProposal> findByCollaboration(@Param("collaboration") Collaboration collaboration);
+
 	@Query("SELECT cp FROM CollaborationProposal cp WHERE cp.targetStore = :targetStore AND cp.status = :status")
 	List<CollaborationProposal> findReceivedProposals(@Param("targetStore") Store targetStore, @Param("status") CollaborationProposal.CollaborationStatus status);
 	

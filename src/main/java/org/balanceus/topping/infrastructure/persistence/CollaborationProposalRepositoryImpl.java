@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.balanceus.topping.domain.model.Collaboration;
 import org.balanceus.topping.domain.model.CollaborationProposal;
 import org.balanceus.topping.domain.model.Store;
 import org.balanceus.topping.domain.model.User;
@@ -28,6 +29,11 @@ public class CollaborationProposalRepositoryImpl implements CollaborationProposa
 	@Override
 	public Optional<CollaborationProposal> findById(UUID uuid) {
 		return jpaRepository.findById(uuid);
+	}
+
+	@Override
+	public Optional<CollaborationProposal> findByCollaboration(Collaboration collaboration) {
+		return jpaRepository.findByCollaboration(collaboration);
 	}
 
 	@Override
